@@ -4,6 +4,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/localization/locale_provider.dart';
 import 'package:anime_flow/core/network/image/image_cache_service.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/core/settings/ech_image_route.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -26,34 +27,42 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
   bool _isLanguageMenuOpen = false;
   late bool _echImageLoading;
   final _echRouteFormKey = GlobalKey<FormState>();
-  late final TextEditingController _echHostController;
-  final List<TextEditingController> _echIpControllers = [];
+  final List<_EchRouteControllers> _echRoutes = [];
 
   @override
   void initState() {
     super.initState();
     _echImageLoading = AppSettings.echImageLoading;
-    _echHostController = TextEditingController(text: AppSettings.echImageHost);
-    _echIpControllers.addAll(
-      AppSettings.echImageFixedIps.map((ip) => TextEditingController(text: ip)),
-    );
+    _echRoutes.addAll(AppSettings.echImageRoutes.map(_EchRouteControllers.new));
   }
 
   @override
   void dispose() {
-    _echHostController.dispose();
-    for (final controller in _echIpControllers) {
-      controller.dispose();
+    for (final route in _echRoutes) {
+      route.dispose();
     }
     super.dispose();
   }
 
-  void _addEchIp() {
-    setState(() => _echIpControllers.add(TextEditingController()));
+  void _addEchRoute() {
+    setState(() => _echRoutes.add(
+          _EchRouteControllers(EchImageRoute(host: '')),
+        ));
   }
 
-  void _removeEchIp(TextEditingController controller) {
-    setState(() => _echIpControllers.remove(controller));
+  void _removeEchRoute(_EchRouteControllers route) {
+    if (_echRoutes.length <= 1) return;
+    setState(() => _echRoutes.remove(route));
+    WidgetsBinding.instance.addPostFrameCallback((_) => route.dispose());
+  }
+
+  void _addEchIp(_EchRouteControllers route) {
+    setState(() => route.ips.add(TextEditingController()));
+  }
+
+  void _removeEchIp(
+      _EchRouteControllers route, TextEditingController controller) {
+    setState(() => route.ips.remove(controller));
     WidgetsBinding.instance.addPostFrameCallback((_) => controller.dispose());
   }
 
@@ -142,30 +151,33 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
 
   Future<void> _saveEchImageRoute() async {
     if (_echRouteFormKey.currentState?.validate() != true) return;
-    await AppSettings.setEchImageRoute(
-      host: _echHostController.text,
-      fixedIps: AppSettings.parseEchImageFixedIps(
-        _echIpControllers.map((controller) => controller.text).join('\n'),
-      ),
-    );
+    await AppSettings.setEchImageRoutes(_echRoutes.map((route) {
+      return EchImageRoute(
+        host: route.host.text,
+        fixedIps: route.ips.map((controller) => controller.text).toList(),
+      );
+    }).toList());
     if (mounted) FocusScope.of(context).unfocus();
   }
 
   Future<void> _restoreEchImageRoute() async {
     _echRouteFormKey.currentState?.reset();
-    _echHostController.text = AppSettings.defaultEchImageHost;
-    final removed = _echIpControllers.toList();
-    setState(_echIpControllers.clear);
+    final removed = _echRoutes.toList();
+    final defaultRoutes = AppSettings.defaultEchImageRoutes;
+    setState(() {
+      _echRoutes
+        ..clear()
+        ..addAll(defaultRoutes.map(_EchRouteControllers.new));
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      for (final controller in removed) {
-        controller.dispose();
+      for (final route in removed) {
+        route.dispose();
       }
     });
-    await AppSettings.setEchImageRoute(
-      host: AppSettings.defaultEchImageHost,
-    );
+    await AppSettings.setEchImageRoutes(defaultRoutes);
     if (mounted) FocusScope.of(context).unfocus();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -259,18 +271,18 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
                       title: Text(l10n.clearImageCache),
                       subtitle: Text(_imageCacheDescription(snapshot)),
                       enabled:
-                      snapshot.connectionState == ConnectionState.done &&
-                          !_clearImageCacheRequested,
+                          snapshot.connectionState == ConnectionState.done &&
+                              !_clearImageCacheRequested,
                       onTap: _confirmClearImageCache,
                       trailing: snapshot.hasError &&
-                          snapshot.connectionState ==
-                              ConnectionState.done &&
-                          !_clearImageCacheRequested
+                              snapshot.connectionState ==
+                                  ConnectionState.done &&
+                              !_clearImageCacheRequested
                           ? IconButton(
-                        tooltip: l10n.retry,
-                        onPressed: _refreshImageCacheSize,
-                        icon: const Icon(Icons.refresh_rounded),
-                      )
+                              tooltip: l10n.retry,
+                              onPressed: _refreshImageCacheSize,
+                              icon: const Icon(Icons.refresh_rounded),
+                            )
                           : const Icon(Icons.image_outlined),
                     ),
                   ),
@@ -313,81 +325,12 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
                                       const SizedBox(height: 8),
                                       Text(l10n.echImageRouteHint),
                                       const SizedBox(height: 12),
-                                      TextFormField(
-                                        controller: _echHostController,
-                                        decoration: InputDecoration(
-                                          labelText: l10n.echImageHost,
-                                        ),
-                                        textInputAction: TextInputAction.next,
-                                        validator: (value) {
-                                          return AppSettings
-                                                  .isValidEchImageHost(
-                                            value ?? '',
-                                          )
-                                              ? null
-                                              : l10n.echImageInvalidHost;
-                                        },
-                                      ),
-                                      const SizedBox(height: 12),
-                                      LayoutBuilder(
-                                        builder: (context, constraints) {
-                                          final fieldWidth =
-                                              constraints.maxWidth < 248
-                                                  ? constraints.maxWidth
-                                                  : 248.0;
-                                          return Wrap(
-                                            spacing: 8,
-                                            runSpacing: 8,
-                                            crossAxisAlignment:
-                                                WrapCrossAlignment.center,
-                                            children: [
-                                              for (final controller
-                                                  in _echIpControllers)
-                                                SizedBox(
-                                                  width: fieldWidth,
-                                                  child: TextFormField(
-                                                    key: ValueKey(controller),
-                                                    controller: controller,
-                                                    decoration: InputDecoration(
-                                                      labelText:
-                                                          l10n.echImageFixedIp,
-                                                      suffixIcon: IconButton(
-                                                        tooltip: l10n.delete,
-                                                        icon: const Icon(
-                                                            Icons.close),
-                                                        onPressed: () =>
-                                                            _removeEchIp(
-                                                                controller),
-                                                      ),
-                                                    ),
-                                                    keyboardType:
-                                                        TextInputType.url,
-                                                    validator: (value) {
-                                                      final ip =
-                                                          value?.trim() ?? '';
-                                                      if (ip.isEmpty) {
-                                                        return l10n
-                                                            .echImageIpRequired;
-                                                      }
-                                                      return InternetAddress
-                                                                  .tryParse(
-                                                                ip,
-                                                              ) !=
-                                                              null
-                                                          ? null
-                                                          : l10n
-                                                              .echImageInvalidIp;
-                                                    },
-                                                  ),
-                                                ),
-                                              TextButton.icon(
-                                                onPressed: _addEchIp,
-                                                icon: const Icon(Icons.add),
-                                                label: Text(l10n.echImageAddIp),
-                                              ),
-                                            ],
-                                          );
-                                        },
+                                      for (final route in _echRoutes)
+                                        _buildEchRoute(route, l10n),
+                                      TextButton.icon(
+                                        onPressed: _addEchRoute,
+                                        icon: const Icon(Icons.add),
+                                        label: Text(l10n.echImageAddHost),
                                       ),
                                       const SizedBox(height: 12),
                                       Wrap(
@@ -430,6 +373,108 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildEchRoute(_EchRouteControllers route, AppLocalizations l10n) {
+    return Padding(
+      key: ValueKey(route),
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            controller: route.host,
+            decoration: InputDecoration(
+              labelText: l10n.echImageHost,
+              suffixIcon: IconButton(
+                tooltip: l10n.delete,
+                onPressed:
+                _echRoutes.length > 1 ? () => _removeEchRoute(route) : null,
+                icon: const Icon(Icons.close),
+              ),
+            ),
+            keyboardType: TextInputType.url,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              final host = (value ?? '').trim().toLowerCase();
+              if (!AppSettings.isValidEchImageHost(host)) {
+                return l10n.echImageInvalidHost;
+              }
+              if (_echRoutes
+                  .where((entry) =>
+              entry.host.text.trim().toLowerCase() == host)
+                  .length >
+                  1) {
+                return l10n.echImageDuplicateHost;
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 12),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final fieldWidth =
+              constraints.maxWidth < 248 ? constraints.maxWidth : 248.0;
+              return Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  for (final controller in route.ips)
+                    SizedBox(
+                      width: fieldWidth,
+                      child: TextFormField(
+                        key: ValueKey(controller),
+                        controller: controller,
+                        decoration: InputDecoration(
+                          labelText: l10n.echImageFixedIp,
+                          suffixIcon: IconButton(
+                            tooltip: l10n.delete,
+                            icon: const Icon(Icons.close),
+                            onPressed: () => _removeEchIp(route, controller),
+                          ),
+                        ),
+                        keyboardType: TextInputType.url,
+                        validator: (value) {
+                          final ip = value?.trim() ?? '';
+                          if (ip.isEmpty) return l10n.echImageIpRequired;
+                          return InternetAddress.tryParse(ip) != null
+                              ? null
+                              : l10n.echImageInvalidIp;
+                        },
+                      ),
+                    ),
+                  TextButton.icon(
+                    onPressed: () => _addEchIp(route),
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n.echImageAddIp),
+                  ),
+                ],
+              );
+            },
+          ),
+          const Divider(),
+        ],
+      ),
+    );
+  }
+}
+
+class _EchRouteControllers {
+  _EchRouteControllers(EchImageRoute route)
+      : host = TextEditingController(text: route.host),
+        ips = route.fixedIps
+            .map((ip) => TextEditingController(text: ip))
+            .toList();
+
+  final TextEditingController host;
+  final List<TextEditingController> ips;
+
+  void dispose() {
+    host.dispose();
+    for (final controller in ips) {
+      controller.dispose();
+    }
   }
 }
 

@@ -160,7 +160,7 @@ abstract class AppLocalizations {
   /// No description provided for @echImageLoadingDescription.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'使用 ECH 加载图片代理资源'**
+  /// **'通过 ECH 访问已配置域名的图片'**
   String get echImageLoadingDescription;
 
   /// No description provided for @echImageRoute.
@@ -172,8 +172,20 @@ abstract class AppLocalizations {
   /// No description provided for @echImageRouteHint.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'自定义域名需支持相同的图片接口并发布 ECH 配置。可添加多个固定 IP，留空时使用 DNS 地址。'**
+  /// **'添加需要通过 ECH 访问的图片域名。每个域名可分别配置固定 IP，留空时使用 DNS 解析。域名需发布可用的 ECH 配置。'**
   String get echImageRouteHint;
+
+  /// No description provided for @echImageAddHost.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'添加域名'**
+  String get echImageAddHost;
+
+  /// No description provided for @echImageDuplicateHost.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'域名不能重复'**
+  String get echImageDuplicateHost;
 
   /// No description provided for @echImageHost.
   ///

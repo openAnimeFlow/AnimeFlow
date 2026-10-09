@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/ech_image_route.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 
 /// 应用持久化配置的统一访问入口。
@@ -21,25 +22,77 @@ abstract final class AppSettings {
   static Future<void> setEchImageLoading(bool value) =>
       setSetting(SettingKey.echImageLoading, value);
 
-  static const defaultEchImageHost = 'wsrv.nl';
+  static const defaultEchImageHosts = ['wsrv.nl', 'lain.bgm.tv'];
+  static const defaultEchImageFixedIps = {
+    'wsrv.nl': [
+      '172.64.229.41',
+      '172.67.73.67',
+      '104.17.139.122',
+    ],
+    'lain.bgm.tv': [
+      '172.67.134.140',
+      '104.20.36.249',
+      '104.25.240.99',
+    ],
+  };
 
-  static String get echImageHost {
-    final host = getSetting<String>(
-      SettingKey.echImageHost,
-      defaultValue: defaultEchImageHost,
-    )?.trim().toLowerCase();
-    return host != null && isValidEchImageHost(host)
-        ? host
-        : defaultEchImageHost;
-  }
+  static List<EchImageRoute> get defaultEchImageRoutes => List.unmodifiable(
+        defaultEchImageHosts.map((host) => EchImageRoute(
+              host: host,
+              fixedIps: defaultEchImageFixedIps[host]!,
+            )),
+      );
 
-  static List<String> get echImageFixedIps {
-    final saved = getSetting<String>(SettingKey.echImageFixedIp) ?? '';
-    return List.unmodifiable(
-      parseEchImageFixedIps(saved).where(
-        (ip) => InternetAddress.tryParse(ip) != null,
+  static List<EchImageRoute> get echImageRoutes {
+    final saved = getSetting<List<dynamic>>(SettingKey.echImageRoutes);
+    if (saved != null) {
+      final routes = <EchImageRoute>[];
+      final hosts = <String>{};
+      for (final entry in saved) {
+        if (entry is! Map || entry['host'] is! String) continue;
+        final host = (entry['host'] as String).trim().toLowerCase();
+        if (!isValidEchImageHost(host) || !hosts.add(host)) continue;
+        final ips = entry['fixedIps'];
+        routes.add(EchImageRoute(
+          host: host,
+          fixedIps: ips is List
+              ? ips
+                  .whereType<String>()
+                  .map((ip) => ip.trim())
+                  .where(
+                    (ip) => InternetAddress.tryParse(ip) != null,
+                  )
+                  .toSet()
+                  .toList()
+              : const [],
+        ));
+      }
+      if (routes.isNotEmpty) return List.unmodifiable(routes);
+    }
+
+    // Preserve the domain and IP addresses saved by the single-route UI.
+    final legacyHost =
+        getSetting<String>(SettingKey.echImageHost)?.trim().toLowerCase();
+    final legacyIps = getSetting<String>(SettingKey.echImageFixedIp) ?? '';
+    final fixedIps = parseEchImageFixedIps(legacyIps)
+        .where((ip) => InternetAddress.tryParse(ip) != null)
+        .toList();
+    if (legacyHost == null || !isValidEchImageHost(legacyHost)) {
+      // Legacy IP-only settings belonged to wsrv.nl, regardless of list order.
+      return List.unmodifiable(
+          defaultEchImageRoutes.map((route) => EchImageRoute(
+                host: route.host,
+                fixedIps: route.host == 'wsrv.nl' && fixedIps.isNotEmpty
+                    ? fixedIps
+                    : route.fixedIps,
+              )));
+    }
+    return List.unmodifiable([
+      EchImageRoute(
+        host: legacyHost,
+        fixedIps: fixedIps,
       ),
-    );
+    ]);
   }
 
   static List<String> parseEchImageFixedIps(String value) => value
@@ -58,14 +111,25 @@ abstract final class AppSettings {
         );
   }
 
-  static Future<void> setEchImageRoute({
-    required String host,
-    List<String> fixedIps = const [],
-  }) =>
-      Storage.setting.putAll({
-        SettingKey.echImageHost: host.trim().toLowerCase(),
-        SettingKey.echImageFixedIp: fixedIps.join('\n'),
-      });
+  static Future<void> setEchImageRoutes(List<EchImageRoute> routes) async {
+    if (routes.isEmpty) {
+      throw ArgumentError('At least one image domain is required');
+    }
+    final hosts = <String>{};
+    final saved = <Map<String, Object>>[];
+    for (final route in routes) {
+      final host = route.host.trim().toLowerCase();
+      if (!isValidEchImageHost(host) || !hosts.add(host)) {
+        throw ArgumentError('Invalid or duplicate image domain: $host');
+      }
+      final ips = route.fixedIps.map((ip) => ip.trim()).toSet().toList();
+      if (ips.any((ip) => InternetAddress.tryParse(ip) == null)) {
+        throw ArgumentError('Invalid IP address for image domain: $host');
+      }
+      saved.add({'host': host, 'fixedIps': ips});
+    }
+    await Storage.setting.put(SettingKey.echImageRoutes, saved);
+  }
 
   static const bool defaultAutoPlayNext = true;
   static const bool defaultEpisodesProgress = true;

@@ -36,14 +36,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get echImageLoading => 'ECH 图片加载优化';
 
   @override
-  String get echImageLoadingDescription => '使用 ECH 加载图片代理资源';
+  String get echImageLoadingDescription => '通过 ECH 访问已配置域名的图片';
 
   @override
   String get echImageRoute => 'ECH 图片连接';
 
   @override
   String get echImageRouteHint =>
-      '自定义域名需支持相同的图片接口并发布 ECH 配置。可添加多个固定 IP，留空时使用 DNS 地址。';
+      '添加需要通过 ECH 访问的图片域名。每个域名可分别配置固定 IP，留空时使用 DNS 解析。域名需发布可用的 ECH 配置。';
+
+  @override
+  String get echImageAddHost => '添加域名';
+
+  @override
+  String get echImageDuplicateHost => '域名不能重复';
 
   @override
   String get echImageHost => '图片域名';
@@ -2402,14 +2408,20 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get echImageLoading => 'ECH 图片加载优化';
 
   @override
-  String get echImageLoadingDescription => '使用 ECH 加载图片代理资源';
+  String get echImageLoadingDescription => '通过 ECH 访问已配置域名的图片';
 
   @override
   String get echImageRoute => 'ECH 图片连接';
 
   @override
   String get echImageRouteHint =>
-      '自定义域名需支持相同的图片接口并发布 ECH 配置。可添加多个固定 IP，留空时使用 DNS 地址。';
+      '添加需要通过 ECH 访问的图片域名。每个域名可分别配置固定 IP，留空时使用 DNS 解析。域名需发布可用的 ECH 配置。';
+
+  @override
+  String get echImageAddHost => '添加域名';
+
+  @override
+  String get echImageDuplicateHost => '域名不能重复';
 
   @override
   String get echImageHost => '图片域名';
@@ -4767,14 +4779,20 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get echImageLoading => 'ECH 圖片載入優化';
 
   @override
-  String get echImageLoadingDescription => '使用 ECH 載入圖片代理資源';
+  String get echImageLoadingDescription => '透過 ECH 存取已設定網域的圖片';
 
   @override
   String get echImageRoute => 'ECH 圖片連線';
 
   @override
   String get echImageRouteHint =>
-      '自訂網域須支援相同的圖片介面並發布 ECH 設定。可新增多個固定 IP，留空時使用 DNS 位址。';
+      '新增需要透過 ECH 存取的圖片網域。每個網域可分別設定固定 IP，留空時使用 DNS 解析。網域須發布可用的 ECH 設定。';
+
+  @override
+  String get echImageAddHost => '新增網域';
+
+  @override
+  String get echImageDuplicateHost => '網域不能重複';
 
   @override
   String get echImageHost => '圖片網域';
@@ -7133,14 +7151,20 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get echImageLoading => 'ECH 圖片載入優化';
 
   @override
-  String get echImageLoadingDescription => '使用 ECH 載入圖片代理資源';
+  String get echImageLoadingDescription => '透過 ECH 存取已設定網域的圖片';
 
   @override
   String get echImageRoute => 'ECH 圖片連線';
 
   @override
   String get echImageRouteHint =>
-      '自訂網域須支援相同的圖片介面並發布 ECH 設定。可新增多個固定 IP，留空時使用 DNS 位址。';
+      '新增需要透過 ECH 存取的圖片網域。每個網域可分別設定固定 IP，留空時使用 DNS 解析。網域須發布可用的 ECH 設定。';
+
+  @override
+  String get echImageAddHost => '新增網域';
+
+  @override
+  String get echImageDuplicateHost => '網域不能重複';
 
   @override
   String get echImageHost => '圖片網域';

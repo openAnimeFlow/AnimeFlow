@@ -39,14 +39,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get echImageLoading => 'ECH image loading';
 
   @override
-  String get echImageLoadingDescription => 'Use ECH for image proxy requests';
+  String get echImageLoadingDescription =>
+      'Access images on configured domains through ECH';
 
   @override
   String get echImageRoute => 'ECH image connection';
 
   @override
   String get echImageRouteHint =>
-      'Custom domains must support the same image API and publish an ECH config. Add multiple IP addresses if needed, or leave them empty to use DNS addresses.';
+      'Add image domains to access through ECH. Configure IP addresses separately for each domain, or leave them empty to use DNS. Each domain must publish a usable ECH config.';
+
+  @override
+  String get echImageAddHost => 'Add domain';
+
+  @override
+  String get echImageDuplicateHost => 'Duplicate image domain';
 
   @override
   String get echImageHost => 'Image domain';

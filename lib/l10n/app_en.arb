@@ -780,5 +780,13 @@
   "voiceActorCareerSeiyu": "Voice actor",
   "voiceActorCareerActor": "Actor",
   "voiceActorCareerArtist": "Artist",
-  "@voiceActorCareers": {"placeholders": {"careers": {"type": "String"}}}
+  "@voiceActorCareers": {"placeholders": {"careers": {"type": "String"}}},
+  "clearImageCache": "Clear image cache",
+  "clearImageCacheTitle": "Clear image cache?",
+  "clearImageCacheDescription": "Images will be downloaded again the next time they load. Videos, history, and settings will be kept.",
+  "imageCacheCalculating": "Calculating…",
+  "imageCacheClearing": "Clearing…",
+  "imageCacheSizeFailed": "Could not calculate cache size. Please retry.",
+  "imageCacheCleared": "Image cache cleared",
+  "imageCacheClearFailed": "Could not clear image cache. Please try again."
 }

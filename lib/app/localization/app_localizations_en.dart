@@ -2419,4 +2419,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceActorCareerArtist => 'Artist';
+
+  @override
+  String get clearImageCache => 'Clear image cache';
+
+  @override
+  String get clearImageCacheTitle => 'Clear image cache?';
+
+  @override
+  String get clearImageCacheDescription =>
+      'Images will be downloaded again the next time they load. Videos, history, and settings will be kept.';
+
+  @override
+  String get imageCacheCalculating => 'Calculating…';
+
+  @override
+  String get imageCacheClearing => 'Clearing…';
+
+  @override
+  String get imageCacheSizeFailed =>
+      'Could not calculate cache size. Please retry.';
+
+  @override
+  String get imageCacheCleared => 'Image cache cleared';
+
+  @override
+  String get imageCacheClearFailed =>
+      'Could not clear image cache. Please try again.';
 }

@@ -786,5 +786,13 @@
   "voiceActorCareerSeiyu": "声优",
   "voiceActorCareerActor": "演员",
   "voiceActorCareerArtist": "艺人",
-  "@voiceActorCareers": {"placeholders": {"careers": {"type": "String"}}}
+  "@voiceActorCareers": {"placeholders": {"careers": {"type": "String"}}},
+  "clearImageCache": "清除图片缓存",
+  "clearImageCacheTitle": "清除图片缓存？",
+  "clearImageCacheDescription": "图片会在下次加载时重新下载。视频、记录和设置不会删除。",
+  "imageCacheCalculating": "正在统计…",
+  "imageCacheClearing": "正在清除…",
+  "imageCacheSizeFailed": "统计失败，请重试",
+  "imageCacheCleared": "图片缓存已清除",
+  "imageCacheClearFailed": "清除失败，请稍后重试"
 }

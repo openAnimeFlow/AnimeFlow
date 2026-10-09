@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/localization/locale_provider.dart';
+import 'package:anime_flow/core/network/image/image_cache_service.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,6 +19,10 @@ class GeneralSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
+  final _imageCache = ImageCacheService();
+  late Future<int> _imageCacheSize = _imageCache.sizeInBytes();
+  bool _clearImageCacheRequested = false;
+  bool _clearingImageCache = false;
   bool _isLanguageMenuOpen = false;
   late bool _echImageLoading;
   final _echRouteFormKey = GlobalKey<FormState>();
@@ -66,6 +72,72 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
 
   void _setLanguage(_LanguageOption language) {
     ref.read(localeProvider.notifier).setLocale(language.locale);
+  }
+
+  void _refreshImageCacheSize() {
+    setState(() => _imageCacheSize = _imageCache.sizeInBytes());
+  }
+
+  Future<void> _confirmClearImageCache() async {
+    if (_clearImageCacheRequested) return;
+    setState(() => _clearImageCacheRequested = true);
+    try {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          final l10n = AppLocalizations.of(dialogContext);
+          return AlertDialog(
+            icon: const Icon(Icons.cleaning_services_rounded),
+            title: Text(l10n.clearImageCacheTitle),
+            content: Text(l10n.clearImageCacheDescription),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text(l10n.clearImageCache),
+              ),
+            ],
+          );
+        },
+      );
+      if (confirmed != true || !mounted) return;
+      setState(() => _clearingImageCache = true);
+      try {
+        await _imageCache.clear();
+        if (mounted) {
+          NotificationToast.show(
+              AppLocalizations.of(context).imageCacheCleared);
+        }
+      } catch (_) {
+        if (mounted) {
+          NotificationToast.show(
+              AppLocalizations.of(context).imageCacheClearFailed);
+        }
+      } finally {
+        // Recount even after a failure because some files may have been removed.
+        if (mounted) _refreshImageCacheSize();
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _clearImageCacheRequested = false;
+          _clearingImageCache = false;
+        });
+      }
+    }
+  }
+
+  String _imageCacheDescription(AsyncSnapshot<int> snapshot) {
+    final l10n = AppLocalizations.of(context);
+    if (_clearingImageCache) return l10n.imageCacheClearing;
+    if (snapshot.connectionState != ConnectionState.done) {
+      return l10n.imageCacheCalculating;
+    }
+    if (snapshot.hasError) return l10n.imageCacheSizeFailed;
+    return '${(snapshot.requireData / (1024 * 1024)).toStringAsFixed(2)} MB';
   }
 
   Future<void> _saveEchImageRoute() async {
@@ -175,6 +247,31 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
                         );
                       },
                       onSelected: _setLanguage,
+                    ),
+                  ),
+                ),
+                Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: FutureBuilder<int>(
+                    future: _imageCacheSize,
+                    builder: (context, snapshot) => ListTile(
+                      leading: const Icon(Icons.cleaning_services_rounded),
+                      title: Text(l10n.clearImageCache),
+                      subtitle: Text(_imageCacheDescription(snapshot)),
+                      enabled:
+                      snapshot.connectionState == ConnectionState.done &&
+                          !_clearImageCacheRequested,
+                      onTap: _confirmClearImageCache,
+                      trailing: snapshot.hasError &&
+                          snapshot.connectionState ==
+                              ConnectionState.done &&
+                          !_clearImageCacheRequested
+                          ? IconButton(
+                        tooltip: l10n.retry,
+                        onPressed: _refreshImageCacheSize,
+                        icon: const Icon(Icons.refresh_rounded),
+                      )
+                          : const Icon(Icons.image_outlined),
                     ),
                   ),
                 ),

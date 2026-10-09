@@ -2344,6 +2344,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get voiceActorCareerArtist => '艺人';
+
+  @override
+  String get clearImageCache => '清除图片缓存';
+
+  @override
+  String get clearImageCacheTitle => '清除图片缓存？';
+
+  @override
+  String get clearImageCacheDescription => '图片会在下次加载时重新下载。视频、记录和设置不会删除。';
+
+  @override
+  String get imageCacheCalculating => '正在统计…';
+
+  @override
+  String get imageCacheClearing => '正在清除…';
+
+  @override
+  String get imageCacheSizeFailed => '统计失败，请重试';
+
+  @override
+  String get imageCacheCleared => '图片缓存已清除';
+
+  @override
+  String get imageCacheClearFailed => '清除失败，请稍后重试';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -4685,6 +4709,30 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get voiceActorCareerArtist => '艺人';
+
+  @override
+  String get clearImageCache => '清除图片缓存';
+
+  @override
+  String get clearImageCacheTitle => '清除图片缓存？';
+
+  @override
+  String get clearImageCacheDescription => '图片会在下次加载时重新下载。视频、记录和设置不会删除。';
+
+  @override
+  String get imageCacheCalculating => '正在统计…';
+
+  @override
+  String get imageCacheClearing => '正在清除…';
+
+  @override
+  String get imageCacheSizeFailed => '统计失败，请重试';
+
+  @override
+  String get imageCacheCleared => '图片缓存已清除';
+
+  @override
+  String get imageCacheClearFailed => '清除失败，请稍后重试';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -7027,6 +7075,30 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get voiceActorCareerArtist => '藝人';
+
+  @override
+  String get clearImageCache => '清除圖片快取';
+
+  @override
+  String get clearImageCacheTitle => '清除圖片快取？';
+
+  @override
+  String get clearImageCacheDescription => '圖片會在下次載入時重新下載。影片、紀錄和設定不會刪除。';
+
+  @override
+  String get imageCacheCalculating => '正在統計…';
+
+  @override
+  String get imageCacheClearing => '正在清除…';
+
+  @override
+  String get imageCacheSizeFailed => '統計失敗，請重試';
+
+  @override
+  String get imageCacheCleared => '圖片快取已清除';
+
+  @override
+  String get imageCacheClearFailed => '清除失敗，請稍後重試';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -9370,4 +9442,28 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get voiceActorCareerArtist => '藝人';
+
+  @override
+  String get clearImageCache => '清除圖片快取';
+
+  @override
+  String get clearImageCacheTitle => '清除圖片快取？';
+
+  @override
+  String get clearImageCacheDescription => '圖片會在下次載入時重新下載。影片、紀錄和設定不會刪除。';
+
+  @override
+  String get imageCacheCalculating => '正在統計…';
+
+  @override
+  String get imageCacheClearing => '正在清除…';
+
+  @override
+  String get imageCacheSizeFailed => '統計失敗，請重試';
+
+  @override
+  String get imageCacheCleared => '圖片快取已清除';
+
+  @override
+  String get imageCacheClearFailed => '清除失敗，請稍後重試';
 }

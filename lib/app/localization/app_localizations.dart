@@ -4454,6 +4454,54 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'艺人'**
   String get voiceActorCareerArtist;
+
+  /// No description provided for @clearImageCache.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'清除图片缓存'**
+  String get clearImageCache;
+
+  /// No description provided for @clearImageCacheTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'清除图片缓存？'**
+  String get clearImageCacheTitle;
+
+  /// No description provided for @clearImageCacheDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'图片会在下次加载时重新下载。视频、记录和设置不会删除。'**
+  String get clearImageCacheDescription;
+
+  /// No description provided for @imageCacheCalculating.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在统计…'**
+  String get imageCacheCalculating;
+
+  /// No description provided for @imageCacheClearing.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在清除…'**
+  String get imageCacheClearing;
+
+  /// No description provided for @imageCacheSizeFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'统计失败，请重试'**
+  String get imageCacheSizeFailed;
+
+  /// No description provided for @imageCacheCleared.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'图片缓存已清除'**
+  String get imageCacheCleared;
+
+  /// No description provided for @imageCacheClearFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'清除失败，请稍后重试'**
+  String get imageCacheClearFailed;
 }
 
 class _AppLocalizationsDelegate

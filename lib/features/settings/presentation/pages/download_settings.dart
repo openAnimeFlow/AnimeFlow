@@ -1,6 +1,5 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
@@ -18,7 +17,6 @@ class DownloadSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
-  final setting = Storage.setting;
   late bool _downloadDanmaku;
   late int _maxParallelEpisodes;
   late int _maxParallelSegments;
@@ -31,18 +29,9 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
   @override
   void initState() {
     super.initState();
-    _downloadDanmaku = setting.get(
-      DownloadKey.downloadDanmaku,
-      defaultValue: true,
-    );
-    _maxParallelEpisodes = setting.get(
-      DownloadKey.maxParallelEpisodes,
-      defaultValue: 3,
-    );
-    _maxParallelSegments = setting.get(
-      DownloadKey.maxParallelSegments,
-      defaultValue: 5,
-    );
+    _downloadDanmaku = AppSettings.downloadDanmaku;
+    _maxParallelEpisodes = AppSettings.downloadMaxParallelEpisodes;
+    _maxParallelSegments = AppSettings.downloadMaxParallelSegments;
     _downloadDirectory = getConfiguredDownloadDirectory();
   }
 
@@ -79,7 +68,7 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                     setState(() {
                       _downloadDanmaku = value;
                     });
-                    setting.put(DownloadKey.downloadDanmaku, value);
+                    AppSettings.setDownloadDanmaku(value);
                   },
                 ),
                 _buildConcurrencySetting(
@@ -91,7 +80,7 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                     setState(() {
                       _maxParallelEpisodes = value;
                     });
-                    setting.put(DownloadKey.maxParallelEpisodes, value);
+                    AppSettings.setDownloadMaxParallelEpisodes(value);
                     ref.read(downloadManagerProvider).maxParallelEpisodes =
                         value;
                   },
@@ -105,7 +94,7 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                     setState(() {
                       _maxParallelSegments = value;
                     });
-                    setting.put(DownloadKey.maxParallelSegments, value);
+                    AppSettings.setDownloadMaxParallelSegments(value);
                     ref.read(downloadManagerProvider).maxParallelSegments =
                         value;
                   },
@@ -181,7 +170,7 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
         return;
       }
       if (!mounted) return;
-      await setting.put(DownloadKey.downloadDirectory, directory);
+      await AppSettings.setDownloadDirectory(directory);
       if (!mounted) return;
       setState(() {
         _downloadDirectory = Future<String>.value(directory);

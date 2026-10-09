@@ -16,6 +16,65 @@ abstract final class AppSettings {
 
   static Future<void> deleteSetting(String key) => Storage.setting.delete(key);
 
+  static const defaultAutoUpdate = true;
+  static const defaultDownloadDanmaku = true;
+  static const defaultDownloadMaxParallelEpisodes = 3;
+  static const defaultDownloadMaxParallelSegments = 5;
+
+  static bool get autoUpdate =>
+      _readBool(StorageKey.autoUpdateKey, defaultAutoUpdate);
+
+  static Future<void> setAutoUpdate(bool value) =>
+      setSetting(StorageKey.autoUpdateKey, value);
+
+  static bool get downloadDanmaku {
+    try {
+      return _readBool(DownloadKey.downloadDanmaku, defaultDownloadDanmaku);
+    } catch (_) {
+      // Downloads can be initialized before the settings box is available.
+      return defaultDownloadDanmaku;
+    }
+  }
+
+  static Future<void> setDownloadDanmaku(bool value) =>
+      setSetting(DownloadKey.downloadDanmaku, value);
+
+  static String get downloadDirectory {
+    try {
+      return getSetting<String>(DownloadKey.downloadDirectory)?.trim() ?? '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  static Future<void> setDownloadDirectory(String value) =>
+      setSetting(DownloadKey.downloadDirectory, value.trim());
+
+  static int get downloadMaxParallelEpisodes => _readDownloadParallelism(
+        DownloadKey.maxParallelEpisodes,
+        defaultDownloadMaxParallelEpisodes,
+      );
+
+  static int get downloadMaxParallelSegments => _readDownloadParallelism(
+        DownloadKey.maxParallelSegments,
+        defaultDownloadMaxParallelSegments,
+      );
+
+  static Future<void> setDownloadMaxParallelEpisodes(int value) =>
+      setSetting(DownloadKey.maxParallelEpisodes, value.clamp(1, 10).toInt());
+
+  static Future<void> setDownloadMaxParallelSegments(int value) =>
+      setSetting(DownloadKey.maxParallelSegments, value.clamp(1, 10).toInt());
+
+  static int _readDownloadParallelism(String key, int fallback) {
+    try {
+      final value = getSetting<int>(key);
+      return value?.clamp(1, 10).toInt() ?? fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
   static bool get echImageLoading =>
       getSetting<bool>(SettingKey.echImageLoading, defaultValue: true) ?? true;
 
@@ -128,7 +187,7 @@ abstract final class AppSettings {
       }
       saved.add({'host': host, 'fixedIps': ips});
     }
-    await Storage.setting.put(SettingKey.echImageRoutes, saved);
+    await setSetting(SettingKey.echImageRoutes, saved);
   }
 
   static const bool defaultAutoPlayNext = true;
@@ -159,7 +218,7 @@ abstract final class AppSettings {
       _readBool(DanmakuKey.danmakuOn, defaultDanmakuOn);
 
   static Future<void> setDanmakuOn(bool value) =>
-      Storage.setting.put(DanmakuKey.danmakuOn, value);
+      setSetting(DanmakuKey.danmakuOn, value);
 
   static double get danmakuFontSize =>
       _readDouble(DanmakuKey.danmakuFontSize, defaultDanmakuFontSize);
@@ -174,12 +233,12 @@ abstract final class AppSettings {
   static int get danmakuFontWeight =>
       _readInt(DanmakuKey.danmakuFontWeight, defaultDanmakuFontWeight);
   static String? get danmakuFontFamily =>
-      Storage.setting.get(DanmakuKey.danmakuFontFamily) as String?;
+      getSetting<Object?>(DanmakuKey.danmakuFontFamily) as String?;
 
   static bool get danmakuMassiveMode =>
       _readBool(DanmakuKey.danmakuMassiveMode, defaultDanmakuMassiveMode);
   static double get danmakuStrokeWidth {
-    final value = Storage.setting.get(DanmakuKey.danmakuBorder);
+    final value = getSetting<Object?>(DanmakuKey.danmakuBorder);
     if (value is bool) {
       // 兼容旧版本的开关配置。
       return value ? defaultDanmakuStrokeWidth : 0.0;
@@ -208,12 +267,12 @@ abstract final class AppSettings {
         defaultDanmakuPlatformEnabled,
       );
   static String get danmakuChineseMode =>
-      Storage.setting.get(DanmakuKey.danmakuChineseMode,
+      getSetting<Object?>(DanmakuKey.danmakuChineseMode,
           defaultValue: defaultDanmakuChineseMode) as String? ??
       defaultDanmakuChineseMode;
 
   static Future<void> setDanmakuValue(String key, Object? value) =>
-      Storage.setting.put(key, value);
+      setSetting(key, value);
 
   static Future<void> setDanmakuChineseMode(String value) =>
       setDanmakuValue(DanmakuKey.danmakuChineseMode, value);
@@ -224,7 +283,7 @@ abstract final class AppSettings {
       );
 
   static Future<void> setAutoPlayNext(bool value) =>
-      Storage.setting.put(PlaybackKey.autoPlayNext, value);
+      setSetting(PlaybackKey.autoPlayNext, value);
 
   static bool get episodesProgress => _readBool(
         PlaybackKey.episodesProgress,
@@ -232,10 +291,10 @@ abstract final class AppSettings {
       );
 
   static Future<void> setEpisodesProgress(bool value) =>
-      Storage.setting.put(PlaybackKey.episodesProgress, value);
+      setSetting(PlaybackKey.episodesProgress, value);
 
   static double get fastForwardSpeed {
-    final value = Storage.setting.get(
+    final value = getSetting<Object?>(
       PlaybackKey.fastForwardSpeed,
       defaultValue: defaultFastForwardSpeed,
     );
@@ -243,7 +302,7 @@ abstract final class AppSettings {
   }
 
   static Future<void> setFastForwardSpeed(double value) =>
-      Storage.setting.put(PlaybackKey.fastForwardSpeed, value);
+      setSetting(PlaybackKey.fastForwardSpeed, value);
 
   static bool get adBlocker => _readBool(
         PlaybackKey.adBlocker,
@@ -251,7 +310,7 @@ abstract final class AppSettings {
       );
 
   static Future<void> setAdBlocker(bool value) =>
-      Storage.setting.put(PlaybackKey.adBlocker, value);
+      setSetting(PlaybackKey.adBlocker, value);
 
   static int get skipDuration => _readInt(
         PlaybackKey.skipDuration,
@@ -259,7 +318,7 @@ abstract final class AppSettings {
       );
 
   static Future<void> setSkipDuration(int value) =>
-      Storage.setting.put(PlaybackKey.skipDuration, value);
+      setSetting(PlaybackKey.skipDuration, value);
 
   static bool get hardwareDecoder => _readBool(
         PlaybackKey.hardwareDecoder,
@@ -267,7 +326,7 @@ abstract final class AppSettings {
       );
 
   static Future<void> setHardwareDecoder(bool value) =>
-      Storage.setting.put(PlaybackKey.hardwareDecoder, value);
+      setSetting(PlaybackKey.hardwareDecoder, value);
 
   static bool get showMiniProgressBar => _readBool(
         PlaybackKey.showMiniProgressBar,
@@ -275,30 +334,30 @@ abstract final class AppSettings {
       );
 
   static Future<void> setShowMiniProgressBar(bool value) =>
-      Storage.setting.put(PlaybackKey.showMiniProgressBar, value);
+      setSetting(PlaybackKey.showMiniProgressBar, value);
 
   static String get preferredPlayerKernelName =>
-      Storage.setting.get(
+      getSetting<Object?>(
         PlaybackKey.preferredPlayerKernel,
         defaultValue: defaultPreferredPlayerKernel,
       ) as String? ??
       defaultPreferredPlayerKernel;
 
   static Future<void> setPreferredPlayerKernel(String value) =>
-      Storage.setting.put(PlaybackKey.preferredPlayerKernel, value);
+      setSetting(PlaybackKey.preferredPlayerKernel, value);
 
   static bool _readBool(String key, bool fallback) {
-    final value = Storage.setting.get(key, defaultValue: fallback);
+    final value = getSetting<Object?>(key, defaultValue: fallback);
     return value is bool ? value : fallback;
   }
 
   static int _readInt(String key, int fallback) {
-    final value = Storage.setting.get(key, defaultValue: fallback);
+    final value = getSetting<Object?>(key, defaultValue: fallback);
     return value is num ? value.toInt() : fallback;
   }
 
   static double _readDouble(String key, double fallback) {
-    final value = Storage.setting.get(key, defaultValue: fallback);
+    final value = getSetting<Object?>(key, defaultValue: fallback);
     return value is num ? value.toDouble() : fallback;
   }
 }

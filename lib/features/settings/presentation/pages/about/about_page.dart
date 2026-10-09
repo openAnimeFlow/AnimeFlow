@@ -1,9 +1,8 @@
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/constants/constants.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/app_update/presentation/widgets/version_update_ui.dart';
@@ -21,13 +20,12 @@ class AboutSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
-  final setting = Storage.setting;
   late bool autoUpdate;
 
   @override
   void initState() {
     super.initState();
-    autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
+    autoUpdate = AppSettings.autoUpdate;
   }
 
   @override
@@ -134,15 +132,15 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 15),
                             child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(l10n.autoUpdate),
                                   Switch(
                                     value: autoUpdate,
                                     onChanged: (bool value) {
                                       setState(() {
-                                        setting.put(
-                                            StorageKey.autoUpdateKey, value);
+                                        AppSettings.setAutoUpdate(value);
                                         autoUpdate = value;
                                       });
                                     },
@@ -152,9 +150,11 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                           const Divider(),
                           ListTile(
                             title: Text(l10n.checkForUpdates),
-                            trailing: const Icon(Icons.browser_updated_outlined),
+                            trailing:
+                                const Icon(Icons.browser_updated_outlined),
                             onTap: () async {
-                              final notifier = ref.read(appInfoProvider.notifier);
+                              final notifier =
+                                  ref.read(appInfoProvider.notifier);
                               final result = await notifier.checkVersion();
                               if (!context.mounted) return;
                               await handleVersionCheckResult(
@@ -172,7 +172,8 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                           ListTile(
                             title: Text(l10n.projectUpdates),
                             trailing: const Icon(Icons.article_outlined),
-                            onTap: () => const SettingUpdatesRoute().push(context),
+                            onTap: () =>
+                                const SettingUpdatesRoute().push(context),
                           ),
                           const Divider(),
                           ListTile(
@@ -183,7 +184,8 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                               if (await canLaunchUrl(uri)) {
                                 await launchUrl(uri);
                               } else {
-                                NotificationToast.show(l10n.deviceUnsupportedWeb,
+                                NotificationToast.show(
+                                    l10n.deviceUnsupportedWeb,
                                     title: l10n.unableOpenWeb);
                               }
                             },

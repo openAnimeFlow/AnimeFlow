@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:anime_flow/core/constants/constants.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/app/localization/locale_provider.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/download/application/download_danmaku_service.dart';
 import 'package:anime_flow/features/download/application/download_foreground_service.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
@@ -101,14 +100,8 @@ IDownloadManager downloadManager(Ref ref) {
   return DownloadManager(
     repository: ref.watch(downloadRepositoryProvider),
     baseDirectoryProvider: getConfiguredDownloadDirectory,
-    maxParallelEpisodes: _downloadSettingInt(
-      DownloadKey.maxParallelEpisodes,
-      fallback: 3,
-    ),
-    maxParallelSegments: _downloadSettingInt(
-      DownloadKey.maxParallelSegments,
-      fallback: 5,
-    ),
+    maxParallelEpisodes: AppSettings.downloadMaxParallelEpisodes,
+    maxParallelSegments: AppSettings.downloadMaxParallelSegments,
   );
 }
 
@@ -117,30 +110,9 @@ Future<String> getConfiguredDownloadDirectory() async {
   if (!platform.supportsSelection) {
     return DownloadManager.getDefaultDownloadDirectory();
   }
-  try {
-    final configured = Storage.setting.get(
-      DownloadKey.downloadDirectory,
-      defaultValue: '',
-    );
-    if (configured is String && configured.trim().isNotEmpty) {
-      return configured.trim();
-    }
-  } catch (_) {
-    // Fall back to the application support directory during startup.
-  }
+  final configured = AppSettings.downloadDirectory;
+  if (configured.isNotEmpty) return configured;
   return DownloadManager.getDefaultDownloadDirectory();
-}
-
-int _downloadSettingInt(String key, {required int fallback}) {
-  try {
-    final value = Storage.setting.get(key, defaultValue: fallback);
-    if (value is int) {
-      return value.clamp(1, 10).toInt();
-    }
-  } catch (_) {
-    // Use the defaults when storage is unavailable during startup.
-  }
-  return fallback;
 }
 
 @Riverpod(keepAlive: true)
@@ -540,16 +512,7 @@ class DownloadController extends _$DownloadController {
     return Uri.parse(baseUrl).resolve(episodeUrl).toString();
   }
 
-  bool get _downloadDanmakuEnabled {
-    try {
-      return Storage.setting.get(
-        DownloadKey.downloadDanmaku,
-        defaultValue: true,
-      );
-    } catch (_) {
-      return true;
-    }
-  }
+  bool get _downloadDanmakuEnabled => AppSettings.downloadDanmaku;
 
   static String _taskKey(String recordKey, String episodeUrl) {
     return '$recordKey::$episodeUrl';

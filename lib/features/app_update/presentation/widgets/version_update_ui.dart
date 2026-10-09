@@ -3,7 +3,6 @@ import 'package:anime_flow/features/app_update/application/apply_updates_control
 import 'package:anime_flow/shared/models/download_info.dart';
 import 'package:anime_flow/shared/models/enums/version_type.dart';
 import 'package:anime_flow/shared/models/version_check_result.dart';
-import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/app_update/presentation/widgets/apply_updates_view.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
@@ -71,7 +70,6 @@ Future<void> showVersionUpdateDialog(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => ApplyUpdatesView(
-      setting: Storage.setting,
       download: updateInfo.download,
       body: updateInfo.body,
       onStartDownload: (downloadUrl, fileName) async {
@@ -88,7 +86,7 @@ Future<void> showVersionUpdateDialog(
           }
 
           if (downloadResult != null && context.mounted) {
-            await   showDownloadCompleteDialog(
+            await showDownloadCompleteDialog(
               context,
               downloadResult,
               onAction: onDownloadedPackageAction,

@@ -1,4 +1,3 @@
-import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/app_update/application/app_info_state.dart';
 import 'package:anime_flow/features/app_update/application/apply_updates_controller.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
@@ -7,7 +6,7 @@ import 'package:anime_flow/shared/models/github_release.dart';
 import 'package:anime_flow/shared/models/enums/version_type.dart';
 import 'package:anime_flow/shared/models/version_check_result.dart';
 import 'package:anime_flow/shared/models/version_download_state.dart';
-import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
@@ -46,11 +45,7 @@ class AppInfo extends _$AppInfo {
 
     state = state.copyWith(hasTriggeredStartupCheck: true);
 
-    final autoUpdate = Storage.setting.get(
-      StorageKey.autoUpdateKey,
-      defaultValue: true,
-    );
-    if (!autoUpdate) return;
+    if (!AppSettings.autoUpdate) return;
 
     final result = await checkVersion();
     state = state.copyWith(pendingStartupVersionResult: result);

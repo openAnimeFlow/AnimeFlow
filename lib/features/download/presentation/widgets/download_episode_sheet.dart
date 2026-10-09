@@ -1,8 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/download/presentation/widgets/download_danmaku_icon.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
@@ -330,7 +329,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
                 setState(() {
                   _downloadDanmakuEnabled = value;
                 });
-                Storage.setting.put(DownloadKey.downloadDanmaku, value);
+                AppSettings.setDownloadDanmaku(value);
               },
             ),
             const SizedBox(height: 12),
@@ -603,16 +602,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     }
   }
 
-  bool get _storedDownloadDanmaku {
-    try {
-      return Storage.setting.get(
-        DownloadKey.downloadDanmaku,
-        defaultValue: true,
-      );
-    } catch (_) {
-      return true;
-    }
-  }
+  bool get _storedDownloadDanmaku => AppSettings.downloadDanmaku;
 }
 
 class _DownloadCandidate {

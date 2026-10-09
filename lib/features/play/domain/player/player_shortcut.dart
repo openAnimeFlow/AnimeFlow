@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:flutter/services.dart';
 
 enum PlayerShortcutAction {
@@ -81,7 +81,7 @@ extension PlayerShortcutActionDetails on PlayerShortcutAction {
       };
 
   List<PlayerShortcutBinding> readBindings() {
-    final stored = Storage.setting.get(storageKey);
+    final stored = AppSettings.getSetting<Object?>(storageKey);
     final ids = stored is List
         ? stored.whereType<num>().map((id) => id.toInt()).toList()
         : stored is num
@@ -92,8 +92,9 @@ extension PlayerShortcutActionDetails on PlayerShortcutAction {
     return bindings.isEmpty ? defaultBindings : bindings;
   }
 
-  void saveBindings(List<PlayerShortcutBinding> bindings) => Storage.setting
-      .put(storageKey, bindings.map((binding) => binding.id).toList());
+  void saveBindings(List<PlayerShortcutBinding> bindings) =>
+      AppSettings.setSetting(
+          storageKey, bindings.map((binding) => binding.id).toList());
 
   static PlayerShortcutBinding? _bindingFromId(int id) {
     if (id == -1) return const PlayerShortcutBinding.wheel(5);

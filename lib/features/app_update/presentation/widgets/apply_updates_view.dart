@@ -1,5 +1,5 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/shared/models/download_info.dart';
 import 'package:anime_flow/shared/models/version_download_state.dart';
@@ -7,14 +7,12 @@ import 'package:anime_flow/core/utils/utils.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_ce/hive.dart';
 
 class ApplyUpdatesView extends StatefulWidget {
   final List<DownloadInfo> download;
   final String body;
   final Future<void> Function(String url, String fileName) onStartDownload;
   final VoidCallback onCancelDownload;
-  final Box setting;
 
   const ApplyUpdatesView({
     super.key,
@@ -22,7 +20,6 @@ class ApplyUpdatesView extends StatefulWidget {
     required this.onCancelDownload,
     required this.download,
     required this.body,
-    required this.setting,
   });
 
   @override
@@ -133,7 +130,7 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
               children: [
                 TextButton(
                   onPressed: () {
-                    widget.setting.put(StorageKey.autoUpdateKey, false);
+                    AppSettings.setAutoUpdate(false);
                     Navigator.of(context).pop();
                   },
                   child: Text(l10n.disableAutoUpdate),
@@ -154,8 +151,7 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
                     else
                       TextButton(
                         onPressed: () async {
-                          final downloadData =
-                              widget.download[_selectedIndex];
+                          final downloadData = widget.download[_selectedIndex];
                           await widget.onStartDownload(
                             downloadData.url,
                             downloadData.fileName,

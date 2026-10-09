@@ -623,6 +623,8 @@
   ,"downloadLocationPermissionDenied": "请授予存储访问权限后再修改下载位置"
   ,"downloadLocationNotWritable": "无法写入所选目录，请选择其他下载位置"
   ,"downloadLocationSelectFailed": "修改下载位置失败，请重试"
+  ,"downloadDirectoryAccessLost": "下载目录访问权限已失效，请在下载设置中重新选择目录并授予权限"
+  ,"downloadDirectoryWriteFailed": "下载目录不可用或无法写入，请检查存储设备、剩余空间和写入权限，或在下载设置中重新选择目录"
   ,"downloadDanmaku": "同时下载弹幕"
   ,"downloadDanmakuDescription": "下载完成后保存本地弹幕，失败不影响视频"
   ,"downloadParallelEpisodes": "同时下载剧集数"

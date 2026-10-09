@@ -95,6 +95,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
       storageCalls++;
+      if (call.method == 'hasDirectoryAccess') return granted;
       if (call.method == 'requestAccess') {
         permissionCalls++;
         return granted;

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/features/download/application/download_danmaku_service.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
+import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/video_source_resolver_pool.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
@@ -237,6 +238,63 @@ void main() {
       expect(episode.danmakuDownloaded, isTrue);
       expect(episode.localDanmakuPath, 'downloads/ep1/danmaku.json');
     });
+
+    for (final failure in [
+      const DownloadDirectoryAccessException(),
+      const DownloadDirectoryNotWritableException(),
+    ]) {
+      test(
+          'danmaku storage failure keeps completed video and cache (${failure.code})',
+          () async {
+        final repository = _FakeDownloadRepository();
+        final manager = _FakeDownloadManager();
+        final service = _FakeDownloadDanmakuService(
+          result: const DownloadDanmakuResult(
+            danDanBangumiId: 2026,
+            localPath: 'downloads/ep1/danmaku.json',
+            hasDanmaku: true,
+          ),
+          failure: failure,
+        );
+        final episode = _episode('ep1', DownloadStatus.completed)
+          ..downloadDirectory = 'downloads/ep1'
+          ..localMediaPath = 'downloads/ep1/video.mp4'
+          ..danmakuDownloaded = true
+          ..localDanmakuPath = 'downloads/ep1/danmaku.json';
+        final record = DownloadRecord(
+          subjectId: 1,
+          subjectName: 'Subject',
+          subjectCover: '',
+          sourceName: 'source',
+          sourceBaseUrl: 'https://source.test',
+          episodes: {'ep1': episode},
+          createdAt: DateTime(2026),
+        );
+        await repository.putRecord(record);
+        final container = ProviderContainer(overrides: [
+          downloadRepositoryProvider.overrideWithValue(repository),
+          downloadManagerProvider.overrideWithValue(manager),
+          videoSourceResolverPoolProvider
+              .overrideWithValue(_FakeResolverPool()),
+          downloadDanmakuServiceProvider.overrideWithValue(service),
+        ]);
+        addTearDown(container.dispose);
+        final controller = container.read(downloadControllerProvider.notifier);
+        await controller.downloadDanmaku(record.key, 'ep1');
+        final stored = repository.getRecord(record.key)!.episodes['ep1']!;
+        expect(stored.errorMessage, failure.code);
+        expect(stored.status, DownloadStatus.completed);
+        expect(stored.localMediaPath, 'downloads/ep1/video.mp4');
+        expect(stored.danmakuDownloaded, isTrue);
+        expect(stored.localDanmakuPath, 'downloads/ep1/danmaku.json');
+        expect(manager.requests, isEmpty);
+
+        service.failure = null;
+        await controller.downloadDanmaku(record.key, 'ep1');
+        expect(stored.errorMessage, isEmpty);
+        expect(stored.danmakuDownloaded, isTrue);
+      });
+    }
 
     test('skips danmaku download when disabled for the task', () async {
       final repository = _FakeDownloadRepository();
@@ -498,9 +556,10 @@ class _FakeDownloadManager implements IDownloadManager {
 }
 
 class _FakeDownloadDanmakuService implements IDownloadDanmakuService {
-  _FakeDownloadDanmakuService({required this.result});
+  _FakeDownloadDanmakuService({required this.result, this.failure});
 
   final DownloadDanmakuResult? result;
+  DownloadDirectoryException? failure;
   final requestedSubjectIds = <int>[];
   final _downloads = <Completer<void>>[];
 
@@ -513,6 +572,7 @@ class _FakeDownloadDanmakuService implements IDownloadDanmakuService {
     final completer = Completer<void>();
     _downloads.add(completer);
     completer.complete();
+    if (failure != null) throw failure!;
     return result;
   }
 

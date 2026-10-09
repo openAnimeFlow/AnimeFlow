@@ -1954,6 +1954,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get downloadLocationSelectFailed => '修改下載位置失敗，請重試';
 
   @override
+  String get downloadDirectoryAccessLost => '下載目錄存取權限已失效，請在下載設定中重新選擇目錄並授予權限';
+
+  @override
+  String get downloadDirectoryWriteFailed =>
+      '下載目錄無法使用或寫入，請檢查儲存裝置、剩餘空間和寫入權限，或在下載設定中重新選擇目錄';
+
+  @override
   String get downloadDanmaku => '同時下載彈幕';
 
   @override
@@ -4323,6 +4330,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get downloadLocationSelectFailed => '修改下载位置失败，请重试';
+
+  @override
+  String get downloadDirectoryAccessLost => '下载目录访问权限已失效，请在下载设置中重新选择目录并授予权限';
+
+  @override
+  String get downloadDirectoryWriteFailed =>
+      '下载目录不可用或无法写入，请检查存储设备、剩余空间和写入权限，或在下载设置中重新选择目录';
 
   @override
   String get downloadDanmaku => '同时下载弹幕';
@@ -6697,6 +6711,13 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get downloadLocationSelectFailed => '修改下載位置失敗，請重試';
 
   @override
+  String get downloadDirectoryAccessLost => '下載目錄存取權限已失效，請在下載設定中重新選擇目錄並授予權限';
+
+  @override
+  String get downloadDirectoryWriteFailed =>
+      '下載目錄無法使用或寫入，請檢查儲存裝置、剩餘空間和寫入權限，或在下載設定中重新選擇目錄';
+
+  @override
   String get downloadDanmaku => '同時下載彈幕';
 
   @override
@@ -9068,6 +9089,13 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get downloadLocationSelectFailed => '修改下載位置失敗，請重試';
+
+  @override
+  String get downloadDirectoryAccessLost => '下載目錄存取權限已失效，請在下載設定中重新選擇目錄並授予權限';
+
+  @override
+  String get downloadDirectoryWriteFailed =>
+      '下載目錄無法使用或寫入，請檢查儲存裝置、剩餘空間和寫入權限，或在下載設定中重新選擇目錄';
 
   @override
   String get downloadDanmaku => '同時下載彈幕';

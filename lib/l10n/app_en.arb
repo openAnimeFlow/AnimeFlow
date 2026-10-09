@@ -576,6 +576,8 @@
   ,"downloadLocationPermissionDenied": "Grant storage access before changing the download location"
   ,"downloadLocationNotWritable": "Cannot write to the selected folder. Choose another download location"
   ,"downloadLocationSelectFailed": "Failed to change the download location. Please try again"
+  ,"downloadDirectoryAccessLost": "Download folder access was lost. Select the folder again in Download settings and grant access."
+  ,"downloadDirectoryWriteFailed": "Cannot write to the download folder. Check the storage device, free space and write permissions, or choose another folder in Download settings."
   ,"downloadDanmaku": "Download danmaku too"
   ,"downloadDanmakuDescription": "Save local danmaku after the video finishes. Failures will not affect the video."
   ,"downloadParallelEpisodes": "Episodes downloaded at the same time"

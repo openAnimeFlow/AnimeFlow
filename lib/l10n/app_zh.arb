@@ -597,6 +597,8 @@
   ,"downloadLocationPermissionDenied": "請授予儲存空間存取權限後再修改下載位置"
   ,"downloadLocationNotWritable": "無法寫入所選目錄，請選擇其他下載位置"
   ,"downloadLocationSelectFailed": "修改下載位置失敗，請重試"
+  ,"downloadDirectoryAccessLost": "下載目錄存取權限已失效，請在下載設定中重新選擇目錄並授予權限"
+  ,"downloadDirectoryWriteFailed": "下載目錄無法使用或寫入，請檢查儲存裝置、剩餘空間和寫入權限，或在下載設定中重新選擇目錄"
   ,"downloadDanmaku": "同時下載彈幕"
   ,"downloadDanmakuDescription": "下載完成後保存本地彈幕，失敗不影響影片"
   ,"downloadParallelEpisodes": "同時下載劇集數"

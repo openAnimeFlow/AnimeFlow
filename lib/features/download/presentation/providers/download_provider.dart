@@ -352,6 +352,7 @@ class DownloadController extends _$DownloadController {
                 0,
             episode: episode,
           );
+      episode.errorMessage = '';
       if (result != null) {
         episode
           ..danDanBangumiID = result.danDanBangumiId
@@ -362,10 +363,14 @@ class DownloadController extends _$DownloadController {
           ..danmakuDownloaded = false
           ..localDanmakuPath = '';
       }
+    } on DownloadDirectoryException catch (error) {
+      // Keep completed video and any existing danmaku usable after a failed write.
+      episode.errorMessage = error.code;
     } catch (_) {
       episode
         ..danmakuDownloaded = false
-        ..localDanmakuPath = '';
+        ..localDanmakuPath = ''
+        ..errorMessage = '';
     } finally {
       _runningDanmakuTasks.remove(taskKey);
       _downloadDanmakuByTask.remove(taskKey);

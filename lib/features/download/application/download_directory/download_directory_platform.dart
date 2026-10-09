@@ -25,6 +25,19 @@ abstract class DownloadDirectoryPlatform {
   /// Restore access without presenting a permission dialog.
   Future<String> restoreAccess(String directory) async => directory;
 
+  /// Preflight every download/resume, including directories that already exist.
+  /// Permission restoration must stay noninteractive in background tasks.
+  Future<String> requireWritableDirectory(String directory) async {
+    final restored = await restoreAccess(directory);
+    try {
+      await Directory(restored).create(recursive: true);
+      await verifyWritable(restored);
+    } on FileSystemException {
+      throw const DownloadDirectoryNotWritableException();
+    }
+    return restored;
+  }
+
   /// Shared filesystem check for platforms used by the dart:io downloader.
   Future<void> verifyWritable(String directory) async {
     try {
@@ -41,8 +54,31 @@ abstract class DownloadDirectoryPlatform {
   }
 }
 
-class DownloadDirectoryNotWritableException implements Exception {
+abstract class DownloadDirectoryException implements Exception {
+  const DownloadDirectoryException();
+
+  String get code;
+
+  @override
+  String toString() => code;
+}
+
+class DownloadDirectoryNotWritableException extends DownloadDirectoryException {
   const DownloadDirectoryNotWritableException();
+
+  static const errorCode = 'download_directory_not_writable';
+
+  @override
+  String get code => errorCode;
+}
+
+class DownloadDirectoryAccessException extends DownloadDirectoryException {
+  const DownloadDirectoryAccessException();
+
+  static const errorCode = 'download_directory_access_denied';
+
+  @override
+  String get code => errorCode;
 }
 
 class DownloadDirectoryPlatformFactory {

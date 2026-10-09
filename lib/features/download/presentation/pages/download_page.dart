@@ -1,12 +1,14 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/router/model/play_route_extra.dart';
+import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/download/presentation/widgets/download_danmaku_icon.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
@@ -349,7 +351,9 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
           ),
           Text(
             _statusText(l10n, episode),
-            maxLines: 2,
+            maxLines: _directoryErrorText(l10n, episode.errorMessage) != null
+                ? null
+                : 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 12,
@@ -412,10 +416,16 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
     if (confirmed != true || !context.mounted) {
       return;
     }
-    await ref.read(downloadControllerProvider.notifier).deleteEpisode(
-          widget.recordKey,
-          widget.episodeUrl,
-        );
+    try {
+      await ref.read(downloadControllerProvider.notifier).deleteEpisode(
+            widget.recordKey,
+            widget.episodeUrl,
+          );
+    } on DownloadDirectoryException catch (error) {
+      if (context.mounted) {
+        NotificationToast.show(_directoryErrorText(l10n, error.code)!);
+      }
+    }
   }
 
   void _playOfflineEpisode(BuildContext context) {
@@ -486,10 +496,13 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
             ? l10n.downloadWithDanmaku
             : l10n.downloadWithoutDanmaku,
       );
+      final directoryError = _directoryErrorText(l10n, episode.errorMessage);
+      if (directoryError != null) details.add(directoryError);
       return details.isEmpty ? status : '$status - ${details.join(' - ')}';
     }
     if (episode.status == DownloadStatus.failed) {
-      final detail = episode.errorMessage.trim();
+      final detail = _directoryErrorText(l10n, episode.errorMessage) ??
+          episode.errorMessage.trim();
       return detail.isEmpty ? status : '$status - $detail';
     }
     if (episode.totalSizeBytes > 0) {
@@ -499,6 +512,18 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
         '${episode.progressPercent.clamp(0, 100).toStringAsFixed(1)}%';
     return '$status - $progress';
   }
+}
+
+String? _directoryErrorText(AppLocalizations l10n, String error) {
+  if (error == DownloadDirectoryAccessException.errorCode ||
+      error.startsWith(
+          'PlatformException(${DownloadDirectoryAccessException.errorCode},')) {
+    return l10n.downloadDirectoryAccessLost;
+  }
+  if (error == DownloadDirectoryNotWritableException.errorCode) {
+    return l10n.downloadDirectoryWriteFailed;
+  }
+  return null;
 }
 
 DownloadRecord? _findRecord(DownloadState state, String key) {

@@ -2016,6 +2016,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Failed to change the download location. Please try again';
 
   @override
+  String get downloadDirectoryAccessLost =>
+      'Download folder access was lost. Select the folder again in Download settings and grant access.';
+
+  @override
+  String get downloadDirectoryWriteFailed =>
+      'Cannot write to the download folder. Check the storage device, free space and write permissions, or choose another folder in Download settings.';
+
+  @override
   String get downloadDanmaku => 'Download danmaku too';
 
   @override

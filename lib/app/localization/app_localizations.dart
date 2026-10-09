@@ -3722,6 +3722,18 @@ abstract class AppLocalizations {
   /// **'修改下载位置失败，请重试'**
   String get downloadLocationSelectFailed;
 
+  /// No description provided for @downloadDirectoryAccessLost.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载目录访问权限已失效，请在下载设置中重新选择目录并授予权限'**
+  String get downloadDirectoryAccessLost;
+
+  /// No description provided for @downloadDirectoryWriteFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载目录不可用或无法写入，请检查存储设备、剩余空间和写入权限，或在下载设置中重新选择目录'**
+  String get downloadDirectoryWriteFailed;
+
   /// No description provided for @downloadDanmaku.
   ///
   /// In zh_Hans, this message translates to:

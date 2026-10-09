@@ -22,4 +22,14 @@ class AndroidDownloadDirectoryPlatform extends DownloadDirectoryPlatform {
   Future<String?> selectDirectory({required String dialogTitle}) {
     return FilePicker.platform.getDirectoryPath(dialogTitle: dialogTitle);
   }
+
+  @override
+  Future<String> restoreAccess(String directory) async {
+    final accessible = await _channel.invokeMethod<bool>(
+      'hasDirectoryAccess',
+      {'path': directory},
+    );
+    if (accessible != true) throw const DownloadDirectoryAccessException();
+    return directory;
+  }
 }

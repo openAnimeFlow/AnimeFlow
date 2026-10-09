@@ -1,6 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/localization/app_localizations_delegates.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
+import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/presentation/pages/download_page.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
@@ -127,6 +128,38 @@ void main() {
     await tester.pump();
     expect(find.text('Subject 1'), findsNothing);
     expect(find.text('Subject 2'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('storage failures show recovery steps instead of exception codes',
+      (tester) async {
+    await mount(tester);
+    final episode = controller.records.first.episodes['First']!;
+    episode
+      ..status = DownloadStatus.failed
+      ..errorMessage = DownloadDirectoryAccessException.errorCode;
+    controller.publish();
+    await tester.pump();
+    expect(find.textContaining('Select the folder again in Download settings'),
+        findsOneWidget);
+    expect(
+        tester
+            .widget<Text>(find
+                .textContaining('Select the folder again in Download settings'))
+            .maxLines,
+        isNull);
+    expect(find.textContaining(DownloadDirectoryAccessException.errorCode),
+        findsNothing);
+    episode.errorMessage = DownloadDirectoryNotWritableException.errorCode;
+    controller.publish();
+    await tester.pump();
+    expect(find.textContaining('Check the storage device, free space'),
+        findsOneWidget);
+    episode.status = DownloadStatus.completed;
+    controller.publish();
+    await tester.pump();
+    expect(find.textContaining('Check the storage device, free space'),
+        findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

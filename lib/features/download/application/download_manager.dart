@@ -74,16 +74,20 @@ class DownloadManager implements IDownloadManager {
   DownloadManager({
     DownloadHttpClient? httpClient,
     IDownloadRepository? repository,
+    DownloadDirectoryPlatform? directoryPlatform,
     Future<String> Function()? baseDirectoryProvider,
     this.maxParallelEpisodes = 2,
     this.maxParallelSegments = 3,
   })  : _httpClient = httpClient ?? DownloadHttpClient(),
         _repository = repository,
+        _directoryPlatform =
+            directoryPlatform ?? DownloadDirectoryPlatformFactory.create(),
         _baseDirectoryProvider =
             baseDirectoryProvider ?? _defaultBaseDirectoryProvider;
 
   final DownloadHttpClient _httpClient;
   final IDownloadRepository? _repository;
+  final DownloadDirectoryPlatform _directoryPlatform;
   final Future<String> Function() _baseDirectoryProvider;
 
   @override
@@ -204,8 +208,8 @@ class DownloadManager implements IDownloadManager {
         !_isSafeEpisodeDirectory(downloadDirectory, episode)) {
       return;
     }
-    final accessible = await DownloadDirectoryPlatformFactory.create()
-        .restoreAccess(downloadDirectory);
+    final accessible =
+        await _directoryPlatform.restoreAccess(downloadDirectory);
     final directory = Directory(accessible);
     if (await directory.exists()) await directory.delete(recursive: true);
   }
@@ -258,12 +262,16 @@ class DownloadManager implements IDownloadManager {
       }
       request.episode
         ..status = DownloadStatus.failed
-        ..errorMessage = error.toString();
+        ..errorMessage = error.error is FileSystemException
+            ? const DownloadDirectoryNotWritableException().code
+            : error.toString();
       await _persistAndNotify(request, speed: 0);
     } catch (error) {
       request.episode
         ..status = DownloadStatus.failed
-        ..errorMessage = error.toString();
+        ..errorMessage = error is FileSystemException
+            ? const DownloadDirectoryNotWritableException().code
+            : error.toString();
       await _persistAndNotify(request, speed: 0);
     } finally {
       if (identical(_activeTasks[key], task)) {
@@ -773,7 +781,7 @@ class DownloadManager implements IDownloadManager {
 
   Future<String> _prepareEpisodeDirectory(DownloadRequest request) async {
     final existing = request.episode.downloadDirectory.trim();
-    final platform = DownloadDirectoryPlatformFactory.create();
+    final platform = _directoryPlatform;
     // An older episode keeps its original grant even after settings change.
     final baseDirectory = existing.isNotEmpty && platform.supportsSelection
         ? ''
@@ -787,7 +795,8 @@ class DownloadManager implements IDownloadManager {
             '${_safeDirectoryName(request.sourceName)}_${request.subjectId}',
             '${request.episode.lineIndex}_${request.episode.episodeIndex}_${_episodeHash(request.episodeUrl)}',
           );
-    final directory = await platform.restoreAccess(recordedDirectory);
+    final directory =
+        await platform.requireWritableDirectory(recordedDirectory);
     if (reuseExisting && !p.equals(existing, directory)) {
       final roots = {existing: directory};
       request.episode
@@ -796,7 +805,6 @@ class DownloadManager implements IDownloadManager {
         ..localDanmakuPath =
             remapDownloadPath(request.episode.localDanmakuPath, roots);
     }
-    await Directory(directory).create(recursive: true);
     return directory;
   }
 

@@ -29,10 +29,7 @@ class MacOSDownloadDirectoryPlatform extends DownloadDirectoryPlatform {
       {'path': directory},
     );
     if (restored == null || restored.isEmpty) {
-      throw PlatformException(
-        code: 'download_directory_access_denied',
-        message: '下载目录访问权限失效，请在下载设置中重新选择目录',
-      );
+      throw const DownloadDirectoryAccessException();
     }
     return restored;
   }

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:anime_flow/features/download/application/download_http_client.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
+import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:dio/dio.dart';
@@ -14,6 +15,7 @@ import 'package:path/path.dart' as p;
 
 var _transientDirectAttempts = 0;
 var _transientSegmentAttempts = 0;
+var _serverRequests = 0;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +26,8 @@ void main() {
   late Uri baseUri;
 
   setUp(() async {
+    // Unit tests use local desktop paths; mobile checks have explicit overrides.
+    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
     tempDir = Directory.systemTemp.createTempSync(
       'anime_flow_download_manager_test_',
     );
@@ -31,10 +35,12 @@ void main() {
     baseUri = Uri.parse('http://${server.address.host}:${server.port}');
     _transientDirectAttempts = 0;
     _transientSegmentAttempts = 0;
+    _serverRequests = 0;
     _serveRequests(server);
   });
 
   tearDown(() async {
+    debugDefaultTargetPlatformOverride = null;
     await server.close(force: true);
     if (tempDir.existsSync()) {
       tempDir.deleteSync(recursive: true);
@@ -42,6 +48,103 @@ void main() {
   });
 
   group('DownloadManager', () {
+    test('unwritable folders fail before any media request', () async {
+      final platform = _WriteCheckingPlatform()..writable = false;
+      final manager = DownloadManager(
+        httpClient: DownloadHttpClient(dio: Dio()),
+        directoryPlatform: platform,
+        baseDirectoryProvider: () async => tempDir.path,
+      );
+      final episode = _episode(url: 'unwritable');
+      final failed = _waitForStatus(manager, DownloadStatus.failed);
+      await manager.enqueue(_request(
+        episode: episode,
+        baseUri: baseUri,
+        networkMediaUrl: baseUri.resolve('/direct.mp4').toString(),
+      ));
+      expect((await failed).errorMessage,
+          DownloadDirectoryNotWritableException.errorCode);
+      expect(platform.checkedDirectories, hasLength(1));
+      expect(_serverRequests, 0);
+    });
+
+    test('resume rechecks an existing folder and preserves its partial file',
+        () async {
+      final directory = Directory(p.join(tempDir.path, 'source_1', 'existing'));
+      await directory.create(recursive: true);
+      final partial = File(p.join(directory.path, 'video.mp4.tmp'));
+      await partial.writeAsString('direct-');
+      final episode = _episode(url: 'range')
+        ..downloadDirectory = directory.path;
+      final platform = _WriteCheckingPlatform()..writable = false;
+      final manager = DownloadManager(
+        httpClient: DownloadHttpClient(dio: Dio()),
+        directoryPlatform: platform,
+        baseDirectoryProvider: () async => throw StateError('Use the old root'),
+      );
+      final request = _request(
+        episode: episode,
+        episodeUrl: 'range',
+        baseUri: baseUri,
+        networkMediaUrl: baseUri.resolve('/range.mp4').toString(),
+      );
+      final failed = _waitForStatus(manager, DownloadStatus.failed);
+      await manager.resume(request);
+      expect((await failed).errorMessage,
+          DownloadDirectoryNotWritableException.errorCode);
+      expect(partial.readAsStringSync(), 'direct-');
+      expect(episode.downloadDirectory, directory.path);
+      expect(_serverRequests, 0);
+
+      platform.writable = true;
+      final completed = _waitForCompletion(manager);
+      await manager.resume(request);
+      await completed;
+      expect(platform.checkedDirectories, [directory.path, directory.path]);
+      expect(File(episode.localMediaPath).readAsStringSync(), 'direct-body');
+      expect(episode.errorMessage, isEmpty);
+      expect(directory.listSync().map((file) => p.basename(file.path)),
+          ['video.mp4']);
+    });
+
+    test('a file occupying the directory yields a storage error and is kept',
+        () async {
+      final file = File(p.join(tempDir.path, 'not-directory'))
+        ..writeAsStringSync('keep');
+      final episode = _episode(url: 'not-directory')
+        ..downloadDirectory = file.path;
+      final manager = _manager(tempDir);
+      final failed = _waitForStatus(manager, DownloadStatus.failed);
+      await manager.enqueue(_request(
+        episode: episode,
+        baseUri: baseUri,
+        networkMediaUrl: baseUri.resolve('/direct.mp4').toString(),
+      ));
+      expect((await failed).errorMessage,
+          DownloadDirectoryNotWritableException.errorCode);
+      expect(file.readAsStringSync(), 'keep');
+      expect(_serverRequests, 0);
+    });
+
+    for (final wrapped in [false, true]) {
+      test('filesystem failures after preflight get a storage error ($wrapped)',
+          () async {
+        final manager = DownloadManager(
+          httpClient: _FilesystemFailingHttpClient(wrapped),
+          baseDirectoryProvider: () async => tempDir.path,
+        );
+        final episode = _episode(url: 'disk-full');
+        final failed = _waitForStatus(manager, DownloadStatus.failed);
+        await manager.enqueue(_request(
+          episode: episode,
+          baseUri: baseUri,
+          networkMediaUrl: baseUri.resolve('/direct.mp4').toString(),
+        ));
+        expect((await failed).errorMessage,
+            DownloadDirectoryNotWritableException.errorCode);
+      });
+    }
+
     test('macOS resumes the old root even when the new setting is inaccessible',
         () async {
       debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
@@ -477,6 +580,7 @@ Future<DownloadEpisode> _waitForStatus(
 
 void _serveRequests(HttpServer server) {
   server.listen((request) async {
+    _serverRequests++;
     switch (request.uri.path) {
       case '/direct.mp4':
         request.response.write('direct-body');
@@ -566,4 +670,46 @@ seg0.ts
     }
     await request.response.close();
   });
+}
+
+class _WriteCheckingPlatform extends DownloadDirectoryPlatform {
+  bool writable = true;
+  final checkedDirectories = <String>[];
+
+  @override
+  bool get supportsSelection => true;
+
+  @override
+  Future<bool> requestAccess() => throw StateError('No background dialog');
+
+  @override
+  Future<String?> selectDirectory({required String dialogTitle}) =>
+      throw StateError('No background picker');
+
+  @override
+  Future<void> verifyWritable(String directory) async {
+    checkedDirectories.add(directory);
+    if (!writable) throw const DownloadDirectoryNotWritableException();
+    await super.verifyWritable(directory);
+  }
+}
+
+class _FilesystemFailingHttpClient extends DownloadHttpClient {
+  _FilesystemFailingHttpClient(this.wrapped) : super(dio: Dio());
+
+  final bool wrapped;
+
+  @override
+  Future<Response<ResponseBody>> getStream(
+    String url, {
+    required Map<String, String> headers,
+    CancelToken? cancelToken,
+  }) async {
+    const error = FileSystemException('Storage became unavailable');
+    if (wrapped) {
+      throw DioException(
+          requestOptions: RequestOptions(path: url), error: error);
+    }
+    throw error;
+  }
 }

@@ -29,6 +29,11 @@ abstract interface class IDownloadDanmakuService {
 }
 
 class DownloadDanmakuService implements IDownloadDanmakuService {
+  DownloadDanmakuService({DownloadDirectoryPlatform? directoryPlatform})
+      : _directoryPlatform =
+            directoryPlatform ?? DownloadDirectoryPlatformFactory.create();
+
+  final DownloadDirectoryPlatform _directoryPlatform;
   static const _fileName = 'danmaku.json';
 
   @override
@@ -40,12 +45,16 @@ class DownloadDanmakuService implements IDownloadDanmakuService {
     if (recordedDirectory.isEmpty || subjectId <= 0) {
       return null;
     }
-    final directory = await DownloadDirectoryPlatformFactory.create()
-        .restoreAccess(recordedDirectory);
+    final directory =
+        await _directoryPlatform.requireWritableDirectory(recordedDirectory);
     episode
       ..downloadDirectory = directory
       ..localMediaPath = remapDownloadPath(
         episode.localMediaPath,
+        {recordedDirectory: directory},
+      )
+      ..localDanmakuPath = remapDownloadPath(
+        episode.localDanmakuPath,
         {recordedDirectory: directory},
       );
 
@@ -67,15 +76,31 @@ class DownloadDanmakuService implements IDownloadDanmakuService {
     }
 
     final filePath = p.join(directory, _fileName);
-    final file = File(filePath);
-    await file.parent.create(recursive: true);
-    await file.writeAsString(
-      jsonEncode({
-        'version': 1,
-        'danDanBangumiID': bangumiId,
-        'comments': danmakus.map(_danmakuToJson).toList(),
-      }),
-    );
+    Directory? staging;
+    try {
+      // A failed retry must not truncate an existing offline danmaku cache.
+      staging = await Directory(directory).createTemp('.anime_flow_danmaku_');
+      final pendingFile = File(p.join(staging.path, _fileName));
+      await pendingFile.writeAsString(
+        jsonEncode({
+          'version': 1,
+          'danDanBangumiID': bangumiId,
+          'comments': danmakus.map(_danmakuToJson).toList(),
+        }),
+        flush: true,
+      );
+      await pendingFile.rename(filePath);
+    } on FileSystemException {
+      throw const DownloadDirectoryNotWritableException();
+    } finally {
+      if (staging != null) {
+        try {
+          await staging.delete(recursive: true);
+        } on FileSystemException {
+          // A revoked grant or disconnected disk can also prevent cleanup.
+        }
+      }
+    }
 
     return DownloadDanmakuResult(
       danDanBangumiId: bangumiId,

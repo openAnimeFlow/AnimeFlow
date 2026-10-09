@@ -111,7 +111,7 @@ Future<String> getConfiguredDownloadDirectory() async {
     return DownloadManager.getDefaultDownloadDirectory();
   }
   final configured = AppSettings.downloadDirectory;
-  if (configured.isNotEmpty) return configured;
+  if (configured.isNotEmpty) return platform.restoreAccess(configured);
   return DownloadManager.getDefaultDownloadDirectory();
 }
 

@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
+import 'package:anime_flow/features/download/application/download_directory/restore_download_directory_access.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:path/path.dart' as p;
@@ -34,10 +36,18 @@ class DownloadDanmakuService implements IDownloadDanmakuService {
     required int subjectId,
     required DownloadEpisode episode,
   }) async {
-    final directory = episode.downloadDirectory.trim();
-    if (directory.isEmpty || subjectId <= 0) {
+    final recordedDirectory = episode.downloadDirectory.trim();
+    if (recordedDirectory.isEmpty || subjectId <= 0) {
       return null;
     }
+    final directory = await DownloadDirectoryPlatformFactory.create()
+        .restoreAccess(recordedDirectory);
+    episode
+      ..downloadDirectory = directory
+      ..localMediaPath = remapDownloadPath(
+        episode.localMediaPath,
+        {recordedDirectory: directory},
+      );
 
     final bangumiId = await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
     if (bangumiId == null || bangumiId <= 0) {

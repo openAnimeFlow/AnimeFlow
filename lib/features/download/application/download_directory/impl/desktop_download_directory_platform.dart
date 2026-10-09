@@ -2,7 +2,7 @@ import 'package:file_picker/file_picker.dart';
 
 import '../download_directory_platform.dart';
 
-/// Windows, macOS and Linux share the same directory picker behavior.
+/// Windows and Linux use an ordinary filesystem directory picker.
 class DesktopDownloadDirectoryPlatform extends DownloadDirectoryPlatform {
   const DesktopDownloadDirectoryPlatform();
 

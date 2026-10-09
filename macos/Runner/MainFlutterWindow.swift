@@ -5,6 +5,7 @@ import Darwin
 class MainFlutterWindow: NSWindow {
   private let channelName = "network_speed_monitor"
   private var methodChannel: FlutterMethodChannel?
+  private var downloadDirectoryHandler: DownloadDirectoryHandler?
 
   private var lastRxBytes: UInt64?
   private var lastTxBytes: UInt64?
@@ -17,6 +18,11 @@ class MainFlutterWindow: NSWindow {
     self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+
+    downloadDirectoryHandler = DownloadDirectoryHandler(
+      messenger: flutterViewController.registrar(forPlugin: "download_directory").messenger,
+      window: self
+    )
 
     // Register native MethodChannel (start/get/stop).
     let registrar = flutterViewController.registrar(forPlugin: "network_speed_monitor")

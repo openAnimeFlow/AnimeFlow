@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import 'impl/android_download_directory_platform.dart';
 import 'impl/desktop_download_directory_platform.dart';
+import 'impl/macos_download_directory_platform.dart';
 import 'impl/unsupported_download_directory_platform.dart';
 
 /// Platform operations for configuring a writable download directory.
@@ -17,6 +18,12 @@ abstract class DownloadDirectoryPlatform {
 
   /// Returns null when the user cancels directory selection.
   Future<String?> selectDirectory({required String dialogTitle});
+
+  /// Persist only after the selected directory passes write verification.
+  Future<void> persistAccess(String directory) async {}
+
+  /// Restore access without presenting a permission dialog.
+  Future<String> restoreAccess(String directory) async => directory;
 
   /// Shared filesystem check for platforms used by the dart:io downloader.
   Future<void> verifyWritable(String directory) async {
@@ -43,8 +50,8 @@ class DownloadDirectoryPlatformFactory {
     if (kIsWeb) return const UnsupportedDownloadDirectoryPlatform();
     return switch (defaultTargetPlatform) {
       TargetPlatform.android => const AndroidDownloadDirectoryPlatform(),
+      TargetPlatform.macOS => const MacOSDownloadDirectoryPlatform(),
       TargetPlatform.windows ||
-      TargetPlatform.macOS ||
       TargetPlatform.linux =>
         const DesktopDownloadDirectoryPlatform(),
       TargetPlatform.iOS ||

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:anime_flow/features/download/application/download_http_client.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
+import 'package:anime_flow/features/download/application/download_directory/restore_download_directory_access.dart';
 import 'package:anime_flow/features/download/application/m3u8_parser.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
@@ -203,7 +204,9 @@ class DownloadManager implements IDownloadManager {
         !_isSafeEpisodeDirectory(downloadDirectory, episode)) {
       return;
     }
-    final directory = Directory(downloadDirectory);
+    final accessible = await DownloadDirectoryPlatformFactory.create()
+        .restoreAccess(downloadDirectory);
+    final directory = Directory(accessible);
     if (await directory.exists()) await directory.delete(recursive: true);
   }
 
@@ -770,17 +773,29 @@ class DownloadManager implements IDownloadManager {
 
   Future<String> _prepareEpisodeDirectory(DownloadRequest request) async {
     final existing = request.episode.downloadDirectory.trim();
-    final baseDirectory = await _baseDirectoryProvider();
+    final platform = DownloadDirectoryPlatformFactory.create();
+    // An older episode keeps its original grant even after settings change.
+    final baseDirectory = existing.isNotEmpty && platform.supportsSelection
+        ? ''
+        : await _baseDirectoryProvider();
     final reuseExisting = existing.isNotEmpty &&
-        (DownloadDirectoryPlatformFactory.create().supportsSelection ||
-            p.isWithin(baseDirectory, existing));
-    final directory = reuseExisting
+        (platform.supportsSelection || p.isWithin(baseDirectory, existing));
+    final recordedDirectory = reuseExisting
         ? existing
         : p.join(
             baseDirectory,
             '${_safeDirectoryName(request.sourceName)}_${request.subjectId}',
             '${request.episode.lineIndex}_${request.episode.episodeIndex}_${_episodeHash(request.episodeUrl)}',
           );
+    final directory = await platform.restoreAccess(recordedDirectory);
+    if (reuseExisting && !p.equals(existing, directory)) {
+      final roots = {existing: directory};
+      request.episode
+        ..localMediaPath =
+            remapDownloadPath(request.episode.localMediaPath, roots)
+        ..localDanmakuPath =
+            remapDownloadPath(request.episode.localDanmakuPath, roots);
+    }
     await Directory(directory).create(recursive: true);
     return directory;
   }

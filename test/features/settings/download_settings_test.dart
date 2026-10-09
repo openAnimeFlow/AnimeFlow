@@ -35,12 +35,16 @@ class _DirectoryPicker extends FilePicker {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const channel = MethodChannel('anime_flow/download_storage');
+  const macChannel = MethodChannel('anime_flow/download_directory');
   const pathChannel = MethodChannel('plugins.flutter.io/path_provider');
   late Directory temp;
   late _DirectoryPicker picker;
   var granted = true;
   var permissionCalls = 0;
   var storageCalls = 0;
+  var macPickerCalls = 0;
+  var bookmarkCalls = 0;
+  var bookmarkFails = false;
 
   setUpAll(() async {
     temp = await Directory.systemTemp.createTemp('download_settings_test_');
@@ -60,6 +64,29 @@ void main() {
     granted = true;
     permissionCalls = 0;
     storageCalls = 0;
+    macPickerCalls = 0;
+    bookmarkCalls = 0;
+    bookmarkFails = false;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(macChannel, (call) async {
+      switch (call.method) {
+        case 'restoreAccess':
+          return (call.arguments as Map)['path'];
+        case 'selectDirectory':
+          macPickerCalls++;
+          if (picker.fails) throw PlatformException(code: 'picker_failed');
+          return picker.selected;
+        case 'persistAccess':
+          bookmarkCalls++;
+          final directory = (call.arguments as Map)['path'] as String;
+          // Verification has finished and its temporary files are gone.
+          expect(Directory(directory).listSync(), isEmpty);
+          if (bookmarkFails) throw PlatformException(code: 'bookmark_failed');
+          return null;
+        default:
+          throw MissingPluginException(call.method);
+      }
+    });
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(pathChannel, (call) async {
       if (call.method == 'getApplicationSupportDirectory') return temp.path;
@@ -77,6 +104,8 @@ void main() {
   });
 
   tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(macChannel, null);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -197,9 +226,59 @@ void main() {
     expect(picker.calls, 1);
   }, platforms: {
     TargetPlatform.windows,
-    TargetPlatform.macOS,
     TargetPlatform.linux,
   });
+
+  testDirectorySelection(
+      'macOS persists native picker access after verification', (tester) async {
+    final target = Directory(p.join(temp.path, 'mac-selected'))..createSync();
+    picker.selected = target.path;
+    await mount(tester);
+    await select(tester);
+    expect(macPickerCalls, 1);
+    expect(bookmarkCalls, 1);
+    expect(permissionCalls, 0);
+    expect(picker.calls, 0);
+    expect(Storage.setting.get(DownloadKey.downloadDirectory), target.path);
+  }, platforms: {TargetPlatform.macOS});
+
+  testDirectorySelection('macOS bookmark failure keeps the previous setting',
+      (tester) async {
+    final target = Directory(p.join(temp.path, 'mac-failure'))..createSync();
+    picker.selected = target.path;
+    bookmarkFails = true;
+    await mount(tester);
+    await select(tester);
+    expect(bookmarkCalls, 1);
+    expect(Storage.setting.get(DownloadKey.downloadDirectory), temp.path);
+    expect(
+        find.text('Failed to change the download location. Please try again'),
+        findsOneWidget);
+    bookmarkFails = false;
+    await select(tester);
+    expect(Storage.setting.get(DownloadKey.downloadDirectory), target.path);
+  }, platforms: {TargetPlatform.macOS});
+
+  testDirectorySelection('macOS cancellation does not persist a bookmark',
+      (tester) async {
+    await mount(tester);
+    await select(tester);
+    expect(macPickerCalls, 1);
+    expect(bookmarkCalls, 0);
+    expect(Storage.setting.get(DownloadKey.downloadDirectory), temp.path);
+  }, platforms: {TargetPlatform.macOS});
+
+  testDirectorySelection('macOS rejects unwritable paths before bookmarking',
+      (tester) async {
+    final file = File(p.join(temp.path, 'mac-not-directory'))
+      ..writeAsStringSync('keep');
+    picker.selected = file.path;
+    await mount(tester);
+    await select(tester);
+    expect(bookmarkCalls, 0);
+    expect(Storage.setting.get(DownloadKey.downloadDirectory), temp.path);
+    expect(file.readAsStringSync(), 'keep');
+  }, platforms: {TargetPlatform.macOS});
 
   testDirectorySelection(
       'fixed-directory platforms ignore saved custom paths and disable selection',

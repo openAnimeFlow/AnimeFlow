@@ -9,12 +9,16 @@ import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 
 var _transientDirectAttempts = 0;
 var _transientSegmentAttempts = 0;
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  // Method-channel tests need a binding; download tests use a real loopback server.
+  HttpOverrides.global = null;
   late Directory tempDir;
   late HttpServer server;
   late Uri baseUri;
@@ -38,6 +42,68 @@ void main() {
   });
 
   group('DownloadManager', () {
+    test('macOS resumes the old root even when the new setting is inaccessible',
+        () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      const channel = MethodChannel('anime_flow/download_directory');
+      final calls = <String>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+        calls.add(call.method);
+        expect(call.method, 'restoreAccess');
+        return (call.arguments as Map)['path'];
+      });
+      addTearDown(() {
+        debugDefaultTargetPlatformOverride = null;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null);
+      });
+      final episodeDir = p.join(tempDir.path, 'source_1', 'old-episode');
+      await Directory(episodeDir).create(recursive: true);
+      await File(p.join(episodeDir, 'video.mp4.tmp')).writeAsString('direct-');
+      final episode = _episode(url: 'range')..downloadDirectory = episodeDir;
+      final manager = DownloadManager(
+        httpClient: DownloadHttpClient(dio: Dio()),
+        baseDirectoryProvider: () async => throw StateError('New root denied'),
+      );
+      final completed = _waitForCompletion(manager);
+      await manager.resume(_request(
+        episode: episode,
+        episodeUrl: 'range',
+        baseUri: baseUri,
+        networkMediaUrl: baseUri.resolve('/range.mp4').toString(),
+      ));
+      await completed;
+      expect(File(episode.localMediaPath).readAsStringSync(), 'direct-body');
+      expect(episode.downloadDirectory, episodeDir);
+      expect(calls, ['restoreAccess']);
+    });
+
+    test('macOS denied grants fail before creating a download directory',
+        () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      const channel = MethodChannel('anime_flow/download_directory');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async => null);
+      addTearDown(() {
+        debugDefaultTargetPlatformOverride = null;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null);
+      });
+      final episodeDir = p.join(tempDir.path, 'denied');
+      final episode = _episode(url: 'denied')..downloadDirectory = episodeDir;
+      final manager = _manager(tempDir);
+      final failed = _waitForStatus(manager, DownloadStatus.failed);
+      await manager.enqueue(_request(
+        episode: episode,
+        baseUri: baseUri,
+        networkMediaUrl: baseUri.resolve('/direct.mp4').toString(),
+      ));
+      expect((await failed).errorMessage,
+          contains('download_directory_access_denied'));
+      expect(Directory(episodeDir).existsSync(), isFalse);
+    });
+
     test('iOS resumes an old custom download in its fixed directory', () async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       addTearDown(() => debugDefaultTargetPlatformOverride = null);

@@ -170,6 +170,8 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
         return;
       }
       if (!mounted) return;
+      await _directoryPlatform.persistAccess(directory);
+      if (!mounted) return;
       await AppSettings.setDownloadDirectory(directory);
       if (!mounted) return;
       setState(() {

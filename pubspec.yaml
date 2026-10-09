@@ -119,10 +119,10 @@ dependencies:
   open_file: ^4.0.0 # 使用操作系统关联的默认应用打开文件。
 
   # 平台信息与系统集成
-  package_info_plus: ^8.3.1 # 读取应用包名、版本号和构建号等元数据。
-  file_picker: ^8.1.7 # 调用平台文件选择器选择文件或目录。
+  package_info_plus: ^10.2.2 # 读取应用包名、版本号和构建号等元数据。
+  file_picker: ^13.1.0 # 调用平台文件选择器选择文件或目录。
   flutter_foreground_task: ^11.0.1 # 提供在后台执行任务的插件。
-  device_info_plus: ^11.3.0 # 读取设备型号、操作系统和平台相关信息。
+  device_info_plus: ^13.3.0 # 读取设备型号、操作系统和平台相关信息。
   battery_plus: ^7.1.1 # 读取设备电池电量、充电状态和电池状态。
   connectivity_plus: ^6.0.5 # 查询网络连接类型并监听连接状态变化。
   window_manager: ^0.5.1 # 管理桌面应用窗口的尺寸、位置、状态和事件。
@@ -130,7 +130,7 @@ dependencies:
   flutter_opencc_plus: ^0.1.4 # 使用 OpenCC 在繁简中文及相关变体之间转换文本。
   logger: ^2.6.2 # 提供分级、可扩展的应用日志输出接口。
   synchronized: ^3.4.1+2 # 为异步代码提供互斥锁和同步执行机制。
-  share_plus: ^12.0.2 # 调用平台原生分享面板分享文本、文件或 URI。
+  share_plus: ^13.3.1 # 调用平台原生分享面板分享文本、文件或 URI。
 
   # 文本与图像处理
   flutter_markdown_plus: ^1.0.12 # 将 Markdown 文本解析并渲染为 Flutter widget。
@@ -138,6 +138,7 @@ dependencies:
   crop_your_image: ^2.0.0 # 在 Flutter 中对图片进行交互式裁剪。
 
 dependency_overrides:
+  wakelock_plus: 1.8.0
   media_kit_libs_linux:
     git:
       url: https://github.com/Predidit/media-kit.git

@@ -14,6 +14,6 @@ class DesktopDownloadDirectoryPlatform extends DownloadDirectoryPlatform {
 
   @override
   Future<String?> selectDirectory({required String dialogTitle}) {
-    return FilePicker.platform.getDirectoryPath(dialogTitle: dialogTitle);
+    return FilePicker.getDirectoryPath(dialogTitle: dialogTitle);
   }
 }

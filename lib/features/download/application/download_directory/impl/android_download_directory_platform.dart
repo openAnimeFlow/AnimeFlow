@@ -20,7 +20,7 @@ class AndroidDownloadDirectoryPlatform extends DownloadDirectoryPlatform {
 
   @override
   Future<String?> selectDirectory({required String dialogTitle}) {
-    return FilePicker.platform.getDirectoryPath(dialogTitle: dialogTitle);
+    return FilePicker.getDirectoryPath(dialogTitle: dialogTitle);
   }
 
   @override

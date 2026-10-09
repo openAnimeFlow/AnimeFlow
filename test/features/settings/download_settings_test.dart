@@ -15,7 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:material_ui/material_ui.dart';
 
-class _DirectoryPicker extends FilePicker {
+class _DirectoryPicker extends FilePickerPlatform {
   String? selected;
   bool fails = false;
   int calls = 0;
@@ -23,8 +23,11 @@ class _DirectoryPicker extends FilePicker {
   @override
   Future<String?> getDirectoryPath({
     String? dialogTitle,
-    bool lockParentWindow = false,
     String? initialDirectory,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
   }) async {
     calls++;
     if (fails) throw PlatformException(code: 'picker_failed');
@@ -60,7 +63,7 @@ void main() {
   setUp(() async {
     await Storage.setting.put(DownloadKey.downloadDirectory, temp.path);
     picker = _DirectoryPicker();
-    FilePicker.platform = picker;
+    FilePickerPlatform.instance = picker;
     granted = true;
     permissionCalls = 0;
     storageCalls = 0;

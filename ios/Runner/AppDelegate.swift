@@ -6,17 +6,12 @@ import UIKit
   private var lastRxBytes: UInt64? = nil
   private var lastTxBytes: UInt64? = nil
   private var lastTime: TimeInterval? = nil
-  private var downloadDirectoryController: DownloadDirectoryController?
 
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     let controller = window?.rootViewController as? FlutterViewController
-    if let controller = controller {
-      downloadDirectoryController = DownloadDirectoryController(
-        messenger: controller.engine.binaryMessenger, presenter: controller)
-    }
     let channel = FlutterMethodChannel(
       name: "network_speed_monitor",
       binaryMessenger: controller!.engine.binaryMessenger

@@ -3,7 +3,6 @@ import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
-import 'package:anime_flow/features/download/application/download_manager.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -44,7 +43,7 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
       DownloadKey.maxParallelSegments,
       defaultValue: 5,
     );
-    _downloadDirectory = _configuredDownloadDirectory();
+    _downloadDirectory = getConfiguredDownloadDirectory();
   }
 
   @override
@@ -141,7 +140,8 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                       : _directoryPlatform.supportsSelection
                           ? const Icon(Icons.drive_file_move_outline)
                           : null,
-                  onTap: _selectingDirectory
+                  onTap: _selectingDirectory ||
+                          !_directoryPlatform.supportsSelection
                       ? null
                       : () => _selectDownloadDirectory(l10n),
                 ),
@@ -151,20 +151,6 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
         ),
       ),
     );
-  }
-
-  Future<String> _configuredDownloadDirectory() async {
-    await _directoryPlatform.initialize();
-    try {
-      final configured = setting.get(
-        DownloadKey.downloadDirectory,
-        defaultValue: '',
-      );
-      if (configured is String && configured.trim().isNotEmpty) {
-        return _directoryPlatform.resolvePath(configured.trim());
-      }
-    } catch (_) {}
-    return DownloadManager.getDefaultDownloadDirectory();
   }
 
   Future<void> _selectDownloadDirectory(AppLocalizations l10n) async {

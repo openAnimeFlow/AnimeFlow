@@ -74,18 +74,14 @@ class DownloadManager implements IDownloadManager {
     DownloadHttpClient? httpClient,
     IDownloadRepository? repository,
     Future<String> Function()? baseDirectoryProvider,
-    DownloadDirectoryPlatform? directoryPlatform,
     this.maxParallelEpisodes = 2,
     this.maxParallelSegments = 3,
   })  : _httpClient = httpClient ?? DownloadHttpClient(),
-        _directoryPlatform =
-            directoryPlatform ?? DownloadDirectoryPlatformFactory.create(),
         _repository = repository,
         _baseDirectoryProvider =
             baseDirectoryProvider ?? _defaultBaseDirectoryProvider;
 
   final DownloadHttpClient _httpClient;
-  final DownloadDirectoryPlatform _directoryPlatform;
   final IDownloadRepository? _repository;
   final Future<String> Function() _baseDirectoryProvider;
 
@@ -192,8 +188,8 @@ class DownloadManager implements IDownloadManager {
     if (episode.localMediaPath.isEmpty) {
       return null;
     }
-    return _directoryPlatform.fileExists(episode.localMediaPath)
-        ? _directoryPlatform.resolvePath(episode.localMediaPath)
+    return File(episode.localMediaPath).existsSync()
+        ? episode.localMediaPath
         : null;
   }
 
@@ -207,8 +203,8 @@ class DownloadManager implements IDownloadManager {
         !_isSafeEpisodeDirectory(downloadDirectory, episode)) {
       return;
     }
-    await _directoryPlatform.initialize();
-    await _directoryPlatform.deleteDirectory(downloadDirectory);
+    final directory = Directory(downloadDirectory);
+    if (await directory.exists()) await directory.delete(recursive: true);
   }
 
   void _startTask(_DownloadTask task) {
@@ -239,22 +235,10 @@ class DownloadManager implements IDownloadManager {
         await _downloadM3u8(request, task, playlistContent, speedTracker);
       }
       task.throwIfStopped();
-      final stagingDirectory = episode.downloadDirectory;
-      final publishedDirectory =
-          await _directoryPlatform.publishDownloadDirectory(stagingDirectory);
-      task.throwIfStopped();
       episode
-        ..downloadDirectory = publishedDirectory
-        ..localMediaPath = p.join(publishedDirectory,
-            p.relative(episode.localMediaPath, from: stagingDirectory))
         ..status = DownloadStatus.completed
         ..completedAt = DateTime.now();
       await _persistAndNotify(request, speed: 0);
-      // Cleanup failure must not turn a successfully published download into
-      // a failed task; the source remains available for later cleanup.
-      try {
-        await _directoryPlatform.discardDownloadStaging(stagingDirectory);
-      } catch (_) {}
     } on _DownloadPaused {
       request.episode.status = DownloadStatus.paused;
       await _persistAndNotify(request, speed: 0);
@@ -785,19 +769,20 @@ class DownloadManager implements IDownloadManager {
   }
 
   Future<String> _prepareEpisodeDirectory(DownloadRequest request) async {
-    await _directoryPlatform.initialize();
     final existing = request.episode.downloadDirectory.trim();
-    final directory = existing.isNotEmpty
+    final baseDirectory = await _baseDirectoryProvider();
+    final reuseExisting = existing.isNotEmpty &&
+        (DownloadDirectoryPlatformFactory.create().supportsSelection ||
+            p.isWithin(baseDirectory, existing));
+    final directory = reuseExisting
         ? existing
         : p.join(
-            await _baseDirectoryProvider(),
+            baseDirectory,
             '${_safeDirectoryName(request.sourceName)}_${request.subjectId}',
             '${request.episode.lineIndex}_${request.episode.episodeIndex}_${_episodeHash(request.episodeUrl)}',
           );
-    final prepared =
-        await _directoryPlatform.prepareDownloadDirectory(directory);
-    await Directory(prepared).create(recursive: true);
-    return prepared;
+    await Directory(directory).create(recursive: true);
+    return directory;
   }
 
   bool _isSafeEpisodeDirectory(String path, DownloadEpisode episode) {

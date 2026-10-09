@@ -45,84 +45,6 @@ jobs:
       - name: Run unit tests
         run: flutter test
 
-  ios-native-test:
-    name: iOS native tests
-    runs-on: macos-15
-    timeout-minutes: 60
-    concurrency:
-      group: ios-native-tests-${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Set up Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 16.4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2.23.0
-        with:
-          channel: stable
-          flutter-version-file: pubspec.yaml
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Install ECH native build tools
-        run: brew install cmake ninja
-
-      - name: Prepare iOS simulator configuration
-        run: flutter build ios --simulator --debug --config-only --no-codesign
-
-      - name: Select an available iPad simulator
-        id: simulator
-        shell: bash
-        run: |
-          SIMULATOR_ID=$(xcrun simctl list devices available --json | python3 -c '
-          import json, sys
-          runtimes = json.load(sys.stdin)["devices"]
-          for runtime in sorted(runtimes, reverse=True):
-              if not runtime.startswith("com.apple.CoreSimulator.SimRuntime.iOS-"):
-                  continue
-              for device in runtimes[runtime]:
-                  if device["name"].startswith("iPad") and device.get("isAvailable", False):
-                      print(device["udid"])
-                      sys.exit(0)
-          sys.exit("No available iPad simulator found")
-          ')
-          echo "id=$SIMULATOR_ID" >> "$GITHUB_OUTPUT"
-
-      - name: Run RunnerTests on iPad simulator
-        shell: bash
-        env:
-          SIMULATOR_ID: ${{ steps.simulator.outputs.id }}
-        run: |
-          set -o pipefail
-          xcodebuild test \
-            -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Debug \
-            -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
-            -destination-timeout 120 \
-            -parallel-testing-enabled NO \
-            -only-testing:RunnerTests \
-            -resultBundlePath "$RUNNER_TEMP/ios-native-tests.xcresult" \
-            CODE_SIGNING_ALLOWED=NO \
-            | tee "$RUNNER_TEMP/ios-native-tests.log"
-
-      - name: Upload iOS native test results
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: ios-native-test-results
-          path: |
-            ${{ runner.temp }}/ios-native-tests.xcresult
-            ${{ runner.temp }}/ios-native-tests.log
-          if-no-files-found: ignore
-
   resolve-platforms:
     if: github.event_name != 'push' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -148,7 +70,7 @@ jobs:
 
   build:
     name: Build ${{ matrix.platform }}
-    needs: [flutter-test, ios-native-test, resolve-platforms]
+    needs: [flutter-test, resolve-platforms]
     runs-on: ${{ matrix.os }}
     env:
       ANIME_FLOW_APP_ID: ${{ secrets.ANIME_FLOW_APP_ID }}

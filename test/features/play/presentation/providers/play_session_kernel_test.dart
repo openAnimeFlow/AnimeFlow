@@ -29,18 +29,15 @@ void main() {
   setUpAll(() => Storage.setting = _Settings());
   setUp(() => (Storage.setting as _Settings).stored.clear());
 
-  test('iOS materializes a provider file before opening the local player',
-      () async {
+  test('iOS opens local playback without a native storage channel', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     addTearDown(() => debugDefaultTargetPlatformOverride = null);
     const channel = MethodChannel('anime_flow/download_storage');
-    final requested = <String>[];
+    var storageCalls = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
-      if (call.method == 'restoreAccess') return <String, String>{};
-      expect(call.method, 'prepareForReading');
-      requested.add((call.arguments as Map)['path'] as String);
-      return _localPath(99);
+      storageCalls++;
+      throw MissingPluginException(call.method);
     });
     addTearDown(() => TestDefaultBinaryMessengerBinding
         .instance.defaultBinaryMessenger
@@ -50,9 +47,9 @@ void main() {
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
     await session.initPlayState(_request(1));
-    expect(requested, [_localPath(1)]);
-    expect(factory.engines.last.source?.uri.toFilePath(), _localPath(99));
-    expect(session.videoUrl, _localPath(99));
+    expect(storageCalls, 0);
+    expect(factory.engines.last.source?.uri.toFilePath(), _localPath(1));
+    expect(session.videoUrl, _localPath(1));
     expect(factory.engines.last.source?.isLocal, isTrue);
   });
 

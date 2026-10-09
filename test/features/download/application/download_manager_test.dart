@@ -4,11 +4,11 @@ import 'dart:io';
 
 import 'package:anime_flow/features/download/application/download_http_client.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
-import 'package:anime_flow/features/download/application/download_directory/impl/desktop_download_directory_platform.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
 var _transientDirectAttempts = 0;
@@ -38,67 +38,31 @@ void main() {
   });
 
   group('DownloadManager', () {
-    test(
-        'completes only after staging is published and uses the published path',
-        () async {
-      final platform = _PublishingDirectoryPlatform(tempDir);
-      final episode = _episode(url: 'published');
+    test('iOS resumes an old custom download in its fixed directory', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      final oldDirectory = Directory(p.join(tempDir.path, 'old-custom', '1'))
+        ..createSync(recursive: true);
+      final oldFile = File(p.join(oldDirectory.path, 'video.mp4'))
+        ..writeAsStringSync('old-content');
+      final episode = _episode(url: 'old-custom')
+        ..downloadDirectory = oldDirectory.path
+        ..localMediaPath = oldFile.path;
+      final root = p.join(tempDir.path, 'app-support', 'downloads');
       final manager = DownloadManager(
         httpClient: DownloadHttpClient(dio: Dio()),
-        baseDirectoryProvider: () async => p.join(tempDir.path, 'selected'),
-        directoryPlatform: platform,
+        baseDirectoryProvider: () async => root,
       );
       final completed = _waitForCompletion(manager);
-      await manager.enqueue(_request(
+      await manager.resume(_request(
         episode: episode,
-        episodeUrl: episode.episodeUrl,
         baseUri: baseUri,
         networkMediaUrl: baseUri.resolve('/direct.mp4').toString(),
       ));
-      await platform.publicationStarted.future;
-      expect(episode.status, DownloadStatus.downloading);
-      expect(manager.getLocalMediaPath(episode), isNull);
-      expect(
-          p.isWithin(
-              p.join(tempDir.path, 'staging'), episode.downloadDirectory),
-          isTrue);
-      platform.publicationGate.complete();
       await completed;
-      expect(
-          p.isWithin(
-              p.join(tempDir.path, 'selected'), episode.downloadDirectory),
-          isTrue);
-      expect(manager.getLocalMediaPath(episode), episode.localMediaPath);
+      expect(p.isWithin(root, episode.downloadDirectory), isTrue);
       expect(File(episode.localMediaPath).readAsStringSync(), 'direct-body');
-      await platform.cleaned.future;
-      expect(Directory(platform.stagingPath!).existsSync(), isFalse);
-      await manager.deleteEpisodeFiles(episode);
-      expect(Directory(episode.downloadDirectory).existsSync(), isFalse);
-    });
-
-    test('publication failure retains downloaded staging data for retry',
-        () async {
-      final platform = _PublishingDirectoryPlatform(tempDir)
-        ..failPublication = true;
-      platform.publicationGate.complete();
-      final episode = _episode(url: 'publication-failed');
-      final manager = DownloadManager(
-        httpClient: DownloadHttpClient(dio: Dio()),
-        baseDirectoryProvider: () async => p.join(tempDir.path, 'selected'),
-        directoryPlatform: platform,
-      );
-      final failed = _waitForStatus(manager, DownloadStatus.failed);
-      await manager.enqueue(_request(
-        episode: episode,
-        episodeUrl: episode.episodeUrl,
-        baseUri: baseUri,
-        networkMediaUrl: baseUri.resolve('/direct.mp4').toString(),
-      ));
-      await failed;
-      expect(File(episode.localMediaPath).readAsStringSync(), 'direct-body');
-      expect(platform.cleaned.isCompleted, isFalse);
-      expect(episode.completedAt, isNull);
-      expect(manager.getLocalMediaPath(episode), isNull);
+      expect(oldFile.readAsStringSync(), 'old-content');
     });
 
     test('downloads direct media to video file', () async {
@@ -371,43 +335,6 @@ void main() {
       expect(Directory(oldRoot).existsSync(), isTrue);
     });
   });
-}
-
-class _PublishingDirectoryPlatform extends DesktopDownloadDirectoryPlatform {
-  _PublishingDirectoryPlatform(this.root);
-
-  final Directory root;
-  final publicationStarted = Completer<void>();
-  final publicationGate = Completer<void>();
-  final cleaned = Completer<void>();
-  String? stagingPath;
-  String? targetPath;
-  bool failPublication = false;
-
-  @override
-  Future<String> prepareDownloadDirectory(String directory) async {
-    targetPath = directory;
-    return stagingPath = p.join(root.path, 'staging',
-        p.basename(p.dirname(directory)), p.basename(directory));
-  }
-
-  @override
-  Future<String> publishDownloadDirectory(String directory) async {
-    publicationStarted.complete();
-    await publicationGate.future;
-    if (failPublication) throw FileSystemException('Provider is unavailable');
-    await Directory(targetPath!).create(recursive: true);
-    await for (final file in Directory(directory).list()) {
-      await (file as File).copy(p.join(targetPath!, p.basename(file.path)));
-    }
-    return targetPath!;
-  }
-
-  @override
-  Future<void> discardDownloadStaging(String directory) async {
-    await Directory(directory).delete(recursive: true);
-    cleaned.complete();
-  }
 }
 
 DownloadManager _manager(Directory tempDir) {

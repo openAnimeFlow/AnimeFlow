@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -6,9 +5,10 @@ import 'package:anime_flow/app/localization/app_localizations_delegates.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/settings/presentation/pages/download_settings.dart';
+import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:bot_toast/bot_toast.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,13 +35,12 @@ class _DirectoryPicker extends FilePicker {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const channel = MethodChannel('anime_flow/download_storage');
+  const pathChannel = MethodChannel('plugins.flutter.io/path_provider');
   late Directory temp;
   late _DirectoryPicker picker;
   var granted = true;
   var permissionCalls = 0;
-  var nativePickerCalls = 0;
-  var writable = true;
-  Completer<Map<String, dynamic>?>? pendingSelection;
+  var storageCalls = 0;
 
   setUpAll(() async {
     temp = await Directory.systemTemp.createTemp('download_settings_test_');
@@ -60,40 +59,28 @@ void main() {
     FilePicker.platform = picker;
     granted = true;
     permissionCalls = 0;
-    nativePickerCalls = 0;
-    writable = true;
-    pendingSelection = null;
+    storageCalls = 0;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(pathChannel, (call) async {
+      if (call.method == 'getApplicationSupportDirectory') return temp.path;
+      throw MissingPluginException(call.method);
+    });
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
-      switch (call.method) {
-        case 'restoreAccess':
-          return <String, String>{};
-        case 'selectDirectory':
-          nativePickerCalls++;
-          if (pendingSelection != null) return pendingSelection!.future;
-          if (picker.fails) throw PlatformException(code: 'picker_failed');
-          final selected = picker.selected;
-          return selected == null
-              ? null
-              : {
-                  'path': selected,
-                  'paths': {selected: selected}
-                };
-        case 'verifyWritable':
-          if (!writable) throw PlatformException(code: 'not_writable');
-          return null;
-        case 'requestAccess':
-          permissionCalls++;
-          return granted;
-        default:
-          throw MissingPluginException(call.method);
+      storageCalls++;
+      if (call.method == 'requestAccess') {
+        permissionCalls++;
+        return granted;
       }
+      throw MissingPluginException(call.method);
     });
   });
 
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(pathChannel, null);
   });
 
   void testDirectorySelection(String description, WidgetTesterCallback callback,
@@ -215,84 +202,20 @@ void main() {
   });
 
   testDirectorySelection(
-      'unsupported platforms retain the location without opening the picker',
+      'fixed-directory platforms ignore saved custom paths and disable selection',
       (tester) async {
     await mount(tester);
+    final defaultDirectory = p.join(temp.path, 'downloads');
     expect(find.byIcon(Icons.drive_file_move_outline), findsNothing);
-    await select(tester);
-    expect(permissionCalls, 0);
-    expect(picker.calls, 0);
-    expect(Storage.setting.get(DownloadKey.downloadDirectory), temp.path);
-    expect(find.text('This device does not support custom download locations'),
-        findsOneWidget);
-  }, platforms: {TargetPlatform.fuchsia});
-
-  testDirectorySelection(
-      'iOS uses its bookmark picker and saves a verified folder',
-      (tester) async {
-    picker.selected = '/provider/AnimeFlow';
-    await mount(tester);
-    expect(find.byIcon(Icons.drive_file_move_outline), findsOneWidget);
-    await select(tester);
-    expect(nativePickerCalls, 1);
-    expect(permissionCalls, 0);
-    expect(picker.calls, 0);
-    expect(Storage.setting.get(DownloadKey.downloadDirectory), picker.selected);
-    expect(find.text(picker.selected!), findsOneWidget);
-  }, platforms: {TargetPlatform.iOS});
-
-  testDirectorySelection('iOS cancellation retains the download location',
-      (tester) async {
-    await mount(tester);
-    await select(tester);
-    expect(nativePickerCalls, 1);
-    expect(Storage.setting.get(DownloadKey.downloadDirectory), temp.path);
-  }, platforms: {TargetPlatform.iOS});
-
-  testDirectorySelection(
-      'iOS pending selection shows progress and prevents duplicate requests',
-      (tester) async {
-    await mount(tester);
-    await tester.runAsync(() async {
-      pendingSelection = Completer<Map<String, dynamic>?>();
-      await tester.tap(locationTile());
-      await tester.pump();
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(tester.widget<ListTile>(locationTile()).onTap, isNull);
-      await tester.tap(locationTile());
-      await tester.pump();
-      expect(nativePickerCalls, 1);
-      expect(Storage.setting.get(DownloadKey.downloadDirectory), temp.path);
-
-      pendingSelection!.complete({
-        'path': '/provider/confirmed',
-        'paths': {'/provider/confirmed': '/provider/confirmed'},
-      });
-      for (var i = 0; i < 100; i++) {
-        await Future<void>.delayed(const Duration(milliseconds: 10));
-        await tester.pump();
-        if (tester.widget<ListTile>(locationTile()).onTap != null) return;
-      }
-      fail('Directory confirmation did not finish');
-    });
+    expect(find.text(defaultDirectory), findsOneWidget);
+    expect(tester.widget<ListTile>(locationTile()).onTap, isNull);
+    await tester.tap(locationTile());
     await tester.pumpAndSettle();
-    expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(tester.widget<ListTile>(locationTile()).onTap, isNotNull);
-    expect(Storage.setting.get(DownloadKey.downloadDirectory),
-        '/provider/confirmed');
-    expect(tester.takeException(), isNull);
-  }, platforms: {TargetPlatform.iOS});
-
-  testDirectorySelection('iOS rejects a provider folder that is not writable',
-      (tester) async {
-    picker.selected = '/provider/read_only';
-    writable = false;
-    await mount(tester);
-    await select(tester);
+    expect(storageCalls, 0);
+    expect(picker.calls, 0);
     expect(Storage.setting.get(DownloadKey.downloadDirectory), temp.path);
-    expect(
-        find.text(
-            'Cannot write to the selected folder. Choose another download location'),
-        findsOneWidget);
-  }, platforms: {TargetPlatform.iOS});
+    expect(await tester.runAsync(getConfiguredDownloadDirectory),
+        defaultDirectory);
+    expect(tester.takeException(), isNull);
+  }, platforms: {TargetPlatform.iOS, TargetPlatform.fuchsia});
 }

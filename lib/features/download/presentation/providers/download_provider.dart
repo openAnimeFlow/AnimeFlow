@@ -100,7 +100,7 @@ IDownloadRepository downloadRepository(Ref ref) {
 IDownloadManager downloadManager(Ref ref) {
   return DownloadManager(
     repository: ref.watch(downloadRepositoryProvider),
-    baseDirectoryProvider: _configuredDownloadDirectory,
+    baseDirectoryProvider: getConfiguredDownloadDirectory,
     maxParallelEpisodes: _downloadSettingInt(
       DownloadKey.maxParallelEpisodes,
       fallback: 3,
@@ -112,16 +112,18 @@ IDownloadManager downloadManager(Ref ref) {
   );
 }
 
-Future<String> _configuredDownloadDirectory() async {
+Future<String> getConfiguredDownloadDirectory() async {
   final platform = DownloadDirectoryPlatformFactory.create();
-  await platform.initialize();
+  if (!platform.supportsSelection) {
+    return DownloadManager.getDefaultDownloadDirectory();
+  }
   try {
     final configured = Storage.setting.get(
       DownloadKey.downloadDirectory,
       defaultValue: '',
     );
     if (configured is String && configured.trim().isNotEmpty) {
-      return platform.resolvePath(configured.trim());
+      return configured.trim();
     }
   } catch (_) {
     // Fall back to the application support directory during startup.

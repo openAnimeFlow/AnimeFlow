@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+        AFAF00000000000000000003 /* DownloadDirectoryControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAF00000000000000000004 /* DownloadDirectoryControllerTests.swift */; };
         AFAF00000000000000000001 /* DownloadDirectoryController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAF00000000000000000002 /* DownloadDirectoryController.swift */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
@@ -40,6 +41,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+        AFAF00000000000000000004 /* DownloadDirectoryControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadDirectoryControllerTests.swift; sourceTree = "<group>"; };
         AFAF00000000000000000002 /* DownloadDirectoryController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadDirectoryController.swift; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
@@ -71,6 +73,7 @@
 		331C8082294A63A400263BE5 /* RunnerTests */ = {
 			isa = PBXGroup;
 			children = (
+                AFAF00000000000000000004 /* DownloadDirectoryControllerTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -260,6 +263,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+                AFAF00000000000000000003 /* DownloadDirectoryControllerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -382,6 +386,10 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+                FRAMEWORK_SEARCH_PATHS = (
+                    "$(inherited)",
+                    "$(BUILT_PRODUCTS_DIR)",
+                );
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ligg.anime_flow.RunnerTests;
@@ -399,6 +407,10 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+                FRAMEWORK_SEARCH_PATHS = (
+                    "$(inherited)",
+                    "$(BUILT_PRODUCTS_DIR)",
+                );
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ligg.anime_flow.RunnerTests;
@@ -414,6 +426,10 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+                FRAMEWORK_SEARCH_PATHS = (
+                    "$(inherited)",
+                    "$(BUILT_PRODUCTS_DIR)",
+                );
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ligg.anime_flow.RunnerTests;

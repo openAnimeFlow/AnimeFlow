@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -40,6 +41,7 @@ void main() {
   var permissionCalls = 0;
   var nativePickerCalls = 0;
   var writable = true;
+  Completer<Map<String, dynamic>?>? pendingSelection;
 
   setUpAll(() async {
     temp = await Directory.systemTemp.createTemp('download_settings_test_');
@@ -60,6 +62,7 @@ void main() {
     permissionCalls = 0;
     nativePickerCalls = 0;
     writable = true;
+    pendingSelection = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
       switch (call.method) {
@@ -67,6 +70,7 @@ void main() {
           return <String, String>{};
         case 'selectDirectory':
           nativePickerCalls++;
+          if (pendingSelection != null) return pendingSelection!.future;
           if (picker.fails) throw PlatformException(code: 'picker_failed');
           final selected = picker.selected;
           return selected == null
@@ -243,6 +247,40 @@ void main() {
     await select(tester);
     expect(nativePickerCalls, 1);
     expect(Storage.setting.get(DownloadKey.downloadDirectory), temp.path);
+  }, platforms: {TargetPlatform.iOS});
+
+  testDirectorySelection(
+      'iOS pending selection shows progress and prevents duplicate requests',
+      (tester) async {
+    await mount(tester);
+    await tester.runAsync(() async {
+      pendingSelection = Completer<Map<String, dynamic>?>();
+      await tester.tap(locationTile());
+      await tester.pump();
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(tester.widget<ListTile>(locationTile()).onTap, isNull);
+      await tester.tap(locationTile());
+      await tester.pump();
+      expect(nativePickerCalls, 1);
+      expect(Storage.setting.get(DownloadKey.downloadDirectory), temp.path);
+
+      pendingSelection!.complete({
+        'path': '/provider/confirmed',
+        'paths': {'/provider/confirmed': '/provider/confirmed'},
+      });
+      for (var i = 0; i < 100; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        await tester.pump();
+        if (tester.widget<ListTile>(locationTile()).onTap != null) return;
+      }
+      fail('Directory confirmation did not finish');
+    });
+    await tester.pumpAndSettle();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(tester.widget<ListTile>(locationTile()).onTap, isNotNull);
+    expect(Storage.setting.get(DownloadKey.downloadDirectory),
+        '/provider/confirmed');
+    expect(tester.takeException(), isNull);
   }, platforms: {TargetPlatform.iOS});
 
   testDirectorySelection('iOS rejects a provider folder that is not writable',

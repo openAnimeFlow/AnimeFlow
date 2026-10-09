@@ -1,6 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
@@ -132,9 +133,14 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                       );
                     },
                   ),
-                  trailing: _directoryPlatform.supportsSelection
-                      ? const Icon(Icons.drive_file_move_outline)
-                      : null,
+                  trailing: _selectingDirectory
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : _directoryPlatform.supportsSelection
+                          ? const Icon(Icons.drive_file_move_outline)
+                          : null,
                   onTap: _selectingDirectory
                       ? null
                       : () => _selectDownloadDirectory(l10n),
@@ -194,7 +200,8 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
       setState(() {
         _downloadDirectory = Future<String>.value(directory);
       });
-    } catch (_) {
+    } catch (error, stackTrace) {
+      LiggLogger().e('修改资源下载位置失败', error: error, stackTrace: stackTrace);
       if (mounted) NotificationToast.show(l10n.downloadLocationSelectFailed);
     } finally {
       if (mounted) setState(() => _selectingDirectory = false);

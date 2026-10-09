@@ -1,6 +1,7 @@
 import Flutter
 import Foundation
 import UIKit
+import UniformTypeIdentifiers
 
 /// Retains folder grants for this process and persists bookmarks for the next
 /// launch. External provider I/O runs on a serial queue through a coordinator.
@@ -9,13 +10,15 @@ final class DownloadDirectoryController: NSObject, UIDocumentPickerDelegate,
   private let channel: FlutterMethodChannel
   private weak var presenter: UIViewController?
   private let queue = DispatchQueue(label: "anime_flow.download_storage")
-  private let defaults = UserDefaults.standard
+  private let defaults: UserDefaults
+  private let makePicker: () -> UIDocumentPickerViewController
   private let bookmarksKey = "anime_flow.download_directory_bookmarks"
   private let stagingKey = "anime_flow.download_directory_staging"
   private let stagingRootKey = "anime_flow.download_directory_staging_root"
   private var roots: [String: URL] = [:]
   private var activeURLs: [String: URL] = [:]
   private var pickerResult: FlutterResult?
+  private var directoryPicker: UIDocumentPickerViewController?
   private var readingCache: [String: URL] = [:]
   private var staging: [String: String] = [:]
   private var stageRoot: URL {
@@ -23,14 +26,18 @@ final class DownloadDirectoryController: NSObject, UIDocumentPickerDelegate,
       .appendingPathComponent("download-staging", isDirectory: true)
   }
 
-  init(messenger: FlutterBinaryMessenger, presenter: UIViewController) {
+  init(messenger: FlutterBinaryMessenger, presenter: UIViewController,
+       defaults: UserDefaults = .standard,
+       makePicker: (() -> UIDocumentPickerViewController)? = nil) {
     self.presenter = presenter
+    self.defaults = defaults
+    self.makePicker = makePicker ?? Self.makeDirectoryPicker
     channel = FlutterMethodChannel(name: "anime_flow/download_storage", binaryMessenger: messenger)
     super.init()
     channel.setMethodCallHandler { [weak self] call, result in
       guard let self = self else { return }
       if call.method == "selectDirectory" {
-        self.selectDirectory(call: call, result: result)
+        DispatchQueue.main.async { self.selectDirectory(call: call, result: result) }
         return
       }
       let args = call.arguments as? [String: Any] ?? [:]
@@ -203,8 +210,15 @@ final class DownloadDirectoryController: NSObject, UIDocumentPickerDelegate,
     return try value.get()
   }
 
+  private static func makeDirectoryPicker() -> UIDocumentPickerViewController {
+    if #available(iOS 14.0, *) {
+      return UIDocumentPickerViewController(forOpeningContentTypes: [.folder], asCopy: false)
+    }
+    return UIDocumentPickerViewController(documentTypes: ["public.folder"], in: .open)
+  }
+
   private func selectDirectory(call: FlutterMethodCall, result: @escaping FlutterResult) {
-    guard pickerResult == nil else {
+    guard pickerResult == nil, directoryPicker == nil else {
       result(FlutterError(code: "request_in_progress", message: "A folder picker is already active",
                           details: nil))
       return
@@ -214,19 +228,27 @@ final class DownloadDirectoryController: NSObject, UIDocumentPickerDelegate,
                           details: nil))
       return
     }
-    let picker = UIDocumentPickerViewController(documentTypes: ["public.folder"], in: .open)
+    let picker = makePicker()
     picker.allowsMultipleSelection = false
     picker.delegate = self
     picker.presentationController?.delegate = self
     picker.title = (call.arguments as? [String: Any])?["title"] as? String
     pickerResult = result
-    presenter.present(picker, animated: true)
-    picker.presentationController?.delegate = self
+    directoryPicker = picker
+    presenter.present(picker, animated: true) {
+      picker.presentationController?.delegate = self
+      NSLog("AnimeFlow download_storage: folder picker presented")
+    }
   }
 
   func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-    guard let result = pickerResult else { return }
+    guard directoryPicker === controller, let result = pickerResult else { return }
     pickerResult = nil
+    directoryPicker = nil
+    // Dismiss on the UI thread before waiting for bookmark/provider I/O. The
+    // native picker otherwise may remain visible after the user presses Open.
+    controller.dismiss(animated: true)
+    NSLog("AnimeFlow download_storage: folder selection callback received")
     guard let url = urls.first else { result(nil); return }
     queue.async {
       do {
@@ -238,8 +260,10 @@ final class DownloadDirectoryController: NSObject, UIDocumentPickerDelegate,
         self.defaults.set(bookmarks, forKey: self.bookmarksKey)
         self.roots[url.path] = url
         let paths = self.roots.mapValues { $0.path }
+        NSLog("AnimeFlow download_storage: folder bookmark saved")
         DispatchQueue.main.async { result(["path": url.path, "paths": paths]) }
       } catch {
+        NSLog("AnimeFlow download_storage: folder selection failed: %@", error.localizedDescription)
         DispatchQueue.main.async {
           result(FlutterError(code: "directory_access_failed", message: error.localizedDescription,
                               details: nil))
@@ -248,11 +272,21 @@ final class DownloadDirectoryController: NSObject, UIDocumentPickerDelegate,
     }
   }
 
-  func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) { cancelPicker() }
-  func presentationControllerDidDismiss(_ presentationController: UIPresentationController) { cancelPicker() }
+  func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+    guard directoryPicker === controller else { return }
+    cancelPicker()
+  }
+  func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+    guard directoryPicker === presentationController.presentedViewController else { return }
+    cancelPicker()
+  }
   private func cancelPicker() {
     let result = pickerResult
+    let picker = directoryPicker
     pickerResult = nil
+    directoryPicker = nil
+    picker?.dismiss(animated: true)
+    NSLog("AnimeFlow download_storage: folder selection cancelled")
     result?(nil)
   }
 

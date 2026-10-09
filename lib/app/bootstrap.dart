@@ -5,6 +5,7 @@ import 'package:anime_flow/app/app.dart';
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/features/download/application/download_foreground_service.dart';
+import 'package:anime_flow/features/download/application/download_path_migration.dart';
 import 'package:anime_flow/features/download/application/download_directory/restore_download_directory_access.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
@@ -29,6 +30,9 @@ Future<void> bootstrap() async {
   MediaKit.ensureInitialized();
   await Hive.initFlutter();
   await Storage.init();
+  if (Platform.isIOS) {
+    await rebaseIosDownloadPaths(Storage.downloads);
+  }
   await restoreDownloadDirectoryAccess();
   CachedNetworkImageProvider.defaultCacheManager =
       AnimeImageCacheManager.instance;

@@ -66,9 +66,11 @@ class FlowEndpointCacheRepository {
     FlowEndpointCache cache, {
     required Uri endpoint,
     required FlowEndpointCandidates candidates,
+    bool Function()? isCurrent,
   }) {
     final operation = _writeTail.then((_) async {
       try {
+        if (isCurrent != null && !isCurrent()) return false;
         // Round-trip validation also rejects invalid caller-created models.
         final valid = FlowEndpointCache.fromMap(cache.toMap())?.validatedFor(
           endpoint: endpoint,
@@ -85,6 +87,7 @@ class FlowEndpointCacheRepository {
         if (current != null && current.verifiedAt.isAfter(valid.verifiedAt)) {
           return false;
         }
+        if (isCurrent != null && !isCurrent()) return false;
         await _store.write(valid.toMap());
         return true;
       } catch (error) {

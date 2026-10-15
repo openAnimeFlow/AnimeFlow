@@ -112,6 +112,21 @@ void main() {
     expect(store.writes, 0);
   });
 
+  test('queued snapshots from an invalidated network are not written',
+      () async {
+    store.writeGate = Completer<void>();
+    final first = save(cache());
+    var current = true;
+    final stale = repository.save(cache(),
+        endpoint: endpoint, candidates: candidates, isCurrent: () => current);
+    await Future<void>.delayed(Duration.zero);
+    current = false;
+    store.writeGate!.complete();
+    expect(await first, isTrue);
+    expect(await stale, isFalse);
+    expect(store.writes, 1);
+  });
+
   test('persists and restores through a real Hive box without custom adapters',
       () async {
     final directory = await Directory.systemTemp.createTemp('flow_ip_cache_');

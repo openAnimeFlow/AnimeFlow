@@ -1,4 +1,6 @@
 import 'package:anime_flow/core/network/api_path.dart';
+import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
+import 'package:anime_flow/core/network/flow/flow_http_client_adapter.dart';
 import 'package:anime_flow/core/network/interceptors/dio_logger_interceptor.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
@@ -38,6 +40,7 @@ class DioFactory {
         allowBadCertificates: false,
       ),
       baseUrl: AnimeFlowApi.animeFlowApi,
+      adapter: FlowHttpClientAdapter(pool: FlowEndpointPool.instance),
       defaultHeaders: {
         'user-agent': _deviceUserAgent ?? Utils.getRandomUA(),
       },
@@ -76,6 +79,7 @@ class DioFactory {
       );
 
   static void reset() {
+    _animeFlowDio?.close();
     _apiDio = null;
     _githubDio = null;
     _pluginDio = null;
@@ -86,6 +90,7 @@ class DioFactory {
   static Dio _create(
     NetworkConfig config, {
     String? baseUrl,
+    HttpClientAdapter? adapter,
     Map<String, dynamic> defaultHeaders = const {},
     List<Interceptor> interceptors = const [],
   }) {
@@ -103,7 +108,7 @@ class DioFactory {
             status != null && status >= 200 && status < 300,
       ),
     );
-    dio.httpClientAdapter = config.createAdapter();
+    dio.httpClientAdapter = adapter ?? config.createAdapter();
     dio.transformer = BackgroundTransformer();
     dio.interceptors.addAll(interceptors);
     if (config.enableLog) {

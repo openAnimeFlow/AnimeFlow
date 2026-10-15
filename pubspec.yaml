@@ -194,6 +194,7 @@ dev_dependencies:
   # 测试与代码质量
   flutter_test: # 提供 Flutter widget、单元和集成测试工具。
     sdk: flutter
+  fake_async: ^1.3.3 # 使用可控时钟验证网络测速防抖和超时。
   flutter_lints: ^6.0.0 # 提供 Flutter 官方推荐的 Dart 静态检查规则。
   riverpod_lint: ^3.1.3 # 提供针对 Riverpod 用法的静态分析规则。
   wakelock_plus_platform_interface: ^1.7.0 # 定义屏幕常亮插件的跨平台接口契约。

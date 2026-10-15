@@ -5,26 +5,30 @@ import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
 import 'package:anime_flow/core/network/flow/flow_network_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'flow_test_support.dart';
 
 class _ServiceHarness {
-  _ServiceHarness(Future<List<ConnectivityResult>> Function() read) {
+  _ServiceHarness(Future<List<ConnectivityResult>> Function() read,
+      {bool platformEvents = false}) {
     pool = FlowEndpointPool(
-      assetBundle: TextAssetBundle(ipA),
+      assetBundle: TextAssetBundle('$ipA\n$ipB'),
       cacheRepository: FlowEndpointCacheRepository(onWarning: (_) {}),
       probeFactory: (_) {
         rounds++;
         return FixedProbe({
           null: const Duration(milliseconds: 500),
-          ipA: const Duration(milliseconds: 50),
+          fastest: const Duration(milliseconds: 50),
         });
       },
     );
     service = FlowNetworkService(
-        pool: pool, networkChanges: events.stream, readConnectivity: read);
+        pool: pool,
+        networkChanges: platformEvents ? null : events.stream,
+        readConnectivity: read);
   }
 
   final events =
@@ -32,6 +36,7 @@ class _ServiceHarness {
   late final FlowEndpointPool pool;
   late final FlowNetworkService service;
   int rounds = 0;
+  String fastest = ipA;
 
   Future<void> dispose() async {
     await service.stop();
@@ -43,6 +48,42 @@ class _ServiceHarness {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpFlowSettings();
+
+  for (final type in [ConnectivityResult.wifi, ConnectivityResult.mobile]) {
+    test('same-type $type platform events remeasure and replace the IP', () {
+      fakeAsync((clock) {
+        late MockStreamHandlerEventSink nativeEvents;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockStreamHandler(
+          const EventChannel('dev.fluttercommunity.plus/connectivity_status'),
+          MockStreamHandler.inline(
+              onListen: (_, events) => nativeEvents = events),
+        );
+        final harness =
+            _ServiceHarness(() async => [type], platformEvents: true);
+        unawaited(harness.service.start());
+        clock.flushMicrotasks();
+        nativeEvents.success([type.name]);
+        clock.elapse(const Duration(seconds: 2));
+        expect(harness.pool.preferredAddresses, [ipA]);
+        expect(harness.rounds, 1);
+
+        harness.fastest = ipB;
+        for (var i = 0; i < 3; i++) {
+          nativeEvents.success([type.name]);
+          clock.elapse(const Duration(milliseconds: 500));
+        }
+        expect(harness.pool.preferredAddresses, isEmpty);
+        clock.elapse(const Duration(milliseconds: 1499));
+        expect(harness.rounds, 1);
+        clock.elapse(const Duration(milliseconds: 1));
+        expect(harness.rounds, 2);
+        expect(harness.pool.preferredAddresses, [ipB]);
+        unawaited(harness.dispose());
+        clock.flushMicrotasks();
+      });
+    });
+  }
 
   test('Wi-Fi/mobile switches remeasure in both directions after debounce', () {
     fakeAsync((clock) {
@@ -118,7 +159,7 @@ void main() {
     });
   });
 
-  test('unchanged resume snapshot preserves routes and ordinary throttle', () {
+  test('ordinary focus changes preserve routes and ordinary throttle', () {
     fakeAsync((clock) {
       final harness = _ServiceHarness(() async => [ConnectivityResult.wifi]);
       unawaited(harness.service.start());
@@ -126,7 +167,7 @@ void main() {
       clock.elapse(const Duration(seconds: 2));
       final generation = harness.pool.networkGeneration;
       expect(harness.rounds, 1);
-      harness.service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      harness.service.didChangeAppLifecycleState(AppLifecycleState.inactive);
       harness.service.didChangeAppLifecycleState(AppLifecycleState.resumed);
       clock.elapse(const Duration(seconds: 2));
       expect(harness.pool.networkGeneration, generation);
@@ -136,6 +177,30 @@ void main() {
       clock.flushMicrotasks();
     });
   });
+
+  for (final state in [AppLifecycleState.paused, AppLifecycleState.hidden]) {
+    test('resume from $state revalidates even without a type change event', () {
+      fakeAsync((clock) {
+        final harness = _ServiceHarness(() async => [ConnectivityResult.wifi]);
+        unawaited(harness.service.start());
+        clock.flushMicrotasks();
+        clock.elapse(const Duration(seconds: 2));
+        expect(harness.pool.preferredAddresses, [ipA]);
+        harness.service.didChangeAppLifecycleState(state);
+        harness.fastest = ipB;
+        clock.elapse(const Duration(seconds: 10));
+        expect(harness.rounds, 1);
+        harness.service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        clock.flushMicrotasks();
+        expect(harness.pool.preferredAddresses, isEmpty);
+        clock.elapse(const Duration(seconds: 2));
+        expect(harness.rounds, 2);
+        expect(harness.pool.preferredAddresses, [ipB]);
+        unawaited(harness.dispose());
+        clock.flushMicrotasks();
+      });
+    });
+  }
 
   for (final supersededBy in ['event', 'resume', 'stop']) {
     test('late resume snapshot is ignored after newer $supersededBy', () {
@@ -164,7 +229,7 @@ void main() {
         clock.flushMicrotasks();
         expect(harness.pool.networkGeneration, generation);
         clock.elapse(const Duration(seconds: 2));
-        expect(harness.rounds, supersededBy == 'event' ? 2 : 1);
+        expect(harness.rounds, supersededBy == 'stop' ? 1 : 2);
         unawaited(harness.dispose());
         clock.flushMicrotasks();
       });

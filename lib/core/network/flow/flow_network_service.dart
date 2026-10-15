@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -11,17 +11,17 @@ import 'flow_probe_scheduler.dart';
 class FlowNetworkService with WidgetsBindingObserver {
   FlowNetworkService(
       {FlowEndpointPool? pool,
-      Connectivity? connectivity,
+      ConnectivityPlatform? connectivity,
       Stream<List<ConnectivityResult>>? networkChanges,
       Future<List<ConnectivityResult>> Function()? readConnectivity})
       : _pool = pool ?? FlowEndpointPool.instance,
-        _connectivity = connectivity ?? Connectivity(),
+        _connectivity = connectivity ?? ConnectivityPlatform.instance,
         _networkChangesOverride = networkChanges,
         _readConnectivityOverride = readConnectivity;
 
   static final instance = FlowNetworkService();
   final FlowEndpointPool _pool;
-  final Connectivity _connectivity;
+  final ConnectivityPlatform _connectivity;
   final Stream<List<ConnectivityResult>>? _networkChangesOverride;
   final Future<List<ConnectivityResult>> Function()? _readConnectivityOverride;
   FlowProbeScheduler? _scheduler;
@@ -29,6 +29,7 @@ class FlowNetworkService with WidgetsBindingObserver {
   StreamSubscription<void>? _failureSubscription;
   Timer? _periodic;
   bool _started = false;
+  bool _revalidateOnResume = false;
   int _events = 0;
   int _connectivityRead = 0;
   Set<ConnectivityResult>? _lastConnectivity;
@@ -36,6 +37,7 @@ class FlowNetworkService with WidgetsBindingObserver {
   Future<void> start() async {
     if (_started) return;
     _started = true;
+    _revalidateOnResume = false;
     _lastConnectivity = null;
     final scheduler = _scheduler = FlowProbeScheduler(
       run: _pool.probe,
@@ -80,13 +82,15 @@ class FlowNetworkService with WidgetsBindingObserver {
       final results = await (_readConnectivityOverride?.call() ??
           _connectivity.checkConnectivity());
       if (!current()) return;
-      // 恢复前台时读取状态快照，避免每次获得焦点都强制完整探测。
-      // 事件流中的同类型通知仍使旧结果失效，例如切换到了另一个 Wi-Fi 接入点。
-      if (!setEquals(_lastConnectivity, results.toSet())) {
+      // 后台可能漏掉同类型网络切换，恢复时重新验证；普通失焦仍保留测速间隔。
+      if (_revalidateOnResume ||
+          !setEquals(_lastConnectivity, results.toSet())) {
+        _revalidateOnResume = false;
         _networkChanged(results);
       }
     } catch (error) {
       if (!current()) return;
+      if (_revalidateOnResume) _pool.networkChanged();
       scheduler.request(force: true);
       LiggLogger().w('读取 Flow IP 网络状态失败 (${error.runtimeType})');
     }
@@ -123,6 +127,10 @@ class FlowNetworkService with WidgetsBindingObserver {
       _pool.expireRoute();
       _startPeriodic();
     } else {
+      if (state == AppLifecycleState.paused ||
+          state == AppLifecycleState.hidden) {
+        _revalidateOnResume = true;
+      }
       _connectivityRead++;
       _periodic?.cancel();
       _periodic = null;

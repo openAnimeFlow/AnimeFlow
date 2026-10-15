@@ -125,6 +125,7 @@ dependencies:
   device_info_plus: ^13.3.0 # 读取设备型号、操作系统和平台相关信息。
   battery_plus: ^7.1.1 # 读取设备电池电量、充电状态和电池状态。
   connectivity_plus: ^6.0.5 # 查询网络连接类型并监听连接状态变化。
+  connectivity_plus_platform_interface: ^2.1.0 # 获取未经类型去重的网络切换事件。
   window_manager: ^0.5.1 # 管理桌面应用窗口的尺寸、位置、状态和事件。
   url_launcher: ^6.3.2 # 调用平台应用打开 URL、电话号码、邮件等外部资源。
   flutter_opencc_plus: ^0.1.4 # 使用 OpenCC 在繁简中文及相关变体之间转换文本。

@@ -4,6 +4,7 @@ class StorageKey {
       settingsKey = 'settings_key',
       visitorId = 'visitor_id',
       presenceId = 'presence_id',
+      flowEndpointPool = 'flow_endpoint_pool_v1',
       playPositionKey = 'play_position_key',
       playHistoryKey = 'play_history_key',
       downloadsKey = 'downloads_key',

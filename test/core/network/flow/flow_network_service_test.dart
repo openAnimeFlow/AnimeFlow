@@ -8,49 +8,58 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'flow_endpoint_cache_repository_test.dart' show MemoryCacheStore;
-import 'flow_endpoint_pool_test.dart' show TextAssetBundle;
-import 'flow_endpoint_selection_test.dart' show FixedProbe, ipA;
+import 'flow_test_support.dart';
+
+class _ServiceHarness {
+  _ServiceHarness(Future<List<ConnectivityResult>> Function() read) {
+    pool = FlowEndpointPool(
+      assetBundle: TextAssetBundle(ipA),
+      cacheRepository: FlowEndpointCacheRepository(onWarning: (_) {}),
+      probeFactory: (_) {
+        rounds++;
+        return FixedProbe({
+          null: const Duration(milliseconds: 500),
+          ipA: const Duration(milliseconds: 50),
+        });
+      },
+    );
+    service = FlowNetworkService(
+        pool: pool, networkChanges: events.stream, readConnectivity: read);
+  }
+
+  final events =
+      StreamController<List<ConnectivityResult>>.broadcast(sync: true);
+  late final FlowEndpointPool pool;
+  late final FlowNetworkService service;
+  int rounds = 0;
+
+  Future<void> dispose() async {
+    await service.stop();
+    await events.close();
+    pool.dispose();
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpFlowSettings();
 
   test('Wi-Fi/mobile switches remeasure in both directions after debounce', () {
     fakeAsync((clock) {
-      final events =
-          StreamController<List<ConnectivityResult>>.broadcast(sync: true);
-      var rounds = 0;
-      final pool = FlowEndpointPool(
-          assetBundle: TextAssetBundle(ipA),
-          cacheRepository: FlowEndpointCacheRepository(
-              store: MemoryCacheStore(), onWarning: (_) {}),
-          probeFactory: (_) {
-            rounds++;
-            return FixedProbe({
-              null: const Duration(milliseconds: 500),
-              ipA: const Duration(milliseconds: 50)
-            });
-          });
-      final service = FlowNetworkService(
-          pool: pool,
-          networkChanges: events.stream,
-          readConnectivity: () async => [ConnectivityResult.wifi]);
-      unawaited(service.start());
+      final harness = _ServiceHarness(() async => [ConnectivityResult.wifi]);
+      unawaited(harness.service.start());
       clock.flushMicrotasks();
       clock.elapse(const Duration(seconds: 2));
-      expect(rounds, 1);
+      expect(harness.rounds, 1);
       for (final type in [ConnectivityResult.mobile, ConnectivityResult.wifi]) {
-        events.add([type]);
-        expect(pool.preferredAddresses, isEmpty);
+        harness.events.add([type]);
+        expect(harness.pool.preferredAddresses, isEmpty);
         clock.elapse(const Duration(milliseconds: 1999));
-        final before = rounds;
+        final before = harness.rounds;
         clock.elapse(const Duration(milliseconds: 1));
-        expect(rounds, before + 1);
+        expect(harness.rounds, before + 1);
       }
-      unawaited(service.stop());
-      clock.flushMicrotasks();
-      unawaited(events.close());
-      pool.dispose();
+      unawaited(harness.dispose());
       clock.flushMicrotasks();
     });
   });
@@ -59,41 +68,106 @@ void main() {
       'background switches wait for foreground and stale initial reads are ignored',
       () {
     fakeAsync((clock) {
-      final events =
-          StreamController<List<ConnectivityResult>>.broadcast(sync: true);
       final initialRead = Completer<List<ConnectivityResult>>();
-      var rounds = 0;
-      final pool = FlowEndpointPool(
-          assetBundle: TextAssetBundle(ipA),
-          cacheRepository: FlowEndpointCacheRepository(
-              store: MemoryCacheStore(), onWarning: (_) {}),
-          probeFactory: (_) {
-            rounds++;
-            return FixedProbe(
-                {null: null, ipA: const Duration(milliseconds: 50)});
-          });
-      final service = FlowNetworkService(
-          pool: pool,
-          networkChanges: events.stream,
-          readConnectivity: () => initialRead.future);
-      unawaited(service.start());
-      events.add([ConnectivityResult.mobile]);
-      final generation = pool.networkGeneration;
+      var reads = 0;
+      final harness = _ServiceHarness(() => ++reads == 1
+          ? initialRead.future
+          : Future.value([ConnectivityResult.wifi]));
+      unawaited(harness.service.start());
+      harness.events.add([ConnectivityResult.mobile]);
+      final generation = harness.pool.networkGeneration;
       initialRead.complete([ConnectivityResult.none]);
       clock.flushMicrotasks();
-      expect(pool.networkGeneration, generation);
-      service.didChangeAppLifecycleState(AppLifecycleState.paused);
-      events.add([ConnectivityResult.wifi]);
+      expect(harness.pool.networkGeneration, generation);
+      harness.service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      harness.events.add([ConnectivityResult.wifi]);
       clock.elapse(const Duration(seconds: 10));
-      expect(rounds, 0);
-      service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      expect(harness.rounds, 0);
+      harness.service.didChangeAppLifecycleState(AppLifecycleState.resumed);
       clock.elapse(const Duration(seconds: 2));
-      expect(rounds, 1);
-      unawaited(service.stop());
-      clock.flushMicrotasks();
-      unawaited(events.close());
-      pool.dispose();
+      expect(harness.rounds, 1);
+      unawaited(harness.dispose());
       clock.flushMicrotasks();
     });
   });
+
+  test('resume refreshes a missed offline-to-online change after debounce', () {
+    fakeAsync((clock) {
+      var network = ConnectivityResult.none;
+      var reads = 0;
+      final harness = _ServiceHarness(() async {
+        reads++;
+        return [network];
+      });
+      unawaited(harness.service.start());
+      clock.flushMicrotasks();
+      clock.elapse(const Duration(seconds: 2));
+      expect(harness.rounds, 0);
+      harness.service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      network = ConnectivityResult.wifi;
+      harness.service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      clock.flushMicrotasks();
+      expect(reads, 2);
+      clock.elapse(const Duration(milliseconds: 1999));
+      expect(harness.rounds, 0);
+      clock.elapse(const Duration(milliseconds: 1));
+      expect(harness.rounds, 1);
+      expect(harness.pool.preferredAddresses, [ipA]);
+      unawaited(harness.dispose());
+      clock.flushMicrotasks();
+    });
+  });
+
+  test('unchanged resume snapshot preserves routes and ordinary throttle', () {
+    fakeAsync((clock) {
+      final harness = _ServiceHarness(() async => [ConnectivityResult.wifi]);
+      unawaited(harness.service.start());
+      clock.flushMicrotasks();
+      clock.elapse(const Duration(seconds: 2));
+      final generation = harness.pool.networkGeneration;
+      expect(harness.rounds, 1);
+      harness.service.didChangeAppLifecycleState(AppLifecycleState.paused);
+      harness.service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      clock.elapse(const Duration(seconds: 2));
+      expect(harness.pool.networkGeneration, generation);
+      expect(harness.pool.preferredAddresses, [ipA]);
+      expect(harness.rounds, 1);
+      unawaited(harness.dispose());
+      clock.flushMicrotasks();
+    });
+  });
+
+  for (final supersededBy in ['event', 'resume', 'stop']) {
+    test('late resume snapshot is ignored after newer $supersededBy', () {
+      fakeAsync((clock) {
+        var reads = 0;
+        final staleRead = Completer<List<ConnectivityResult>>();
+        final harness = _ServiceHarness(() => ++reads == 2
+            ? staleRead.future
+            : Future.value([ConnectivityResult.wifi]));
+        unawaited(harness.service.start());
+        clock.flushMicrotasks();
+        clock.elapse(const Duration(seconds: 2));
+        harness.service.didChangeAppLifecycleState(AppLifecycleState.paused);
+        harness.service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        if (supersededBy == 'event') {
+          harness.events.add([ConnectivityResult.mobile]);
+        } else if (supersededBy == 'resume') {
+          harness.service.didChangeAppLifecycleState(AppLifecycleState.paused);
+          harness.service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        } else {
+          unawaited(harness.service.stop());
+        }
+        clock.flushMicrotasks();
+        final generation = harness.pool.networkGeneration;
+        staleRead.complete([ConnectivityResult.none]);
+        clock.flushMicrotasks();
+        expect(harness.pool.networkGeneration, generation);
+        clock.elapse(const Duration(seconds: 2));
+        expect(harness.rounds, supersededBy == 'event' ? 2 : 1);
+        unawaited(harness.dispose());
+        clock.flushMicrotasks();
+      });
+    });
+  }
 }

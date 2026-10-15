@@ -1,6 +1,6 @@
 import 'flow_endpoint_candidates.dart';
 
-/// A previous measurement is only a hint for revalidation on the current network.
+/// 历史测量结果仅作为当前网络重新验证时的参考。
 class FlowEndpointMeasurement {
   const FlowEndpointMeasurement({
     required this.address,
@@ -58,7 +58,7 @@ class FlowEndpointCache {
   final String candidateHash;
   final DateTime verifiedAt;
 
-  /// Preserves the previous primary/backup order, not current-network validity.
+  /// 保留上次的主备顺序，不代表这些地址在当前网络仍然有效。
   final List<FlowEndpointMeasurement> measurements;
   final String? networkType;
 
@@ -119,7 +119,7 @@ class FlowEndpointCache {
     }
   }
 
-  /// Reject incompatible/expired metadata and remove obsolete individual IPs.
+  /// 拒绝不兼容或过期的元数据，并移除已不在候选池中的 IP。
   FlowEndpointCache? validatedFor({
     required Uri endpoint,
     required FlowEndpointCandidates candidates,

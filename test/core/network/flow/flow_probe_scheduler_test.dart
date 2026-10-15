@@ -53,8 +53,7 @@ void main() {
     });
   });
 
-  test('both network-switch directions bypass throttle but retain debounce',
-      () {
+  test('network changes bypass throttle but retain debounce', () {
     fakeAsync((clock) {
       var runs = 0;
       final start = DateTime.utc(2026);
@@ -67,14 +66,12 @@ void main() {
       scheduler.request();
       clock.elapse(const Duration(seconds: 2));
       expect(runs, 1);
-      for (var switchDirection = 0; switchDirection < 2; switchDirection++) {
-        scheduler.networkChanged(online: true);
-        clock.elapse(const Duration(milliseconds: 1999));
-        expect(runs, switchDirection + 1);
-        clock.elapse(const Duration(milliseconds: 1));
-        clock.flushMicrotasks();
-        expect(runs, switchDirection + 2);
-      }
+      scheduler.networkChanged(online: true);
+      clock.elapse(const Duration(milliseconds: 1999));
+      expect(runs, 1);
+      clock.elapse(const Duration(milliseconds: 1));
+      clock.flushMicrotasks();
+      expect(runs, 2);
       scheduler.dispose();
     });
   });

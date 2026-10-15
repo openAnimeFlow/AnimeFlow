@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/core/network/flow/flow_endpoint_probe.dart';
@@ -55,15 +56,23 @@ void main() {
     final server = await testTlsServer();
     addTearDown(() => server.close(force: true));
     final endpoint = Uri.parse('https://ligg.test:${server.port}');
-    final arrived = <HttpRequest>[];
-    server.listen(arrived.add, onError: (_) {});
+    final arrived = Completer<void>();
+    var requests = 0;
+    server.listen((request) {
+      if (++requests == 2) arrived.complete();
+      // Leave both responses pending so cancellation happens after TLS/HTTP.
+    });
     final probe = FlowEndpointProbe(
         endpoint: endpoint,
         securityContext: trustedTestContext(),
         findProxy: (_) => 'DIRECT');
-    final pending = probe.probe('127.0.0.1');
-    // Cancellation is valid even before DNS/TCP acquisition has finished.
+    addTearDown(probe.cancel);
+    final pending = Future.wait([
+      probe.probe('127.0.0.1'),
+      probe.probe('127.0.0.1'),
+    ]);
+    await arrived.future.timeout(const Duration(seconds: 2));
     probe.cancel();
-    expect(await pending, isNull);
+    expect(await pending.timeout(const Duration(seconds: 1)), [null, null]);
   });
 }

@@ -1,77 +1,50 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:anime_flow/core/network/flow/flow_endpoint_cache.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_cache_repository.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_probe.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'flow_endpoint_cache_repository_test.dart' show MemoryCacheStore;
-import 'flow_endpoint_pool_test.dart' show TextAssetBundle;
+import 'flow_test_support.dart';
 
-const ipA = '104.19.52.165';
-const ipB = '172.66.214.245';
-const ipC = '162.159.82.236';
-
-class FixedProbe implements FlowProbeSession {
-  FixedProbe(this.values);
-  final Map<String?, Duration?> values;
-  int active = 0;
-  int maxActive = 0;
-  final calls = <String?>[];
-  final pending = <Completer<Duration?>>[];
-  bool hold = false;
-  bool cancelled = false;
+class _CallbackProbe implements FlowProbeSession {
+  _CallbackProbe(this.run);
+  final Future<Duration?> Function(String?) run;
 
   @override
-  Future<Duration?> probe(String? address) async {
-    calls.add(address);
-    active++;
-    maxActive = max(maxActive, active);
-    try {
-      if (hold) {
-        final completion = Completer<Duration?>();
-        pending.add(completion);
-        return await completion.future;
-      }
-      await Future<void>.delayed(Duration.zero);
-      return cancelled ? null : values[address];
-    } finally {
-      active--;
-    }
-  }
+  Future<Duration?> probe(String? address) => run(address);
 
   @override
-  void cancel() {
-    cancelled = true;
-    for (final item in pending) {
-      if (!item.isCompleted) item.complete(null);
-    }
-  }
+  void cancel() {}
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  late MemoryCacheStore store;
+  final store = setUpFlowSettings();
   late DateTime now;
   late Map<String?, Duration?> values;
   final sessions = <FixedProbe>[];
 
   FlowEndpointPool makePool(
       {Duration roundTimeout = const Duration(seconds: 15),
-      bool holdFirst = false}) {
+      bool holdFirst = false,
+      FlowProbeSession Function(Uri)? probeFactory}) {
     final pool = FlowEndpointPool(
       assetBundle: TextAssetBundle('$ipA\n$ipB\n$ipC'),
-      cacheRepository: FlowEndpointCacheRepository(
-          store: store, now: () => now, onWarning: (_) {}),
+      cacheRepository:
+          FlowEndpointCacheRepository(now: () => now, onWarning: (_) {}),
       now: () => now,
       random: Random(1),
       roundTimeout: roundTimeout,
-      probeFactory: (_) {
-        final probe = FixedProbe(values)..hold = holdFirst && sessions.isEmpty;
-        sessions.add(probe);
-        return probe;
-      },
+      probeFactory: probeFactory ??
+          (_) {
+            final probe = FixedProbe(values)
+              ..hold = holdFirst && sessions.isEmpty;
+            sessions.add(probe);
+            return probe;
+          },
       onWarning: (_) {},
     );
     addTearDown(pool.dispose);
@@ -79,7 +52,6 @@ void main() {
   }
 
   setUp(() {
-    store = MemoryCacheStore();
     now = DateTime.utc(2026, 10, 15, 12);
     sessions.clear();
     values = {
@@ -112,6 +84,63 @@ void main() {
     final smallGain = makePool();
     await smallGain.probe();
     expect(smallGain.preferredAddresses, isEmpty);
+  });
+
+  test('higher success rate bypasses latency hysteresis', () async {
+    var dnsCalls = 0;
+    final pool = makePool(
+        probeFactory: (_) => _CallbackProbe((address) async {
+              if (address == null) {
+                return ++dnsCalls == 1
+                    ? null
+                    : const Duration(milliseconds: 50);
+              }
+              return const Duration(milliseconds: 100);
+            }));
+    await pool.probe();
+    // DNS succeeds once out of two, each slower candidate succeeds twice.
+    expect(pool.preferredAddresses, hasLength(3));
+  });
+
+  test('a later business failure wins over completed probe samples', () async {
+    var round = 0;
+    var dnsCalls = 0;
+    var ipCalls = 0;
+    final sampled = Completer<void>();
+    final releaseDns = Completer<Duration?>();
+    addTearDown(() {
+      if (!releaseDns.isCompleted) releaseDns.complete(null);
+    });
+    final pool = makePool(probeFactory: (_) {
+      if (++round != 2) return FixedProbe(values);
+      return _CallbackProbe((address) async {
+        if (address == null && ++dnsCalls == 2) return releaseDns.future;
+        if (address == ipA && ++ipCalls == 2) sampled.complete();
+        return values[address];
+      });
+    });
+    await pool.probe();
+    expect(pool.preferredAddresses, [ipA, ipB, ipC]);
+    final pending = pool.probe();
+    await sampled.future;
+    await Future<void>.delayed(Duration.zero);
+    pool.reportConnectionFailure(ipA, pool.networkGeneration);
+    expect(pool.isAddressAvailable(ipA), isFalse);
+    releaseDns.complete(values[null]);
+    await pending;
+    expect(pool.isAddressAvailable(ipA), isFalse);
+    expect(pool.preferredAddresses, [ipB, ipC]);
+    expect(
+        FlowEndpointCache.fromMap(store.value)!
+            .measurements
+            .map((measurement) => measurement.address),
+        isNot(contains(ipA)));
+
+    // The address can recover with fresh samples after its cooldown expires.
+    now = now.add(const Duration(minutes: 1));
+    await pool.probe();
+    expect(pool.isAddressAvailable(ipA), isTrue);
+    expect(pool.preferredAddresses, contains(ipA));
   });
 
   test(

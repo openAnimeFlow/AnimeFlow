@@ -47,6 +47,7 @@ class FlowEndpointPool extends ChangeNotifier {
   final _revalidationRequests = StreamController<void>.broadcast(sync: true);
   final Map<String?, _EndpointStats> _stats = {};
   final Map<String, (int, DateTime)> _cooldowns = {};
+  final Map<String, int> _failureVersions = {};
   List<String> _preferredAddresses = const [];
   List<String> _probeOrder = const [];
   int _cursor = 0;
@@ -66,7 +67,7 @@ class FlowEndpointPool extends ChangeNotifier {
   FlowEndpointCandidates get candidates => _candidates;
   FlowEndpointCache? get cachedForRevalidation => _cachedForRevalidation;
 
-  /// Cached addresses are tested first, never treated as already usable.
+  /// 优先复测缓存中的地址，但不将其直接视为可用节点。
   List<String> get revalidationOrder => List.unmodifiable({
         ...?_cachedForRevalidation?.measurements.map((item) => item.address),
         ..._candidates.addresses,
@@ -124,6 +125,7 @@ class FlowEndpointPool extends ChangeNotifier {
       return;
     }
     final failures = (_cooldowns[address]?.$1 ?? 0) + 1;
+    _failureVersions[address] = (_failureVersions[address] ?? 0) + 1;
     final minutes = min(10, 1 << min(failures - 1, 4));
     _cooldowns[address] = (failures, _now().add(Duration(minutes: minutes)));
     _stats.remove(address);
@@ -146,6 +148,7 @@ class FlowEndpointPool extends ChangeNotifier {
     cancelProbe();
     _stats.clear();
     _cooldowns.clear();
+    _failureVersions.clear();
     _routeExpiresAt = null;
     _setRoute(const [], force: true);
   }
@@ -170,6 +173,7 @@ class FlowEndpointPool extends ChangeNotifier {
     }
     final token = ++_roundToken;
     final generation = _networkGeneration;
+    final failureVersions = Map<String, int>.of(_failureVersions);
     final session = _activeProbe = _probeFactory(endpoint);
     final samples = <String?, _EndpointStats>{};
     var deadlineReached = false;
@@ -208,10 +212,16 @@ class FlowEndpointPool extends ChangeNotifier {
           .where((ip) => samples[ip]?.latencies.isNotEmpty ?? false)
           .toList()
         ..sort((a, b) => samples[a]!.average.compareTo(samples[b]!.average));
-      // Confirm DNS and the fastest three IPs using fresh TLS connections.
+      // 使用新建的 TLS 连接复测 DNS 路径和最快的三个 IP。
       await measure([null, ...successful.take(3)]);
       if (!current()) return;
       for (final entry in samples.entries) {
+        // 本轮期间若收到某地址的业务连接失败报告，则丢弃该地址的样本，
+        // 即使这些样本是在失败报告到来之前完成的。
+        if (entry.key != null &&
+            failureVersions[entry.key] != _failureVersions[entry.key]) {
+          continue;
+        }
         final stats = _stats[entry.key] ??= _EndpointStats();
         stats.merge(entry.value);
         if (entry.key != null && entry.value.latencies.isNotEmpty) {
@@ -274,7 +284,7 @@ class FlowEndpointPool extends ChangeNotifier {
       return;
     }
     final dns = _stats[null];
-    // An unmeasured baseline is not evidence that normal DNS is worse.
+    // 未测量 DNS 基线路径时，不能认定普通 DNS 路径更差。
     if (dns == null || dns.attempts == 0) return;
     String? best = eligible.first;
     if (dns.latencies.isNotEmpty && _compare(dns, _stats[best]!) <= 0) {
@@ -289,7 +299,9 @@ class FlowEndpointPool extends ChangeNotifier {
         oldStats.lastSucceeded &&
         oldStats.latencies.isNotEmpty &&
         newStats != null &&
-        newStats.latencies.isNotEmpty) {
+        newStats.latencies.isNotEmpty &&
+        // 延迟切换阈值不能阻止选择成功率更高的路径。
+        newStats.successRate == oldStats.successRate) {
       final improvement = oldStats.average - newStats.average;
       if (improvement < const Duration(milliseconds: 100) ||
           newStats.average.inMicroseconds >
@@ -349,7 +361,7 @@ class _EndpointStats {
   }
 
   void _trim() {
-    // Bound historical influence and memory on long-running clients.
+    // 限制历史样本的影响及长期运行时的内存占用。
     if (_samples.length > 12) {
       _samples.removeRange(0, _samples.length - 12);
     }

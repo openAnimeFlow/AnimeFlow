@@ -11,7 +11,7 @@ abstract interface class FlowProbeSession {
   void cancel();
 }
 
-/// A separate, credential-free client for each cold-connection measurement.
+/// 每次测量新建连接的耗时，均使用独立且不携带凭据的客户端。
 class FlowEndpointProbe implements FlowProbeSession {
   FlowEndpointProbe(
       {required this.endpoint,
@@ -38,7 +38,7 @@ class FlowEndpointProbe implements FlowProbeSession {
     if (_cancelled.isCompleted) return null;
     final uri =
         endpoint.replace(path: '/cdn-cgi/trace', query: null, fragment: null);
-    // Explicit proxies keep their normal path; direct-IP measurements would lie.
+    // 显式代理沿用正常连接路径；此时直连 IP 的测量结果不能反映实际请求路径。
     if (_findProxy(uri) != 'DIRECT') return null;
     final context = FlowConnectionContext(budget: timeout);
     final connector = FlowConnectionConnector(

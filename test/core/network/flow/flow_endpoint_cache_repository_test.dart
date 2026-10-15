@@ -1,49 +1,16 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:anime_flow/core/network/flow/flow_endpoint_cache.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_cache_repository.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_candidates.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive_ce/hive.dart';
-
-class MemoryCacheStore implements FlowEndpointCacheStore {
-  Object? value;
-  bool failRead = false;
-  bool failWrite = false;
-  int reads = 0;
-  int writes = 0;
-  int activeWrites = 0;
-  int maxActiveWrites = 0;
-  Completer<void>? writeGate;
-
-  @override
-  Future<Object?> read() async {
-    reads++;
-    if (failRead) throw StateError('storage unavailable');
-    return value;
-  }
-
-  @override
-  Future<void> write(Map<String, Object?> value) async {
-    writes++;
-    activeWrites++;
-    if (activeWrites > maxActiveWrites) maxActiveWrites = activeWrites;
-    try {
-      if (failWrite) throw StateError('write unavailable');
-      await writeGate?.future;
-      this.value = value;
-    } finally {
-      activeWrites--;
-    }
-  }
-}
+import 'flow_test_support.dart';
 
 void main() {
   final endpoint = Uri.parse('https://ligg.top');
   final candidates = FlowEndpointCandidates.parse('172.66.214.245');
   final now = DateTime.utc(2026, 10, 15, 12);
-  late MemoryCacheStore store;
+  final store = setUpFlowSettings();
   late FlowEndpointCacheRepository repository;
 
   FlowEndpointCache cache({DateTime? verifiedAt}) => FlowEndpointCache(
@@ -65,9 +32,7 @@ void main() {
       repository.load(endpoint: endpoint, candidates: candidates);
 
   setUp(() {
-    store = MemoryCacheStore();
     repository = FlowEndpointCacheRepository(
-      store: store,
       now: () => now,
       onWarning: (_) {},
     );
@@ -125,35 +90,5 @@ void main() {
     expect(await first, isTrue);
     expect(await stale, isFalse);
     expect(store.writes, 1);
-  });
-
-  test('persists and restores through a real Hive box without custom adapters',
-      () async {
-    final directory = await Directory.systemTemp.createTemp('flow_ip_cache_');
-    Hive.init(directory.path);
-    final box = await Hive.openBox<dynamic>('flow_ip_cache');
-    addTearDown(() async {
-      await box.close();
-      // The deletion target is the specific temporary directory created above.
-      expect(
-          directory.absolute.path
-              .startsWith(Directory.systemTemp.absolute.path),
-          isTrue);
-      await directory.delete(recursive: true);
-    });
-    final hiveRepository = FlowEndpointCacheRepository(
-      store: HiveFlowEndpointCacheStore(box: () => box),
-      now: () => now,
-      onWarning: (_) {},
-    );
-
-    expect(
-      await hiveRepository.save(cache(),
-          endpoint: endpoint, candidates: candidates),
-      isTrue,
-    );
-    final restored =
-        await hiveRepository.load(endpoint: endpoint, candidates: candidates);
-    expect(restored!.toMap(), cache().toMap());
   });
 }

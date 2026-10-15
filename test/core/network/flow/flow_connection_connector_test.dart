@@ -8,29 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'tls_fixture.dart';
 
 void main() {
-  test(
-      'IP TLS connection preserves the original HTTP host and validated domain',
-      () async {
-    final server = await testTlsServer();
-    addTearDown(() => server.close(force: true));
-    final endpoint = Uri.parse('https://ligg.test:${server.port}');
-    server.listen((request) async {
-      request.response.write(request.headers.value('host'));
-      await request.response.close();
-    });
-    final client = FlowConnectionConnector(
-            endpoint: endpoint,
-            addresses: ['127.0.0.1'],
-            allowDnsFallback: false,
-            securityContext: trustedTestContext())
-        .createClient()
-      ..findProxy = (_) => 'DIRECT';
-    addTearDown(() => client.close(force: true));
-    final response = await (await client.getUrl(endpoint)).close();
-    expect(
-        await utf8.decoder.bind(response).join(), 'ligg.test:${server.port}');
-  });
-
   for (final wrongHost in [false, true]) {
     test('rejects ${wrongHost ? 'wrong hostname' : 'untrusted'} certificate',
         () async {
@@ -168,13 +145,14 @@ void main() {
     socket.destroy();
   });
 
-  test('TLS socket handles large streams and reuses a keep-alive connection',
+  test('IP TLS preserves the HTTP host, large streams and connection reuse',
       () async {
     final server = await testTlsServer();
     addTearDown(() => server.close(force: true));
     final endpoint = Uri.parse('https://ligg.test:${server.port}');
     final received = <int>[];
     server.listen((request) async {
+      expect(request.headers.value('host'), 'ligg.test:${server.port}');
       received.add((await utf8.decoder.bind(request).join()).length);
       request.response.write('z' * 200000);
       await request.response.close();

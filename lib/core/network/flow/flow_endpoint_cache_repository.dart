@@ -1,41 +1,18 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/settings/storage.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 
 import 'flow_endpoint_cache.dart';
 import 'flow_endpoint_candidates.dart';
 
-abstract interface class FlowEndpointCacheStore {
-  Future<Object?> read();
-  Future<void> write(Map<String, Object?> value);
-}
-
-class HiveFlowEndpointCacheStore implements FlowEndpointCacheStore {
-  HiveFlowEndpointCacheStore({Box<dynamic> Function()? box})
-      : _box = box ?? (() => Storage.setting);
-
-  final Box<dynamic> Function() _box;
-
-  @override
-  Future<Object?> read() async => _box().get(StorageKey.flowEndpointPool);
-
-  @override
-  Future<void> write(Map<String, Object?> value) =>
-      _box().put(StorageKey.flowEndpointPool, value);
-}
-
-/// Storage failures are optional-cache misses and never block normal DNS access.
+/// 存储失败按缓存未命中处理，不阻断正常的 DNS 访问。
 class FlowEndpointCacheRepository {
   FlowEndpointCacheRepository({
-    FlowEndpointCacheStore? store,
     DateTime Function()? now,
     void Function(String)? onWarning,
-  })  : _store = store ?? HiveFlowEndpointCacheStore(),
-        _now = now ?? DateTime.now,
+  })  : _now = now ?? DateTime.now,
         _onWarning = onWarning ?? ((message) => LiggLogger().w(message));
 
-  final FlowEndpointCacheStore _store;
   final DateTime Function() _now;
   final void Function(String) _onWarning;
   Future<void> _writeTail = Future<void>.value();
@@ -45,7 +22,7 @@ class FlowEndpointCacheRepository {
     required FlowEndpointCandidates candidates,
   }) async {
     try {
-      final raw = await _store.read();
+      final raw = AppSettings.getSetting<Object?>(StorageKey.flowEndpointPool);
       final cache = FlowEndpointCache.fromMap(raw)?.validatedFor(
         endpoint: endpoint,
         candidates: candidates,
@@ -61,7 +38,7 @@ class FlowEndpointCacheRepository {
     }
   }
 
-  /// Serialize writes and prevent an older verification overwriting a newer one.
+  /// 串行写入，防止较旧的验证结果覆盖较新的结果。
   Future<bool> save(
     FlowEndpointCache cache, {
     required Uri endpoint,
@@ -71,15 +48,16 @@ class FlowEndpointCacheRepository {
     final operation = _writeTail.then((_) async {
       try {
         if (isCurrent != null && !isCurrent()) return false;
-        // Round-trip validation also rejects invalid caller-created models.
+        // 通过序列化后再解析校验，同时拒绝调用方构造的无效模型。
         final valid = FlowEndpointCache.fromMap(cache.toMap())?.validatedFor(
           endpoint: endpoint,
           candidates: candidates,
           now: _now(),
         );
         if (valid == null) return false;
-        final current =
-            FlowEndpointCache.fromMap(await _store.read())?.validatedFor(
+        final current = FlowEndpointCache.fromMap(
+          AppSettings.getSetting<Object?>(StorageKey.flowEndpointPool),
+        )?.validatedFor(
           endpoint: endpoint,
           candidates: candidates,
           now: _now(),
@@ -87,8 +65,8 @@ class FlowEndpointCacheRepository {
         if (current != null && current.verifiedAt.isAfter(valid.verifiedAt)) {
           return false;
         }
-        if (isCurrent != null && !isCurrent()) return false;
-        await _store.write(valid.toMap());
+        await AppSettings.setSetting(
+            StorageKey.flowEndpointPool, valid.toMap());
         return true;
       } catch (error) {
         _onWarning('保存 Flow IP 缓存失败 (${error.runtimeType})');

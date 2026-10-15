@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'flow_endpoint_pool.dart';
@@ -29,10 +30,13 @@ class FlowNetworkService with WidgetsBindingObserver {
   Timer? _periodic;
   bool _started = false;
   int _events = 0;
+  int _connectivityRead = 0;
+  Set<ConnectivityResult>? _lastConnectivity;
 
   Future<void> start() async {
     if (_started) return;
     _started = true;
+    _lastConnectivity = null;
     final scheduler = _scheduler = FlowProbeScheduler(
       run: _pool.probe,
       cancel: _pool.cancelProbe,
@@ -58,24 +62,41 @@ class FlowNetworkService with WidgetsBindingObserver {
     } catch (error) {
       LiggLogger().w('Flow IP 网络监听不可用 (${error.runtimeType})');
     }
+    await _refreshConnectivity(scheduler);
+    if (!_started || !identical(_scheduler, scheduler)) return;
+    await _pool.initialize();
+    if (_started && identical(_scheduler, scheduler)) _startPeriodic();
+  }
+
+  Future<void> _refreshConnectivity(FlowProbeScheduler scheduler) async {
     final beforeRead = _events;
+    final read = ++_connectivityRead;
+    bool current() =>
+        _started &&
+        identical(_scheduler, scheduler) &&
+        read == _connectivityRead &&
+        beforeRead == _events;
     try {
       final results = await (_readConnectivityOverride?.call() ??
           _connectivity.checkConnectivity());
-      if (_started && beforeRead == _events) _networkChanged(results);
+      if (!current()) return;
+      // 恢复前台时读取状态快照，避免每次获得焦点都强制完整探测。
+      // 事件流中的同类型通知仍使旧结果失效，例如切换到了另一个 Wi-Fi 接入点。
+      if (!setEquals(_lastConnectivity, results.toSet())) {
+        _networkChanged(results);
+      }
     } catch (error) {
-      if (_started) scheduler.request(force: true);
+      if (!current()) return;
+      scheduler.request(force: true);
       LiggLogger().w('读取 Flow IP 网络状态失败 (${error.runtimeType})');
     }
-    if (!_started) return;
-    await _pool.initialize();
-    if (_started) _startPeriodic();
   }
 
   void _networkChanged(List<ConnectivityResult> results) {
     if (!_started) return;
-    // Equal type notifications can represent different Wi-Fi access points.
-    // Conservatively invalidate them; debounce coalesces transition bursts.
+    _lastConnectivity = results.toSet();
+    // 相同网络类型的通知也可能表示切换到了不同的 Wi-Fi 接入点。
+    // 保守地使旧结果失效，再通过防抖合并切换过程中的密集通知。
     _pool.networkChanged();
     _scheduler?.networkChanged(
         online: results.any((result) => result != ConnectivityResult.none));
@@ -98,9 +119,11 @@ class FlowNetworkService with WidgetsBindingObserver {
     final active = state == AppLifecycleState.resumed;
     _scheduler?.setActive(active);
     if (active) {
+      unawaited(_refreshConnectivity(_scheduler!));
       _pool.expireRoute();
       _startPeriodic();
     } else {
+      _connectivityRead++;
       _periodic?.cancel();
       _periodic = null;
     }
@@ -108,6 +131,7 @@ class FlowNetworkService with WidgetsBindingObserver {
 
   Future<void> stop() async {
     _started = false;
+    _connectivityRead++;
     _scheduler?.dispose();
     _scheduler = null;
     _periodic?.cancel();

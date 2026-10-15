@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-/// Socket stream/sink over public raw TLS APIs. Keeping the raw TCP handle lets
-/// the connector close a handshake immediately when its owner is cancelled.
+/// 基于公开的底层 TLS API 实现 Socket 读写流。
+/// 保留原始 TCP 句柄，使连接器能在所属请求取消时立即终止握手。
 class FlowSecureSocket extends Stream<Uint8List> implements SecureSocket {
   FlowSecureSocket(this._raw) {
     _input = StreamController<Uint8List>(
@@ -129,8 +129,8 @@ class FlowSecureSocket extends Stream<Uint8List> implements SecureSocket {
   @override
   void writeCharCode(int charCode) => _sink.writeCharCode(charCode);
 
-  // Socket has a library-private detach operation. This already-secure socket
-  // is never upgraded again; all public Socket/IOSink members are implemented.
+  // Socket 包含库私有的分离操作。此套接字已完成 TLS 升级，不会再次升级；
+  // 所有公开的 Socket/IOSink 成员均已实现。
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

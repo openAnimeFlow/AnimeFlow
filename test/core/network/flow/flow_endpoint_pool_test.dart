@@ -1,43 +1,25 @@
-import 'dart:convert';
-
 import 'package:anime_flow/core/network/flow/flow_endpoint_cache.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_cache_repository.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_candidates.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
-import 'package:flutter/services.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 
-import 'flow_endpoint_cache_repository_test.dart' show MemoryCacheStore;
-
-class TextAssetBundle extends CachingAssetBundle {
-  TextAssetBundle(this.text);
-  final String? text;
-  int reads = 0;
-
-  @override
-  Future<ByteData> load(String key) async {
-    expect(key, FlowEndpointPool.assetPath);
-    reads++;
-    if (text == null) throw StateError('asset missing');
-    return ByteData.sublistView(Uint8List.fromList(utf8.encode(text!)));
-  }
-}
+import 'flow_test_support.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const text = '172.66.214.245\n104.19.52.165';
   final now = DateTime.utc(2026, 10, 15, 12);
-  late MemoryCacheStore store;
+  final store = setUpFlowSettings();
 
   FlowEndpointPool pool(TextAssetBundle bundle, {List<String>? warnings}) =>
       FlowEndpointPool(
         assetBundle: bundle,
-        cacheRepository: FlowEndpointCacheRepository(
-            store: store, now: () => now, onWarning: (_) {}),
+        cacheRepository:
+            FlowEndpointCacheRepository(now: () => now, onWarning: (_) {}),
         onWarning: (message) => warnings?.add(message),
       );
-
-  setUp(() => store = MemoryCacheStore());
 
   test('duplicate initialization shares one asset/cache read', () async {
     final bundle = TextAssetBundle(text);

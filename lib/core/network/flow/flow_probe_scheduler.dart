@@ -1,6 +1,6 @@
 import 'dart:async';
 
-/// Trailing debounce and single-flight scheduling, independent of platform APIs.
+/// 独立于平台 API 的尾沿防抖调度器，同一时间仅运行一轮探测。
 class FlowProbeScheduler {
   FlowProbeScheduler({
     required Future<void> Function() run,
@@ -70,7 +70,7 @@ class FlowProbeScheduler {
   }
 
   Future<void> _flush(int ticket) async {
-    // A network switch may have cancelled an old round still releasing sockets.
+    // 网络切换可能已取消上一轮探测，此处等待其完成套接字清理。
     await _running;
     if (_disposed || ticket != _ticket || !_active || !_online || !_pending) {
       return;

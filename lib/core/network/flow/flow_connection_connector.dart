@@ -12,7 +12,7 @@ class FlowConnectionCancelled implements Exception {
   const FlowConnectionCancelled();
 }
 
-/// Each fetch has its own cancellation scope, including DNS/TCP/TLS acquisition.
+/// 每个请求拥有独立的取消范围，覆盖 DNS 解析、TCP 建连和 TLS 握手。
 class FlowConnectionContext {
   FlowConnectionContext({this.budget = const Duration(seconds: 8)});
 
@@ -43,7 +43,7 @@ class FlowConnectionContext {
   }
 }
 
-/// Returns TLS sockets for HTTPS; HttpClient does not add TLS to a custom factory.
+/// 为 HTTPS 返回 TLS 套接字；HttpClient 不会为自定义连接工厂补做 TLS 握手。
 class FlowConnectionConnector {
   FlowConnectionConnector({
     required this.endpoint,
@@ -91,7 +91,7 @@ class FlowConnectionConnector {
       if (!isTarget || allowDnsFallback || addresses.isEmpty) null,
     ];
     final result = Completer<Socket>();
-    // Cancellation can precede HttpClient attaching to the returned task.
+    // 取消操作可能发生在 HttpClient 开始监听返回的连接任务之前。
     unawaited(result.future.then<void>((_) {}, onError: (_) {}));
     final watch = Stopwatch()..start();
     _SocketAttempt? active;
@@ -118,7 +118,7 @@ class FlowConnectionConnector {
           if (ended) return;
           final remaining = budget - watch.elapsed;
           if (remaining <= Duration.zero) break;
-          // Short requests reserve their entire budget for DNS.
+          // 连接时限较短时，将全部剩余时间留给 DNS 路径。
           if (address != null && allowDnsFallback && remaining <= dnsReserve) {
             continue;
           }
@@ -166,7 +166,7 @@ class FlowConnectionConnector {
       }
     }
 
-    // Install error handling before any asynchronous dial can finish.
+    // 在异步建连可能完成之前注册错误处理。
     unawaited(run());
     return ConnectionTask.fromSocket(result.future, cancel);
   }
@@ -196,7 +196,7 @@ class _SocketAttempt {
   Future<Socket> open() async {
     if (tlsHost != null) return _openTls();
     final task = _task = await dial(host, port);
-    // startConnect itself may return after cancellation (e.g. slow DNS).
+    // startConnect 本身可能在取消后才返回，例如 DNS 解析较慢时。
     if (_cancelled) {
       task.cancel();
       unawaited(task.socket.then<void>((s) => s.destroy(), onError: (_) {}));

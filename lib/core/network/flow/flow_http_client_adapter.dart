@@ -8,7 +8,7 @@ import 'package:dio/io.dart';
 import 'flow_connection_connector.dart';
 import 'flow_endpoint_pool.dart';
 
-/// A stable Dio adapter whose old pools drain while new fetches use new routes.
+/// 保持实例稳定的 Dio 适配器：旧连接池等待已有请求结束，新请求使用新路由。
 class FlowHttpClientAdapter implements HttpClientAdapter {
   FlowHttpClientAdapter(
       {required this.pool,
@@ -95,7 +95,7 @@ class FlowHttpClientAdapter implements HttpClientAdapter {
       }
       rethrow;
     } finally {
-      // Also abort acquisition if IOHttpClientAdapter timed out before it ended.
+      // 若 IOHttpClientAdapter 提前超时，也要终止尚未完成的连接获取过程。
       context.cancel();
       _contexts.remove(context);
       generation.pending--;

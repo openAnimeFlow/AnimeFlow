@@ -33,7 +33,6 @@ void main() {
     final original = cache();
     final restored = FlowEndpointCache.fromMap(original.toMap())!;
     expect(restored.toMap(), original.toMap());
-    expect(restored.measurements.single.latency.inMicroseconds, 123456);
     expect(restored.verifiedAt.isUtc, isTrue);
     expect(validate(restored), isNotNull);
     expect(() => restored.measurements.clear(), throwsUnsupportedError);

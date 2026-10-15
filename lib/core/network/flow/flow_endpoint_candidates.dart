@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-/// Bundled addresses are candidates, not a ranking or verified live routes.
+/// 内置地址仅作为候选，不代表排名或已经验证可用的路由。
 class FlowEndpointCandidates {
   FlowEndpointCandidates._(List<String> addresses, List<int> rejectedLines)
       : addresses = List.unmodifiable(addresses),
@@ -30,11 +30,11 @@ class FlowEndpointCandidates {
 
   final List<String> addresses;
 
-  /// One-based line numbers; do not expose malformed source text in logs.
+  /// 行号从 1 开始；日志中不输出格式错误的原始文本。
   final List<int> rejectedLines;
   final Set<String> _addressSet;
 
-  /// Hash of the normalized address set: whitespace/order do not expire cache.
+  /// 规范化地址集合的哈希值：空白字符或顺序变化不会使缓存失效。
   final String hash;
 
   bool contains(String address) => _addressSet.contains(address);
@@ -58,7 +58,7 @@ class FlowEndpointCandidates {
     if (octets.length != 4) return null;
     var value = 0;
     for (final octet in octets) {
-      // Reject hostnames, CIDRs, ports, alternate encodings and leading zeroes.
+      // 拒绝主机名、CIDR 网段、端口、其他编码形式及前导零。
       if (!_octetPattern.hasMatch(octet)) return null;
       final number = int.parse(octet);
       if (number > 255) return null;
@@ -69,9 +69,9 @@ class FlowEndpointCandidates {
 
   static final _octetPattern = RegExp(r'^(0|[1-9][0-9]{0,2})$');
 
-  // Cloudflare's public HTTP proxy IPv4 ranges, checked 2026-10-15.
+  // Cloudflare 公布的 HTTP 代理 IPv4 网段，核对日期：2026-10-15。
   // https://www.cloudflare.com/ips-v4
-  // This allowlist also excludes private, loopback, link-local and multicast IPs.
+  // 此白名单同时排除了私有、回环、链路本地及组播地址。
   static const _cloudflareRanges = <(int, int)>[
     (0xadf53000, 20), // 173.245.48.0/20
     (0x6715f400, 22), // 103.21.244.0/22

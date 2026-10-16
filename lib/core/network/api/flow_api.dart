@@ -443,16 +443,19 @@ class FlowApi {
   }
 
   ///根据id获取条目（已登录时携带 Flow Token，服务端换取 Bangumi token 返回 interest）
-  static Future<SubjectsInfoItem> getSubjectByIdService(int id) async {
-    final response = await _client.get('${AnimeFlowApi.subjects}/$id');
+  static Future<SubjectsInfoItem> getSubjectByIdService(int id,
+      {CancelToken? cancelToken}) async {
+    final response = await _client.get('${AnimeFlowApi.subjects}/$id',
+        cancelToken: cancelToken);
     return SubjectsInfoItem.fromJson(response.data);
   }
 
   /// 获取条目预览图
-  static Future<List<String>> getSubjectStillsService(int subjectId) async {
-    final path =
-        AnimeFlowApi.subjectStills.replaceFirst('{subjectId}', subjectId.toString());
-    final response = await _client.get(path);
+  static Future<List<String>> getSubjectStillsService(int subjectId,
+      {CancelToken? cancelToken}) async {
+    final path = AnimeFlowApi.subjectStills
+        .replaceFirst('{subjectId}', subjectId.toString());
+    final response = await _client.get(path, cancelToken: cancelToken);
     final data = response.data;
     if (data is! List) return const [];
     return data.whereType<String>().where((url) => url.isNotEmpty).toList();
@@ -460,10 +463,12 @@ class FlowApi {
 
   ///获取条目章节
   static Future<EpisodesItem> getSubjectEpisodesByIdService(
-      int id, int limit, int offset) async {
+      int id, int limit, int offset,
+      {CancelToken? cancelToken}) async {
     try {
       return await _client.get(
           AnimeFlowApi.episodes.replaceFirst('{subjectId}', id.toString()),
+          cancelToken: cancelToken,
           queryParameters: {
             'limit': limit,
             'offset': offset
@@ -563,7 +568,10 @@ class FlowApi {
 
   ///角色列表
   static Future<CharactersItem> charactersService(int subjectId,
-      {required int limit, required int offset, int? type}) async {
+      {required int limit,
+      required int offset,
+      int? type,
+      CancelToken? cancelToken}) async {
     final queryParameters = <String, dynamic>{
       'limit': limit,
       'offset': offset,
@@ -575,6 +583,7 @@ class FlowApi {
         .get(
           AnimeFlowApi.characters
               .replaceFirst('{subjectId}', subjectId.toString()),
+          cancelToken: cancelToken,
           queryParameters: queryParameters,
         )
         .then((response) => (CharactersItem.fromJson(response.data)));
@@ -582,9 +591,12 @@ class FlowApi {
 
   ///获取条目制作人
   static Future<ProducersItem> getProducersService(int subjectId,
-      {required int limit, required int offset}) async {
+      {required int limit,
+      required int offset,
+      CancelToken? cancelToken}) async {
     final response = await _client.get(
       AnimeFlowApi.staffs.replaceFirst('{subjectId}', subjectId.toString()),
+      cancelToken: cancelToken,
       queryParameters: {
         'limit': limit,
         'offset': offset,
@@ -598,10 +610,12 @@ class FlowApi {
     required int limit,
     required int offset,
     required int subjectId,
+    CancelToken? cancelToken,
   }) async {
     final response = await _client.get(
       AnimeFlowApi.subjectComments
           .replaceFirst('{subjectId}', subjectId.toString()),
+      cancelToken: cancelToken,
       queryParameters: {
         'limit': limit,
         'offset': offset,
@@ -651,9 +665,13 @@ class FlowApi {
 
   ///相关条目
   static Future<SubjectRelationItem> relatedSubjectsService(int subjectId,
-      {required int limit, required int offset, int? type = 2}) async {
+      {required int limit,
+      required int offset,
+      int? type = 2,
+      CancelToken? cancelToken}) async {
     return _client.get(
       AnimeFlowApi.relations.replaceFirst('{subjectId}', subjectId.toString()),
+      cancelToken: cancelToken,
       queryParameters: {
         'type': type,
         'limit': limit,

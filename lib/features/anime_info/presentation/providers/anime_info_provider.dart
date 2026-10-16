@@ -12,6 +12,7 @@ import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/bangumi/interest_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -21,6 +22,13 @@ part 'anime_info_provider.g.dart';
 /// Optional detail data supplied by a route that already loaded the subject.
 /// This lets child pages reuse the loaded response without another request.
 final animeInfoInitialProvider = Provider<SubjectsInfoItem?>((ref) => null);
+
+// Each build owns its requests, including when dependencies invalidate it.
+CancelToken _requestCancelToken(Ref ref) {
+  final token = CancelToken();
+  ref.onDispose(() => token.cancel());
+  return token;
+}
 
 @Riverpod(dependencies: [animeInfoArgs])
 class AnimeInfo extends _$AnimeInfo {
@@ -38,7 +46,8 @@ class AnimeInfo extends _$AnimeInfo {
       _initialConsumed = true;
       return initial!;
     }
-    return FlowApi.getSubjectByIdService(subjectId);
+    return FlowApi.getSubjectByIdService(subjectId,
+        cancelToken: _requestCancelToken(ref));
   }
 
   void setAnimeInfo(SubjectsInfoItem subjectInfo) {
@@ -88,7 +97,8 @@ class SubjectStills extends _$SubjectStills {
   @override
   Future<List<String>> build() {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return FlowApi.getSubjectStillsService(subjectId);
+    return FlowApi.getSubjectStillsService(subjectId,
+        cancelToken: _requestCancelToken(ref));
   }
 }
 
@@ -112,14 +122,19 @@ class SubjectComments extends _$SubjectComments {
 
   bool _armedForBottomLoad = true;
   bool _loadMoreScheduled = false;
+  late CancelToken _cancelToken;
 
   @override
   Future<SubjectCommentsViewState> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
+    _cancelToken = _requestCancelToken(ref);
+    _armedForBottomLoad = true;
+    _loadMoreScheduled = false;
     final comments = await FlowApi.getSubjectCommentsByIdService(
       subjectId: subjectId,
       limit: _pageSize,
       offset: 0,
+      cancelToken: _cancelToken,
     );
     return SubjectCommentsViewState(comments: comments);
   }
@@ -143,13 +158,17 @@ class SubjectComments extends _$SubjectComments {
 
     _armedForBottomLoad = false;
     _loadMoreScheduled = true;
+    final cancelToken = _cancelToken;
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (!ref.mounted || cancelToken.isCancelled) return;
       _loadMoreScheduled = false;
       await loadMore();
     });
   }
 
   Future<void> loadMore() async {
+    if (!ref.mounted || _cancelToken.isCancelled) return;
+    final cancelToken = _cancelToken;
     final current = state.asData?.value;
     if (current == null || current.isLoadingMore || !current.hasMore) {
       return;
@@ -169,13 +188,16 @@ class SubjectComments extends _$SubjectComments {
         subjectId: subjectId,
         limit: _pageSize,
         offset: prev.data.length,
+        cancelToken: cancelToken,
       );
+      if (!ref.mounted || cancelToken.isCancelled) return;
       final merged = SubjectCommentItem(
         data: [...prev.data, ...result.data],
         total: result.total,
       );
       state = AsyncData(SubjectCommentsViewState(comments: merged));
     } catch (_) {
+      if (!ref.mounted || cancelToken.isCancelled) return;
       _armedForBottomLoad = true;
       state = AsyncData(
         SubjectCommentsViewState(
@@ -193,7 +215,8 @@ class SubjectRelated extends _$SubjectRelated {
   @override
   Future<SubjectRelationItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return FlowApi.relatedSubjectsService(subjectId, limit: 20, offset: 0);
+    return FlowApi.relatedSubjectsService(subjectId,
+        limit: 20, offset: 0, cancelToken: _requestCancelToken(ref));
   }
 }
 
@@ -203,7 +226,8 @@ class SubjectCharacters extends _$SubjectCharacters {
   @override
   Future<CharactersItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return FlowApi.charactersService(subjectId, limit: 10, offset: 0);
+    return FlowApi.charactersService(subjectId,
+        limit: 10, offset: 0, cancelToken: _requestCancelToken(ref));
   }
 }
 
@@ -213,6 +237,7 @@ class SubjectProducers extends _$SubjectProducers {
   @override
   Future<ProducersItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return FlowApi.getProducersService(subjectId, limit: 10, offset: 0);
+    return FlowApi.getProducersService(subjectId,
+        limit: 10, offset: 0, cancelToken: _requestCancelToken(ref));
   }
 }

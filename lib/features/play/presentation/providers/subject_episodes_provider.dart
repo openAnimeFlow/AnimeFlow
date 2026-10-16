@@ -1,6 +1,7 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'subject_episodes_provider.g.dart';
@@ -169,12 +170,17 @@ class SubjectEpisodes extends _$SubjectEpisodes {
   Future<bool>? _pendingPage;
   int _revision = 0;
   int _nextOffset = 0;
+  late CancelToken _cancelToken;
 
   @override
   Future<SubjectEpisodesState> build(int subjectId) async {
     final revision = ++_revision;
+    final cancelToken = _cancelToken = CancelToken();
     _pendingPage = null;
-    ref.onDispose(() => _revision++);
+    ref.onDispose(() {
+      _revision++;
+      cancelToken.cancel();
+    });
     final episodes = await fetchPage(subjectId, offset: 0);
     if (_isCurrent(revision)) _nextOffset = episodes.data.length;
     return SubjectEpisodesState(
@@ -195,14 +201,13 @@ class SubjectEpisodes extends _$SubjectEpisodes {
 
   /// Returns whether new episodes were added. Concurrent callers share a request.
   Future<bool> loadMore() {
+    if (!ref.mounted) return Future.value(false);
     final pending = _pendingPage;
     if (pending != null) return pending;
     final revision = _revision;
-    final link = ref.keepAlive();
     late final Future<bool> request;
     request = _loadMore(revision).whenComplete(() {
       if (identical(_pendingPage, request)) _pendingPage = null;
-      link.close();
     });
     return _pendingPage = request;
   }
@@ -276,7 +281,8 @@ class SubjectEpisodes extends _$SubjectEpisodes {
   @protected
   Future<EpisodesItem> fetchPage(int subjectId, {required int offset}) =>
       FlowApi.getSubjectEpisodesByIdService(
-          subjectId, _episodesPageSize, offset);
+          subjectId, _episodesPageSize, offset,
+          cancelToken: _cancelToken);
 
   Future<void> updateEpisodeWatched({
     required int episodeId,

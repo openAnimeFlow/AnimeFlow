@@ -52,26 +52,22 @@ class FlowEndpointPool extends ChangeNotifier {
   List<String> _probeOrder = const [];
   int _cursor = 0;
   int _networkGeneration = 0;
-  int _routeVersion = 0;
   int _roundToken = 0;
   DateTime? _routeExpiresAt;
+  bool _preferCached = true;
   Future<void>? _probing;
   FlowProbeSession? _activeProbe;
   bool _disposed = false;
 
   int get networkGeneration => _networkGeneration;
-  int get routeVersion => _routeVersion;
   List<String> get preferredAddresses => _preferredAddresses;
   Stream<void> get revalidationRequests => _revalidationRequests.stream;
 
+  /// 已验证的 IP 或 DNS 路径在有效期内无需周期性扫描候选池。
+  bool get needsProbe => _routeExpiresAt == null;
+
   FlowEndpointCandidates get candidates => _candidates;
   FlowEndpointCache? get cachedForRevalidation => _cachedForRevalidation;
-
-  /// 优先复测缓存中的地址，但不将其直接视为可用节点。
-  List<String> get revalidationOrder => List.unmodifiable({
-        ...?_cachedForRevalidation?.measurements.map((item) => item.address),
-        ..._candidates.addresses,
-      });
 
   Future<void> initialize() => _initialization ??= _initialize();
 
@@ -115,7 +111,10 @@ class FlowEndpointPool extends ChangeNotifier {
   }
 
   void requestRevalidation() {
-    if (!_disposed) _revalidationRequests.add(null);
+    if (_disposed) return;
+    // DNS 路径的业务失败也需要重新验证，不能被健康路径的有效期拦住。
+    _routeExpiresAt = null;
+    _revalidationRequests.add(null);
   }
 
   void reportConnectionFailure(String address, int generation) {
@@ -138,6 +137,7 @@ class FlowEndpointPool extends ChangeNotifier {
       _stats.clear();
       _setRoute(const [], force: true);
       _routeExpiresAt = null;
+      _preferCached = true;
       requestRevalidation();
     }
   }
@@ -145,6 +145,7 @@ class FlowEndpointPool extends ChangeNotifier {
   void networkChanged() {
     if (_disposed) return;
     _networkGeneration++;
+    _preferCached = true;
     cancelProbe();
     _stats.clear();
     _cooldowns.clear();
@@ -185,36 +186,50 @@ class FlowEndpointPool extends ChangeNotifier {
         !_disposed && token == _roundToken && generation == _networkGeneration;
 
     Future<void> measure(List<String?> targets) async {
-      var index = 0;
-      Future<void> worker() async {
-        while (current() && !deadlineReached && index < targets.length) {
-          final address = targets[index++];
-          final latency = await session.probe(address);
-          if (!current() || deadlineReached) return;
-          (samples[address] ??= _EndpointStats()).add(latency);
-        }
+      // 自动探测串行执行，避免与启动请求争抢多个连接。
+      for (final address in targets) {
+        if (!current() || deadlineReached) return;
+        final latency = await session.probe(address);
+        if (!current() || deadlineReached) return;
+        (samples[address] ??= _EndpointStats()).add(latency);
       }
-
-      await Future.wait(List.generate(min(3, targets.length), (_) => worker()));
     }
 
-    try {
+    List<String> nextCandidates(int limit, {String? exclude}) {
       final selected = <String>[];
       for (var count = 0;
-          count < _probeOrder.length && selected.length < 12;
+          count < _probeOrder.length && selected.length < limit;
           count++) {
         final ip = _probeOrder[_cursor++ % _probeOrder.length];
-        if (isAddressAvailable(ip)) selected.add(ip);
+        if (ip != exclude && isAddressAvailable(ip)) selected.add(ip);
       }
-      await measure([null, ...selected]);
-      if (!current()) return;
-      final successful = selected
+      return selected;
+    }
+
+    Future<void> measureCandidates(List<String> targets,
+        {bool includeDns = false}) async {
+      await measure([if (includeDns) null, ...targets]);
+      final successful = targets
           .where((ip) => samples[ip]?.latencies.isNotEmpty ?? false)
           .toList()
         ..sort((a, b) => samples[a]!.average.compareTo(samples[b]!.average));
-      // 使用新建的 TLS 连接复测 DNS 路径和最快的三个 IP。
-      await measure([null, ...successful.take(3)]);
+      // 保留两次新连接验证，历史成功次数不计入当前网络的验证结果。
+      await measure([...successful, if (includeDns) null]);
+    }
+
+    try {
+      final cached = _cachedForRevalidation?.measurements.first.address;
+      final hint = _preferCached && cached != null && isAddressAvailable(cached)
+          ? cached
+          : null;
+      await measureCandidates(hint == null ? nextCandidates(3) : [hint],
+          includeDns: true);
+      // 缓存主 IP 验证失败才扩展到其他候选，整轮最多检查三个 IP。
+      if (hint != null && (samples[hint]?.latencies.length ?? 0) < 2) {
+        await measureCandidates(nextCandidates(2, exclude: hint));
+      }
       if (!current()) return;
+      _preferCached = false;
       for (final entry in samples.entries) {
         // 本轮期间若收到某地址的业务连接失败报告，则丢弃该地址的样本，
         // 即使这些样本是在失败报告到来之前完成的。
@@ -232,22 +247,21 @@ class FlowEndpointPool extends ChangeNotifier {
       final eligible = _eligibleAddresses();
       if (eligible.isNotEmpty) {
         final ordered = <String>{..._preferredAddresses, ...eligible}.take(3);
-        await _cacheRepository.save(
-            FlowEndpointCache(
-              host: endpoint.host,
-              port: endpoint.port,
-              candidateHash: _candidates.hash,
-              verifiedAt: _now(),
-              measurements: ordered
-                  .map((ip) => FlowEndpointMeasurement(
-                      address: ip,
-                      latency: _stats[ip]!.average,
-                      successCount: _stats[ip]!.latencies.length))
-                  .toList(),
-            ),
-            endpoint: endpoint,
-            candidates: _candidates,
-            isCurrent: current);
+        final cache = FlowEndpointCache(
+          host: endpoint.host,
+          port: endpoint.port,
+          candidateHash: _candidates.hash,
+          verifiedAt: _now(),
+          measurements: ordered
+              .map((ip) => FlowEndpointMeasurement(
+                  address: ip,
+                  latency: _stats[ip]!.average,
+                  successCount: _stats[ip]!.latencies.length))
+              .toList(),
+        );
+        await _cacheRepository.save(cache,
+            endpoint: endpoint, candidates: _candidates, isCurrent: current);
+        if (current()) _cachedForRevalidation = cache;
       }
       LiggLogger().d('Flow IP 测速完成，网络代次 $generation，'
           '可用候选 ${eligible.length}，当前路径 '
@@ -281,6 +295,10 @@ class FlowEndpointPool extends ChangeNotifier {
     final eligible = _eligibleAddresses();
     if (eligible.isEmpty) {
       _setRoute(const []);
+      // DNS 本身可用时无需为寻找优选 IP 持续扫描；全部失败则保留后续重试。
+      _routeExpiresAt = (_stats[null]?.lastSucceeded ?? false)
+          ? _now().add(FlowEndpointCache.lifetime)
+          : null;
       return;
     }
     final dns = _stats[null];
@@ -320,7 +338,6 @@ class FlowEndpointPool extends ChangeNotifier {
       return;
     }
     _preferredAddresses = List.unmodifiable(addresses);
-    _routeVersion++;
     notifyListeners();
   }
 

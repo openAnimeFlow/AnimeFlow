@@ -12,11 +12,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'flow_test_support.dart';
 
 class _ServiceHarness {
-  _ServiceHarness(Future<List<ConnectivityResult>> Function() read,
+  _ServiceHarness(
+      FakeAsync clock, Future<List<ConnectivityResult>> Function() read,
       {bool platformEvents = false}) {
+    DateTime now() => DateTime.utc(2026, 10, 15).add(clock.elapsed);
     pool = FlowEndpointPool(
+      now: now,
       assetBundle: TextAssetBundle('$ipA\n$ipB'),
-      cacheRepository: FlowEndpointCacheRepository(onWarning: (_) {}),
+      cacheRepository: FlowEndpointCacheRepository(now: now, onWarning: (_) {}),
       probeFactory: (_) {
         rounds++;
         return FixedProbe({
@@ -27,6 +30,7 @@ class _ServiceHarness {
     );
     service = FlowNetworkService(
         pool: pool,
+        now: now,
         networkChanges: platformEvents ? null : events.stream,
         readConnectivity: read);
   }
@@ -60,11 +64,13 @@ void main() {
               onListen: (_, events) => nativeEvents = events),
         );
         final harness =
-            _ServiceHarness(() async => [type], platformEvents: true);
+            _ServiceHarness(clock, () async => [type], platformEvents: true);
         unawaited(harness.service.start());
         clock.flushMicrotasks();
         nativeEvents.success([type.name]);
-        clock.elapse(const Duration(seconds: 2));
+        clock.elapse(const Duration(milliseconds: 9999));
+        expect(harness.rounds, 0);
+        clock.elapse(const Duration(milliseconds: 1));
         expect(harness.pool.preferredAddresses, [ipA]);
         expect(harness.rounds, 1);
 
@@ -87,10 +93,11 @@ void main() {
 
   test('Wi-Fi/mobile switches remeasure in both directions after debounce', () {
     fakeAsync((clock) {
-      final harness = _ServiceHarness(() async => [ConnectivityResult.wifi]);
+      final harness =
+          _ServiceHarness(clock, () async => [ConnectivityResult.wifi]);
       unawaited(harness.service.start());
       clock.flushMicrotasks();
-      clock.elapse(const Duration(seconds: 2));
+      clock.elapse(const Duration(seconds: 10));
       expect(harness.rounds, 1);
       for (final type in [ConnectivityResult.mobile, ConnectivityResult.wifi]) {
         harness.events.add([type]);
@@ -111,9 +118,11 @@ void main() {
     fakeAsync((clock) {
       final initialRead = Completer<List<ConnectivityResult>>();
       var reads = 0;
-      final harness = _ServiceHarness(() => ++reads == 1
-          ? initialRead.future
-          : Future.value([ConnectivityResult.wifi]));
+      final harness = _ServiceHarness(
+          clock,
+          () => ++reads == 1
+              ? initialRead.future
+              : Future.value([ConnectivityResult.wifi]));
       unawaited(harness.service.start());
       harness.events.add([ConnectivityResult.mobile]);
       final generation = harness.pool.networkGeneration;
@@ -136,13 +145,13 @@ void main() {
     fakeAsync((clock) {
       var network = ConnectivityResult.none;
       var reads = 0;
-      final harness = _ServiceHarness(() async {
+      final harness = _ServiceHarness(clock, () async {
         reads++;
         return [network];
       });
       unawaited(harness.service.start());
       clock.flushMicrotasks();
-      clock.elapse(const Duration(seconds: 2));
+      clock.elapse(const Duration(seconds: 10));
       expect(harness.rounds, 0);
       harness.service.didChangeAppLifecycleState(AppLifecycleState.paused);
       network = ConnectivityResult.wifi;
@@ -161,10 +170,11 @@ void main() {
 
   test('ordinary focus changes preserve routes and ordinary throttle', () {
     fakeAsync((clock) {
-      final harness = _ServiceHarness(() async => [ConnectivityResult.wifi]);
+      final harness =
+          _ServiceHarness(clock, () async => [ConnectivityResult.wifi]);
       unawaited(harness.service.start());
       clock.flushMicrotasks();
-      clock.elapse(const Duration(seconds: 2));
+      clock.elapse(const Duration(seconds: 10));
       final generation = harness.pool.networkGeneration;
       expect(harness.rounds, 1);
       harness.service.didChangeAppLifecycleState(AppLifecycleState.inactive);
@@ -172,6 +182,8 @@ void main() {
       clock.elapse(const Duration(seconds: 2));
       expect(harness.pool.networkGeneration, generation);
       expect(harness.pool.preferredAddresses, [ipA]);
+      expect(harness.rounds, 1);
+      clock.elapse(const Duration(minutes: 10));
       expect(harness.rounds, 1);
       unawaited(harness.dispose());
       clock.flushMicrotasks();
@@ -181,10 +193,11 @@ void main() {
   for (final state in [AppLifecycleState.paused, AppLifecycleState.hidden]) {
     test('resume from $state revalidates even without a type change event', () {
       fakeAsync((clock) {
-        final harness = _ServiceHarness(() async => [ConnectivityResult.wifi]);
+        final harness =
+            _ServiceHarness(clock, () async => [ConnectivityResult.wifi]);
         unawaited(harness.service.start());
         clock.flushMicrotasks();
-        clock.elapse(const Duration(seconds: 2));
+        clock.elapse(const Duration(seconds: 10));
         expect(harness.pool.preferredAddresses, [ipA]);
         harness.service.didChangeAppLifecycleState(state);
         harness.fastest = ipB;
@@ -207,12 +220,14 @@ void main() {
       fakeAsync((clock) {
         var reads = 0;
         final staleRead = Completer<List<ConnectivityResult>>();
-        final harness = _ServiceHarness(() => ++reads == 2
-            ? staleRead.future
-            : Future.value([ConnectivityResult.wifi]));
+        final harness = _ServiceHarness(
+            clock,
+            () => ++reads == 2
+                ? staleRead.future
+                : Future.value([ConnectivityResult.wifi]));
         unawaited(harness.service.start());
         clock.flushMicrotasks();
-        clock.elapse(const Duration(seconds: 2));
+        clock.elapse(const Duration(seconds: 10));
         harness.service.didChangeAppLifecycleState(AppLifecycleState.paused);
         harness.service.didChangeAppLifecycleState(AppLifecycleState.resumed);
         if (supersededBy == 'event') {

@@ -5,6 +5,34 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final eventAt in [4, 9]) {
+    test('startup grace and late debounce both apply to event at ${eventAt}s',
+        () {
+      fakeAsync((clock) {
+        var runs = 0;
+        final scheduler = FlowProbeScheduler(
+          run: () async => runs++,
+          cancel: () {},
+          initialDelay: const Duration(seconds: 10),
+        );
+        scheduler.networkChanged(online: true);
+        clock.elapse(Duration(seconds: eventAt));
+        scheduler.setActive(false);
+        scheduler.networkChanged(online: true);
+        scheduler.setActive(true);
+        final runAt = eventAt == 4 ? 10 : 11;
+        clock.elapse(Duration(milliseconds: (runAt - eventAt) * 1000 - 1));
+        expect(runs, 0);
+        clock.elapse(const Duration(milliseconds: 1));
+        expect(runs, 1);
+        scheduler.networkChanged(online: true);
+        clock.elapse(const Duration(seconds: 2));
+        expect(runs, 2);
+        scheduler.dispose();
+      });
+    });
+  }
+
   test('trailing debounce resets and preserves forced network remeasurement',
       () {
     fakeAsync((clock) {

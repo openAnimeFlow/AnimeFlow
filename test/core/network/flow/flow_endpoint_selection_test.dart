@@ -29,10 +29,11 @@ void main() {
 
   FlowEndpointPool makePool(
       {Duration roundTimeout = const Duration(seconds: 15),
+      String candidates = '$ipA\n$ipB\n$ipC',
       bool holdFirst = false,
       FlowProbeSession Function(Uri)? probeFactory}) {
     final pool = FlowEndpointPool(
-      assetBundle: TextAssetBundle('$ipA\n$ipB\n$ipC'),
+      assetBundle: TextAssetBundle(candidates),
       cacheRepository:
           FlowEndpointCacheRepository(now: () => now, onWarning: (_) {}),
       now: () => now,
@@ -70,9 +71,42 @@ void main() {
     expect(identical(first, pool.probe()), isTrue);
     await first;
     expect(pool.preferredAddresses, [ipA, ipB, ipC]);
-    expect(sessions.single.maxActive, lessThanOrEqualTo(3));
+    expect(sessions.single.maxActive, 1);
     expect(sessions.single.calls.where((ip) => ip == ipA), hasLength(2));
     expect(store.writes, 1);
+    expect(pool.needsProbe, isFalse);
+  });
+
+  test('cold probes check at most three candidates and keep DNS usable',
+      () async {
+    final pool = makePool(candidates: '$ipA\n$ipB\n$ipC\n104.16.0.1');
+    await pool.probe();
+    expect(pool.candidates.addresses, hasLength(4));
+    final calls = sessions.single.calls;
+    expect(calls.whereType<String>().toSet(), hasLength(3));
+    expect(calls.length, lessThanOrEqualTo(8));
+    expect(sessions.single.maxActive, 1);
+  });
+
+  test(
+      'cached primary needs four probes; failure expands within one small batch',
+      () async {
+    await makePool().probe();
+    final pool = makePool();
+    await pool.initialize();
+    expect(pool.preferredAddresses, isEmpty);
+    await pool.probe();
+    expect(sessions.last.calls, [null, ipA, ipA, null]);
+    expect(pool.preferredAddresses, [ipA]);
+
+    values[ipA] = null;
+    pool.networkChanged();
+    expect(pool.needsProbe, isTrue);
+    await pool.probe();
+    expect(sessions.last.calls.length, lessThanOrEqualTo(8));
+    expect(sessions.last.maxActive, 1);
+    expect(pool.preferredAddresses, [ipB, ipC]);
+    expect(pool.cachedForRevalidation!.measurements.first.address, ipB);
   });
 
   test('keeps DNS if faster or improvement is below 100ms', () async {
@@ -80,6 +114,9 @@ void main() {
     final fastDns = makePool();
     await fastDns.probe();
     expect(fastDns.preferredAddresses, isEmpty);
+    expect(fastDns.needsProbe, isFalse);
+    fastDns.requestRevalidation();
+    expect(fastDns.needsProbe, isTrue);
     values[null] = const Duration(milliseconds: 120);
     final smallGain = makePool();
     await smallGain.probe();
@@ -153,6 +190,12 @@ void main() {
     values = {null: null, ipA: null, ipB: null, ipC: null};
     await pool.probe();
     expect(pool.preferredAddresses, isEmpty);
+    expect(pool.needsProbe, isTrue);
+
+    values[null] = const Duration(milliseconds: 50);
+    await pool.probe();
+    expect(pool.preferredAddresses, isEmpty);
+    expect(pool.needsProbe, isFalse);
   });
 
   test('connection failures cool down the actual IP; stale generations ignored',
@@ -160,6 +203,7 @@ void main() {
     final pool = makePool();
     await pool.probe();
     pool.reportConnectionFailure(ipA, pool.networkGeneration);
+    expect(pool.needsProbe, isTrue);
     expect(pool.preferredAddresses, [ipB, ipC]);
     expect(pool.isAddressAvailable(ipA), isFalse);
     now = now.add(const Duration(minutes: 1));

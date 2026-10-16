@@ -9,10 +9,18 @@ class FlowProbeScheduler {
     void Function(Object)? onError,
     this.debounce = const Duration(seconds: 2),
     this.minimumInterval = const Duration(minutes: 5),
+    Duration initialDelay = Duration.zero,
   })  : _run = run,
         _cancel = cancel,
         _now = now ?? DateTime.now,
-        _onError = onError ?? ((_) {});
+        _onError = onError ?? ((_) {}) {
+    // 宽限期独立于尾沿防抖，网络通知不会提前结束或重新计时。
+    if (initialDelay > Duration.zero) {
+      _startupTimer = Timer(initialDelay, () {
+        if (!(_timer?.isActive ?? false)) unawaited(_flush(_ticket));
+      });
+    }
+  }
 
   final Future<void> Function() _run;
   final void Function() _cancel;
@@ -20,6 +28,7 @@ class FlowProbeScheduler {
   final void Function(Object) _onError;
   final Duration debounce;
   final Duration minimumInterval;
+  Timer? _startupTimer;
   Timer? _timer;
   Future<void>? _running;
   DateTime? _lastRun;
@@ -72,7 +81,12 @@ class FlowProbeScheduler {
   Future<void> _flush(int ticket) async {
     // 网络切换可能已取消上一轮探测，此处等待其完成套接字清理。
     await _running;
-    if (_disposed || ticket != _ticket || !_active || !_online || !_pending) {
+    if (_disposed ||
+        ticket != _ticket ||
+        !_active ||
+        !_online ||
+        !_pending ||
+        (_startupTimer?.isActive ?? false)) {
       return;
     }
     if (!_force &&
@@ -101,6 +115,7 @@ class FlowProbeScheduler {
 
   void dispose() {
     _disposed = true;
+    _startupTimer?.cancel();
     _timer?.cancel();
     _ticket++;
     _cancel();

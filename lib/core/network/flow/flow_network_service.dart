@@ -12,16 +12,19 @@ class FlowNetworkService with WidgetsBindingObserver {
   FlowNetworkService(
       {FlowEndpointPool? pool,
       ConnectivityPlatform? connectivity,
+      DateTime Function()? now,
       Stream<List<ConnectivityResult>>? networkChanges,
       Future<List<ConnectivityResult>> Function()? readConnectivity})
       : _pool = pool ?? FlowEndpointPool.instance,
         _connectivity = connectivity ?? ConnectivityPlatform.instance,
+        _now = now ?? DateTime.now,
         _networkChangesOverride = networkChanges,
         _readConnectivityOverride = readConnectivity;
 
   static final instance = FlowNetworkService();
   final FlowEndpointPool _pool;
   final ConnectivityPlatform _connectivity;
+  final DateTime Function() _now;
   final Stream<List<ConnectivityResult>>? _networkChangesOverride;
   final Future<List<ConnectivityResult>> Function()? _readConnectivityOverride;
   FlowProbeScheduler? _scheduler;
@@ -39,9 +42,17 @@ class FlowNetworkService with WidgetsBindingObserver {
     _started = true;
     _revalidateOnResume = false;
     _lastConnectivity = null;
+    final addresses = _pool.preferredAddresses;
+    LiggLogger().d('Flow IP 网络服务启动，当前路由策略：'
+        '${addresses.isEmpty ? '系统 DNS（优选 IP 待验证）' : addresses.join(', ')}，'
+        '启动探测至少延迟 10 秒');
     final scheduler = _scheduler = FlowProbeScheduler(
-      run: _pool.probe,
+      run: () async {
+        if (_pool.needsProbe) await _pool.probe();
+      },
       cancel: _pool.cancelProbe,
+      now: _now,
+      initialDelay: const Duration(seconds: 10),
       onError: (error) => LiggLogger().w('Flow IP 调度失败 (${error.runtimeType})'),
     );
     WidgetsBinding.instance.addObserver(this);
@@ -113,7 +124,7 @@ class FlowNetworkService with WidgetsBindingObserver {
     }
     _periodic ??= Timer.periodic(const Duration(minutes: 5), (_) {
       _pool.expireRoute();
-      _scheduler?.request();
+      if (_pool.needsProbe) _scheduler?.request();
     });
   }
 

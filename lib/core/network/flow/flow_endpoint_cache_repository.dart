@@ -7,14 +7,10 @@ import 'flow_endpoint_candidates.dart';
 
 /// 存储失败按缓存未命中处理，不阻断正常的 DNS 访问。
 class FlowEndpointCacheRepository {
-  FlowEndpointCacheRepository({
-    DateTime Function()? now,
-    void Function(String)? onWarning,
-  })  : _now = now ?? DateTime.now,
-        _onWarning = onWarning ?? ((message) => LiggLogger().w(message));
+  FlowEndpointCacheRepository({DateTime Function()? now})
+      : _now = now ?? DateTime.now;
 
   final DateTime Function() _now;
-  final void Function(String) _onWarning;
   Future<void> _writeTail = Future<void>.value();
 
   Future<FlowEndpointCache?> load({
@@ -29,11 +25,11 @@ class FlowEndpointCacheRepository {
         now: _now(),
       );
       if (raw != null && cache == null) {
-        _onWarning('Flow IP 缓存已失效，忽略历史结果');
+        LiggLogger().w('Flow IP 缓存已失效，忽略历史结果');
       }
       return cache;
     } catch (error) {
-      _onWarning('读取 Flow IP 缓存失败 (${error.runtimeType})');
+      LiggLogger().w('读取 Flow IP 缓存失败 (${error.runtimeType})');
       return null;
     }
   }
@@ -69,7 +65,7 @@ class FlowEndpointCacheRepository {
             StorageKey.flowEndpointPool, valid.toMap());
         return true;
       } catch (error) {
-        _onWarning('保存 Flow IP 缓存失败 (${error.runtimeType})');
+        LiggLogger().w('保存 Flow IP 缓存失败 (${error.runtimeType})');
         return false;
       }
     });

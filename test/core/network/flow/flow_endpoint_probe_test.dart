@@ -43,11 +43,12 @@ void main() {
         await request.response.close();
       });
       final probe = FlowEndpointProbe(
-          endpoint: endpoint,
-          securityContext: trustedTestContext(),
-          findProxy: (_) => 'DIRECT');
+          endpoint: endpoint, securityContext: trustedTestContext());
       addTearDown(probe.cancel);
-      final result = await probe.probe('127.0.0.1');
+      final result = await HttpOverrides.runZoned(
+        () => probe.probe('127.0.0.1'),
+        findProxyFromEnvironment: (uri, environment) => 'DIRECT',
+      );
       expect(result != null, scenario == 'valid' || scenario == 'tls12');
     });
   }
@@ -63,16 +64,29 @@ void main() {
       // Leave both responses pending so cancellation happens after TLS/HTTP.
     });
     final probe = FlowEndpointProbe(
-        endpoint: endpoint,
-        securityContext: trustedTestContext(),
-        findProxy: (_) => 'DIRECT');
+        endpoint: endpoint, securityContext: trustedTestContext());
     addTearDown(probe.cancel);
-    final pending = Future.wait([
-      probe.probe('127.0.0.1'),
-      probe.probe('127.0.0.1'),
-    ]);
+    final pending = HttpOverrides.runZoned(
+      () => Future.wait([
+        probe.probe('127.0.0.1'),
+        probe.probe('127.0.0.1'),
+      ]),
+      findProxyFromEnvironment: (uri, environment) => 'DIRECT',
+    );
     await arrived.future.timeout(const Duration(seconds: 2));
     probe.cancel();
     expect(await pending.timeout(const Duration(seconds: 1)), [null, null]);
+  });
+
+  test('explicit proxy skips direct IP probes without opening a client',
+      () async {
+    final probe = FlowEndpointProbe(endpoint: Uri.parse('https://ligg.test'));
+    addTearDown(probe.cancel);
+    final result = await HttpOverrides.runZoned(
+      () => probe.probe('104.19.52.165'),
+      findProxyFromEnvironment: (uri, environment) => 'PROXY 127.0.0.1:7890',
+      createHttpClient: (_) => throw StateError('must not open a client'),
+    );
+    expect(result, isNull);
   });
 }

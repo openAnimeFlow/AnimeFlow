@@ -11,12 +11,9 @@ void main() {
   final now = DateTime.utc(2026, 10, 15, 12);
   final store = setUpFlowSettings();
 
-  FlowEndpointPool pool(TextAssetBundle bundle, {List<String>? warnings}) =>
-      FlowEndpointPool(
+  FlowEndpointPool pool(TextAssetBundle bundle) => FlowEndpointPool(
         assetBundle: bundle,
-        cacheRepository:
-            FlowEndpointCacheRepository(now: () => now, onWarning: (_) {}),
-        onWarning: (message) => warnings?.add(message),
+        cacheRepository: FlowEndpointCacheRepository(now: () => now),
       );
 
   test('duplicate initialization shares one asset/cache read', () async {
@@ -29,29 +26,30 @@ void main() {
 
     expect(bundle.reads, 1);
     expect(store.reads, 1);
-    expect(instance.candidates.addresses, ['172.66.214.245', '104.19.52.165']);
-    expect(instance.cachedForRevalidation, isNull);
+    expect(instance.isAddressAvailable(ipA), isTrue);
+    expect(instance.isAddressAvailable(ipB), isTrue);
+    expect(instance.preferredAddresses, isEmpty);
   });
 
   test('cache failure preserves all loaded candidates', () async {
     store.failRead = true;
     final instance = pool(TextAssetBundle(text));
     await instance.initialize();
-    expect(instance.candidates.addresses, hasLength(2));
-    expect(instance.cachedForRevalidation, isNull);
+    expect(instance.isAddressAvailable(ipA), isTrue);
+    expect(instance.isAddressAvailable(ipB), isTrue);
+    expect(instance.preferredAddresses, isEmpty);
   });
 
   for (final text in <String?>[null, '', '127.0.0.1\ninvalid']) {
     test(
         'missing/empty/invalid asset safely keeps an empty candidate pool: $text',
         () async {
-      final warnings = <String>[];
-      final instance = pool(TextAssetBundle(text), warnings: warnings);
-      await instance.initialize();
+      final instance = pool(TextAssetBundle(text));
+      await instance.probe();
 
-      expect(instance.candidates.addresses, isEmpty);
+      expect(instance.isAddressAvailable(ipA), isFalse);
+      expect(instance.preferredAddresses, isEmpty);
       expect(store.reads, 0);
-      expect(warnings, isNotEmpty);
     });
   }
 }

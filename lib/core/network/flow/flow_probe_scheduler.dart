@@ -8,8 +8,6 @@ class FlowProbeScheduler {
     bool Function()? shouldRun,
     DateTime Function()? now,
     void Function(Object)? onError,
-    this.debounce = const Duration(seconds: 2),
-    this.minimumInterval = const Duration(minutes: 5),
     Duration initialDelay = Duration.zero,
   })  : _run = run,
         _cancel = cancel,
@@ -29,8 +27,8 @@ class FlowProbeScheduler {
   final bool Function() _shouldRun;
   final DateTime Function() _now;
   final void Function(Object) _onError;
-  final Duration debounce;
-  final Duration minimumInterval;
+  static const _debounce = Duration(seconds: 2);
+  static const _minimumInterval = Duration(minutes: 5);
   Timer? _startupTimer;
   Timer? _timer;
   Future<void>? _running;
@@ -52,7 +50,7 @@ class FlowProbeScheduler {
     _timer?.cancel();
     final ticket = ++_ticket;
     if (_active && _online) {
-      _timer = Timer(debounce, () => unawaited(_flush(ticket)));
+      _timer = Timer(_debounce, () => unawaited(_flush(ticket)));
     }
   }
 
@@ -100,7 +98,7 @@ class FlowProbeScheduler {
     }
     if (!_force &&
         _lastRun != null &&
-        _now().difference(_lastRun!) < minimumInterval) {
+        _now().difference(_lastRun!) < _minimumInterval) {
       _pending = false;
       return;
     }

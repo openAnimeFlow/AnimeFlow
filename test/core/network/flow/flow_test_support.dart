@@ -76,7 +76,7 @@ const ipA = '104.19.52.165';
 const ipB = '172.66.214.245';
 const ipC = '162.159.82.236';
 
-class FixedProbe implements FlowProbeSession {
+class FixedProbe extends Fake implements FlowEndpointProbe {
   FixedProbe(this.values);
   final Map<String?, Duration?> values;
   int active = 0;

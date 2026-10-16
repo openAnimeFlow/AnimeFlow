@@ -19,7 +19,6 @@ void main() {
               latency: Duration(microseconds: 123456),
               successCount: 2),
         ],
-        networkType: 'wifi',
       );
 
   FlowEndpointCache? validate(FlowEndpointCache value) => value.validatedFor(

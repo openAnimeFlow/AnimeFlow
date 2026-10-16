@@ -6,50 +6,36 @@ import 'package:anime_flow/core/logger/logger.dart';
 
 import 'flow_connection_connector.dart';
 
-abstract interface class FlowProbeSession {
-  Future<Duration?> probe(String? address);
-  void cancel();
-}
-
 /// 每次测量新建连接的耗时，均使用独立且不携带凭据的客户端。
-class FlowEndpointProbe implements FlowProbeSession {
-  FlowEndpointProbe(
-      {required this.endpoint,
-      this.timeout = const Duration(seconds: 3),
-      this.maxBodyBytes = 8192,
-      this.securityContext,
-      String Function(Uri)? findProxy,
-      void Function(String)? onDiagnostic})
-      : _findProxy = findProxy ?? HttpClient.findProxyFromEnvironment,
-        _onDiagnostic = onDiagnostic ?? ((message) => LiggLogger().d(message));
+class FlowEndpointProbe {
+  FlowEndpointProbe({required this.endpoint, this.securityContext});
+
+  static const _timeout = Duration(seconds: 3);
+  static const _maxBodyBytes = 8192;
 
   final Uri endpoint;
-  final Duration timeout;
-  final int maxBodyBytes;
   final SecurityContext? securityContext;
-  final String Function(Uri) _findProxy;
-  final void Function(String) _onDiagnostic;
   final Set<HttpClient> _clients = {};
   final Set<FlowConnectionContext> _contexts = {};
   final Completer<void> _cancelled = Completer<void>();
 
-  @override
   Future<Duration?> probe(String? address) async {
     if (_cancelled.isCompleted) return null;
     final uri =
         endpoint.replace(path: '/cdn-cgi/trace', query: null, fragment: null);
     // 显式代理沿用正常连接路径；此时直连 IP 的测量结果不能反映实际请求路径。
-    if (_findProxy(uri) != 'DIRECT') return null;
-    final context = FlowConnectionContext(budget: timeout);
+    const findProxy = HttpClient.findProxyFromEnvironment;
+    if (findProxy(uri) != 'DIRECT') return null;
+    final context = FlowConnectionContext(budget: _timeout);
     final connector = FlowConnectionConnector(
         endpoint: endpoint,
         addresses: address == null ? const [] : [address],
         allowDnsFallback: false,
-        candidateTimeout: timeout,
+        candidateTimeout: _timeout,
         securityContext: securityContext);
     final client = connector.createClient()
-      ..findProxy = _findProxy
-      ..connectionTimeout = timeout;
+      ..findProxy = findProxy
+      ..connectionTimeout = _timeout;
     _clients.add(client);
     _contexts.add(context);
     final watch = Stopwatch()..start();
@@ -60,14 +46,14 @@ class FlowEndpointProbe implements FlowProbeSession {
         request.headers.set(HttpHeaders.acceptHeader, 'text/plain');
         final response = await request.close();
         if (response.statusCode != HttpStatus.ok ||
-            response.contentLength > maxBodyBytes) {
-          _onDiagnostic('Flow IP 探测 ${address ?? 'DNS'} 不接受响应 '
+            response.contentLength > _maxBodyBytes) {
+          LiggLogger().d('Flow IP 探测 ${address ?? 'DNS'} 不接受响应 '
               '(HTTP ${response.statusCode}, length ${response.contentLength})');
           return null;
         }
         final bytes = <int>[];
         await for (final chunk in response) {
-          if (bytes.length + chunk.length > maxBodyBytes) return null;
+          if (bytes.length + chunk.length > _maxBodyBytes) return null;
           bytes.addAll(chunk);
         }
         final fields = <String, String>{};
@@ -86,11 +72,11 @@ class FlowEndpointProbe implements FlowProbeSession {
       return await Future.any<Duration?>([
         operation,
         _cancelled.future.then<Duration?>((_) => null),
-      ]).timeout(timeout);
+      ]).timeout(_timeout);
     } catch (error) {
       if (!_cancelled.isCompleted) {
-        _onDiagnostic(
-            'Flow IP 探测 ${address ?? 'DNS'} 失败 (${error.runtimeType})');
+        LiggLogger()
+            .d('Flow IP 探测 ${address ?? 'DNS'} 失败 (${error.runtimeType})');
       }
       return null;
     } finally {
@@ -101,7 +87,6 @@ class FlowEndpointProbe implements FlowProbeSession {
     }
   }
 
-  @override
   void cancel() {
     if (!_cancelled.isCompleted) _cancelled.complete();
     for (final context in _contexts.toList()) {

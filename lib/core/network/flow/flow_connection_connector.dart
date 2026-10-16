@@ -3,11 +3,6 @@ import 'dart:io';
 
 import 'flow_secure_socket.dart';
 
-typedef FlowSocketDial = Future<ConnectionTask<Socket>> Function(
-    String host, int port);
-typedef FlowRawSocketDial = Future<ConnectionTask<RawSocket>> Function(
-    String host, int port);
-
 class FlowConnectionCancelled implements Exception {
   const FlowConnectionCancelled();
 }
@@ -50,26 +45,19 @@ class FlowConnectionConnector {
     this.addresses = const [],
     this.allowDnsFallback = true,
     this.candidateTimeout = const Duration(milliseconds: 1500),
-    this.dnsReserve = const Duration(seconds: 3),
     this.securityContext,
     this.onAddressFailure,
     this.isAddressAvailable,
-    FlowSocketDial? dial,
-    FlowRawSocketDial? rawDial,
-  })  : _dial = dial ?? ((host, port) => Socket.startConnect(host, port)),
-        _rawDial =
-            rawDial ?? ((host, port) => RawSocket.startConnect(host, port));
+  });
 
   final Uri endpoint;
   final List<String> addresses;
   final bool allowDnsFallback;
   final Duration candidateTimeout;
-  final Duration dnsReserve;
+  static const _dnsReserve = Duration(seconds: 3);
   final SecurityContext? securityContext;
   final void Function(String address)? onAddressFailure;
   final bool Function(String address)? isAddressAvailable;
-  final FlowSocketDial _dial;
-  final FlowRawSocketDial _rawDial;
 
   bool matches(Uri uri) =>
       uri.scheme == 'https' &&
@@ -119,18 +107,16 @@ class FlowConnectionConnector {
           final remaining = budget - watch.elapsed;
           if (remaining <= Duration.zero) break;
           // 连接时限较短时，将全部剩余时间留给 DNS 路径。
-          if (address != null && allowDnsFallback && remaining <= dnsReserve) {
+          if (address != null && allowDnsFallback && remaining <= _dnsReserve) {
             continue;
           }
           var timeout = address == null ? remaining : candidateTimeout;
           if (address != null && allowDnsFallback) {
-            final available = remaining - dnsReserve;
+            final available = remaining - _dnsReserve;
             if (available < timeout) timeout = available;
           }
           if (remaining < timeout) timeout = remaining;
           final attempt = _SocketAttempt(
-            dial: _dial,
-            rawDial: _rawDial,
             host: proxyHost ?? address ?? uri.host,
             port: proxyPort ?? uri.port,
             tlsHost:
@@ -174,15 +160,11 @@ class FlowConnectionConnector {
 
 class _SocketAttempt {
   _SocketAttempt(
-      {required this.dial,
-      required this.rawDial,
-      required this.host,
+      {required this.host,
       required this.port,
       required this.tlsHost,
       required this.securityContext});
 
-  final FlowSocketDial dial;
-  final FlowRawSocketDial rawDial;
   final String host;
   final int port;
   final String? tlsHost;
@@ -195,18 +177,14 @@ class _SocketAttempt {
 
   Future<Socket> open() async {
     if (tlsHost != null) return _openTls();
-    final task = _task = await dial(host, port);
+    final task = _task = await Socket.startConnect(host, port);
     // startConnect 本身可能在取消后才返回，例如 DNS 解析较慢时。
     if (_cancelled) {
       task.cancel();
       unawaited(task.socket.then<void>((s) => s.destroy(), onError: (_) {}));
       throw const FlowConnectionCancelled();
     }
-    var socket = _socket = await task.socket;
-    if (_cancelled) {
-      socket.destroy();
-      throw const FlowConnectionCancelled();
-    }
+    final socket = _socket = await task.socket;
     if (_cancelled) {
       socket.destroy();
       throw const FlowConnectionCancelled();
@@ -215,7 +193,7 @@ class _SocketAttempt {
   }
 
   Future<Socket> _openTls() async {
-    final task = _rawTask = await rawDial(host, port);
+    final task = _rawTask = await RawSocket.startConnect(host, port);
     if (_cancelled) {
       task.cancel();
       unawaited(task.socket.then<void>((raw) {

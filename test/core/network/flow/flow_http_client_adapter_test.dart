@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -7,115 +8,114 @@ import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class RecordingAdapter implements HttpClientAdapter {
-  RecordingAdapter(this.respond);
-  final Future<ResponseBody> Function() respond;
-  final closes = <bool>[];
-  int requests = 0;
-  @override
-  Future<ResponseBody> fetch(
-      RequestOptions options, Stream<Uint8List>? stream, Future<void>? cancel) {
-    requests++;
-    return respond();
-  }
-
-  @override
-  void close({bool force = false}) => closes.add(force);
-}
-
 void main() {
-  test('route change drains an old SSE pool while new fetches use a new pool',
-      () async {
-    final pool = FlowEndpointPool();
-    final chunks = StreamController<Uint8List>();
-    final children = <RecordingAdapter>[];
-    final adapter = FlowHttpClientAdapter(
-        pool: pool,
-        createAdapter: (addresses, generation) {
-          final child = RecordingAdapter(() async => children.length == 1
-              ? ResponseBody(chunks.stream, 200)
-              : ResponseBody.fromString('new', 200));
-          children.add(child);
-          return child;
-        });
-    addTearDown(() {
-      adapter.close(force: true);
-      pool.dispose();
-    });
-    final options = RequestOptions(path: 'https://ligg.top/events');
-    final oldResponse = await adapter.fetch(options, null, null);
-    final events = <Uint8List>[];
-    final subscription = oldResponse.stream.listen(events.add);
-    pool.networkChanged();
-    expect(children.single.closes, [false]);
-    final newResponse = await adapter.fetch(options, null, null);
-    await newResponse.stream.drain<void>();
-    expect(children, hasLength(2));
-    chunks.add(Uint8List.fromList([1]));
-    await Future<void>.delayed(Duration.zero);
-    expect(events, hasLength(1));
-    expect(children.first.closes, [false]);
-    await subscription.cancel();
-    await chunks.close();
+  late HttpServer server;
+  late FlowEndpointPool pool;
+  late FlowHttpClientAdapter adapter;
+
+  RequestOptions options(String path, {String method = 'GET'}) =>
+      RequestOptions(
+          path: 'http://127.0.0.1:${server.port}$path',
+          method: method,
+          connectTimeout: const Duration(seconds: 2),
+          receiveTimeout: const Duration(seconds: 2));
+
+  setUp(() async {
+    server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    pool = FlowEndpointPool();
+    adapter = FlowHttpClientAdapter(pool: pool);
   });
 
-  test('retiring a generation does not close its pending header acquisition',
-      () async {
-    final pool = FlowEndpointPool();
-    final pending = Completer<ResponseBody>();
-    final child = RecordingAdapter(() => pending.future);
-    final adapter = FlowHttpClientAdapter(
-        pool: pool, createAdapter: (addresses, generation) => child);
-    addTearDown(() {
-      adapter.close(force: true);
-      pool.dispose();
-    });
-    final request =
-        adapter.fetch(RequestOptions(path: 'https://ligg.top/'), null, null);
-    pool.networkChanged();
-    expect(child.closes, isEmpty);
-    pending.complete(ResponseBody.fromString('completed', 200));
-    final response = await request;
-    expect(child.closes, [false]);
-    await response.stream.drain<void>();
+  tearDown(() async {
+    adapter.close(force: true);
+    await server.close(force: true);
+    pool.dispose();
   });
 
-  test('HTTP errors do not replay POST bodies', () async {
-    final pool = FlowEndpointPool();
-    final child = RecordingAdapter(
-        () async => throw const SocketException('closed after write'));
-    final adapter = FlowHttpClientAdapter(
-        pool: pool, createAdapter: (addresses, generation) => child);
-    addTearDown(() {
-      adapter.close(force: true);
-      pool.dispose();
+  test('route change preserves old SSE while new fetches use a new connection',
+      () async {
+    final connections = <int>{};
+    late HttpResponse eventsResponse;
+    server.listen((request) async {
+      connections.add(request.connectionInfo!.remotePort);
+      if (request.uri.path == '/events') {
+        eventsResponse = request.response
+          ..headers.contentType = ContentType('text', 'event-stream')
+          ..bufferOutput = false;
+        eventsResponse.write('data: first\n\n');
+        await eventsResponse.flush();
+      } else {
+        request.response.write('new');
+        await request.response.close();
+      }
+    });
+
+    final response = await adapter.fetch(options('/events'), null, null);
+    final first = Completer<void>();
+    final second = Completer<void>();
+    var received = '';
+    final subscription = utf8.decoder.bind(response.stream).listen((chunk) {
+      received += chunk;
+      if (received.contains('first') && !first.isCompleted) first.complete();
+      if (received.contains('second') && !second.isCompleted) second.complete();
+    });
+    addTearDown(subscription.cancel);
+    await first.future.timeout(const Duration(seconds: 2));
+
+    final beforeChange = await adapter.fetch(options('/before'), null, null);
+    await beforeChange.stream.drain<void>();
+    expect(connections, hasLength(2));
+    pool.networkChanged();
+    final newResponse = await adapter.fetch(options('/new'), null, null);
+    expect(await utf8.decoder.bind(newResponse.stream).join(), 'new');
+    expect(connections, hasLength(3));
+    eventsResponse.write('data: second\n\n');
+    await eventsResponse.flush();
+    await second.future.timeout(const Duration(seconds: 2));
+    final done = subscription.asFuture<void>();
+    await eventsResponse.close();
+    await done.timeout(const Duration(seconds: 2));
+  });
+
+  test('retiring a generation preserves a request waiting for headers',
+      () async {
+    final arrived = Completer<HttpRequest>();
+    server.listen(arrived.complete);
+    final pending = adapter.fetch(options('/'), null, null);
+    final request = await arrived.future.timeout(const Duration(seconds: 2));
+    pool.networkChanged();
+    request.response.write('completed');
+    await request.response.close();
+    final response = await pending;
+    expect(await utf8.decoder.bind(response.stream).join(), 'completed');
+  });
+
+  test('connection errors after receiving a POST do not replay its body',
+      () async {
+    var requests = 0;
+    final bodies = <List<int>>[];
+    server.listen((request) async {
+      requests++;
+      bodies.add(await request
+          .fold<List<int>>([], (body, bytes) => body..addAll(bytes)));
+      final socket = await request.response.detachSocket(writeHeaders: false);
+      socket.destroy();
     });
     await expectLater(
-        adapter.fetch(
-            RequestOptions(path: 'https://ligg.top/write', method: 'POST'),
-            Stream.value(Uint8List.fromList([1, 2, 3])),
-            null),
-        throwsA(isA<SocketException>()));
-    expect(child.requests, 1);
+        adapter.fetch(options('/write', method: 'POST'),
+            Stream.value(Uint8List.fromList([1, 2, 3])), null),
+        throwsA(isA<DioException>()));
+    expect(requests, 1);
+    expect(bodies, [
+      [1, 2, 3]
+    ]);
   });
 
   test('already cancelled token cancels acquisition before a request exists',
       () async {
-    final pool = FlowEndpointPool();
-    final adapter = FlowHttpClientAdapter(pool: pool);
-    addTearDown(() {
-      adapter.close(force: true);
-      pool.dispose();
-    });
     final cancel = Completer<void>()..complete();
-    final result = adapter.fetch(
-        RequestOptions(
-            path: 'https://ligg.test/',
-            connectTimeout: const Duration(milliseconds: 100)),
-        null,
-        cancel.future);
     await expectLater(
-        result,
+        adapter.fetch(options('/'), null, cancel.future),
         throwsA(isA<DioException>()
             .having((error) => error.type, 'type', DioExceptionType.cancel)));
   });

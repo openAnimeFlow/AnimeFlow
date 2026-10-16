@@ -3,13 +3,24 @@ import 'dart:async';
 import 'package:anime_flow/core/network/flow/flow_endpoint_cache_repository.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
 import 'package:anime_flow/core/network/flow/flow_network_service.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'flow_test_support.dart';
+
+class _TestConnectivity extends ConnectivityPlatform {
+  _TestConnectivity(this.onConnectivityChanged, this.read);
+
+  @override
+  final Stream<List<ConnectivityResult>> onConnectivityChanged;
+  final Future<List<ConnectivityResult>> Function() read;
+
+  @override
+  Future<List<ConnectivityResult>> checkConnectivity() => read();
+}
 
 class _ServiceHarness {
   _ServiceHarness(
@@ -19,7 +30,7 @@ class _ServiceHarness {
     pool = FlowEndpointPool(
       now: now,
       assetBundle: TextAssetBundle('$ipA\n$ipB'),
-      cacheRepository: FlowEndpointCacheRepository(now: now, onWarning: (_) {}),
+      cacheRepository: FlowEndpointCacheRepository(now: now),
       probeFactory: (_) {
         rounds++;
         return FixedProbe({
@@ -28,11 +39,16 @@ class _ServiceHarness {
         });
       },
     );
-    service = FlowNetworkService(
-        pool: pool,
-        now: now,
-        networkChanges: platformEvents ? null : events.stream,
-        readConnectivity: read);
+    if (platformEvents) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('dev.fluttercommunity.plus/connectivity'),
+        (_) async => (await read()).map((result) => result.name).toList(),
+      );
+    } else {
+      ConnectivityPlatform.instance = _TestConnectivity(events.stream, read);
+    }
+    service = FlowNetworkService(pool: pool, now: now);
   }
 
   final events =
@@ -52,6 +68,14 @@ class _ServiceHarness {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpFlowSettings();
+  final connectivity = ConnectivityPlatform.instance;
+  tearDown(() {
+    ConnectivityPlatform.instance = connectivity;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+            const MethodChannel('dev.fluttercommunity.plus/connectivity'),
+            null);
+  });
 
   for (final type in [ConnectivityResult.wifi, ConnectivityResult.mobile]) {
     test('same-type $type platform events remeasure and replace the IP', () {

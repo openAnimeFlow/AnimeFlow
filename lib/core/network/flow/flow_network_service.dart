@@ -9,24 +9,13 @@ import 'flow_endpoint_pool.dart';
 import 'flow_probe_scheduler.dart';
 
 class FlowNetworkService with WidgetsBindingObserver {
-  FlowNetworkService(
-      {FlowEndpointPool? pool,
-      ConnectivityPlatform? connectivity,
-      DateTime Function()? now,
-      Stream<List<ConnectivityResult>>? networkChanges,
-      Future<List<ConnectivityResult>> Function()? readConnectivity})
+  FlowNetworkService({FlowEndpointPool? pool, DateTime Function()? now})
       : _pool = pool ?? FlowEndpointPool.instance,
-        _connectivity = connectivity ?? ConnectivityPlatform.instance,
-        _now = now ?? DateTime.now,
-        _networkChangesOverride = networkChanges,
-        _readConnectivityOverride = readConnectivity;
+        _now = now ?? DateTime.now;
 
   static final instance = FlowNetworkService();
   final FlowEndpointPool _pool;
-  final ConnectivityPlatform _connectivity;
   final DateTime Function() _now;
-  final Stream<List<ConnectivityResult>>? _networkChangesOverride;
-  final Future<List<ConnectivityResult>> Function()? _readConnectivityOverride;
   FlowProbeScheduler? _scheduler;
   StreamSubscription<List<ConnectivityResult>>? _networkSubscription;
   StreamSubscription<void>? _failureSubscription;
@@ -62,8 +51,7 @@ class FlowNetworkService with WidgetsBindingObserver {
     });
     try {
       _networkSubscription =
-          (_networkChangesOverride ?? _connectivity.onConnectivityChanged)
-              .listen(
+          ConnectivityPlatform.instance.onConnectivityChanged.listen(
         (results) {
           _events++;
           _networkChanged(results);
@@ -89,8 +77,7 @@ class FlowNetworkService with WidgetsBindingObserver {
         read == _connectivityRead &&
         beforeRead == _events;
     try {
-      final results = await (_readConnectivityOverride?.call() ??
-          _connectivity.checkConnectivity());
+      final results = await ConnectivityPlatform.instance.checkConnectivity();
       if (!current()) return;
       // 后台可能漏掉同类型网络切换，恢复时重新验证；普通失焦仍保留测速间隔。
       if (_revalidateOnResume ||

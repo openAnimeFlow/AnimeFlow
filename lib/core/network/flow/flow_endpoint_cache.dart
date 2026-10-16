@@ -46,7 +46,6 @@ class FlowEndpointCache {
     required this.candidateHash,
     required DateTime verifiedAt,
     required List<FlowEndpointMeasurement> measurements,
-    this.networkType,
   })  : verifiedAt = verifiedAt.toUtc(),
         measurements = List.unmodifiable(measurements);
 
@@ -60,7 +59,6 @@ class FlowEndpointCache {
 
   /// 保留上次的主备顺序，不代表这些地址在当前网络仍然有效。
   final List<FlowEndpointMeasurement> measurements;
-  final String? networkType;
 
   Map<String, Object?> toMap() => {
         'version': version,
@@ -69,7 +67,6 @@ class FlowEndpointCache {
         'candidateHash': candidateHash,
         'verifiedAtMs': verifiedAt.millisecondsSinceEpoch,
         'measurements': measurements.map((item) => item.toMap()).toList(),
-        if (networkType != null) 'networkType': networkType,
       };
 
   static FlowEndpointCache? fromMap(Object? raw) {
@@ -81,7 +78,6 @@ class FlowEndpointCache {
     final hash = raw['candidateHash'];
     final verifiedAtMs = raw['verifiedAtMs'];
     final entries = raw['measurements'];
-    final networkType = raw['networkType'];
     if (host is! String ||
         host.isEmpty ||
         port is! int ||
@@ -91,8 +87,7 @@ class FlowEndpointCache {
         !RegExp(r'^[a-f0-9]{64}$').hasMatch(hash) ||
         verifiedAtMs is! int ||
         verifiedAtMs < 0 ||
-        entries is! List ||
-        (networkType != null && networkType is! String)) {
+        entries is! List) {
       return null;
     }
     final measurements = <FlowEndpointMeasurement>[];
@@ -112,7 +107,6 @@ class FlowEndpointCache {
         verifiedAt:
             DateTime.fromMillisecondsSinceEpoch(verifiedAtMs, isUtc: true),
         measurements: measurements,
-        networkType: networkType as String?,
       );
     } on ArgumentError {
       return null;
@@ -145,7 +139,6 @@ class FlowEndpointCache {
       candidateHash: candidateHash,
       verifiedAt: verifiedAt,
       measurements: eligible,
-      networkType: networkType,
     );
   }
 }

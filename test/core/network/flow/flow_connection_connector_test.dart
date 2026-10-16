@@ -36,26 +36,19 @@ void main() {
       requests++;
       await request.response.close();
     });
-    final dialed = <String>[];
     final failed = <String>[];
-    final endpoint = Uri.parse('https://ligg.test:${server.port}');
+    final endpoint = Uri.parse('https://localhost:${server.port}');
     final connector = FlowConnectionConnector(
         endpoint: endpoint,
-        addresses: ['104.19.52.165', '172.66.214.245'],
+        addresses: ['127.0.0.2', '127.0.0.3'],
         securityContext: trustedTestContext(),
-        onAddressFailure: failed.add,
-        rawDial: (host, port) async {
-          dialed.add(host);
-          if (host != 'ligg.test') throw const SocketException('offline');
-          return RawSocket.startConnect('127.0.0.1', port);
-        });
+        onAddressFailure: failed.add);
     final client = connector.createClient()..findProxy = (_) => 'DIRECT';
     addTearDown(() => client.close(force: true));
     final request = await client.postUrl(endpoint);
     request.write('one write');
     await (await request.close()).drain<void>();
-    expect(dialed, ['104.19.52.165', '172.66.214.245', 'ligg.test']);
-    expect(failed, ['104.19.52.165', '172.66.214.245']);
+    expect(failed, ['127.0.0.2', '127.0.0.3']);
     expect(requests, 1);
   });
 
@@ -64,22 +57,19 @@ void main() {
     final server = await testTlsServer();
     addTearDown(() => server.close(force: true));
     server.listen((request) => request.response.close(), onError: (_) {});
-    final endpoint = Uri.parse('https://ligg.test:${server.port}');
-    final dialed = <String>[];
+    final endpoint = Uri.parse('https://localhost:${server.port}');
+    final failed = <String>[];
     final connector = FlowConnectionConnector(
         endpoint: endpoint,
-        addresses: ['104.19.52.165'],
+        addresses: ['127.0.0.2'],
         securityContext: trustedTestContext(),
-        rawDial: (host, port) {
-          dialed.add(host);
-          return RawSocket.startConnect('127.0.0.1', port);
-        });
+        onAddressFailure: failed.add);
     final context = FlowConnectionContext(budget: const Duration(seconds: 2));
     final task = await runZoned(() => connector.connect(endpoint, null, null),
         zoneValues: {FlowConnectionContext.zoneKey: context});
     final socket = await task.socket;
     socket.destroy();
-    expect(dialed, ['ligg.test']);
+    expect(failed, isEmpty);
   });
 
   test('cancellation during TLS closes the attempt and never dials a backup',
@@ -91,16 +81,11 @@ void main() {
     });
     addTearDown(() => server.close());
     final endpoint = Uri.parse('https://ligg.test:${server.port}');
-    final dialed = <String>[];
     final failures = <String>[];
     final connector = FlowConnectionConnector(
         endpoint: endpoint,
         addresses: ['127.0.0.1', '127.0.0.2'],
-        onAddressFailure: failures.add,
-        rawDial: (host, port) {
-          dialed.add(host);
-          return RawSocket.startConnect(host, port);
-        });
+        onAddressFailure: failures.add);
     final context = FlowConnectionContext();
     final task = await runZoned(() => connector.connect(endpoint, null, null),
         zoneValues: {FlowConnectionContext.zoneKey: context});
@@ -113,7 +98,6 @@ void main() {
     context.cancel();
     await assertion;
     await peerClosed.timeout(const Duration(seconds: 1));
-    expect(dialed, ['127.0.0.1']);
     expect(failures, isEmpty);
   });
 
@@ -129,19 +113,14 @@ void main() {
       }
       await server.close();
     });
-    final hosts = <String>[];
     final connector = FlowConnectionConnector(
-        endpoint: Uri.parse('https://ligg.test'),
-        addresses: ['104.19.52.165'],
-        dial: (host, port) {
-          hosts.add(host);
-          return Socket.startConnect(host, port);
-        });
+        endpoint: Uri.parse('https://ligg.test'), addresses: ['104.19.52.165']);
     final task = await connector.connect(
         Uri.parse('https://ligg.test'), '127.0.0.1', server.port);
     final socket = await task.socket;
     expect(socket, isNot(isA<SecureSocket>()));
-    expect(hosts, ['127.0.0.1']);
+    expect(socket.remoteAddress, InternetAddress.loopbackIPv4);
+    expect(socket.remotePort, server.port);
     socket.destroy();
   });
 
@@ -151,22 +130,19 @@ void main() {
     addTearDown(() => server.close(force: true));
     final endpoint = Uri.parse('https://ligg.test:${server.port}');
     final received = <int>[];
+    final connections = <int>{};
     server.listen((request) async {
+      connections.add(request.connectionInfo!.remotePort);
       expect(request.headers.value('host'), 'ligg.test:${server.port}');
       received.add((await utf8.decoder.bind(request).join()).length);
       request.response.write('z' * 200000);
       await request.response.close();
     });
-    var connections = 0;
     final connector = FlowConnectionConnector(
         endpoint: endpoint,
         addresses: ['127.0.0.1'],
         allowDnsFallback: false,
-        securityContext: trustedTestContext(),
-        rawDial: (host, port) {
-          connections++;
-          return RawSocket.startConnect(host, port);
-        });
+        securityContext: trustedTestContext());
     final client = connector.createClient()..findProxy = (_) => 'DIRECT';
     addTearDown(() => client.close(force: true));
     for (var index = 0; index < 2; index++) {
@@ -178,38 +154,32 @@ void main() {
       await Future<void>.delayed(Duration.zero);
     }
     expect(received, [200000, 200000]);
-    expect(connections, 1);
+    expect(connections, hasLength(1));
   });
 
-  test(
-      'redirect to a different HTTPS host resolves it and validates its own TLS name',
+  test('redirect to a different HTTPS host validates its own TLS name',
       () async {
     final server = await testTlsServer();
     addTearDown(() => server.close(force: true));
     final endpoint = Uri.parse('https://ligg.test:${server.port}');
+    var requests = 0;
     server.listen((request) async {
-      if (request.uri.path == '/') {
-        request.response.statusCode = 302;
-        request.response.headers
-            .set('location', 'https://localhost:${server.port}/final');
-      } else {
-        request.response.write('redirected');
-      }
+      requests++;
+      request.response.statusCode = 302;
+      // 证书只包含域名，重定向后的 IP 地址必须独立校验证书。
+      request.response.headers
+          .set('location', 'https://127.0.0.1:${server.port}/final');
       await request.response.close();
-    });
-    final dialed = <String>[];
+    }, onError: (_) {});
     final client = FlowConnectionConnector(
-        endpoint: endpoint,
-        addresses: ['127.0.0.1'],
-        securityContext: trustedTestContext(),
-        rawDial: (host, port) {
-          dialed.add(host);
-          return RawSocket.startConnect('127.0.0.1', port);
-        }).createClient()
+            endpoint: endpoint,
+            addresses: ['127.0.0.1'],
+            securityContext: trustedTestContext())
+        .createClient()
       ..findProxy = (_) => 'DIRECT';
     addTearDown(() => client.close(force: true));
-    final response = await (await client.getUrl(endpoint)).close();
-    expect(await utf8.decoder.bind(response).join(), 'redirected');
-    expect(dialed, ['127.0.0.1', 'localhost']);
+    final request = await client.getUrl(endpoint);
+    await expectLater(request.close(), throwsA(isA<HandshakeException>()));
+    expect(requests, 1);
   });
 }

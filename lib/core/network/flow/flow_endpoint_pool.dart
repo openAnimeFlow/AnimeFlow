@@ -15,35 +15,26 @@ class FlowEndpointPool extends ChangeNotifier {
   FlowEndpointPool({
     AssetBundle? assetBundle,
     FlowEndpointCacheRepository? cacheRepository,
-    Uri? endpoint,
-    void Function(String)? onWarning,
     DateTime Function()? now,
-    FlowProbeSession Function(Uri)? probeFactory,
-    Random? random,
-    this.roundTimeout = const Duration(seconds: 15),
+    FlowEndpointProbe Function(Uri)? probeFactory,
   })  : _assetBundle = assetBundle ?? rootBundle,
         _cacheRepository = cacheRepository ?? FlowEndpointCacheRepository(),
-        endpoint = endpoint ?? Uri.parse(AnimeFlowApi.animeFlowApi),
-        _onWarning = onWarning ?? ((message) => LiggLogger().w(message)),
         _now = now ?? DateTime.now,
         _probeFactory =
-            probeFactory ?? ((uri) => FlowEndpointProbe(endpoint: uri)),
-        _random = random ?? Random();
+            probeFactory ?? ((uri) => FlowEndpointProbe(endpoint: uri));
 
   static final instance = FlowEndpointPool();
   static const assetPath = 'assets/network/ligg-candidates.txt';
+  static const _roundTimeout = Duration(seconds: 15);
 
-  final Uri endpoint;
+  final Uri endpoint = Uri.parse(AnimeFlowApi.animeFlowApi);
   final AssetBundle _assetBundle;
   final FlowEndpointCacheRepository _cacheRepository;
-  final void Function(String) _onWarning;
   FlowEndpointCandidates _candidates = FlowEndpointCandidates.parse('');
   FlowEndpointCache? _cachedForRevalidation;
   Future<void>? _initialization;
   final DateTime Function() _now;
-  final FlowProbeSession Function(Uri) _probeFactory;
-  final Random _random;
-  final Duration roundTimeout;
+  final FlowEndpointProbe Function(Uri) _probeFactory;
   final _revalidationRequests = StreamController<void>.broadcast(sync: true);
   final Map<String?, _EndpointStats> _stats = {};
   final Map<String, (int, DateTime)> _cooldowns = {};
@@ -57,7 +48,7 @@ class FlowEndpointPool extends ChangeNotifier {
   bool _needsRevalidation = false;
   bool _preferCached = true;
   Future<void>? _probing;
-  FlowProbeSession? _activeProbe;
+  FlowEndpointProbe? _activeProbe;
   bool _disposed = false;
 
   int get networkGeneration => _networkGeneration;
@@ -67,33 +58,30 @@ class FlowEndpointPool extends ChangeNotifier {
   /// 已验证的 IP 或 DNS 路径在有效期内无需周期性扫描候选池。
   bool get needsProbe => _needsRevalidation || _routeExpiresAt == null;
 
-  FlowEndpointCandidates get candidates => _candidates;
-  FlowEndpointCache? get cachedForRevalidation => _cachedForRevalidation;
-
   Future<void> initialize() => _initialization ??= _initialize();
 
   Future<void> _initialize() async {
     try {
       if (endpoint.scheme != 'https' || endpoint.host.isEmpty) {
-        _onWarning('Flow IP 优选仅支持有效的 HTTPS 域名');
+        LiggLogger().w('Flow IP 优选仅支持有效的 HTTPS 域名');
         return;
       }
       _candidates = FlowEndpointCandidates.parse(
         await _assetBundle.loadString(assetPath),
       );
       if (_candidates.rejectedLines.isNotEmpty) {
-        _onWarning('Flow IP 资源已忽略无效行: '
+        LiggLogger().w('Flow IP 资源已忽略无效行: '
             '${_candidates.rejectedLines.join(', ')}');
       }
       if (_candidates.addresses.isEmpty) {
-        _onWarning('Flow IP 候选池为空，继续使用系统 DNS');
+        LiggLogger().w('Flow IP 候选池为空，继续使用系统 DNS');
         return;
       }
       _cachedForRevalidation = await _cacheRepository.load(
         endpoint: endpoint,
         candidates: _candidates,
       );
-      final shuffled = _candidates.addresses.toList()..shuffle(_random);
+      final shuffled = _candidates.addresses.toList()..shuffle();
       _probeOrder = List.unmodifiable({
         ...?_cachedForRevalidation?.measurements.map((item) => item.address),
         ...shuffled,
@@ -101,7 +89,7 @@ class FlowEndpointPool extends ChangeNotifier {
       LiggLogger().d('Flow IP 资源已加载 ${_candidates.addresses.length} 个候选，'
           '历史复测候选 ${_cachedForRevalidation?.measurements.length ?? 0} 个');
     } catch (error) {
-      _onWarning('加载 Flow IP 资源失败，继续使用系统 DNS (${error.runtimeType})');
+      LiggLogger().w('加载 Flow IP 资源失败，继续使用系统 DNS (${error.runtimeType})');
     }
   }
 
@@ -179,7 +167,7 @@ class FlowEndpointPool extends ChangeNotifier {
     final session = _activeProbe = _probeFactory(endpoint);
     final samples = <String?, _EndpointStats>{};
     var deadlineReached = false;
-    final timer = Timer(roundTimeout, () {
+    final timer = Timer(_roundTimeout, () {
       deadlineReached = true;
       session.cancel();
     });
@@ -269,7 +257,7 @@ class FlowEndpointPool extends ChangeNotifier {
           '可用候选 ${eligible.length}，当前路径 '
           '${_preferredAddresses.isEmpty ? 'DNS' : _preferredAddresses.first}');
     } catch (error) {
-      _onWarning('Flow IP 测速失败 (${error.runtimeType})');
+      LiggLogger().w('Flow IP 测速失败 (${error.runtimeType})');
     } finally {
       timer.cancel();
       session.cancel();

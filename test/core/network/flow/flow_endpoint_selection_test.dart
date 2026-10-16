@@ -1,15 +1,15 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:anime_flow/core/network/flow/flow_endpoint_cache.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_cache_repository.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_probe.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'flow_test_support.dart';
 
-class _CallbackProbe implements FlowProbeSession {
+class _CallbackProbe extends Fake implements FlowEndpointProbe {
   _CallbackProbe(this.run);
   final Future<Duration?> Function(String?) run;
 
@@ -28,17 +28,13 @@ void main() {
   final sessions = <FixedProbe>[];
 
   FlowEndpointPool makePool(
-      {Duration roundTimeout = const Duration(seconds: 15),
-      String candidates = '$ipA\n$ipB\n$ipC',
+      {String candidates = '$ipA\n$ipB\n$ipC',
       bool holdFirst = false,
-      FlowProbeSession Function(Uri)? probeFactory}) {
+      FlowEndpointProbe Function(Uri)? probeFactory}) {
     final pool = FlowEndpointPool(
       assetBundle: TextAssetBundle(candidates),
-      cacheRepository:
-          FlowEndpointCacheRepository(now: () => now, onWarning: (_) {}),
+      cacheRepository: FlowEndpointCacheRepository(now: () => now),
       now: () => now,
-      random: Random(1),
-      roundTimeout: roundTimeout,
       probeFactory: probeFactory ??
           (_) {
             final probe = FixedProbe(values)
@@ -46,7 +42,6 @@ void main() {
             sessions.add(probe);
             return probe;
           },
-      onWarning: (_) {},
     );
     addTearDown(pool.dispose);
     return pool;
@@ -81,9 +76,10 @@ void main() {
       () async {
     final pool = makePool(candidates: '$ipA\n$ipB\n$ipC\n104.16.0.1');
     await pool.probe();
-    expect(pool.candidates.addresses, hasLength(4));
     final calls = sessions.single.calls;
     expect(calls.whereType<String>().toSet(), hasLength(3));
+    expect({ipA, ipB, ipC, '104.16.0.1'},
+        containsAll(calls.whereType<String>().toSet()));
     expect(calls.length, lessThanOrEqualTo(8));
     expect(sessions.single.maxActive, 1);
   });
@@ -106,7 +102,8 @@ void main() {
     expect(sessions.last.calls.length, lessThanOrEqualTo(8));
     expect(sessions.last.maxActive, 1);
     expect(pool.preferredAddresses, [ipB, ipC]);
-    expect(pool.cachedForRevalidation!.measurements.first.address, ipB);
+    expect(FlowEndpointCache.fromMap(store.value)!.measurements.first.address,
+        ipB);
   });
 
   test('keeps DNS if faster or improvement is below 100ms', () async {
@@ -248,14 +245,21 @@ void main() {
 
   test(
       'round deadline cancels stalled probes without counting them as failures',
-      () async {
-    final pool = makePool(
-        holdFirst: true, roundTimeout: const Duration(milliseconds: 20));
-    await pool.probe();
-    expect(sessions.single.cancelled, isTrue);
-    expect(sessions.single.active, 0);
-    expect(pool.preferredAddresses, isEmpty);
-    expect(pool.isAddressAvailable(ipA), isTrue);
-    expect(store.writes, 0);
+      () {
+    fakeAsync((clock) {
+      final pool = makePool(holdFirst: true);
+      var completed = false;
+      unawaited(pool.probe().then((_) => completed = true));
+      clock.elapse(const Duration(milliseconds: 14999));
+      expect(completed, isFalse);
+      clock.elapse(const Duration(milliseconds: 1));
+      expect(completed, isTrue);
+      expect(sessions.single.cancelled, isTrue);
+      expect(sessions.single.active, 0);
+      expect(pool.preferredAddresses, isEmpty);
+      expect(pool.isAddressAvailable(ipA), isTrue);
+      expect(store.writes, 0);
+      pool.dispose();
+    });
   });
 }

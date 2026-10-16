@@ -32,10 +32,7 @@ void main() {
       repository.load(endpoint: endpoint, candidates: candidates);
 
   setUp(() {
-    repository = FlowEndpointCacheRepository(
-      now: () => now,
-      onWarning: (_) {},
-    );
+    repository = FlowEndpointCacheRepository(now: () => now);
   });
 
   test('missing, corrupt and inaccessible cache are optional misses', () async {

@@ -54,6 +54,7 @@ class FlowEndpointPool extends ChangeNotifier {
   int _networkGeneration = 0;
   int _roundToken = 0;
   DateTime? _routeExpiresAt;
+  bool _needsRevalidation = false;
   bool _preferCached = true;
   Future<void>? _probing;
   FlowProbeSession? _activeProbe;
@@ -64,7 +65,7 @@ class FlowEndpointPool extends ChangeNotifier {
   Stream<void> get revalidationRequests => _revalidationRequests.stream;
 
   /// 已验证的 IP 或 DNS 路径在有效期内无需周期性扫描候选池。
-  bool get needsProbe => _routeExpiresAt == null;
+  bool get needsProbe => _needsRevalidation || _routeExpiresAt == null;
 
   FlowEndpointCandidates get candidates => _candidates;
   FlowEndpointCache? get cachedForRevalidation => _cachedForRevalidation;
@@ -112,8 +113,8 @@ class FlowEndpointPool extends ChangeNotifier {
 
   void requestRevalidation() {
     if (_disposed) return;
-    // DNS 路径的业务失败也需要重新验证，不能被健康路径的有效期拦住。
-    _routeExpiresAt = null;
+    // 保留现有路由的到期时间，复验尚未完成时也必须遵守原有效期。
+    _needsRevalidation = true;
     _revalidationRequests.add(null);
   }
 
@@ -244,6 +245,7 @@ class FlowEndpointPool extends ChangeNotifier {
         }
       }
       _chooseRoute();
+      _needsRevalidation = false;
       final eligible = _eligibleAddresses();
       if (eligible.isNotEmpty) {
         final ordered = <String>{..._preferredAddresses, ...eligible}.take(3);

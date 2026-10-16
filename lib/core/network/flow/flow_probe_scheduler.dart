@@ -5,6 +5,7 @@ class FlowProbeScheduler {
   FlowProbeScheduler({
     required Future<void> Function() run,
     required void Function() cancel,
+    bool Function()? shouldRun,
     DateTime Function()? now,
     void Function(Object)? onError,
     this.debounce = const Duration(seconds: 2),
@@ -12,6 +13,7 @@ class FlowProbeScheduler {
     Duration initialDelay = Duration.zero,
   })  : _run = run,
         _cancel = cancel,
+        _shouldRun = shouldRun ?? (() => true),
         _now = now ?? DateTime.now,
         _onError = onError ?? ((_) {}) {
     // 宽限期独立于尾沿防抖，网络通知不会提前结束或重新计时。
@@ -24,6 +26,7 @@ class FlowProbeScheduler {
 
   final Future<void> Function() _run;
   final void Function() _cancel;
+  final bool Function() _shouldRun;
   final DateTime Function() _now;
   final void Function(Object) _onError;
   final Duration debounce;
@@ -87,6 +90,12 @@ class FlowProbeScheduler {
         !_online ||
         !_pending ||
         (_startupTimer?.isActive ?? false)) {
+      return;
+    }
+    // 统一在执行入口判断需求，跳过探测不消耗测速间隔。
+    if (!_shouldRun()) {
+      _pending = false;
+      _force = false;
       return;
     }
     if (!_force &&

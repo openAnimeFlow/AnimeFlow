@@ -47,9 +47,8 @@ class FlowNetworkService with WidgetsBindingObserver {
         '${addresses.isEmpty ? '系统 DNS（优选 IP 待验证）' : addresses.join(', ')}，'
         '启动探测至少延迟 10 秒');
     final scheduler = _scheduler = FlowProbeScheduler(
-      run: () async {
-        if (_pool.needsProbe) await _pool.probe();
-      },
+      run: _pool.probe,
+      shouldRun: () => _pool.needsProbe,
       cancel: _pool.cancelProbe,
       now: _now,
       initialDelay: const Duration(seconds: 10),
@@ -124,7 +123,7 @@ class FlowNetworkService with WidgetsBindingObserver {
     }
     _periodic ??= Timer.periodic(const Duration(minutes: 5), (_) {
       _pool.expireRoute();
-      if (_pool.needsProbe) _scheduler?.request();
+      _scheduler?.request();
     });
   }
 

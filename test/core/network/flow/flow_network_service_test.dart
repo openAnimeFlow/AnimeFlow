@@ -190,6 +190,27 @@ void main() {
     });
   });
 
+  test('skipped healthy checks do not throttle a subsequent failure', () {
+    fakeAsync((clock) {
+      final harness =
+          _ServiceHarness(clock, () async => [ConnectivityResult.wifi]);
+      unawaited(harness.service.start());
+      clock.elapse(const Duration(seconds: 10));
+      expect(harness.rounds, 1);
+      clock.elapse(const Duration(minutes: 6));
+      harness.service.didChangeAppLifecycleState(AppLifecycleState.inactive);
+      harness.service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      clock.elapse(const Duration(seconds: 2));
+      expect(harness.rounds, 1);
+      harness.pool.requestRevalidation();
+      clock.elapse(const Duration(seconds: 2));
+      expect(harness.rounds, 2);
+      expect(harness.pool.needsProbe, isFalse);
+      unawaited(harness.dispose());
+      clock.flushMicrotasks();
+    });
+  });
+
   for (final state in [AppLifecycleState.paused, AppLifecycleState.hidden]) {
     test('resume from $state revalidates even without a type change event', () {
       fakeAsync((clock) {

@@ -230,12 +230,20 @@ void main() {
     expect(pool.preferredAddresses.first, ipA);
   });
 
-  test('expired live routes return to DNS pending revalidation', () async {
+  test('revalidation requests preserve the expiry of retained routes',
+      () async {
     final pool = makePool();
     await pool.probe();
+    expect(pool.needsProbe, isFalse);
+    pool.requestRevalidation();
+    expect(pool.needsProbe, isTrue);
+    expect(pool.preferredAddresses.first, ipA);
     now = now.add(const Duration(hours: 6));
     pool.expireRoute();
     expect(pool.preferredAddresses, isEmpty);
+    await pool.probe();
+    expect(pool.needsProbe, isFalse);
+    expect(pool.preferredAddresses.first, ipA);
   });
 
   test(

@@ -61,6 +61,7 @@ class FlowEndpointPool extends ChangeNotifier {
   Future<void> initialize() => _initialization ??= _initialize();
 
   Future<void> _initialize() async {
+    final generation = _networkGeneration;
     try {
       if (endpoint.scheme != 'https' || endpoint.host.isEmpty) {
         LiggLogger().w('Flow IP 优选仅支持有效的 HTTPS 域名');
@@ -86,6 +87,15 @@ class FlowEndpointPool extends ChangeNotifier {
         ...?_cachedForRevalidation?.measurements.map((item) => item.address),
         ...shuffled,
       });
+      final cache = _cachedForRevalidation;
+      // 加载期间若已切换网络，不得用旧缓存重新覆盖刚清空的路由。
+      if (!_disposed && generation == _networkGeneration && cache != null) {
+        _routeExpiresAt = cache.verifiedAt.add(FlowEndpointCache.lifetime);
+        _needsRevalidation = true;
+        if (!cache.preferDns) {
+          _setRoute(cache.measurements.map((item) => item.address).toList());
+        }
+      }
       LiggLogger().d('Flow IP 资源已加载 ${_candidates.addresses.length} 个候选，'
           '历史复测候选 ${_cachedForRevalidation?.measurements.length ?? 0} 个');
     } catch (error) {
@@ -207,7 +217,7 @@ class FlowEndpointPool extends ChangeNotifier {
     }
 
     try {
-      final cached = _cachedForRevalidation?.measurements.first.address;
+      final cached = _cachedForRevalidation?.measurements.firstOrNull?.address;
       final hint = _preferCached && cached != null && isAddressAvailable(cached)
           ? cached
           : null;
@@ -235,13 +245,14 @@ class FlowEndpointPool extends ChangeNotifier {
       _chooseRoute();
       _needsRevalidation = false;
       final eligible = _eligibleAddresses();
-      if (eligible.isNotEmpty) {
+      if (eligible.isNotEmpty || (_stats[null]?.lastSucceeded ?? false)) {
         final ordered = <String>{..._preferredAddresses, ...eligible}.take(3);
         final cache = FlowEndpointCache(
           host: endpoint.host,
           port: endpoint.port,
           candidateHash: _candidates.hash,
           verifiedAt: _now(),
+          preferDns: _preferredAddresses.isEmpty,
           measurements: ordered
               .map((ip) => FlowEndpointMeasurement(
                   address: ip,

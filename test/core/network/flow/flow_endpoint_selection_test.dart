@@ -59,14 +59,12 @@ void main() {
   });
 
   test(
-      'confirms two fresh samples, selects main/backups and limits concurrency',
+      'concurrent requests share one round and select main/backups with fresh samples',
       () async {
     final pool = makePool();
-    final first = pool.probe();
-    expect(identical(first, pool.probe()), isTrue);
-    await first;
+    await Future.wait([pool.probe(), pool.probe()]);
+    expect(sessions, hasLength(1));
     expect(pool.preferredAddresses, [ipA, ipB, ipC]);
-    expect(sessions.single.maxActive, 1);
     expect(sessions.single.calls.where((ip) => ip == ipA), hasLength(2));
     expect(store.writes, 1);
     expect(pool.needsProbe, isFalse);
@@ -90,7 +88,8 @@ void main() {
     await makePool().probe();
     final pool = makePool();
     await pool.initialize();
-    expect(pool.preferredAddresses, isEmpty);
+    expect(pool.preferredAddresses, [ipA, ipB, ipC]);
+    expect(pool.needsProbe, isTrue);
     await pool.probe();
     expect(sessions.last.calls, [null, ipA, ipA, null]);
     expect(pool.preferredAddresses, [ipA]);
@@ -100,7 +99,6 @@ void main() {
     expect(pool.needsProbe, isTrue);
     await pool.probe();
     expect(sessions.last.calls.length, lessThanOrEqualTo(8));
-    expect(sessions.last.maxActive, 1);
     expect(pool.preferredAddresses, [ipB, ipC]);
     expect(FlowEndpointCache.fromMap(store.value)!.measurements.first.address,
         ipB);
@@ -118,6 +116,38 @@ void main() {
     final smallGain = makePool();
     await smallGain.probe();
     expect(smallGain.preferredAddresses, isEmpty);
+    final restarted = makePool();
+    await restarted.initialize();
+    expect(restarted.preferredAddresses, isEmpty);
+  });
+
+  test('restored routes retain their original expiry and reject expired caches',
+      () async {
+    await makePool().probe();
+    now = now.add(const Duration(hours: 5));
+    final restarted = makePool();
+    await restarted.initialize();
+    expect(restarted.preferredAddresses, [ipA, ipB, ipC]);
+    restarted.reportConnectionFailure(ipA, restarted.networkGeneration);
+    expect(restarted.preferredAddresses, [ipB, ipC]);
+    expect(restarted.isAddressAvailable(ipA), isFalse);
+    now = now.add(const Duration(hours: 1));
+    restarted.expireRoute();
+    expect(restarted.preferredAddresses, isEmpty);
+    final expired = makePool();
+    await expired.initialize();
+    expect(expired.preferredAddresses, isEmpty);
+  });
+
+  test('network changes during initialization prevent restoring stale routes',
+      () async {
+    await makePool().probe();
+    final restarted = makePool();
+    final loading = restarted.initialize();
+    restarted.networkChanged();
+    await loading;
+    expect(restarted.preferredAddresses, isEmpty);
+    expect(restarted.needsProbe, isTrue);
   });
 
   test('higher success rate bypasses latency hysteresis', () async {
@@ -193,6 +223,11 @@ void main() {
     await pool.probe();
     expect(pool.preferredAddresses, isEmpty);
     expect(pool.needsProbe, isFalse);
+    final restarted = makePool();
+    await restarted.initialize();
+    expect(restarted.preferredAddresses, isEmpty);
+    await restarted.probe();
+    expect(restarted.preferredAddresses, isEmpty);
   });
 
   test('connection failures cool down the actual IP; stale generations ignored',

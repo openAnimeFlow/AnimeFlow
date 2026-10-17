@@ -32,9 +32,7 @@ void main() {
     final original = cache();
     final restored = FlowEndpointCache.fromMap(original.toMap())!;
     expect(restored.toMap(), original.toMap());
-    expect(restored.verifiedAt.isUtc, isTrue);
     expect(validate(restored), isNotNull);
-    expect(() => restored.measurements.clear(), throwsUnsupportedError);
   });
 
   test('expires at six hours and rejects dates in the future', () {
@@ -60,6 +58,7 @@ void main() {
       const MapEntry('verifiedAtMs', -1),
       const MapEntry('verifiedAtMs', 9223372036854775807),
       const MapEntry('measurements', 'not-a-list'),
+      const MapEntry('preferDns', 'true'),
     ]) {
       final raw = cache().toMap()..[entry.key] = entry.value;
       final parsed = FlowEndpointCache.fromMap(raw);

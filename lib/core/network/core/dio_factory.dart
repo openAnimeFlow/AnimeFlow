@@ -17,11 +17,6 @@ class DioFactory {
   static Dio? _pluginDio;
   static Dio? _downloadDio;
   static Dio? _animeFlowDio;
-  static String? _deviceUserAgent;
-
-  static Future<void> initialize() async {
-    _deviceUserAgent = await Utils.getCurrentUserAgent();
-  }
 
   static Dio get apiDio => _apiDio ??= _create(
         NetworkConfig.fromSettings(),
@@ -41,10 +36,19 @@ class DioFactory {
       ),
       baseUrl: AnimeFlowApi.animeFlowApi,
       adapter: FlowHttpClientAdapter(pool: FlowEndpointPool.instance),
-      defaultHeaders: {
-        'user-agent': _deviceUserAgent ?? Utils.getRandomUA(),
-      },
     );
+    Future<String>? deviceUserAgent;
+    dio.interceptors
+        .add(InterceptorsWrapper(onRequest: (options, handler) async {
+      if (!options.headers.containsKey('user-agent')) {
+        options.headers['user-agent'] = await (deviceUserAgent ??=
+            Utils.getCurrentUserAgent().catchError((Object error) {
+          LiggLogger().w('读取设备 User-Agent 失败，使用随机 UA (${error.runtimeType})');
+          return Utils.getRandomUA();
+        }));
+      }
+      handler.next(options);
+    }));
     dio.interceptors.add(
       FlowRefreshTokenInterceptor(dio, FlowTokenStorage.instance),
     );

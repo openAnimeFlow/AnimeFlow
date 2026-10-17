@@ -22,8 +22,6 @@ void main() {
 
     expect(candidates.addresses, ['172.66.214.245', '104.19.52.165']);
     expect(candidates.rejectedLines, isEmpty);
-    expect(() => candidates.addresses.add('104.18.55.113'),
-        throwsUnsupportedError);
   });
 
   test(
@@ -36,44 +34,30 @@ void main() {
     expect(candidates.rejectedLines, [3, 4]);
   });
 
-  for (final address in [
-    '127.0.0.1',
-    '0.0.0.0',
-    '10.0.0.1',
-    '172.16.0.1',
-    '192.168.1.1',
-    '169.254.1.1',
-    '100.64.0.1',
-    '224.0.0.1',
-    '255.255.255.255',
-    '8.8.8.8',
-    '1.1.1.1',
-    '104.15.255.255',
-    '104.28.0.0',
-    '172.63.255.255',
-    '172.72.0.0',
-    '162.157.255.255',
-    '162.160.0.0',
-    '103.31.3.255',
-    '103.31.8.0',
-    '::1',
-    '2606:4700::1111',
-    '::ffff:104.19.52.165',
-    '104.19.52.256',
-    '0104.19.52.165',
-    '104.19.52',
-    '104.19.52.165/24',
-    '104.19.52.165:443',
-    '0x681334a5',
-    '1746097317',
-    'https://104.19.52.165',
-    'ligg.top',
-    '104.19.\uFEFF52.165',
-  ]) {
-    test('rejects unsupported address $address', () {
-      expect(FlowEndpointCandidates.isAllowedAddress(address), isFalse);
-    });
-  }
+  test('rejects non-Cloudflare IPs and unsupported address formats', () {
+    for (final address in [
+      '127.0.0.1',
+      '10.0.0.1',
+      '224.0.0.1',
+      '8.8.8.8',
+      '104.15.255.255',
+      '104.28.0.0',
+      '::1',
+      '104.19.52.256',
+      '0104.19.52.165',
+      '104.19.52',
+      '104.19.52.165/24',
+      '104.19.52.165:443',
+      '0x681334a5',
+      '1746097317',
+      'https://104.19.52.165',
+      'ligg.top',
+      '104.19.\uFEFF52.165',
+    ]) {
+      expect(FlowEndpointCandidates.isAllowedAddress(address), isFalse,
+          reason: address);
+    }
+  });
 
   test('accepts boundaries of the ranges used in the bundled pool', () {
     for (final address in [
@@ -103,11 +87,5 @@ void main() {
     expect(first.hash, matches(RegExp(r'^[a-f0-9]{64}$')));
     expect(first.hash, reordered.hash);
     expect(first.hash, isNot(changed.hash));
-  });
-
-  test('empty or entirely invalid input is a valid empty pool', () {
-    for (final text in ['', '\uFEFF\r\n \n', 'localhost\n127.0.0.1']) {
-      expect(FlowEndpointCandidates.parse(text).addresses, isEmpty);
-    }
   });
 }

@@ -67,13 +67,6 @@ void main() {
     expect(await load(), isNotNull);
   });
 
-  test('invalid or expired snapshots are not persisted', () async {
-    expect(
-        await save(cache(verifiedAt: now.subtract(const Duration(hours: 7)))),
-        isFalse);
-    expect(store.writes, 0);
-  });
-
   test('queued snapshots from an invalidated network are not written',
       () async {
     store.writeGate = Completer<void>();

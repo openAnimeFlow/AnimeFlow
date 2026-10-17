@@ -31,10 +31,7 @@ class FlowNetworkService with WidgetsBindingObserver {
     _started = true;
     _revalidateOnResume = false;
     _lastConnectivity = null;
-    final addresses = _pool.preferredAddresses;
-    LiggLogger().d('Flow IP 网络服务启动，当前路由策略：'
-        '${addresses.isEmpty ? '系统 DNS（优选 IP 待验证）' : addresses.join(', ')}，'
-        '启动探测至少延迟 10 秒');
+    _events = 0;
     final scheduler = _scheduler = FlowProbeScheduler(
       run: _pool.probe,
       shouldRun: () => _pool.needsProbe,
@@ -54,7 +51,12 @@ class FlowNetworkService with WidgetsBindingObserver {
           ConnectivityPlatform.instance.onConnectivityChanged.listen(
         (results) {
           _events++;
-          _networkChanged(results);
+          // 启动复验前，首个同状态推送视为初始快照，保留恢复的缓存路由。
+          final initialSnapshot = _lastConnectivity == null ||
+              (_events == 1 &&
+                  _pool.needsProbe &&
+                  setEquals(_lastConnectivity, results.toSet()));
+          _networkChanged(results, invalidateRoute: !initialSnapshot);
         },
         onError: (Object error) =>
             LiggLogger().w('Flow IP 网络监听失败 (${error.runtimeType})'),
@@ -65,7 +67,12 @@ class FlowNetworkService with WidgetsBindingObserver {
     await _refreshConnectivity(scheduler);
     if (!_started || !identical(_scheduler, scheduler)) return;
     await _pool.initialize();
-    if (_started && identical(_scheduler, scheduler)) _startPeriodic();
+    if (!_started || !identical(_scheduler, scheduler)) return;
+    final addresses = _pool.preferredAddresses;
+    LiggLogger().d('Flow IP 网络服务启动，当前路由策略：'
+        '${addresses.isEmpty ? '系统 DNS（优选 IP 待验证）' : addresses.join(', ')}，'
+        '启动探测至少延迟 10 秒');
+    _startPeriodic();
   }
 
   Future<void> _refreshConnectivity(FlowProbeScheduler scheduler) async {
@@ -82,8 +89,10 @@ class FlowNetworkService with WidgetsBindingObserver {
       // 后台可能漏掉同类型网络切换，恢复时重新验证；普通失焦仍保留测速间隔。
       if (_revalidateOnResume ||
           !setEquals(_lastConnectivity, results.toSet())) {
+        final invalidateRoute =
+            _revalidateOnResume || _lastConnectivity != null;
         _revalidateOnResume = false;
-        _networkChanged(results);
+        _networkChanged(results, invalidateRoute: invalidateRoute);
       }
     } catch (error) {
       if (!current()) return;
@@ -93,12 +102,13 @@ class FlowNetworkService with WidgetsBindingObserver {
     }
   }
 
-  void _networkChanged(List<ConnectivityResult> results) {
+  void _networkChanged(List<ConnectivityResult> results,
+      {bool invalidateRoute = true}) {
     if (!_started) return;
     _lastConnectivity = results.toSet();
     // 相同网络类型的通知也可能表示切换到了不同的 Wi-Fi 接入点。
     // 保守地使旧结果失效，再通过防抖合并切换过程中的密集通知。
-    _pool.networkChanged();
+    if (invalidateRoute) _pool.networkChanged();
     _scheduler?.networkChanged(
         online: results.any((result) => result != ConnectivityResult.none));
   }

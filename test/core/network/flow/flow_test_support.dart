@@ -21,7 +21,6 @@ class MemorySettingsBox extends Fake implements Box<dynamic> {
   Object? value;
   bool failRead = false;
   bool failWrite = false;
-  int reads = 0;
   int writes = 0;
   int activeWrites = 0;
   int maxActiveWrites = 0;
@@ -30,7 +29,6 @@ class MemorySettingsBox extends Fake implements Box<dynamic> {
   @override
   dynamic get(dynamic key, {dynamic defaultValue}) {
     expect(key, StorageKey.flowEndpointPool);
-    reads++;
     if (failRead) throw StateError('storage unavailable');
     return value ?? defaultValue;
   }
@@ -53,22 +51,19 @@ class MemorySettingsBox extends Fake implements Box<dynamic> {
   void reset() {
     value = null;
     failRead = failWrite = false;
-    reads = writes = activeWrites = maxActiveWrites = 0;
+    writes = activeWrites = maxActiveWrites = 0;
     writeGate = null;
   }
 }
 
 class TextAssetBundle extends CachingAssetBundle {
   TextAssetBundle(this.text);
-  final String? text;
-  int reads = 0;
+  final String text;
 
   @override
   Future<ByteData> load(String key) async {
     expect(key, FlowEndpointPool.assetPath);
-    reads++;
-    if (text == null) throw StateError('asset missing');
-    return ByteData.sublistView(Uint8List.fromList(utf8.encode(text!)));
+    return ByteData.sublistView(Uint8List.fromList(utf8.encode(text)));
   }
 }
 

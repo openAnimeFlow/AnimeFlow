@@ -1,6 +1,6 @@
 import 'flow_endpoint_candidates.dart';
 
-/// 历史测量结果仅作为当前网络重新验证时的参考。
+/// 历史测量结果保留主备顺序，复测时仍需采集当前网络的新样本。
 class FlowEndpointMeasurement {
   const FlowEndpointMeasurement({
     required this.address,
@@ -46,6 +46,7 @@ class FlowEndpointCache {
     required this.candidateHash,
     required DateTime verifiedAt,
     required List<FlowEndpointMeasurement> measurements,
+    this.preferDns = false,
   })  : verifiedAt = verifiedAt.toUtc(),
         measurements = List.unmodifiable(measurements);
 
@@ -57,8 +58,9 @@ class FlowEndpointCache {
   final String candidateHash;
   final DateTime verifiedAt;
 
-  /// 保留上次的主备顺序，不代表这些地址在当前网络仍然有效。
+  /// 未过期时可先恢复此顺序，连接失败后由连接器回退系统 DNS。
   final List<FlowEndpointMeasurement> measurements;
+  final bool preferDns;
 
   Map<String, Object?> toMap() => {
         'version': version,
@@ -67,6 +69,7 @@ class FlowEndpointCache {
         'candidateHash': candidateHash,
         'verifiedAtMs': verifiedAt.millisecondsSinceEpoch,
         'measurements': measurements.map((item) => item.toMap()).toList(),
+        'preferDns': preferDns,
       };
 
   static FlowEndpointCache? fromMap(Object? raw) {
@@ -78,6 +81,7 @@ class FlowEndpointCache {
     final hash = raw['candidateHash'];
     final verifiedAtMs = raw['verifiedAtMs'];
     final entries = raw['measurements'];
+    final preferDns = raw['preferDns'] ?? false;
     if (host is! String ||
         host.isEmpty ||
         port is! int ||
@@ -87,7 +91,8 @@ class FlowEndpointCache {
         !RegExp(r'^[a-f0-9]{64}$').hasMatch(hash) ||
         verifiedAtMs is! int ||
         verifiedAtMs < 0 ||
-        entries is! List) {
+        entries is! List ||
+        preferDns is! bool) {
       return null;
     }
     final measurements = <FlowEndpointMeasurement>[];
@@ -98,7 +103,7 @@ class FlowEndpointCache {
         measurements.add(measurement);
       }
     }
-    if (measurements.isEmpty) return null;
+    if (measurements.isEmpty && !preferDns) return null;
     try {
       return FlowEndpointCache(
         host: host,
@@ -107,6 +112,7 @@ class FlowEndpointCache {
         verifiedAt:
             DateTime.fromMillisecondsSinceEpoch(verifiedAtMs, isUtc: true),
         measurements: measurements,
+        preferDns: preferDns,
       );
     } on ArgumentError {
       return null;
@@ -132,13 +138,14 @@ class FlowEndpointCache {
         .where((item) => candidates.contains(item.address))
         .take(3)
         .toList();
-    if (eligible.isEmpty) return null;
+    if (eligible.isEmpty && !preferDns) return null;
     return FlowEndpointCache(
       host: host,
       port: port,
       candidateHash: candidateHash,
       verifiedAt: verifiedAt,
       measurements: eligible,
+      preferDns: preferDns,
     );
   }
 }

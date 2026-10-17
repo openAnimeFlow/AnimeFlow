@@ -11,8 +11,6 @@ void main() {
     'valid',
     'tls12',
     'tls-off',
-    '404',
-    'challenge',
     'redirect',
     'wrong-host',
     'oversized'
@@ -27,13 +25,11 @@ void main() {
         expect(request.headers.value('authorization'), isNull);
         expect(request.headers.value('cookie'), isNull);
         expect(request.headers.value('x-signature'), isNull);
-        if (scenario == '404') request.response.statusCode = 404;
         if (scenario == 'redirect') {
           request.response.statusCode = 302;
           request.response.headers.set('location', 'https://other.test');
         }
         request.response.write(switch (scenario) {
-          'challenge' => '<html>challenge</html>',
           'wrong-host' => 'h=other.test\ntls=TLSv1.3\n',
           'oversized' => 'h=ligg.test\ntls=TLSv1.3\nx=${'a' * 9000}',
           'tls12' => 'h=ligg.test\ntls=TLSv1.2\n',

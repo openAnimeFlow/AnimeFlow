@@ -77,6 +77,47 @@ void main() {
             null);
   });
 
+  for (final eventBeforeRead in [false, true]) {
+    test(
+        'restart preserves cache across initial snapshots: event first $eventBeforeRead',
+        () {
+      fakeAsync((clock) {
+        final previous =
+            _ServiceHarness(clock, () async => [ConnectivityResult.wifi]);
+        unawaited(previous.pool.probe());
+        clock.elapse(Duration.zero);
+        expect(previous.pool.preferredAddresses, [ipA]);
+        unawaited(previous.dispose());
+        clock.flushMicrotasks();
+
+        final read = Completer<List<ConnectivityResult>>();
+        final restarted = _ServiceHarness(clock, () => read.future);
+        unawaited(restarted.pool.initialize());
+        clock.flushMicrotasks();
+        expect(restarted.pool.preferredAddresses, [ipA]);
+        unawaited(restarted.service.start());
+        if (eventBeforeRead) restarted.events.add([ConnectivityResult.wifi]);
+        read.complete([ConnectivityResult.wifi]);
+        clock.flushMicrotasks();
+        if (!eventBeforeRead) restarted.events.add([ConnectivityResult.wifi]);
+        expect(restarted.pool.preferredAddresses, [ipA]);
+        expect(restarted.rounds, 0);
+        clock.elapse(const Duration(milliseconds: 9999));
+        expect(restarted.rounds, 0);
+        clock.elapse(const Duration(milliseconds: 1));
+        expect(restarted.rounds, 1);
+
+        restarted.fastest = ipB;
+        restarted.events.add([ConnectivityResult.wifi]);
+        expect(restarted.pool.preferredAddresses, isEmpty);
+        clock.elapse(const Duration(seconds: 2));
+        expect(restarted.pool.preferredAddresses, [ipB]);
+        unawaited(restarted.dispose());
+        clock.flushMicrotasks();
+      });
+    });
+  }
+
   for (final type in [ConnectivityResult.wifi, ConnectivityResult.mobile]) {
     test('same-type $type platform events remeasure and replace the IP', () {
       fakeAsync((clock) {
@@ -114,27 +155,6 @@ void main() {
       });
     });
   }
-
-  test('Wi-Fi/mobile switches remeasure in both directions after debounce', () {
-    fakeAsync((clock) {
-      final harness =
-          _ServiceHarness(clock, () async => [ConnectivityResult.wifi]);
-      unawaited(harness.service.start());
-      clock.flushMicrotasks();
-      clock.elapse(const Duration(seconds: 10));
-      expect(harness.rounds, 1);
-      for (final type in [ConnectivityResult.mobile, ConnectivityResult.wifi]) {
-        harness.events.add([type]);
-        expect(harness.pool.preferredAddresses, isEmpty);
-        clock.elapse(const Duration(milliseconds: 1999));
-        final before = harness.rounds;
-        clock.elapse(const Duration(milliseconds: 1));
-        expect(harness.rounds, before + 1);
-      }
-      unawaited(harness.dispose());
-      clock.flushMicrotasks();
-    });
-  });
 
   test(
       'background switches wait for foreground and stale initial reads are ignored',
@@ -192,28 +212,6 @@ void main() {
     });
   });
 
-  test('ordinary focus changes preserve routes and ordinary throttle', () {
-    fakeAsync((clock) {
-      final harness =
-          _ServiceHarness(clock, () async => [ConnectivityResult.wifi]);
-      unawaited(harness.service.start());
-      clock.flushMicrotasks();
-      clock.elapse(const Duration(seconds: 10));
-      final generation = harness.pool.networkGeneration;
-      expect(harness.rounds, 1);
-      harness.service.didChangeAppLifecycleState(AppLifecycleState.inactive);
-      harness.service.didChangeAppLifecycleState(AppLifecycleState.resumed);
-      clock.elapse(const Duration(seconds: 2));
-      expect(harness.pool.networkGeneration, generation);
-      expect(harness.pool.preferredAddresses, [ipA]);
-      expect(harness.rounds, 1);
-      clock.elapse(const Duration(minutes: 10));
-      expect(harness.rounds, 1);
-      unawaited(harness.dispose());
-      clock.flushMicrotasks();
-    });
-  });
-
   test('skipped healthy checks do not throttle a subsequent failure', () {
     fakeAsync((clock) {
       final harness =
@@ -222,14 +220,19 @@ void main() {
       clock.elapse(const Duration(seconds: 10));
       expect(harness.rounds, 1);
       clock.elapse(const Duration(minutes: 6));
+      final generation = harness.pool.networkGeneration;
       harness.service.didChangeAppLifecycleState(AppLifecycleState.inactive);
       harness.service.didChangeAppLifecycleState(AppLifecycleState.resumed);
       clock.elapse(const Duration(seconds: 2));
       expect(harness.rounds, 1);
+      expect(harness.pool.networkGeneration, generation);
+      expect(harness.pool.preferredAddresses, [ipA]);
       harness.pool.requestRevalidation();
       clock.elapse(const Duration(seconds: 2));
       expect(harness.rounds, 2);
       expect(harness.pool.needsProbe, isFalse);
+      clock.elapse(const Duration(minutes: 10));
+      expect(harness.rounds, 2);
       unawaited(harness.dispose());
       clock.flushMicrotasks();
     });

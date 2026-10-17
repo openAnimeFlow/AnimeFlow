@@ -14,21 +14,11 @@ void main() {
     expect(candidates.rejectedLines, isEmpty);
   });
 
-  test('normalizes BOM, whitespace, CRLF and duplicates without reordering',
-      () {
-    final candidates = FlowEndpointCandidates.parse(
-      '\uFEFF 172.66.214.245 \r\n\r\n104.19.52.165\r\n172.66.214.245\n',
-    );
-
-    expect(candidates.addresses, ['172.66.214.245', '104.19.52.165']);
-    expect(candidates.rejectedLines, isEmpty);
-  });
-
   test(
-      'rejects malformed and non-Cloudflare addresses with source line numbers',
+      'normalizes candidates and reports rejected source lines without reordering',
       () {
     final candidates = FlowEndpointCandidates.parse(
-      '104.19.52.165\n\n127.0.0.1\ninvalid\n172.66.214.245\n',
+      '\uFEFF 104.19.52.165 \r\n\r\n127.0.0.1\ninvalid\n172.66.214.245\n104.19.52.165\n',
     );
     expect(candidates.addresses, ['104.19.52.165', '172.66.214.245']);
     expect(candidates.rejectedLines, [3, 4]);

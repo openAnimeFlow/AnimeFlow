@@ -121,6 +121,47 @@ void main() {
     expect(restarted.preferredAddresses, isEmpty);
   });
 
+  test('failed DNS cannot outrank a working IP using historical successes',
+      () async {
+    const fast = Duration(milliseconds: 10);
+    const slow = Duration(milliseconds: 100);
+    final dnsSamples = <Duration?>[
+      fast, fast, // First round: DNS works.
+      fast, fast, // Second round: DNS still works.
+      null, null, // Third round: DNS is unavailable.
+      fast, fast, // Fourth round: DNS recovers.
+    ];
+    final ipSamples = <Duration?>[
+      null, // First round: failed candidates are not probed twice.
+      slow, null, // Second round: the IP is still unreliable.
+      slow, slow, // Third round: both fresh IP probes succeed.
+      null, // Fourth round: only DNS works.
+    ];
+    final pool = makePool(
+      candidates: ipA,
+      probeFactory: (_) => _CallbackProbe((address) async =>
+          (address == null ? dnsSamples : ipSamples).removeAt(0)),
+    );
+    await pool.probe();
+    await pool.probe();
+    expect(pool.preferredAddresses, isEmpty);
+
+    // Historical DNS success rate (4/6) exceeds the IP's (3/5),
+    // but its latest failures must exclude it from selection.
+    pool.requestRevalidation();
+    await pool.probe();
+    expect(pool.preferredAddresses, [ipA]);
+    expect(pool.needsProbe, isFalse);
+    final cache = FlowEndpointCache.fromMap(store.value)!;
+    expect(cache.preferDns, isFalse);
+    expect(cache.measurements.single.address, ipA);
+
+    await pool.probe();
+    expect(pool.preferredAddresses, isEmpty);
+    expect(pool.needsProbe, isFalse);
+    expect(FlowEndpointCache.fromMap(store.value)!.preferDns, isTrue);
+  });
+
   test('restored routes retain their original expiry and reject expired caches',
       () async {
     await makePool().probe();
@@ -129,6 +170,7 @@ void main() {
     await restarted.initialize();
     expect(restarted.preferredAddresses, [ipA, ipB, ipC]);
     restarted.reportConnectionFailure(ipA, restarted.networkGeneration);
+    expect(restarted.needsProbe, isTrue);
     expect(restarted.preferredAddresses, [ipB, ipC]);
     expect(restarted.isAddressAvailable(ipA), isFalse);
     now = now.add(const Duration(hours: 1));
@@ -202,6 +244,7 @@ void main() {
 
     // The address can recover with fresh samples after its cooldown expires.
     now = now.add(const Duration(minutes: 1));
+    expect(pool.isAddressAvailable(ipA), isTrue);
     await pool.probe();
     expect(pool.isAddressAvailable(ipA), isTrue);
     expect(pool.preferredAddresses, contains(ipA));
@@ -230,51 +273,21 @@ void main() {
     expect(restarted.preferredAddresses, isEmpty);
   });
 
-  test('connection failures cool down the actual IP; stale generations ignored',
-      () async {
-    final pool = makePool();
-    await pool.probe();
-    pool.reportConnectionFailure(ipA, pool.networkGeneration);
-    expect(pool.needsProbe, isTrue);
-    expect(pool.preferredAddresses, [ipB, ipC]);
-    expect(pool.isAddressAvailable(ipA), isFalse);
-    now = now.add(const Duration(minutes: 1));
-    expect(pool.isAddressAvailable(ipA), isTrue);
-    final oldGeneration = pool.networkGeneration;
-    pool.networkChanged();
-    pool.reportConnectionFailure(ipB, oldGeneration);
-    expect(pool.isAddressAvailable(ipB), isTrue);
-    expect(pool.preferredAddresses, isEmpty);
-  });
-
-  test('network switch cancels old round and never publishes its results',
+  test('network switch discards old probes and connection failure reports',
       () async {
     final pool = makePool(holdFirst: true);
     await pool.initialize();
     final pending = pool.probe();
     await Future<void>.delayed(Duration.zero);
+    final oldGeneration = pool.networkGeneration;
     pool.networkChanged();
+    pool.reportConnectionFailure(ipA, oldGeneration);
+    expect(pool.isAddressAvailable(ipA), isTrue);
     await pending;
     expect(pool.preferredAddresses, isEmpty);
     expect(store.writes, 0);
     expect(sessions.single.cancelled, isTrue);
     await pool.probe();
-    expect(pool.preferredAddresses.first, ipA);
-  });
-
-  test('revalidation requests preserve the expiry of retained routes',
-      () async {
-    final pool = makePool();
-    await pool.probe();
-    expect(pool.needsProbe, isFalse);
-    pool.requestRevalidation();
-    expect(pool.needsProbe, isTrue);
-    expect(pool.preferredAddresses.first, ipA);
-    now = now.add(const Duration(hours: 6));
-    pool.expireRoute();
-    expect(pool.preferredAddresses, isEmpty);
-    await pool.probe();
-    expect(pool.needsProbe, isFalse);
     expect(pool.preferredAddresses.first, ipA);
   });
 

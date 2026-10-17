@@ -27,14 +27,6 @@ void main() {
         now: now,
       );
 
-  test('round-trips Hive-compatible maps without losing measurement precision',
-      () {
-    final original = cache();
-    final restored = FlowEndpointCache.fromMap(original.toMap())!;
-    expect(restored.toMap(), original.toMap());
-    expect(validate(restored), isNotNull);
-  });
-
   test('expires at six hours and rejects dates in the future', () {
     expect(validate(cache(verifiedAt: now.subtract(const Duration(hours: 6)))),
         isNull);

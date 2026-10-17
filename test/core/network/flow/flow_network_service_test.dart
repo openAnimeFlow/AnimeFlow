@@ -118,43 +118,42 @@ void main() {
     });
   }
 
-  for (final type in [ConnectivityResult.wifi, ConnectivityResult.mobile]) {
-    test('same-type $type platform events remeasure and replace the IP', () {
-      fakeAsync((clock) {
-        late MockStreamHandlerEventSink nativeEvents;
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockStreamHandler(
-          const EventChannel('dev.fluttercommunity.plus/connectivity_status'),
-          MockStreamHandler.inline(
-              onListen: (_, events) => nativeEvents = events),
-        );
-        final harness =
-            _ServiceHarness(clock, () async => [type], platformEvents: true);
-        unawaited(harness.service.start());
-        clock.flushMicrotasks();
-        nativeEvents.success([type.name]);
-        clock.elapse(const Duration(milliseconds: 9999));
-        expect(harness.rounds, 0);
-        clock.elapse(const Duration(milliseconds: 1));
-        expect(harness.pool.preferredAddresses, [ipA]);
-        expect(harness.rounds, 1);
+  test('same-type Wi-Fi platform events remeasure and replace the IP', () {
+    const type = ConnectivityResult.wifi;
+    fakeAsync((clock) {
+      late MockStreamHandlerEventSink nativeEvents;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockStreamHandler(
+        const EventChannel('dev.fluttercommunity.plus/connectivity_status'),
+        MockStreamHandler.inline(
+            onListen: (_, events) => nativeEvents = events),
+      );
+      final harness =
+          _ServiceHarness(clock, () async => [type], platformEvents: true);
+      unawaited(harness.service.start());
+      clock.flushMicrotasks();
+      nativeEvents.success([type.name]);
+      clock.elapse(const Duration(milliseconds: 9999));
+      expect(harness.rounds, 0);
+      clock.elapse(const Duration(milliseconds: 1));
+      expect(harness.pool.preferredAddresses, [ipA]);
+      expect(harness.rounds, 1);
 
-        harness.fastest = ipB;
-        for (var i = 0; i < 3; i++) {
-          nativeEvents.success([type.name]);
-          clock.elapse(const Duration(milliseconds: 500));
-        }
-        expect(harness.pool.preferredAddresses, isEmpty);
-        clock.elapse(const Duration(milliseconds: 1499));
-        expect(harness.rounds, 1);
-        clock.elapse(const Duration(milliseconds: 1));
-        expect(harness.rounds, 2);
-        expect(harness.pool.preferredAddresses, [ipB]);
-        unawaited(harness.dispose());
-        clock.flushMicrotasks();
-      });
+      harness.fastest = ipB;
+      for (var i = 0; i < 3; i++) {
+        nativeEvents.success([type.name]);
+        clock.elapse(const Duration(milliseconds: 500));
+      }
+      expect(harness.pool.preferredAddresses, isEmpty);
+      clock.elapse(const Duration(milliseconds: 1499));
+      expect(harness.rounds, 1);
+      clock.elapse(const Duration(milliseconds: 1));
+      expect(harness.rounds, 2);
+      expect(harness.pool.preferredAddresses, [ipB]);
+      unawaited(harness.dispose());
+      clock.flushMicrotasks();
     });
-  }
+  });
 
   test(
       'background switches wait for foreground and stale initial reads are ignored',

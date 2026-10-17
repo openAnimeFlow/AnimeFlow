@@ -21,7 +21,7 @@ void main() {
         measurements: const [
           FlowEndpointMeasurement(
               address: '172.66.214.245',
-              latency: Duration(milliseconds: 50),
+              latency: Duration(microseconds: 123456),
               successCount: 2),
         ],
       );
@@ -64,7 +64,7 @@ void main() {
     expect(await save(cache()), isFalse);
     store.failWrite = false;
     expect(await save(cache()), isTrue);
-    expect(await load(), isNotNull);
+    expect((await load())!.toMap(), cache().toMap());
   });
 
   test('queued snapshots from an invalidated network are not written',

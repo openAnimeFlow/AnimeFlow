@@ -306,7 +306,8 @@ class FlowEndpointPool extends ChangeNotifier {
     // 未测量 DNS 基线路径时，不能认定普通 DNS 路径更差。
     if (dns == null || dns.attempts == 0) return;
     String? best = eligible.first;
-    if (dns.latencies.isNotEmpty && _compare(dns, _stats[best]!) <= 0) {
+    // 与候选 IP 一样，DNS 最新探测成功后才可参与历史表现比较。
+    if (dns.lastSucceeded && _compare(dns, _stats[best]!) <= 0) {
       best = null;
     }
     final old = _preferredAddresses.isEmpty ? null : _preferredAddresses.first;

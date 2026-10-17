@@ -8,7 +8,8 @@ import 'package:anime_flow/features/download/application/download_foreground_ser
 import 'package:anime_flow/features/download/application/download_path_migration.dart';
 import 'package:anime_flow/features/download/application/download_directory/restore_download_directory_access.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
-import 'package:anime_flow/core/network/core/dio_factory.dart';
+import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
+import 'package:anime_flow/core/network/flow/flow_network_service.dart';
 import 'package:anime_flow/core/network/image/ech_http_licenses.dart';
 import 'package:anime_flow/core/network/image/image_cache_manager.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
@@ -39,7 +40,8 @@ Future<void> bootstrap() async {
   await DownloadForegroundService.initialize();
   await SelectedFont.initOnStartup();
   appPackageInfo = await PackageInfo.fromPlatform();
-  await DioFactory.initialize();
+  await FlowEndpointPool.instance.initialize();
+  unawaited(FlowNetworkService.instance.start());
   unawaited(
     PresenceService.instance.start(appVersion: appPackageInfo!.version),
   );

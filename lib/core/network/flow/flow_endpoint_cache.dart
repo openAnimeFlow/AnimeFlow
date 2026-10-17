@@ -1,0 +1,151 @@
+import 'flow_endpoint_candidates.dart';
+
+/// 历史测量结果保留主备顺序，复测时仍需采集当前网络的新样本。
+class FlowEndpointMeasurement {
+  const FlowEndpointMeasurement({
+    required this.address,
+    required this.latency,
+    required this.successCount,
+  });
+
+  final String address;
+  final Duration latency;
+  final int successCount;
+
+  Map<String, Object> toMap() => {
+        'address': address,
+        'latencyMicros': latency.inMicroseconds,
+        'successCount': successCount,
+      };
+
+  static FlowEndpointMeasurement? fromMap(Object? raw) {
+    if (raw is! Map) return null;
+    final address = raw['address'];
+    final latency = raw['latencyMicros'];
+    final successes = raw['successCount'];
+    if (address is! String ||
+        !FlowEndpointCandidates.isAllowedAddress(address) ||
+        latency is! int ||
+        latency < 0 ||
+        successes is! int ||
+        successes < 1) {
+      return null;
+    }
+    return FlowEndpointMeasurement(
+      address: address,
+      latency: Duration(microseconds: latency),
+      successCount: successes,
+    );
+  }
+}
+
+class FlowEndpointCache {
+  FlowEndpointCache({
+    required this.host,
+    required this.port,
+    required this.candidateHash,
+    required DateTime verifiedAt,
+    required List<FlowEndpointMeasurement> measurements,
+    this.preferDns = false,
+  })  : verifiedAt = verifiedAt.toUtc(),
+        measurements = List.unmodifiable(measurements);
+
+  static const version = 1;
+  static const lifetime = Duration(hours: 6);
+
+  final String host;
+  final int port;
+  final String candidateHash;
+  final DateTime verifiedAt;
+
+  /// 未过期时可先恢复此顺序，连接失败后由连接器回退系统 DNS。
+  final List<FlowEndpointMeasurement> measurements;
+  final bool preferDns;
+
+  Map<String, Object?> toMap() => {
+        'version': version,
+        'host': host,
+        'port': port,
+        'candidateHash': candidateHash,
+        'verifiedAtMs': verifiedAt.millisecondsSinceEpoch,
+        'measurements': measurements.map((item) => item.toMap()).toList(),
+        'preferDns': preferDns,
+      };
+
+  static FlowEndpointCache? fromMap(Object? raw) {
+    if (raw is! Map || raw['version'] is! int || raw['version'] != version) {
+      return null;
+    }
+    final host = raw['host'];
+    final port = raw['port'];
+    final hash = raw['candidateHash'];
+    final verifiedAtMs = raw['verifiedAtMs'];
+    final entries = raw['measurements'];
+    final preferDns = raw['preferDns'] ?? false;
+    if (host is! String ||
+        host.isEmpty ||
+        port is! int ||
+        port < 1 ||
+        port > 65535 ||
+        hash is! String ||
+        !RegExp(r'^[a-f0-9]{64}$').hasMatch(hash) ||
+        verifiedAtMs is! int ||
+        verifiedAtMs < 0 ||
+        entries is! List ||
+        preferDns is! bool) {
+      return null;
+    }
+    final measurements = <FlowEndpointMeasurement>[];
+    final seen = <String>{};
+    for (final entry in entries) {
+      final measurement = FlowEndpointMeasurement.fromMap(entry);
+      if (measurement != null && seen.add(measurement.address)) {
+        measurements.add(measurement);
+      }
+    }
+    if (measurements.isEmpty && !preferDns) return null;
+    try {
+      return FlowEndpointCache(
+        host: host,
+        port: port,
+        candidateHash: hash,
+        verifiedAt:
+            DateTime.fromMillisecondsSinceEpoch(verifiedAtMs, isUtc: true),
+        measurements: measurements,
+        preferDns: preferDns,
+      );
+    } on ArgumentError {
+      return null;
+    }
+  }
+
+  /// 拒绝不兼容或过期的元数据，并移除已不在候选池中的 IP。
+  FlowEndpointCache? validatedFor({
+    required Uri endpoint,
+    required FlowEndpointCandidates candidates,
+    required DateTime now,
+  }) {
+    final age = now.toUtc().difference(verifiedAt);
+    if (endpoint.scheme != 'https' ||
+        host != endpoint.host ||
+        port != endpoint.port ||
+        candidateHash != candidates.hash ||
+        age.isNegative ||
+        age >= lifetime) {
+      return null;
+    }
+    final eligible = measurements
+        .where((item) => candidates.contains(item.address))
+        .take(3)
+        .toList();
+    if (eligible.isEmpty && !preferDns) return null;
+    return FlowEndpointCache(
+      host: host,
+      port: port,
+      candidateHash: candidateHash,
+      verifiedAt: verifiedAt,
+      measurements: eligible,
+      preferDns: preferDns,
+    );
+  }
+}

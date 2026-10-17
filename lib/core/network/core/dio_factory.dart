@@ -1,4 +1,6 @@
 import 'package:anime_flow/core/network/api_path.dart';
+import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
+import 'package:anime_flow/core/network/flow/flow_http_client_adapter.dart';
 import 'package:anime_flow/core/network/interceptors/dio_logger_interceptor.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
@@ -15,11 +17,6 @@ class DioFactory {
   static Dio? _pluginDio;
   static Dio? _downloadDio;
   static Dio? _animeFlowDio;
-  static String? _deviceUserAgent;
-
-  static Future<void> initialize() async {
-    _deviceUserAgent = await Utils.getCurrentUserAgent();
-  }
 
   static Dio get apiDio => _apiDio ??= _create(
         NetworkConfig.fromSettings(),
@@ -38,10 +35,20 @@ class DioFactory {
         allowBadCertificates: false,
       ),
       baseUrl: AnimeFlowApi.animeFlowApi,
-      defaultHeaders: {
-        'user-agent': _deviceUserAgent ?? Utils.getRandomUA(),
-      },
+      adapter: FlowHttpClientAdapter(pool: FlowEndpointPool.instance),
     );
+    Future<String>? deviceUserAgent;
+    dio.interceptors
+        .add(InterceptorsWrapper(onRequest: (options, handler) async {
+      if (!options.headers.containsKey('user-agent')) {
+        options.headers['user-agent'] = await (deviceUserAgent ??=
+            Utils.getCurrentUserAgent().catchError((Object error) {
+          LiggLogger().w('读取设备 User-Agent 失败，使用随机 UA (${error.runtimeType})');
+          return Utils.getRandomUA();
+        }));
+      }
+      handler.next(options);
+    }));
     dio.interceptors.add(
       FlowRefreshTokenInterceptor(dio, FlowTokenStorage.instance),
     );
@@ -75,7 +82,9 @@ class DioFactory {
         },
       );
 
+  /// 清空工厂缓存
   static void reset() {
+    _animeFlowDio?.close();
     _apiDio = null;
     _githubDio = null;
     _pluginDio = null;
@@ -86,6 +95,7 @@ class DioFactory {
   static Dio _create(
     NetworkConfig config, {
     String? baseUrl,
+    HttpClientAdapter? adapter,
     Map<String, dynamic> defaultHeaders = const {},
     List<Interceptor> interceptors = const [],
   }) {
@@ -103,7 +113,7 @@ class DioFactory {
             status != null && status >= 200 && status < 300,
       ),
     );
-    dio.httpClientAdapter = config.createAdapter();
+    dio.httpClientAdapter = adapter ?? config.createAdapter();
     dio.transformer = BackgroundTransformer();
     dio.interceptors.addAll(interceptors);
     if (config.enableLog) {

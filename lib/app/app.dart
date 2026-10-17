@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         final fontFamily = themeState.fontFamily;
         return MaterialApp.router(
           key: ValueKey(fontFamily),
-          debugShowCheckedModeBanner: false,
+          // debugShowCheckedModeBanner: false,
           routerConfig: appRouter,
           theme: buildLightTheme(themeState.seedColor, fontFamily: fontFamily),
           darkTheme:

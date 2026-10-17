@@ -125,14 +125,14 @@ abstract final class AppSettings {
   static const defaultEchImageHosts = ['wsrv.nl', 'lain.bgm.tv'];
   static const defaultEchImageFixedIps = {
     'wsrv.nl': [
-      '172.64.229.41',
+      '172.67.134.140',
+      '104.21.6.61',
       '172.67.73.67',
-      '104.17.139.122',
     ],
     'lain.bgm.tv': [
       '172.67.134.140',
-      '104.20.36.249',
-      '104.25.240.99',
+      '104.21.6.61',
+      '172.67.73.67',
     ],
   };
 
@@ -263,21 +263,28 @@ abstract final class AppSettings {
 
   static double get danmakuFontSize =>
       _readDouble(DanmakuKey.danmakuFontSize, defaultDanmakuFontSize);
+
   static double get danmakuArea =>
       _readDouble(DanmakuKey.danmakuArea, defaultDanmakuArea);
+
   static double get danmakuOpacity =>
       _readDouble(DanmakuKey.danmakuOpacity, defaultDanmakuOpacity);
+
   static double get danmakuDuration =>
       _readDouble(DanmakuKey.danmakuDuration, defaultDanmakuDuration);
+
   static double get danmakuLineHeight =>
       _readDouble(DanmakuKey.danmakuLineHeight, defaultDanmakuLineHeight);
+
   static int get danmakuFontWeight =>
       _readInt(DanmakuKey.danmakuFontWeight, defaultDanmakuFontWeight);
+
   static String? get danmakuFontFamily =>
       getSetting<Object?>(DanmakuKey.danmakuFontFamily) as String?;
 
   static bool get danmakuMassiveMode =>
       _readBool(DanmakuKey.danmakuMassiveMode, defaultDanmakuMassiveMode);
+
   static double get danmakuStrokeWidth {
     final value = getSetting<Object?>(DanmakuKey.danmakuBorder);
     if (value is bool) {
@@ -292,21 +299,29 @@ abstract final class AppSettings {
 
   static bool get danmakuColor =>
       _readBool(DanmakuKey.danmakuColor, defaultDanmakuColor);
+
   static bool get danmakuUseFont => _readBool(DanmakuKey.danmakuUseFont, true);
+
   static bool get danmakuHideScroll =>
       _readBool(DanmakuKey.danmakuHideScroll, defaultDanmakuHideScroll);
+
   static bool get danmakuHideTop =>
       _readBool(DanmakuKey.danmakuHideTop, defaultDanmakuHideTop);
+
   static bool get danmakuHideBottom =>
       _readBool(DanmakuKey.danmakuHideBottom, defaultDanmakuHideBottom);
+
   static bool get danmakuPlatformBilibili => _readBool(
       DanmakuKey.danmakuPlatformBilibili, defaultDanmakuPlatformEnabled);
+
   static bool get danmakuPlatformGamer =>
       _readBool(DanmakuKey.danmakuPlatformGamer, defaultDanmakuPlatformEnabled);
+
   static bool get danmakuPlatformDanDanPlay => _readBool(
         DanmakuKey.danmakuPlatformDanDanPlay,
         defaultDanmakuPlatformEnabled,
       );
+
   static String get danmakuChineseMode =>
       getSetting<Object?>(DanmakuKey.danmakuChineseMode,
           defaultValue: defaultDanmakuChineseMode) as String? ??

@@ -12,6 +12,8 @@ class DioFactory {
 
   static Dio? _apiDio;
   static Dio? _githubDio;
+  static Dio? _githubOAuthDio;
+  static Dio? _githubAuthorizedDio;
   static Dio? _pluginDio;
   static Dio? _downloadDio;
   static Dio? _animeFlowDio;
@@ -37,7 +39,7 @@ class DioFactory {
         receiveTimeout: const Duration(seconds: 60),
         allowBadCertificates: false,
       ),
-      baseUrl: AnimeFlowApi.animeFlowApi,
+      baseUrl: AnimeFlowApi.animeFlowApiDev,
       defaultHeaders: {
         'user-agent': _deviceUserAgent ?? Utils.getRandomUA(),
       },
@@ -55,6 +57,22 @@ class DioFactory {
           'user-agent': Utils.getRandomUA(),
         },
         interceptors: [_GithubMirrorInterceptor()],
+      );
+
+  /// GitHub 授权和用户 API 必须直连，并保持系统证书校验。
+  static Dio get githubOAuthDio => _githubOAuthDio ??= _create(
+        const NetworkConfig(enableLog: false),
+        baseUrl: GitHubApi.oauthBaseUrl,
+        defaultHeaders: {'user-agent': _deviceUserAgent ?? 'AnimeFlow'},
+      );
+
+  static Dio get githubAuthorizedDio => _githubAuthorizedDio ??= _create(
+        const NetworkConfig(enableLog: false),
+        baseUrl: GitHubApi.apiBaseUrl,
+        defaultHeaders: {
+          'accept': 'application/vnd.github+json',
+          'user-agent': _deviceUserAgent ?? 'AnimeFlow',
+        },
       );
 
   static Dio get pluginDio => _pluginDio ??= _create(
@@ -78,6 +96,8 @@ class DioFactory {
   static void reset() {
     _apiDio = null;
     _githubDio = null;
+    _githubOAuthDio = null;
+    _githubAuthorizedDio = null;
     _pluginDio = null;
     _downloadDio = null;
     _animeFlowDio = null;

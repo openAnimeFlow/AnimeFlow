@@ -56,301 +56,305 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final paddingOf = MediaQuery.paddingOf(context);
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: Consumer(
-          builder: (context, ref, _) {
-            final isWideScreen = ref.watch(settingsLayoutProvider);
-            return AppBar(
-              title: Text(l10n.playbackSettings),
-              automaticallyImplyLeading: !isWideScreen,
-            );
-          },
+    return MediaQuery.removePadding(
+      context: context,
+      removeLeft: true,
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: Consumer(
+            builder: (context, ref, _) {
+              final isWideScreen = ref.watch(settingsLayoutProvider);
+              return AppBar(
+                title: Text(l10n.playbackSettings),
+                automaticallyImplyLeading: !isWideScreen,
+              );
+            },
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-          padding: EdgeInsets.only(left: 10, right: 10, bottom: paddingOf.bottom),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1500),
-              child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 自动播放设置
-                _buildSectionTitle(l10n.playbackSettings),
-                SwitchListTile(
-                  title: Text(l10n.autoNextEpisode),
-                  subtitle: Text(l10n.autoNextEpisodeSubtitle),
-                  value: _autoPlayNext,
-                  onChanged: (value) {
-                    setState(() {
-                      _autoPlayNext = value;
-                      AppSettings.setAutoPlayNext(_autoPlayNext);
-                    });
-                  },
-                ),
-                SwitchListTile(
-                  title: Text(l10n.adBlocker),
-                  subtitle: Text(l10n.adBlockerSubtitle),
-                  value: _adBlocker,
-                  onChanged: (value) {
-                    setState(() {
-                      _adBlocker = value;
-                      AppSettings.setAdBlocker(_adBlocker);
-                    });
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
+        body: SingleChildScrollView(
+            padding: EdgeInsets.only(left: 10, right: 10, bottom: paddingOf.bottom),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1500),
+                child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 自动播放设置
+                  _buildSectionTitle(l10n.playbackSettings),
+                  SwitchListTile(
+                    title: Text(l10n.autoNextEpisode),
+                    subtitle: Text(l10n.autoNextEpisodeSubtitle),
+                    value: _autoPlayNext,
+                    onChanged: (value) {
+                      setState(() {
+                        _autoPlayNext = value;
+                        AppSettings.setAutoPlayNext(_autoPlayNext);
+                      });
+                    },
+                  ),
+                  SwitchListTile(
+                    title: Text(l10n.adBlocker),
+                    subtitle: Text(l10n.adBlockerSubtitle),
+                    value: _adBlocker,
+                    onChanged: (value) {
+                      setState(() {
+                        _adBlocker = value;
+                        AppSettings.setAdBlocker(_adBlocker);
+                      });
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.skipDuration,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              Text(
+                                l10n.skipDurationSubtitle,
+                                style: const TextStyle(fontSize: 12),
+                              )
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 100,
+                          child: TextField(
+                            controller: TextEditingController(
+                              text: _skipDuration.toString(),
+                            ),
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 5, vertical: 5),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              suffixText: l10n.seconds,
+                            ),
+                            onChanged: (value) {
+                              final parsed = int.tryParse(value);
+                              if (parsed != null && parsed > 0) {
+                                setState(() {
+                                  _skipDuration = parsed;
+                                  AppSettings.setSkipDuration(_skipDuration);
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // 进度设置
+                  _buildSectionTitle(l10n.playbackProgress),
+                  SwitchListTile(
+                    title: Text(l10n.saveEpisodeProgress),
+                    subtitle: Text(l10n.saveEpisodeProgressSubtitle),
+                    value: _episodesProgress,
+                    onChanged: (value) {
+                      setState(() {
+                        _episodesProgress = value;
+                        AppSettings.setEpisodesProgress(_episodesProgress);
+                      });
+                    },
+                  ),
+                  SwitchListTile(
+                    title: Text(l10n.showMiniProgressBar),
+                    subtitle: Text(l10n.showMiniProgressBarSubtitle),
+                    value: _showMiniProgressBar,
+                    onChanged: (value) {
+                      setState(() {
+                        _showMiniProgressBar = value;
+                        AppSettings.setShowMiniProgressBar(value);
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 播放器内核设置
+                  _buildSectionTitle(l10n.playerKernel),
+                  SwitchListTile(
+                    title: Text(l10n.hardwareDecoding),
+                    value: _hardwareDecoder,
+                    onChanged: (value) {
+                      setState(() {
+                        _hardwareDecoder = value;
+                        AppSettings.setHardwareDecoder(value);
+                      });
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      spacing: 5,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.playerKernelTroubleshootingHint,
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                        DropDownMenu<PlayerKernel>(
+                          items: PlayerKernel.values,
+                          selectedItem: _preferredPlayerKernel,
+                          tooltip: l10n.selectPlayerKernel,
+                          offset: const Offset(0, 44),
+                          buttonBuilder: (context, selectedKernel) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(AppLocalizations.of(context).kernelLabel(
+                                selectedKernel ?? _preferredPlayerKernel,
+                              )),
+                              const Icon(Icons.arrow_drop_down),
+                            ],
+                          ),
+                          itemBuilder: (context, kernel, isSelected) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(AppLocalizations.of(context)
+                                  .kernelLabel(kernel)),
+                              if (isSelected) ...[
+                                const SizedBox(width: 12),
+                                const Icon(Icons.check, size: 18),
+                              ],
+                            ],
+                          ),
+                          onSelected: (kernel) {
+                            setState(() {
+                              _preferredPlayerKernel = kernel;
+                              AppSettings.setPreferredPlayerKernel(kernel.name);
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          _preferredPlayerKernel == PlayerKernel.mediaKit
+                              ? Icons.check_circle_outline
+                              : Icons.info_outline,
+                          size: 16,
+                          color: _preferredPlayerKernel == PlayerKernel.mediaKit
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _preferredPlayerKernel == PlayerKernel.mediaKit
+                                ? l10n.playerKernelSupportsSuperResolution
+                                : l10n.playerKernelNoSuperResolution,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 播放速度设置
+                  _buildSectionTitle(l10n.playbackControl),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              l10n.skipDuration,
+                              l10n.longPressFastForwardSpeed,
                               style: const TextStyle(fontSize: 16),
                             ),
                             Text(
-                              l10n.skipDurationSubtitle,
-                              style: const TextStyle(fontSize: 12),
-                            )
+                              '${_fastForwardSpeed.toStringAsFixed(1)}x',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                      SizedBox(
-                        width: 100,
-                        child: TextField(
-                          controller: TextEditingController(
-                            text: _skipDuration.toString(),
-                          ),
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 5, vertical: 5),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            suffixText: l10n.seconds,
-                          ),
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 15,
+                        ),
+                        child: Slider(
+                          value: _fastForwardSpeed,
+                          min: 1.0,
+                          max: 5.0,
+                          divisions: 16,
+                          label: '${_fastForwardSpeed.toStringAsFixed(1)}x',
                           onChanged: (value) {
-                            final parsed = int.tryParse(value);
-                            if (parsed != null && parsed > 0) {
-                              setState(() {
-                                _skipDuration = parsed;
-                                AppSettings.setSkipDuration(_skipDuration);
-                              });
-                            }
+                            setState(() {
+                              _fastForwardSpeed = value;
+                              AppSettings.setFastForwardSpeed(
+                                  _fastForwardSpeed);
+                            });
                           },
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // 进度设置
-                _buildSectionTitle(l10n.playbackProgress),
-                SwitchListTile(
-                  title: Text(l10n.saveEpisodeProgress),
-                  subtitle: Text(l10n.saveEpisodeProgressSubtitle),
-                  value: _episodesProgress,
-                  onChanged: (value) {
-                    setState(() {
-                      _episodesProgress = value;
-                      AppSettings.setEpisodesProgress(_episodesProgress);
-                    });
-                  },
-                ),
-                SwitchListTile(
-                  title: Text(l10n.showMiniProgressBar),
-                  subtitle: Text(l10n.showMiniProgressBarSubtitle),
-                  value: _showMiniProgressBar,
-                  onChanged: (value) {
-                    setState(() {
-                      _showMiniProgressBar = value;
-                      AppSettings.setShowMiniProgressBar(value);
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // 播放器内核设置
-                _buildSectionTitle(l10n.playerKernel),
-                SwitchListTile(
-                  title: Text(l10n.hardwareDecoding),
-                  value: _hardwareDecoder,
-                  onChanged: (value) {
-                    setState(() {
-                      _hardwareDecoder = value;
-                      AppSettings.setHardwareDecoder(value);
-                    });
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    spacing: 5,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              l10n.playerKernelTroubleshootingHint,
-                              style: const TextStyle(fontSize: 13),
+                              '1.0x',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                            ),
+                            Text(
+                              '5.0x',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
                             ),
                           ],
-                        ),
-                      ),
-                      DropDownMenu<PlayerKernel>(
-                        items: PlayerKernel.values,
-                        selectedItem: _preferredPlayerKernel,
-                        tooltip: l10n.selectPlayerKernel,
-                        offset: const Offset(0, 44),
-                        buttonBuilder: (context, selectedKernel) => Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(AppLocalizations.of(context).kernelLabel(
-                              selectedKernel ?? _preferredPlayerKernel,
-                            )),
-                            const Icon(Icons.arrow_drop_down),
-                          ],
-                        ),
-                        itemBuilder: (context, kernel, isSelected) => Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(AppLocalizations.of(context)
-                                .kernelLabel(kernel)),
-                            if (isSelected) ...[
-                              const SizedBox(width: 12),
-                              const Icon(Icons.check, size: 18),
-                            ],
-                          ],
-                        ),
-                        onSelected: (kernel) {
-                          setState(() {
-                            _preferredPlayerKernel = kernel;
-                            AppSettings.setPreferredPlayerKernel(kernel.name);
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        _preferredPlayerKernel == PlayerKernel.mediaKit
-                            ? Icons.check_circle_outline
-                            : Icons.info_outline,
-                        size: 16,
-                        color: _preferredPlayerKernel == PlayerKernel.mediaKit
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _preferredPlayerKernel == PlayerKernel.mediaKit
-                              ? l10n.playerKernelSupportsSuperResolution
-                              : l10n.playerKernelNoSuperResolution,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
-
-                // 播放速度设置
-                _buildSectionTitle(l10n.playbackControl),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n.longPressFastForwardSpeed,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          Text(
-                            '${_fastForwardSpeed.toStringAsFixed(1)}x',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ],
+                ],
+              ),
                       ),
-                    ),
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 15,
-                      ),
-                      child: Slider(
-                        value: _fastForwardSpeed,
-                        min: 1.0,
-                        max: 5.0,
-                        divisions: 16,
-                        label: '${_fastForwardSpeed.toStringAsFixed(1)}x',
-                        onChanged: (value) {
-                          setState(() {
-                            _fastForwardSpeed = value;
-                            AppSettings.setFastForwardSpeed(
-                                _fastForwardSpeed);
-                          });
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '1.0x',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                          ),
-                          Text(
-                            '5.0x',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
             ),
-                    ),
-          ),
+        ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/enums/collection_sort.dart';
@@ -23,7 +24,11 @@ typedef CollectionPageLoader = Future<UserCollectionsItem> Function({
 });
 
 final collectionCancelProvider = Provider<Future<void> Function(int)>((ref) {
-  return FlowApi.cancelCollectionService;
+  final repository = ref.watch(animeInfoRepositoryProvider.notifier);
+  return (subjectId) async {
+    await FlowApi.cancelCollectionService(subjectId);
+    repository.invalidateCache();
+  };
 });
 
 final collectionPageLoaderProvider = Provider<CollectionPageLoader>((ref) {
@@ -40,11 +45,16 @@ final collectionPageLoaderProvider = Provider<CollectionPageLoader>((ref) {
 final collectionTypeUpdateProvider =
     Provider<Future<CollectionUpdateResult> Function(UserCollectionData, int)>(
         (ref) {
-  return (collection, newType) => FlowApi.updateCollectionService(
-        collection.id,
-        type: newType,
-        subjectType: collection.type,
-      );
+  final repository = ref.watch(animeInfoRepositoryProvider.notifier);
+  return (collection, newType) async {
+    final result = await FlowApi.updateCollectionService(
+      collection.id,
+      type: newType,
+      subjectType: collection.type,
+    );
+    repository.invalidateCache();
+    return result;
+  };
 });
 
 @Riverpod(keepAlive: true)

@@ -13,7 +13,7 @@ part of 'anime_info_provider.dart';
 final animeInfoProvider = AnimeInfoProvider._();
 
 final class AnimeInfoProvider
-    extends $AsyncNotifierProvider<AnimeInfo, SubjectsInfoItem> {
+    extends $StreamNotifierProvider<AnimeInfo, SubjectsInfoItem> {
   AnimeInfoProvider._()
       : super(
           from: null,
@@ -37,10 +37,10 @@ final class AnimeInfoProvider
   AnimeInfo create() => AnimeInfo();
 }
 
-String _$animeInfoHash() => r'8dd19bead4e34ef6591842eda2d44dae208ea06f';
+String _$animeInfoHash() => r'f8fe314e1154e0f3b4be37de3281a4e26770cfe4';
 
-abstract class _$AnimeInfo extends $AsyncNotifier<SubjectsInfoItem> {
-  FutureOr<SubjectsInfoItem> build();
+abstract class _$AnimeInfo extends $StreamNotifier<SubjectsInfoItem> {
+  Stream<SubjectsInfoItem> build();
   @$mustCallSuper
   @override
   void runBuild() {
@@ -83,7 +83,7 @@ final class SubjectStillsProvider
   SubjectStills create() => SubjectStills();
 }
 
-String _$subjectStillsHash() => r'328d04c51158c086441c35c4a6bef2980481078b';
+String _$subjectStillsHash() => r'a072252f2ad3053c35442e4fe6e8db174892bbe9';
 
 abstract class _$SubjectStills extends $AsyncNotifier<List<String>> {
   FutureOr<List<String>> build();
@@ -128,7 +128,7 @@ final class SubjectCommentsProvider
   SubjectComments create() => SubjectComments();
 }
 
-String _$subjectCommentsHash() => r'c1ac03076273ada97e856a12971608408d4f913c';
+String _$subjectCommentsHash() => r'16c109ade684240f87a5eb43b18337c418aafe62';
 
 abstract class _$SubjectComments
     extends $AsyncNotifier<SubjectCommentsViewState> {
@@ -180,7 +180,7 @@ final class SubjectRelatedProvider
   SubjectRelated create() => SubjectRelated();
 }
 
-String _$subjectRelatedHash() => r'2dcf600f294c10ef6580fe370d7babd935e88f5c';
+String _$subjectRelatedHash() => r'eaaa843c7af504c9c4b9271db75acc06a1b1aa75';
 
 ///相关条目
 
@@ -232,7 +232,7 @@ final class SubjectCharactersProvider
   SubjectCharacters create() => SubjectCharacters();
 }
 
-String _$subjectCharactersHash() => r'b821240203ad3ff327796dba034c0d3bdefa1dfe';
+String _$subjectCharactersHash() => r'219f71dc0d49953304a59cd5c3a672ab3a5d49dd';
 
 ///条目角色信息
 
@@ -283,7 +283,7 @@ final class SubjectProducersProvider
   SubjectProducers create() => SubjectProducers();
 }
 
-String _$subjectProducersHash() => r'a552ba3d84513bf79bfbdcf35a6209fde633f38a';
+String _$subjectProducersHash() => r'5511e9e4dfdc35111578a175fc1535c6cb8b11aa';
 
 ///番剧制作人信息
 

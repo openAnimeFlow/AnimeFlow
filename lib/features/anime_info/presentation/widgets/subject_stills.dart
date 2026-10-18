@@ -44,6 +44,7 @@ class SubjectStillsView extends ConsumerWidget {
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: imageFilter.length,
+                padding: EdgeInsets.zero,
                 itemBuilder: (context, index) {
                   final image = imageFilter[index];
                   final heroTag = ImageViewer.heroTagFor(image, index);

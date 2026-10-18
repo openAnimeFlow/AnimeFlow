@@ -1,4 +1,5 @@
-import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/features/characters/data/repositories/character_repository.dart';
+import 'package:dio/dio.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:flutter/scheduler.dart';
@@ -28,15 +29,26 @@ class CharactersList extends _$CharactersList {
   bool _armedForBottomLoad = true;
   bool _loadMoreScheduled = false;
   bool _autoFillScheduled = false;
+  late CancelToken _cancelToken;
+  bool _forceRefresh = false;
 
   @override
   Future<CharactersViewState> build() async {
     final subjectId = ref.watch(charactersArgsProvider);
-    final characters = await FlowApi.charactersService(
-      subjectId,
-      limit: _pageSize,
-      offset: 0,
-    );
+    final token = _cancelToken = CancelToken();
+    ref.onDispose(() => token.cancel());
+    _armedForBottomLoad = true;
+    _loadMoreScheduled = false;
+    _autoFillScheduled = false;
+    _forceRefresh = !ref.isFirstBuild;
+    final characters =
+        await ref.watch(characterRepositoryProvider.notifier).getCharacters(
+              subjectId,
+              limit: _pageSize,
+              offset: 0,
+              cancelToken: token,
+              forceRefresh: _forceRefresh,
+            );
     return CharactersViewState(characters: characters);
   }
 
@@ -84,6 +96,7 @@ class CharactersList extends _$CharactersList {
   }
 
   Future<void> loadMore() async {
+    if (!ref.mounted) return;
     final current = state.asData?.value;
     if (current == null || current.isLoadingMore || !current.hasMore) {
       return;
@@ -96,20 +109,26 @@ class CharactersList extends _$CharactersList {
       ),
     );
 
+    final token = _cancelToken;
     try {
       final prev = current.characters;
       final subjectId = ref.read(charactersArgsProvider);
-      final result = await FlowApi.charactersService(
-        subjectId,
-        limit: _pageSize,
-        offset: prev.data.length,
-      );
+      final result =
+          await ref.read(characterRepositoryProvider.notifier).getCharacters(
+                subjectId,
+                limit: _pageSize,
+                offset: prev.data.length,
+                cancelToken: token,
+                forceRefresh: _forceRefresh,
+              );
+      if (!ref.mounted || token.isCancelled) return;
       final merged = CharactersItem(
         data: [...prev.data, ...result.data],
         total: result.total,
       );
       state = AsyncData(CharactersViewState(characters: merged));
     } catch (_) {
+      if (!ref.mounted || token.isCancelled) return;
       _armedForBottomLoad = true;
       state = AsyncData(
         CharactersViewState(

@@ -799,5 +799,17 @@
   "imageCacheClearing": "正在清除…",
   "imageCacheSizeFailed": "統計失敗，請重試",
   "imageCacheCleared": "圖片快取已清除",
-  "imageCacheClearFailed": "清除失敗，請稍後重試"
+  "imageCacheClearFailed": "清除失敗，請稍後重試",
+  "popularAnimeUpdateAvailable": "熱門動畫有更新，點擊重新整理",
+  "cacheUsageTitle": "快取總大小",
+  "imageCacheLabel": "圖片",
+  "animeInfoCacheLabel": "條目詳情",
+  "cacheSelectAll": "全選",
+  "cacheDeselectAll": "取消全選",
+  "cacheSelectedSize": "已選快取",
+  "clearSelectedCache": "清除所選",
+  "clearSelectedCacheTitle": "清除所選快取？",
+  "clearSelectedCacheDescription": "快取會在下次使用時重新載入。下載的影片、觀看紀錄和設定會保留。",
+  "selectedCacheCleared": "所選快取已清除",
+  "selectedCacheClearFailed": "部分快取清除失敗，請重試"
 }

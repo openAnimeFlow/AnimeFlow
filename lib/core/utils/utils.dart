@@ -290,15 +290,15 @@ class Utils {
   }
 
   /// 格式化字节数
-  static String formatBytes(int bytes) {
+  static String formatBytes(int bytes, {int fractionDigits = 2}) {
     if (bytes < 1024) {
       return '$bytes B';
     } else if (bytes < 1024 * 1024) {
-      return '${(bytes / 1024).toStringAsFixed(2)} KB';
+      return '${(bytes / 1024).toStringAsFixed(fractionDigits)} KB';
     } else if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(fractionDigits)} MB';
     } else {
-      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
+      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(fractionDigits)} GB';
     }
   }
 }

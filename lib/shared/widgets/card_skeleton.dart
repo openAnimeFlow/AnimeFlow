@@ -1,8 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:shimmer/shimmer.dart';
 
-class SubjectCardSkeleton extends StatelessWidget {
-  const SubjectCardSkeleton({super.key});
+class CardSkeleton extends StatelessWidget {
+  const CardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {

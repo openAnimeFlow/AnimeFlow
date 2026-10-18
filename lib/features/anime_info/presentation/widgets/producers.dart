@@ -38,6 +38,7 @@ class ProducersView extends StatelessWidget {
                       ),
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.zero,
                         itemCount: producers.data.length,
                         itemBuilder: (BuildContext context, int index) {
                           final staffItem = producers.data[index];

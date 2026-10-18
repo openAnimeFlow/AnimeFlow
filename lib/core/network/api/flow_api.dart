@@ -423,9 +423,11 @@ class FlowApi {
   }
 
   ///每日放送
-  static Future<Calendar> calendarService({int? year, int? month}) async {
+  static Future<Calendar> calendarService(
+      {int? year, int? month, CancelToken? cancelToken}) async {
     return await _client.get(
       AnimeFlowApi.calendar,
+      cancelToken: cancelToken,
       queryParameters: {
         if (year != null) 'year': year,
         if (month != null) 'month': month,
@@ -434,12 +436,15 @@ class FlowApi {
   }
 
   /// 获取热门
-  static Future<HotItem> getHotService(int limit, int offset) async {
-    return await _client.get(AnimeFlowApi.hot, queryParameters: {
-      'type': 2,
-      'limit': limit,
-      'offset': offset
-    }).then((value) => HotItem.fromJson(value.data));
+  static Future<HotItem> getHotService(int limit, int offset,
+      {CancelToken? cancelToken}) async {
+    return await _client.get(AnimeFlowApi.hot,
+        cancelToken: cancelToken,
+        queryParameters: {
+          'type': 2,
+          'limit': limit,
+          'offset': offset
+        }).then((value) => HotItem.fromJson(value.data));
   }
 
   ///根据id获取条目（已登录时携带 Flow Token，服务端换取 Bangumi token 返回 interest）
@@ -629,19 +634,25 @@ class FlowApi {
   }
 
   ///角色信息
-  static Future<CharacterDetailItem> characterInfoService(
-      int characterId) async {
-    final response = await _client.get(AnimeFlowApi.character
-        .replaceFirst('{characterId}', characterId.toString()));
+  static Future<CharacterDetailItem> characterInfoService(int characterId,
+      {CancelToken? cancelToken}) async {
+    final response = await _client.get(
+        AnimeFlowApi.character
+            .replaceFirst('{characterId}', characterId.toString()),
+        cancelToken: cancelToken);
     return CharacterDetailItem.fromJson(response.data);
   }
 
   ///角色出演作品
   static Future<CharacterCastsItem> characterWorksService(int characterId,
-      {required int limit, required int offset, int subjectType = 2}) async {
+      {required int limit,
+      required int offset,
+      int subjectType = 2,
+      CancelToken? cancelToken}) async {
     final response = await _client.get(
         AnimeFlowApi.characterCasts
             .replaceFirst('{characterId}', characterId.toString()),
+        cancelToken: cancelToken,
         queryParameters: {
           'subjectType': subjectType,
           'limit': limit,

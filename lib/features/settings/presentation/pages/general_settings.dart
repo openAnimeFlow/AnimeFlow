@@ -2,12 +2,11 @@ import 'dart:io';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/localization/locale_provider.dart';
-import 'package:anime_flow/core/network/image/image_cache_service.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/ech_image_route.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/cache_management_card.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
-import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,10 +19,6 @@ class GeneralSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
-  final _imageCache = ImageCacheService();
-  late Future<int> _imageCacheSize = _imageCache.sizeInBytes();
-  bool _clearImageCacheRequested = false;
-  bool _clearingImageCache = false;
   bool _isLanguageMenuOpen = false;
   late bool _echImageLoading;
   final _echRouteFormKey = GlobalKey<FormState>();
@@ -83,72 +78,6 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
     ref.read(localeProvider.notifier).setLocale(language.locale);
   }
 
-  void _refreshImageCacheSize() {
-    setState(() => _imageCacheSize = _imageCache.sizeInBytes());
-  }
-
-  Future<void> _confirmClearImageCache() async {
-    if (_clearImageCacheRequested) return;
-    setState(() => _clearImageCacheRequested = true);
-    try {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) {
-          final l10n = AppLocalizations.of(dialogContext);
-          return AlertDialog(
-            icon: const Icon(Icons.cleaning_services_rounded),
-            title: Text(l10n.clearImageCacheTitle),
-            content: Text(l10n.clearImageCacheDescription),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text(l10n.cancel),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: Text(l10n.clearImageCache),
-              ),
-            ],
-          );
-        },
-      );
-      if (confirmed != true || !mounted) return;
-      setState(() => _clearingImageCache = true);
-      try {
-        await _imageCache.clear();
-        if (mounted) {
-          NotificationToast.show(
-              AppLocalizations.of(context).imageCacheCleared);
-        }
-      } catch (_) {
-        if (mounted) {
-          NotificationToast.show(
-              AppLocalizations.of(context).imageCacheClearFailed);
-        }
-      } finally {
-        // Recount even after a failure because some files may have been removed.
-        if (mounted) _refreshImageCacheSize();
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _clearImageCacheRequested = false;
-          _clearingImageCache = false;
-        });
-      }
-    }
-  }
-
-  String _imageCacheDescription(AsyncSnapshot<int> snapshot) {
-    final l10n = AppLocalizations.of(context);
-    if (_clearingImageCache) return l10n.imageCacheClearing;
-    if (snapshot.connectionState != ConnectionState.done) {
-      return l10n.imageCacheCalculating;
-    }
-    if (snapshot.hasError) return l10n.imageCacheSizeFailed;
-    return '${(snapshot.requireData / (1024 * 1024)).toStringAsFixed(2)} MB';
-  }
-
   Future<void> _saveEchImageRoute() async {
     if (_echRouteFormKey.currentState?.validate() != true) return;
     await AppSettings.setEchImageRoutes(_echRoutes.map((route) {
@@ -178,196 +107,179 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
     if (mounted) FocusScope.of(context).unfocus();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final paddingOf = MediaQuery.paddingOf(context);
     final selectedLanguage = _languageForLocale(ref.watch(localeProvider));
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: Consumer(
-          builder: (context, ref, _) {
-            final isWideScreen = ref.watch(settingsLayoutProvider);
-            return AppBar(
-              title: Text(l10n.generalSettingsTitle),
-              automaticallyImplyLeading: !isWideScreen,
-            );
-          },
+    return MediaQuery.removePadding(
+      context: context,
+      removeLeft: true,
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: Consumer(
+            builder: (context, ref, _) {
+              final isWideScreen = ref.watch(settingsLayoutProvider);
+              return AppBar(
+                title: Text(l10n.generalSettingsTitle),
+                automaticallyImplyLeading: !isWideScreen,
+              );
+            },
+          ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1500),
-            child: ListView(
-              padding: EdgeInsets.only(top: 16, bottom: 16 + paddingOf.bottom),
-              children: [
-                Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: ListTile(
-                    leading: const Icon(Icons.language),
-                    title: Text(l10n.languageLabel),
-                    trailing: DropDownMenu<_LanguageOption>(
-                      items: _LanguageOption.values,
-                      selectedItem: selectedLanguage,
-                      tooltip: l10n.selectLanguageTooltip,
-                      onOpenedChanged: (isOpen) {
-                        if (_isLanguageMenuOpen == isOpen) return;
-                        setState(() => _isLanguageMenuOpen = isOpen);
-                      },
-                      buttonBuilder: (context, _) {
-                        final colorScheme = Theme.of(context).colorScheme;
-                        return Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              selectedLanguage.label,
-                              style: TextStyle(color: colorScheme.primary),
-                            ),
-                            AnimatedRotation(
-                              turns: _isLanguageMenuOpen ? 0.5 : 0,
-                              duration: const Duration(milliseconds: 180),
-                              curve: Curves.easeOutCubic,
-                              child: Icon(
-                                Icons.arrow_drop_down,
-                                color: colorScheme.primary,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                      itemBuilder: (context, language, isSelected) {
-                        return Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              width: 24,
-                              child: isSelected
-                                  ? Icon(
-                                      Icons.check,
-                                      size: 18,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    )
-                                  : null,
-                            ),
-                            Text(language.label),
-                          ],
-                        );
-                      },
-                      onSelected: _setLanguage,
-                    ),
-                  ),
-                ),
-                Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: FutureBuilder<int>(
-                    future: _imageCacheSize,
-                    builder: (context, snapshot) => ListTile(
-                      leading: const Icon(Icons.cleaning_services_rounded),
-                      title: Text(l10n.clearImageCache),
-                      subtitle: Text(_imageCacheDescription(snapshot)),
-                      enabled:
-                          snapshot.connectionState == ConnectionState.done &&
-                              !_clearImageCacheRequested,
-                      onTap: _confirmClearImageCache,
-                      trailing: snapshot.hasError &&
-                              snapshot.connectionState ==
-                                  ConnectionState.done &&
-                              !_clearImageCacheRequested
-                          ? IconButton(
-                              tooltip: l10n.retry,
-                              onPressed: _refreshImageCacheSize,
-                              icon: const Icon(Icons.refresh_rounded),
-                            )
-                          : const Icon(Icons.image_outlined),
-                    ),
-                  ),
-                ),
-                Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    children: [
-                      SwitchListTile(
-                        secondary: const Icon(Icons.image_outlined),
-                        title: Text(l10n.echImageLoading),
-                        subtitle: Text(l10n.echImageLoadingDescription),
-                        value: _echImageLoading,
-                        onChanged: (value) async {
-                          await AppSettings.setEchImageLoading(value);
-                          if (mounted) setState(() => _echImageLoading = value);
+        body: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(10, 16, 10, 16 + paddingOf.bottom),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1500),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: ListTile(
+                      leading: const Icon(Icons.language),
+                      title: Text(l10n.languageLabel),
+                      trailing: DropDownMenu<_LanguageOption>(
+                        items: _LanguageOption.values,
+                        selectedItem: selectedLanguage,
+                        tooltip: l10n.selectLanguageTooltip,
+                        onOpenedChanged: (isOpen) {
+                          if (_isLanguageMenuOpen == isOpen) return;
+                          setState(() => _isLanguageMenuOpen = isOpen);
                         },
-                      ),
-                      AnimatedSize(
-                        duration: const Duration(milliseconds: 180),
-                        alignment: Alignment.topCenter,
-                        child: _echImageLoading
-                            ? Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                child: Form(
-                                  key: _echRouteFormKey,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Divider(),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        l10n.echImageRoute,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(l10n.echImageRouteHint),
-                                      const SizedBox(height: 12),
-                                      for (final route in _echRoutes)
-                                        _buildEchRoute(route, l10n),
-                                      TextButton.icon(
-                                        onPressed: _addEchRoute,
-                                        icon: const Icon(Icons.add),
-                                        label: Text(l10n.echImageAddHost),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Wrap(
-                                        spacing: 8,
-                                        runSpacing: 8,
-                                        children: [
-                                          OutlinedButton(
-                                            onPressed: _restoreEchImageRoute,
-                                            child: Text(
-                                                l10n.echImageRestoreDefaults),
-                                          ),
-                                          FilledButton(
-                                            onPressed: _saveEchImageRoute,
-                                            child: Text(l10n.echImageSave),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
+                        buttonBuilder: (context, _) {
+                          final colorScheme = Theme.of(context).colorScheme;
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                selectedLanguage.label,
+                                style: TextStyle(color: colorScheme.primary),
+                              ),
+                              AnimatedRotation(
+                                turns: _isLanguageMenuOpen ? 0.5 : 0,
+                                duration: const Duration(milliseconds: 180),
+                                curve: Curves.easeOutCubic,
+                                child: Icon(
+                                  Icons.arrow_drop_down,
+                                  color: colorScheme.primary,
                                 ),
-                              )
-                            : const SizedBox.shrink(),
+                              ),
+                            ],
+                          );
+                        },
+                        itemBuilder: (context, language, isSelected) {
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 24,
+                                child: isSelected
+                                    ? Icon(
+                                        Icons.check,
+                                        size: 18,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      )
+                                    : null,
+                              ),
+                              Text(language.label),
+                            ],
+                          );
+                        },
+                        onSelected: _setLanguage,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.info_outline, size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(child: Text(l10n.echImageRestartRequired)),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  const CacheManagementCard(),
+                  Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        SwitchListTile(
+                          secondary: const Icon(Icons.image_outlined),
+                          title: Text(l10n.echImageLoading),
+                          subtitle: Text(l10n.echImageLoadingDescription),
+                          value: _echImageLoading,
+                          onChanged: (value) async {
+                            await AppSettings.setEchImageLoading(value);
+                            if (mounted) {
+                              setState(() => _echImageLoading = value);
+                            }
+                          },
+                        ),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 180),
+                          alignment: Alignment.topCenter,
+                          child: _echImageLoading
+                              ? Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                  child: Form(
+                                    key: _echRouteFormKey,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Divider(),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          l10n.echImageRoute,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(l10n.echImageRouteHint),
+                                        const SizedBox(height: 12),
+                                        for (final route in _echRoutes)
+                                          _buildEchRoute(route, l10n),
+                                        TextButton.icon(
+                                          onPressed: _addEchRoute,
+                                          icon: const Icon(Icons.add),
+                                          label: Text(l10n.echImageAddHost),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Wrap(
+                                          spacing: 8,
+                                          runSpacing: 8,
+                                          children: [
+                                            OutlinedButton(
+                                              onPressed: _restoreEchImageRoute,
+                                              child: Text(
+                                                  l10n.echImageRestoreDefaults),
+                                            ),
+                                            FilledButton(
+                                              onPressed: _saveEchImageRoute,
+                                              child: Text(l10n.echImageSave),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.info_outline, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                  child: Text(l10n.echImageRestartRequired)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -389,7 +301,7 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
               suffixIcon: IconButton(
                 tooltip: l10n.delete,
                 onPressed:
-                _echRoutes.length > 1 ? () => _removeEchRoute(route) : null,
+                    _echRoutes.length > 1 ? () => _removeEchRoute(route) : null,
                 icon: const Icon(Icons.close),
               ),
             ),
@@ -401,9 +313,9 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
                 return l10n.echImageInvalidHost;
               }
               if (_echRoutes
-                  .where((entry) =>
-              entry.host.text.trim().toLowerCase() == host)
-                  .length >
+                      .where((entry) =>
+                          entry.host.text.trim().toLowerCase() == host)
+                      .length >
                   1) {
                 return l10n.echImageDuplicateHost;
               }
@@ -411,47 +323,63 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
             },
           ),
           const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final fieldWidth =
-              constraints.maxWidth < 248 ? constraints.maxWidth : 248.0;
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  for (final controller in route.ips)
-                    SizedBox(
-                      width: fieldWidth,
-                      child: TextFormField(
-                        key: ValueKey(controller),
-                        controller: controller,
-                        decoration: InputDecoration(
-                          labelText: l10n.echImageFixedIp,
-                          suffixIcon: IconButton(
-                            tooltip: l10n.delete,
-                            icon: const Icon(Icons.close),
-                            onPressed: () => _removeEchIp(route, controller),
+          ExpansionTile(
+            key: PageStorageKey(route),
+            initiallyExpanded: false,
+            maintainState: true,
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(bottom: 8),
+            shape: const Border(),
+            collapsedShape: const Border(),
+            title: Text('${l10n.echImageFixedIp} (${route.ips.length})'),
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final fieldWidth =
+                      constraints.maxWidth < 248 ? constraints.maxWidth : 248.0;
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        for (final controller in route.ips)
+                          SizedBox(
+                            width: fieldWidth,
+                            child: TextFormField(
+                              key: ValueKey(controller),
+                              controller: controller,
+                              decoration: InputDecoration(
+                                labelText: l10n.echImageFixedIp,
+                                suffixIcon: IconButton(
+                                  tooltip: l10n.delete,
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () =>
+                                      _removeEchIp(route, controller),
+                                ),
+                              ),
+                              keyboardType: TextInputType.url,
+                              validator: (value) {
+                                final ip = value?.trim() ?? '';
+                                if (ip.isEmpty) return l10n.echImageIpRequired;
+                                return InternetAddress.tryParse(ip) != null
+                                    ? null
+                                    : l10n.echImageInvalidIp;
+                              },
+                            ),
                           ),
+                        TextButton.icon(
+                          onPressed: () => _addEchIp(route),
+                          icon: const Icon(Icons.add),
+                          label: Text(l10n.echImageAddIp),
                         ),
-                        keyboardType: TextInputType.url,
-                        validator: (value) {
-                          final ip = value?.trim() ?? '';
-                          if (ip.isEmpty) return l10n.echImageIpRequired;
-                          return InternetAddress.tryParse(ip) != null
-                              ? null
-                              : l10n.echImageInvalidIp;
-                        },
-                      ),
+                      ],
                     ),
-                  TextButton.icon(
-                    onPressed: () => _addEchIp(route),
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.echImageAddIp),
-                  ),
-                ],
-              );
-            },
+                  );
+                },
+              )
+            ],
           ),
           const Divider(),
         ],

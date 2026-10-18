@@ -80,6 +80,31 @@ class SubjectsInfoItem {
             ? InterestItem.fromJson(json['interest'])
             : null;
 
+  Map<String, dynamic> toJson() => {
+        'airtime': airtime?.toJson(),
+        'collection': collection.toJson(),
+        'eps': eps,
+        'id': id,
+        'infobox': infobox.map((item) => item.toJson()).toList(),
+        'info': info,
+        'metaTags': metaTags,
+        'locked': locked,
+        'name': name,
+        'nameCN': nameCN,
+        'nsfw': nsfw,
+        'platform': platform.toJson(),
+        'rating': rating.toJson(),
+        'redirect': redirect,
+        'series': series,
+        'seriesEntry': seriesEntry,
+        'summary': summary,
+        'type': type,
+        'volumes': volumes,
+        'tags': tags.map((item) => item.toJson()).toList(),
+        'images': images.toJson(),
+        'interest': interest?.toJson(),
+      };
+
   SubjectsInfoItem copyWith(
       {InterestItem? interest, bool clearInterest = false}) {
     return SubjectsInfoItem(

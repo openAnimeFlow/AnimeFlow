@@ -6,9 +6,9 @@ import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
+import 'package:anime_flow/shared/widgets/card_skeleton.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -19,7 +19,7 @@ class CalendarView extends StatefulWidget {
 
 class _CalendarViewState extends State<CalendarView> {
   final ScrollController _scrollController = ScrollController();
-  final weekday = DateTime.now().weekday;
+  int get weekday => DateTime.now().weekday;
   bool _isHovering = false;
   bool _canScrollLeft = false;
   bool _canScrollRight = false;
@@ -242,58 +242,10 @@ class _CalendarViewState extends State<CalendarView> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: _buildCalendarPosterSkeleton(context),
+              child: const CardSkeleton(),
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildCalendarPosterSkeleton(BuildContext context) {
-    final isDark = SystemUtil.isDarkTheme(context);
-    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-    final filler = isDark
-        ? Theme.of(context).colorScheme.surfaceContainerHighest
-        : Theme.of(context).colorScheme.surface;
-
-    return Shimmer.fromColors(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned.fill(child: Container(color: filler)),
-          Positioned(
-            left: 10,
-            right: 10,
-            bottom: 14,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  height: 12,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: filler,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  height: 12,
-                  width: 72,
-                  decoration: BoxDecoration(
-                    color: filler,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

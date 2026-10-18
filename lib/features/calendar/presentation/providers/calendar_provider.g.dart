@@ -18,8 +18,8 @@ final calendarProvider = CalendarFamily._();
 final class CalendarProvider extends $FunctionalProvider<
         AsyncValue<CalendarWithTags>,
         CalendarWithTags,
-        FutureOr<CalendarWithTags>>
-    with $FutureModifier<CalendarWithTags>, $FutureProvider<CalendarWithTags> {
+        Stream<CalendarWithTags>>
+    with $FutureModifier<CalendarWithTags>, $StreamProvider<CalendarWithTags> {
   /// A null season requests the current season, shared by the home and calendar pages.
   CalendarProvider._(
       {required CalendarFamily super.from,
@@ -44,12 +44,12 @@ final class CalendarProvider extends $FunctionalProvider<
 
   @$internal
   @override
-  $FutureProviderElement<CalendarWithTags> $createElement(
+  $StreamProviderElement<CalendarWithTags> $createElement(
           $ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
+      $StreamProviderElement(pointer);
 
   @override
-  FutureOr<CalendarWithTags> create(Ref ref) {
+  Stream<CalendarWithTags> create(Ref ref) {
     final argument = this.argument as CalendarSeason?;
     return calendar(
       ref,
@@ -68,13 +68,12 @@ final class CalendarProvider extends $FunctionalProvider<
   }
 }
 
-String _$calendarHash() => r'c7f5049023872db4e107e7379079aba8fa26f4f3';
+String _$calendarHash() => r'a483fc7f2e6a55baa45b3a17f28787b800c1366b';
 
 /// A null season requests the current season, shared by the home and calendar pages.
 
 final class CalendarFamily extends $Family
-    with
-        $FunctionalFamilyOverride<FutureOr<CalendarWithTags>, CalendarSeason?> {
+    with $FunctionalFamilyOverride<Stream<CalendarWithTags>, CalendarSeason?> {
   CalendarFamily._()
       : super(
           retry: null,

@@ -799,5 +799,17 @@
   "imageCacheClearing": "正在清除…",
   "imageCacheSizeFailed": "统计失败，请重试",
   "imageCacheCleared": "图片缓存已清除",
-  "imageCacheClearFailed": "清除失败，请稍后重试"
+  "imageCacheClearFailed": "清除失败，请稍后重试",
+  "popularAnimeUpdateAvailable": "热门动画有更新，点击刷新",
+  "cacheUsageTitle": "缓存总大小",
+  "imageCacheLabel": "图片",
+  "animeInfoCacheLabel": "条目详情",
+  "cacheSelectAll": "全选",
+  "cacheDeselectAll": "取消全选",
+  "cacheSelectedSize": "已选缓存",
+  "clearSelectedCache": "清理所选",
+  "clearSelectedCacheTitle": "清理所选缓存？",
+  "clearSelectedCacheDescription": "缓存会在下次使用时重新加载。下载的视频、观看记录和设置会保留。",
+  "selectedCacheCleared": "所选缓存已清理",
+  "selectedCacheClearFailed": "部分缓存清理失败，请重试"
 }

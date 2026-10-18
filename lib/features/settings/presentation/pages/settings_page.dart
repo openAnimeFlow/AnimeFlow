@@ -26,22 +26,40 @@ class SettingsPage extends StatelessWidget {
   final String location;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) {
-          final wide = constraints.maxWidth > 600;
-          return ProviderScope(
-            overrides: [settingsLayoutProvider.overrideWithValue(wide)],
-            child: wide
-                ? Scaffold(
-                    body: Row(children: [
-                    SizedBox(
-                        width: 250,
-                        child: _SettingsMenu(location: location, wide: true)),
-                    Expanded(child: child),
-                  ]))
-                : child,
-          );
-        },
+  Widget build(BuildContext context) {
+    // Reuse the same widget while resizing within a layout breakpoint.
+    final narrow =
+        _SettingsLayout(wide: false, location: location, child: child);
+    final wide = _SettingsLayout(wide: true, location: location, child: child);
+    return LayoutBuilder(
+        builder: (context, constraints) =>
+            constraints.maxWidth > 600 ? wide : narrow);
+  }
+}
+
+class _SettingsLayout extends StatelessWidget {
+  const _SettingsLayout(
+      {required this.wide, required this.location, required this.child});
+
+  final bool wide;
+  final String location;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => ProviderScope(
+        overrides: [settingsLayoutProvider.overrideWithValue(wide)],
+        // Keep the route navigator at the same position in both layouts.
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: Row(children: [
+            SizedBox(
+                width: wide ? 250 : 0,
+                child: wide
+                    ? _SettingsMenu(location: location, wide: true)
+                    : null),
+            Expanded(child: child),
+          ]),
+        ),
       );
 }
 
@@ -247,10 +265,10 @@ class _SettingsMenu extends ConsumerWidget {
           const Divider(height: 1),
           Expanded(
               child: Material(
-                type: MaterialType.transparency,
-                clipBehavior: Clip.hardEdge,
-                child: menu,
-              )),
+            type: MaterialType.transparency,
+            clipBehavior: Clip.hardEdge,
+            child: menu,
+          )),
         ]),
       ),
     );

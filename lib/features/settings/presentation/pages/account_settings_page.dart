@@ -127,39 +127,43 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
     final isBinding = oauthState.isAuthorizing &&
         oauthState.purpose == OAuthPurpose.bindBangumi;
 
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: Consumer(
-          builder: (context, ref, _) {
-            final isWideScreen = ref.watch(settingsLayoutProvider);
-            return AppBar(
-              title: Text(l10n.accountSettings),
-              automaticallyImplyLeading: !isWideScreen,
+    return MediaQuery.removePadding(
+      context: context,
+      removeLeft: true,
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: Consumer(
+            builder: (context, ref, _) {
+              final isWideScreen = ref.watch(settingsLayoutProvider);
+              return AppBar(
+                title: Text(l10n.accountSettings),
+                automaticallyImplyLeading: !isWideScreen,
+              );
+            },
+          ),
+        ),
+        body: isLoggedInAsync.when(
+          data: (isLoggedIn) {
+            if (!isLoggedIn) {
+              return const LoginPage();
+            }
+            return userInfoAsync.when(
+              data: (user) => user == null
+                  ? _buildErrorState(l10n.profileLoadFailed)
+                  : _buildLoggedInContent(
+                      context,
+                      user,
+                      bangumiBindAsync,
+                      isBinding,
+                    ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => _buildErrorState(l10n.profileLoadFailed),
             );
           },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, __) => _buildErrorState(l10n.loginStateLoadFailed),
         ),
-      ),
-      body: isLoggedInAsync.when(
-        data: (isLoggedIn) {
-          if (!isLoggedIn) {
-            return const LoginPage();
-          }
-          return userInfoAsync.when(
-            data: (user) => user == null
-                ? _buildErrorState(l10n.profileLoadFailed)
-                : _buildLoggedInContent(
-                    context,
-                    user,
-                    bangumiBindAsync,
-                    isBinding,
-                  ),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => _buildErrorState(l10n.profileLoadFailed),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => _buildErrorState(l10n.loginStateLoadFailed),
       ),
     );
   }

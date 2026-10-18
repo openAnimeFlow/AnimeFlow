@@ -34,212 +34,216 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final paddingOf = MediaQuery.paddingOf(context);
     final topPadding = paddingOf.top + kToolbarHeight;
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: Consumer(
-          builder: (context, ref, _) {
-            final isWideScreen = ref.watch(settingsLayoutProvider);
-            return AppBar(
-              title: Text(l10n.about),
-              automaticallyImplyLeading: !isWideScreen,
-              backgroundColor: Colors.transparent,
-            );
-          },
+    return MediaQuery.removePadding(
+      context: context,
+      removeLeft: true,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: Consumer(
+            builder: (context, ref, _) {
+              final isWideScreen = ref.watch(settingsLayoutProvider);
+              return AppBar(
+                title: Text(l10n.about),
+                automaticallyImplyLeading: !isWideScreen,
+                backgroundColor: Colors.transparent,
+              );
+            },
+          ),
         ),
-      ),
-      body: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: IgnorePointer(
-              child: SizedBox(
-                height: 360,
-                child: ShaderMask(
-                  blendMode: BlendMode.dstIn,
-                  shaderCallback: (bounds) => const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white,
-                      Colors.white,
-                      Colors.transparent,
-                    ],
-                    stops: [0, 0.68, 1],
-                  ).createShader(bounds),
-                  child: SvgPicture.asset(
-                    AssetsPathConstants.ambientWaveBackground,
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      colorScheme.primary.withValues(alpha: 0.42),
-                      BlendMode.srcIn,
+        body: Stack(
+          children: [
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                child: SizedBox(
+                  height: 360,
+                  child: ShaderMask(
+                    blendMode: BlendMode.dstIn,
+                    shaderCallback: (bounds) => const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white,
+                        Colors.white,
+                        Colors.transparent,
+                      ],
+                      stops: [0, 0.68, 1],
+                    ).createShader(bounds),
+                    child: SvgPicture.asset(
+                      AssetsPathConstants.ambientWaveBackground,
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        colorScheme.primary.withValues(alpha: 0.42),
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          SingleChildScrollView(
-            padding: EdgeInsets.only(top: topPadding, bottom: paddingOf.bottom),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1500),
-                child: Column(
-                  children: [
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final appInfo = ref.watch(appInfoProvider);
-                        return Center(
-                          child: Column(
-                            children: [
-                              CircleAvatar(
-                                radius: 80,
-                                backgroundColor: Colors.transparent,
-                                child: Image.asset(
-                                  AssetsPathConstants.logo,
-                                ),
-                              ),
-                              Text(
-                                appInfo.appName,
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                l10n.version(appInfo.version),
-                                style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 16),
-                          const Divider(),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                            child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(l10n.autoUpdate),
-                                  Switch(
-                                    value: autoUpdate,
-                                    onChanged: (bool value) {
-                                      setState(() {
-                                        AppSettings.setAutoUpdate(value);
-                                        autoUpdate = value;
-                                      });
-                                    },
+            SingleChildScrollView(
+              padding: EdgeInsets.only(top: topPadding, bottom: paddingOf.bottom),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1500),
+                  child: Column(
+                    children: [
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final appInfo = ref.watch(appInfoProvider);
+                          return Center(
+                            child: Column(
+                              children: [
+                                CircleAvatar(
+                                  radius: 80,
+                                  backgroundColor: Colors.transparent,
+                                  child: Image.asset(
+                                    AssetsPathConstants.logo,
                                   ),
-                                ]),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: Text(l10n.checkForUpdates),
-                            trailing:
-                                const Icon(Icons.browser_updated_outlined),
-                            onTap: () async {
-                              final notifier =
-                                  ref.read(appInfoProvider.notifier);
-                              final result = await notifier.checkVersion();
-                              if (!context.mounted) return;
-                              await handleVersionCheckResult(
-                                context,
-                                result,
-                                onStartDownload: notifier.performUpdateDownload,
-                                onDownloadedPackageAction:
-                                    notifier.openDownloadedPackage,
-                                onCancelDownload: notifier.cancelUpdateDownload,
-                                notifyWhenUpToDate: true,
-                              );
-                            },
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: Text(l10n.projectUpdates),
-                            trailing: const Icon(Icons.article_outlined),
-                            onTap: () =>
-                                const SettingUpdatesRoute().push(context),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: Text(l10n.projectWebsite),
-                            trailing: const Icon(Icons.public_outlined),
-                            onTap: () =>
-                                const SettingWebsiteRoute().push(context),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: Text(l10n.openSource),
-                            trailing: const Icon(Icons.open_in_new),
-                            onTap: () async {
-                              final uri = Uri.parse(Constants.animeFlow);
-                              if (await canLaunchUrl(uri)) {
-                                await launchUrl(uri);
-                              } else {
-                                NotificationToast.show(
-                                    l10n.deviceUnsupportedWeb,
-                                    title: l10n.unableOpenWeb);
-                              }
-                            },
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: Text(l10n.thanks),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () {
-                              const SettingThanksRoute().push(context);
-                            },
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: const Text('关于作者'),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () =>
-                                const SettingAuthorRoute().push(context),
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: Text(l10n.sponsor),
-                            trailing: const Icon(
-                              Icons.volunteer_activism_outlined,
+                                ),
+                                Text(
+                                  appInfo.appName,
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  l10n.version(appInfo.version),
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
                             ),
-                            onTap: () {
-                              const SettingSponsorRoute().push(context);
-                            },
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: Text(l10n.privacyPolicy),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () {
-                              const SettingAgreementRoute().push(context);
-                            },
-                          ),
-                          const Divider(),
-                        ],
+                          );
+                        },
                       ),
-                    )
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 16),
+                            const Divider(),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(l10n.autoUpdate),
+                                    Switch(
+                                      value: autoUpdate,
+                                      onChanged: (bool value) {
+                                        setState(() {
+                                          AppSettings.setAutoUpdate(value);
+                                          autoUpdate = value;
+                                        });
+                                      },
+                                    ),
+                                  ]),
+                            ),
+                            const Divider(),
+                            ListTile(
+                              title: Text(l10n.checkForUpdates),
+                              trailing:
+                                  const Icon(Icons.browser_updated_outlined),
+                              onTap: () async {
+                                final notifier =
+                                    ref.read(appInfoProvider.notifier);
+                                final result = await notifier.checkVersion();
+                                if (!context.mounted) return;
+                                await handleVersionCheckResult(
+                                  context,
+                                  result,
+                                  onStartDownload: notifier.performUpdateDownload,
+                                  onDownloadedPackageAction:
+                                      notifier.openDownloadedPackage,
+                                  onCancelDownload: notifier.cancelUpdateDownload,
+                                  notifyWhenUpToDate: true,
+                                );
+                              },
+                            ),
+                            const Divider(),
+                            ListTile(
+                              title: Text(l10n.projectUpdates),
+                              trailing: const Icon(Icons.article_outlined),
+                              onTap: () =>
+                                  const SettingUpdatesRoute().push(context),
+                            ),
+                            const Divider(),
+                            ListTile(
+                              title: Text(l10n.projectWebsite),
+                              trailing: const Icon(Icons.public_outlined),
+                              onTap: () =>
+                                  const SettingWebsiteRoute().push(context),
+                            ),
+                            const Divider(),
+                            ListTile(
+                              title: Text(l10n.openSource),
+                              trailing: const Icon(Icons.open_in_new),
+                              onTap: () async {
+                                final uri = Uri.parse(Constants.animeFlow);
+                                if (await canLaunchUrl(uri)) {
+                                  await launchUrl(uri);
+                                } else {
+                                  NotificationToast.show(
+                                      l10n.deviceUnsupportedWeb,
+                                      title: l10n.unableOpenWeb);
+                                }
+                              },
+                            ),
+                            const Divider(),
+                            ListTile(
+                              title: Text(l10n.thanks),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () {
+                                const SettingThanksRoute().push(context);
+                              },
+                            ),
+                            const Divider(),
+                            ListTile(
+                              title: const Text('关于作者'),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () =>
+                                  const SettingAuthorRoute().push(context),
+                            ),
+                            const Divider(),
+                            ListTile(
+                              title: Text(l10n.sponsor),
+                              trailing: const Icon(
+                                Icons.volunteer_activism_outlined,
+                              ),
+                              onTap: () {
+                                const SettingSponsorRoute().push(context);
+                              },
+                            ),
+                            const Divider(),
+                            ListTile(
+                              title: Text(l10n.privacyPolicy),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () {
+                                const SettingAgreementRoute().push(context);
+                              },
+                            ),
+                            const Divider(),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

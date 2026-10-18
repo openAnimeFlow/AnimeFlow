@@ -2482,4 +2482,43 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get imageCacheClearFailed =>
       'Could not clear image cache. Please try again.';
+
+  @override
+  String get popularAnimeUpdateAvailable =>
+      'New popular anime rankings available · Tap to refresh';
+
+  @override
+  String get cacheUsageTitle => 'Total cache size';
+
+  @override
+  String get imageCacheLabel => 'Images';
+
+  @override
+  String get animeInfoCacheLabel => 'Subject details';
+
+  @override
+  String get cacheSelectAll => 'Select all';
+
+  @override
+  String get cacheDeselectAll => 'Deselect all';
+
+  @override
+  String get cacheSelectedSize => 'Selected cache';
+
+  @override
+  String get clearSelectedCache => 'Clear selected';
+
+  @override
+  String get clearSelectedCacheTitle => 'Clear selected cache?';
+
+  @override
+  String get clearSelectedCacheDescription =>
+      'Cached content will reload when needed. Downloaded videos, watch history, and settings will be kept.';
+
+  @override
+  String get selectedCacheCleared => 'Selected cache cleared';
+
+  @override
+  String get selectedCacheClearFailed =>
+      'Some cache could not be cleared. Please retry.';
 }

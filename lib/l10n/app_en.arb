@@ -799,5 +799,17 @@
   "imageCacheClearing": "Clearing…",
   "imageCacheSizeFailed": "Could not calculate cache size. Please retry.",
   "imageCacheCleared": "Image cache cleared",
-  "imageCacheClearFailed": "Could not clear image cache. Please try again."
+  "imageCacheClearFailed": "Could not clear image cache. Please try again.",
+  "popularAnimeUpdateAvailable": "New popular anime rankings available · Tap to refresh",
+  "cacheUsageTitle": "Total cache size",
+  "imageCacheLabel": "Images",
+  "animeInfoCacheLabel": "Subject details",
+  "cacheSelectAll": "Select all",
+  "cacheDeselectAll": "Deselect all",
+  "cacheSelectedSize": "Selected cache",
+  "clearSelectedCache": "Clear selected",
+  "clearSelectedCacheTitle": "Clear selected cache?",
+  "clearSelectedCacheDescription": "Cached content will reload when needed. Downloaded videos, watch history, and settings will be kept.",
+  "selectedCacheCleared": "Selected cache cleared",
+  "selectedCacheClearFailed": "Some cache could not be cleared. Please retry."
 }

@@ -4568,6 +4568,78 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'清除失败，请稍后重试'**
   String get imageCacheClearFailed;
+
+  /// No description provided for @popularAnimeUpdateAvailable.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'热门动画有更新，点击刷新'**
+  String get popularAnimeUpdateAvailable;
+
+  /// No description provided for @cacheUsageTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'缓存总大小'**
+  String get cacheUsageTitle;
+
+  /// No description provided for @imageCacheLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'图片'**
+  String get imageCacheLabel;
+
+  /// No description provided for @animeInfoCacheLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'条目详情'**
+  String get animeInfoCacheLabel;
+
+  /// No description provided for @cacheSelectAll.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'全选'**
+  String get cacheSelectAll;
+
+  /// No description provided for @cacheDeselectAll.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'取消全选'**
+  String get cacheDeselectAll;
+
+  /// No description provided for @cacheSelectedSize.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已选缓存'**
+  String get cacheSelectedSize;
+
+  /// No description provided for @clearSelectedCache.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'清理所选'**
+  String get clearSelectedCache;
+
+  /// No description provided for @clearSelectedCacheTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'清理所选缓存？'**
+  String get clearSelectedCacheTitle;
+
+  /// No description provided for @clearSelectedCacheDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'缓存会在下次使用时重新加载。下载的视频、观看记录和设置会保留。'**
+  String get clearSelectedCacheDescription;
+
+  /// No description provided for @selectedCacheCleared.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'所选缓存已清理'**
+  String get selectedCacheCleared;
+
+  /// No description provided for @selectedCacheClearFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'部分缓存清理失败，请重试'**
+  String get selectedCacheClearFailed;
 }
 
 class _AppLocalizationsDelegate

@@ -28,6 +28,9 @@ class _AnimePageState extends ConsumerState<AnimeView>
   }
 
   void _scrollListener() {
+    if (_scrollController.position.pixels > 0) {
+      ref.read(animeHotProvider.notifier).markScrolled();
+    }
     final hotState = ref.read(animeHotProvider).asData?.value;
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 200 &&

@@ -72,6 +72,7 @@ class CharactersView extends StatelessWidget {
                           scrollbars: false,
                         ),
                         child: ListView.builder(
+                          padding: EdgeInsets.zero,
                           scrollDirection: Axis.horizontal,
                           itemCount: characters.data.length,
                           itemBuilder: (context, index) {

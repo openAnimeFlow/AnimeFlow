@@ -29,12 +29,24 @@ class GuestToken extends CurrentFlowToken {
 
 class PendingAdapter implements HttpClientAdapter {
   final requests = <Completer<ResponseBody>>[];
+  var _requestAdded = Completer<void>();
+
+  Future<void> waitForRequests(int count) async {
+    while (requests.length < count) {
+      await _requestAdded.future.timeout(const Duration(seconds: 10),
+          onTimeout: () => throw TestFailure(
+              'Expected $count requests, but received ${requests.length}.'));
+    }
+  }
 
   @override
   Future<ResponseBody> fetch(RequestOptions options,
       Stream<Uint8List>? requestStream, Future<void>? cancelFuture) {
     final request = Completer<ResponseBody>();
     requests.add(request);
+    final added = _requestAdded;
+    _requestAdded = Completer<void>();
+    added.complete();
     return request.future;
   }
 
@@ -139,12 +151,12 @@ void main() {
       () async {
     final container = createContainer();
     final result = container.read(animeInfoProvider.future);
-    await pumpEventQueue();
+    await remote.waitForRequests(1);
     expect(remote.requests, hasLength(1));
 
     repositoryContainer.read(collectionRevisionProvider.notifier).changed();
     remote.requests[0].complete(reply(subject: subject('stale')));
-    await pumpEventQueue();
+    await remote.waitForRequests(2);
     expect(remote.requests, hasLength(2));
     expect(Storage.animeInfoCache.isEmpty, isTrue);
     expect(container.read(animeInfoProvider).isLoading, isTrue);
@@ -163,11 +175,11 @@ void main() {
         result,
         throwsA(isA<AnimeFlowApiException>().having(
             (error) => error.message, 'message', 'current request failed')));
-    await pumpEventQueue();
+    await remote.waitForRequests(1);
 
     repository.invalidateCache();
     remote.requests[0].complete(reply(error: 'obsolete request failed'));
-    await pumpEventQueue();
+    await remote.waitForRequests(2);
     expect(remote.requests, hasLength(2));
     remote.requests[1].complete(reply(error: 'current request failed'));
     await assertion;
@@ -181,7 +193,7 @@ void main() {
     final result = repository
         .watchSubject(42, sessionId: null, cancelToken: token)
         .toList();
-    await pumpEventQueue();
+    await remote.waitForRequests(1);
     repository.invalidateCache();
     token.cancel();
     remote.requests.single.complete(reply(subject: subject('stale')));
@@ -202,10 +214,10 @@ void main() {
     });
     addTearDown(subscription.cancel);
     final result = repository.watchSubject(42, sessionId: null).toList();
-    await pumpEventQueue();
+    await remote.waitForRequests(1);
     remote.requests[0].complete(reply(subject: subject('stale')));
     await invalidated.future;
-    await pumpEventQueue();
+    await remote.waitForRequests(2);
     expect(remote.requests, hasLength(2));
     remote.requests[1].complete(reply(subject: subject('fresh')));
 
@@ -224,7 +236,7 @@ void main() {
       'manual clearing does not let a pending subject response restore disk cache',
       () async {
     final result = repository.watchSubject(42, sessionId: null).toList();
-    await pumpEventQueue();
+    await remote.waitForRequests(1);
     await JsonResponseCache.clear(Storage.animeInfoCache);
     remote.requests.single.complete(reply(subject: subject('visible')));
     expect((await result).single.name, 'visible');
@@ -236,10 +248,10 @@ void main() {
     await Storage.animeInfoCache.put(jsonEncode([null, 42]),
         jsonEncode({'subject': subject('cached').toJson(), 'cachedAt': 0}));
     final result = repository.watchSubject(42, sessionId: null).toList();
-    await pumpEventQueue();
+    await remote.waitForRequests(1);
     repository.invalidateCache();
     remote.requests[0].complete(reply(subject: subject('stale')));
-    await pumpEventQueue();
+    await remote.waitForRequests(2);
     expect(remote.requests, hasLength(2));
     remote.requests[1].complete(reply(error: 'offline'));
 

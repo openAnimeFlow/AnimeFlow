@@ -70,46 +70,39 @@ class CacheUsagePanel extends StatelessWidget {
             .textTheme
             .bodyMedium
             ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant));
-    final legend = DecoratedBox(
-      decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(20)),
-      child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: TextButton(
-                      onPressed: busy
-                          ? null
-                          : () => onSelectionChanged(
-                              selected.length == CacheCategory.values.length
-                                  ? {}
-                                  : CacheCategory.values.toSet()),
-                      child: Text(selected.length == CacheCategory.values.length
-                          ? l10n.cacheDeselectAll
-                          : l10n.cacheSelectAll))),
-              for (final category in CacheCategory.values)
-                _categoryRow(context, category, l10n, selectedBytes),
-              const SizedBox(height: 12),
-              SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    key: const ValueKey('clear-selected-cache'),
-                    onPressed: busy || selectedBytes == 0 ? null : onClear,
-                    style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 12)),
-                    child: Text(
-                        clearing
-                            ? l10n.imageCacheClearing
-                            : '${l10n.clearSelectedCache}  ${Utils.formatBytes(selectedBytes)}',
-                        textAlign: TextAlign.center),
-                  )),
-            ],
-          )),
+    final legend = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: TextButton(
+                onPressed: busy
+                    ? null
+                    : () => onSelectionChanged(
+                        selected.length == CacheCategory.values.length
+                            ? {}
+                            : CacheCategory.values.toSet()),
+                child: Text(selected.length == CacheCategory.values.length
+                    ? l10n.cacheDeselectAll
+                    : l10n.cacheSelectAll))),
+        for (final category in CacheCategory.values)
+          _categoryRow(context, category, l10n, selectedBytes),
+        const SizedBox(height: 12),
+        SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              key: const ValueKey('clear-selected-cache'),
+              onPressed: busy || selectedBytes == 0 ? null : onClear,
+              style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 16, horizontal: 12)),
+              child: Text(
+                  clearing
+                      ? l10n.imageCacheClearing
+                      : '${l10n.clearSelectedCache}  ${Utils.formatBytes(selectedBytes)}',
+                  textAlign: TextAlign.center),
+            )),
+      ],
     );
     // Resize only the layout wrappers; keep the chart and controls mounted.
     return LayoutBuilder(builder: (context, constraints) {

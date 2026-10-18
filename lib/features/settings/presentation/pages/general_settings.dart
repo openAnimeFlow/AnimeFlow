@@ -136,8 +136,8 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Card(
-                    clipBehavior: Clip.antiAlias,
+                  Padding(
+                    padding: const EdgeInsets.all(4),
                     child: ListTile(
                       leading: const Icon(Icons.language),
                       title: Text(l10n.languageLabel),
@@ -195,8 +195,8 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
                     ),
                   ),
                   const CacheManagementCard(),
-                  Card(
-                    clipBehavior: Clip.antiAlias,
+                  Padding(
+                    padding: const EdgeInsets.all(4),
                     child: Column(
                       children: [
                         SwitchListTile(

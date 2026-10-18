@@ -89,49 +89,44 @@ class _CacheManagementCardState extends State<CacheManagementCard> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Card(
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: FutureBuilder<CacheUsage>(
-              future: _usage,
-              builder: (context, snapshot) {
-                final loading =
-                    snapshot.connectionState != ConnectionState.done;
-                return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(children: [
-                        const Icon(Icons.donut_large_rounded),
-                        const SizedBox(width: 12),
-                        Expanded(
-                            child: Text(l10n.cacheUsageTitle,
-                                style:
-                                    Theme.of(context).textTheme.titleMedium)),
-                        IconButton(
-                            tooltip: l10n.reload,
-                            onPressed:
-                                loading || _requested ? null : _refreshUsage,
-                            icon: const Icon(Icons.refresh_rounded)),
-                      ]),
-                      if (snapshot.hasError && !loading)
-                        Text(l10n.imageCacheSizeFailed,
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.error)),
-                      const SizedBox(height: 16),
-                      CacheUsagePanel(
-                        usage: snapshot.data ?? CacheUsage({}),
-                        selected: _selected,
-                        loading: loading,
-                        refreshToken: _usage,
-                        busy: loading || snapshot.hasError || _requested,
-                        clearing: _clearing,
-                        onSelectionChanged: (selected) =>
-                            setState(() => _selected = selected),
-                        onClear: _clearSelected,
-                      ),
-                    ]);
-              }),
-        ));
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: FutureBuilder<CacheUsage>(
+          future: _usage,
+          builder: (context, snapshot) {
+            final loading = snapshot.connectionState != ConnectionState.done;
+            return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(children: [
+                    const Icon(Icons.donut_large_rounded),
+                    const SizedBox(width: 12),
+                    Expanded(
+                        child: Text(l10n.cacheUsageTitle,
+                            style: Theme.of(context).textTheme.titleMedium)),
+                    IconButton(
+                        tooltip: l10n.reload,
+                        onPressed: loading || _requested ? null : _refreshUsage,
+                        icon: const Icon(Icons.refresh_rounded)),
+                  ]),
+                  if (snapshot.hasError && !loading)
+                    Text(l10n.imageCacheSizeFailed,
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error)),
+                  const SizedBox(height: 16),
+                  CacheUsagePanel(
+                    usage: snapshot.data ?? CacheUsage({}),
+                    selected: _selected,
+                    loading: loading,
+                    refreshToken: _usage,
+                    busy: loading || snapshot.hasError || _requested,
+                    clearing: _clearing,
+                    onSelectionChanged: (selected) =>
+                        setState(() => _selected = selected),
+                    onClear: _clearSelected,
+                  ),
+                ]);
+          }),
+    );
   }
 }

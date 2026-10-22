@@ -93,7 +93,7 @@ final class DownloadManagerProvider extends $FunctionalProvider<
   }
 }
 
-String _$downloadManagerHash() => r'243775f960e4a600e4a606cd268e102790b1c10e';
+String _$downloadManagerHash() => r'df104043a75b14308bc4ce300205e54e8368e1ef';
 
 @ProviderFor(downloadDanmakuService)
 final downloadDanmakuServiceProvider = DownloadDanmakuServiceProvider._();
@@ -181,7 +181,7 @@ final class VideoSourceResolverPoolProvider extends $FunctionalProvider<
 }
 
 String _$videoSourceResolverPoolHash() =>
-    r'63e2bc7050b31ddf14e95bf4a492b1d2731133ae';
+    r'4f59afa10ea0192bad3387b6f1eb6f40c0e93acc';
 
 @ProviderFor(DownloadController)
 final downloadControllerProvider = DownloadControllerProvider._();
@@ -216,7 +216,7 @@ final class DownloadControllerProvider
 }
 
 String _$downloadControllerHash() =>
-    r'c5be615ed6104ba697161a6762d08a84664d3288';
+    r'9e670316af204b563d1e59e34f601d4e86e81600';
 
 abstract class _$DownloadController extends $Notifier<DownloadState> {
   DownloadState build();

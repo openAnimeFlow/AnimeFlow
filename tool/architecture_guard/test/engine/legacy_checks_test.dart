@@ -83,47 +83,55 @@ void main() {
       );
     },
   );
-  test(
-    'project policy closes user/auth business without hiding routing debt',
-    () {
-      final spec = projectArchitecture();
-      expect(
-        spec.isStrict('R07', 'lib/core/network/interceptors/new.dart'),
-        isTrue,
-      );
-      for (final feature in ['auth', 'user']) {
-        for (final rule in ['R03', 'R06', 'R07', 'R09']) {
-          expect(
-            spec.isStrict(rule, 'lib/features/$feature/application/new.dart'),
-            isTrue,
-          );
-        }
+  test('project policy closes user/auth business without hiding routing debt', () {
+    final spec = projectArchitecture();
+    const implementation =
+        'lib/core/video_source/infrastructure/webview_video_source_service.dart';
+    expect(
+      () => compareLegacy(
+        [],
+        register(rule: 'R04', destination: implementation),
+        sources: {source},
+        spec: spec,
+      ),
+      throwsStateError,
+    );
+    expect(
+      spec.isStrict('R07', 'lib/core/network/interceptors/new.dart'),
+      isTrue,
+    );
+    for (final feature in ['auth', 'user']) {
+      for (final rule in ['R03', 'R06', 'R07', 'R09']) {
+        expect(
+          spec.isStrict(rule, 'lib/features/$feature/application/new.dart'),
+          isTrue,
+        );
       }
-      expect(
-        spec.isStrict(
-          'R07',
-          'lib/features/user/presentation/pages/user_page.dart',
-        ),
-        isFalse,
-      );
-      expect(
-        spec.modules.singleWhere((m) => m.name == 'auth').dependencies,
-        isEmpty,
-      );
-      expect(spec.modules.singleWhere((m) => m.name == 'user').dependencies, {
-        'auth',
-      });
-      expect(
-        () => ArchitectureSpec(
-          spec.modules,
-          strictScopes: {
-            'R03': {'lib/missing/**.dart'},
-          },
-        ).validate({'lib/main.dart'}),
-        throwsStateError,
-      );
-    },
-  );
+    }
+    expect(
+      spec.isStrict(
+        'R07',
+        'lib/features/user/presentation/pages/user_page.dart',
+      ),
+      isFalse,
+    );
+    expect(
+      spec.modules.singleWhere((m) => m.name == 'auth').dependencies,
+      isEmpty,
+    );
+    expect(spec.modules.singleWhere((m) => m.name == 'user').dependencies, {
+      'auth',
+    });
+    expect(
+      () => ArchitectureSpec(
+        spec.modules,
+        strictScopes: {
+          'R03': {'lib/missing/**.dart'},
+        },
+      ).validate({'lib/main.dart'}),
+      throwsStateError,
+    );
+  });
   final date = DateTime.utc(2026, 10, 22);
   LegacyResult compare(
     List<ArchitectureViolation> values,

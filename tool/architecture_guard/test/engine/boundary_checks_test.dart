@@ -6,12 +6,74 @@ import 'package:test/test.dart';
 import 'package:anime_flow_architecture_guard/src/boundary_checks.dart';
 import 'package:anime_flow_architecture_guard/src/dependency_graph.dart';
 import 'package:anime_flow_architecture_guard/src/model.dart';
+import 'package:anime_flow_architecture_guard/architecture_spec.dart';
 
 import 'fixture_project.dart';
 
 void main() {
   late FixtureProject fixture;
   tearDown(() => fixture.dispose());
+  test('shared video resolution keeps contracts pure and implementation selection in composition', () {
+    const service =
+        'lib/core/video_source/infrastructure/webview_video_source_service.dart';
+    const factory =
+        'lib/core/webview/video/video_webview_controller_factory.dart';
+    const contract = 'lib/core/video_source/domain/video_source.dart';
+    const providers = 'lib/core/video_source/application/providers.dart';
+    const consumer = 'lib/features/a/application/resolve.dart';
+    final project = projectArchitecture();
+    final spec = ArchitectureSpec([
+      project.modules.singleWhere((module) => module.name == 'core'),
+      ModuleSpec('app', 'lib/app', [
+        SourceScope('lib/app/**.dart', Responsibility.composition),
+      ]),
+      ModuleSpec('a', 'lib/features/a', [
+        SourceScope('lib/features/a/**.dart', Responsibility.business),
+      ]),
+    ], compositionOnly: project.compositionOnly);
+    fixture = FixtureProject({
+      'lib/app/setup.dart': "import '../core/video_source/infrastructure/webview_video_source_service.dart';\nimport '../core/webview/video/video_webview_controller_factory.dart';",
+      'lib/core/webview/video/base.dart': 'abstract class NativeController {}',
+      service: "import '../domain/video_source.dart';",
+      factory: "import 'base.dart';",
+      contract: 'abstract class VideoResolver {}',
+      providers: "import '../domain/video_source.dart';",
+      consumer: "import '../../../core/video_source/domain/video_source.dart';\nimport '../../../core/video_source/application/providers.dart';",
+    });
+    expect(
+      checkBoundaries(collectDependencies(fixture.root, spec), spec),
+      isEmpty,
+    );
+    fixture.write(
+      'lib/core/resolver_barrel.dart',
+      "export 'video_source/infrastructure/webview_video_source_service.dart';",
+    );
+    fixture.write(
+      consumer,
+      "import '../../../core/resolver_barrel.dart';\nimport '../../../core/webview/video/video_webview_controller_factory.dart';",
+    );
+    fixture.write(contract, "import '../application/providers.dart';");
+    fixture.write(service, "import '../application/providers.dart';");
+    final violations = checkBoundaries(
+      collectDependencies(fixture.root, spec),
+      spec,
+    );
+    expect(
+      violations
+          .where((v) => v.source == consumer && v.rule == 'R04')
+          .map((v) => v.target)
+          .toSet(),
+      {service, factory},
+    );
+    expect(
+      violations.where((v) => v.source == contract).map((v) => v.rule),
+      contains('R05'),
+    );
+    expect(
+      violations.where((v) => v.source == service).map((v) => v.rule),
+      contains('R02'),
+    );
+  });
   test(
     'reusable UI entries allow UI consumers but reject business consumers',
     () {

@@ -200,3 +200,48 @@ HTTP 测试使用替身 adapter 验证真实工厂装配和请求链路，没有
 隔离样例额外验证了等价 YAML 形式可通过、删除 quality 依赖仍会失败、标签注解前可有
 注释且可使用不同引号，以及部分用例漏标能被反向筛选发现。没有修改实际工作流来做探测。
 日志位于 build/test-optimization-business.log 和 build/test-optimization-architecture.log。
+
+## 第四阶段：共享视频解析契约
+
+2026-10-22，Windows，Flutter 3.47.6 / Dart 3.13.5。
+
+共享解析能力归 core/video_source，domain 只含纯 Dart 请求、结果、异常、取消和接口；
+application 提供注入入口，infrastructure 实现原生 WebView 适配。播放与下载解析池使用
+相同契约，具体工厂由 app/composition/video_source_bindings.dart 选择，在 bootstrap 装配。
+播放容器复用同一服务，下载工作器使用独立服务；容器释放时销毁，未装配时明确失败。
+
+下载解析池不再导入 play 内部服务，构造时必须注入工厂。原生 WebView 控制器接口与平台
+工厂已拆开。播放业务不接触 ensureInitialized 或平台对象；退出、替换请求会取消自己的
+解析任务，并在历史读取后拒绝过期请求，避免旧请求反过来取消新请求。
+
+请求超时从执行开始，覆盖原生初始化、加载与解析，排队不计时。取消与超时立即结束调用方
+的等待，并隔离旧控制器的事件；成功时复用控制器。原生插件尚未完成的 init/load 无法由
+Dart 强制中断，资源销毁会等待该操作结束，因此 dispose 的完成也依赖原生操作最终返回。
+取消后的控制器不再承载新解析任务，防止迟到事件串入新请求。
+
+解析池取消排队和执行中的请求，丢弃迟到结果；超时工作器退役后继续调度。单个请求可取消，
+销毁可等待，重复销毁不会重复释放。原有测试已改为验证执行中请求也必须取消。
+
+唯一架构策略新增 compositionOnly 实现清单，只有装配职责可依赖解析器与平台工厂，
+barrel 也不能绕过；这些 R04 违规不能登记存量。核心解析域启用纯契约检查，解析能力、
+原生视频控制器及下载解析池启用严格循环检查。正反 fixture 验证纯契约、适配器与装配边界。
+
+| 验证 | 结果 |
+| --- | --- |
+| 全量业务测试 | 484 项通过，新增 11 项并强化原有取消案例 |
+| 架构引擎验收 | 50 项通过，新增共享能力职责和注入边界正反样例 |
+| Flutter 架构集成入口 | 2 项通过 |
+| 静态分析 | 应用与独立工具包零诊断 |
+| 完整扫描 | 485 个源码文件、432 个 library、2472 条依赖 |
+| 存量门禁 | 205 条；新增 0、失效 0 |
+
+删除 16 条旧登记（R06 3、R07 13），其余身份和元数据保持不变。
+当前全项目计数为 R03 3、R04 19、R05 4、R06 34、R07 141、R09 4；R01/R02/R08 为零。
+解析池和原生视频控制器循环消除；下载选集弹窗仍有复用 play Provider 的历史 UI 依赖，
+继续按基线约束，留待展示层收口，不能将本阶段描述成两个 feature 已完全无环。
+
+定向测试位于 test/core/video_source/webview_video_source_service_test.dart、
+test/features/download/application/video_source_resolver_pool_test.dart，使用假原生控制器和
+假解析器，覆盖并发、FIFO、参数传递、取消、超时、初始化失败、迟到结果、销毁及恢复。
+全量日志位于 build/phase4-business-tests.log、build/phase4-architecture-tests.log。
+实际设备 WebView、Linux 和远程 Actions 尚未验证；无运行实例时无法执行热重载。

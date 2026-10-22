@@ -1,51 +1,27 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:anime_flow/features/play/application/video_source_service.dart';
-import 'package:anime_flow/features/play/application/webview_video_source_service.dart';
+import 'package:anime_flow/core/video_source/domain/video_source.dart';
 
-class VideoSourceResolveRequest {
-  const VideoSourceResolveRequest({
-    required this.episodeUrl,
-    this.useLegacyParser = false,
-    this.offset = 0,
-    this.timeout = const Duration(seconds: 30),
-  });
-
-  final String episodeUrl;
-  final bool useLegacyParser;
-  final int offset;
-  final Duration timeout;
-}
-
-abstract interface class IVideoSourceResolverPool {
-  Future<VideoSource> resolve(VideoSourceResolveRequest request);
-
-  void cancelAll();
-
-  void dispose();
-}
-
+/// Bounded workers using injected resolvers, independent of native plugins.
 class VideoSourceResolverPool implements IVideoSourceResolverPool {
-  VideoSourceResolverPool({
-    int workerCount = 2,
-    IVideoSourceProvider Function()? providerFactory,
-  })  : _workerCount = workerCount < 1 ? 1 : workerCount,
-        _providerFactory =
-            providerFactory ?? (() => WebViewVideoSourceService());
-
+  VideoSourceResolverPool(
+      {int workerCount = 2,
+      required VideoSourceProviderFactory providerFactory})
+      : _workerCount = workerCount < 1 ? 1 : workerCount,
+        _providerFactory = providerFactory;
   final int _workerCount;
-  final IVideoSourceProvider Function() _providerFactory;
+  final VideoSourceProviderFactory _providerFactory;
   final _queue = Queue<_QueuedResolve>();
   final _workers = <_ResolverWorker>[];
-  var _disposed = false;
+  final _retirements = <Future<void>>{};
+  Future<void>? _disposal;
 
   @override
   Future<VideoSource> resolve(VideoSourceResolveRequest request) {
-    if (_disposed) {
-      return Future<VideoSource>.error(StateError('resolver pool disposed'));
+    if (_disposal != null) {
+      return Future.error(StateError('resolver pool disposed'));
     }
-
     final queued = _QueuedResolve(request);
     _queue.add(queued);
     _pump();
@@ -55,95 +31,133 @@ class VideoSourceResolverPool implements IVideoSourceResolverPool {
   @override
   void cancelAll() {
     for (final queued in _queue) {
-      if (!queued.completer.isCompleted) {
-        queued.completer.completeError(const VideoSourceCancelledException());
-      }
+      queued._abort(const VideoSourceCancelledException());
     }
     _queue.clear();
-
-    for (final worker in _workers) {
-      worker.provider.cancel();
+    for (final worker in _workers.toList()) {
+      worker.active?._abort(const VideoSourceCancelledException());
     }
   }
 
   @override
-  void dispose() {
-    if (_disposed) {
-      return;
-    }
-    _disposed = true;
+  Future<void> dispose() => _disposal ??= _dispose();
+
+  Future<void> _dispose() async {
     cancelAll();
-    final workers = List<_ResolverWorker>.from(_workers);
+    final workers = _workers.toList();
     _workers.clear();
-    unawaited(_disposeWorkers(workers));
+    for (final worker in workers) {
+      _retire(worker);
+    }
+    await Future.wait(_retirements.toList());
   }
 
-  Future<void> _disposeWorkers(List<_ResolverWorker> workers) async {
-    await Future.wait(
-      workers.map((worker) => worker.provider.dispose()),
-    );
+  void _retire(_ResolverWorker worker) {
+    if (worker.retired) return;
+    worker.retired = true;
+    worker.provider.cancel();
+    final disposal = Future<void>.sync(worker.provider.dispose);
+    _retirements.add(disposal);
+    unawaited(disposal.then<void>((_) => _retirements.remove(disposal),
+        onError: (Object error, StackTrace stack) {}));
   }
 
   void _pump() {
-    while (_queue.isNotEmpty && _activeWorkers < _workerCount) {
-      final worker = _idleWorker() ?? _createWorker();
+    if (_disposal != null) return;
+    while (_queue.isNotEmpty) {
+      if (_queue.first.completer.isCompleted) {
+        _queue.removeFirst();
+        continue;
+      }
+      _ResolverWorker? worker;
+      for (final candidate in _workers) {
+        if (candidate.active == null) {
+          worker = candidate;
+          break;
+        }
+      }
+      if (worker == null) {
+        if (_workers.length >= _workerCount) return;
+        try {
+          worker = _ResolverWorker(_providerFactory());
+          _workers.add(worker);
+        } catch (error, stack) {
+          final queued = _queue.removeFirst();
+          queued.completer.completeError(error, stack);
+          queued._finish();
+          continue;
+        }
+      }
       final queued = _queue.removeFirst();
-      worker.isBusy = true;
+      worker.active = queued;
       unawaited(_run(worker, queued));
     }
   }
 
   Future<void> _run(_ResolverWorker worker, _QueuedResolve queued) async {
+    final timer = Timer(
+        queued.request.timeout,
+        () =>
+            queued._abort(VideoSourceTimeoutException(queued.request.timeout)));
     try {
-      final source = await worker.provider.resolve(
-        queued.request.episodeUrl,
-        useLegacyParser: queued.request.useLegacyParser,
-        offset: queued.request.offset,
-        timeout: queued.request.timeout,
-      );
+      final source = await Future.any([
+        Future<VideoSource>.sync(() => worker.provider
+            .resolve(queued.request.withCancellation(queued.cancellation))),
+        queued.aborted.future.then<VideoSource>((_) => throw queued.error!),
+      ]);
+      if (!queued.completer.isCompleted) queued.completer.complete(source);
+    } catch (error, stack) {
       if (!queued.completer.isCompleted) {
-        queued.completer.complete(source);
-      }
-    } catch (error, stackTrace) {
-      if (!queued.completer.isCompleted) {
-        queued.completer.completeError(error, stackTrace);
+        queued.completer.completeError(error, stack);
       }
     } finally {
-      worker.isBusy = false;
-      if (!_disposed) {
-        _pump();
+      timer.cancel();
+      queued._finish();
+      worker.active = null;
+      if (queued.error != null) {
+        _workers.remove(worker);
+        _retire(worker);
       }
+      _pump();
     }
-  }
-
-  int get _activeWorkers => _workers.where((worker) => worker.isBusy).length;
-
-  _ResolverWorker? _idleWorker() {
-    for (final worker in _workers) {
-      if (!worker.isBusy) {
-        return worker;
-      }
-    }
-    return null;
-  }
-
-  _ResolverWorker _createWorker() {
-    final worker = _ResolverWorker(_providerFactory());
-    _workers.add(worker);
-    return worker;
   }
 }
 
 class _QueuedResolve {
-  _QueuedResolve(this.request);
+  _QueuedResolve(this.request) {
+    final token = request.cancellation;
+    if (token != null) {
+      _subscription = token.onCancel
+          .listen((_) => _abort(const VideoSourceCancelledException()));
+      if (token.isCancelled) _abort(const VideoSourceCancelledException());
+    }
+  }
 
   final VideoSourceResolveRequest request;
-  final Completer<VideoSource> completer = Completer<VideoSource>();
+  final completer = Completer<VideoSource>();
+  final aborted = Completer<void>();
+  final cancellation = VideoSourceCancellation();
+  StreamSubscription<void>? _subscription;
+  Exception? error;
+
+  void _abort(Exception reason) {
+    if (completer.isCompleted) return;
+    error = reason;
+    cancellation.cancel();
+    aborted.complete();
+    completer.completeError(reason);
+    _finish();
+  }
+
+  void _finish() {
+    unawaited(_subscription?.cancel());
+  }
 }
 
 class _ResolverWorker {
   _ResolverWorker(this.provider);
 
   final IVideoSourceProvider provider;
-  var isBusy = false;
+  _QueuedResolve? active;
+  bool retired = false;
 }

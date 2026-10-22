@@ -10,8 +10,9 @@ import 'package:anime_flow/features/download/application/download_foreground_ser
 import 'package:anime_flow/features/download/application/download_manager.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/video_source_resolver_pool.dart';
+import 'package:anime_flow/core/video_source/application/video_source_providers.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
-import 'package:anime_flow/features/play/application/video_source_service.dart';
+import 'package:anime_flow/core/video_source/domain/video_source.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
@@ -122,8 +123,9 @@ IDownloadDanmakuService downloadDanmakuService(Ref ref) {
 
 @Riverpod(keepAlive: true)
 IVideoSourceResolverPool videoSourceResolverPool(Ref ref) {
-  final pool = VideoSourceResolverPool();
-  ref.onDispose(pool.dispose);
+  final pool = VideoSourceResolverPool(
+      providerFactory: ref.watch(videoSourceProviderFactoryProvider));
+  ref.onDispose(() => unawaited(pool.dispose()));
   return pool;
 }
 

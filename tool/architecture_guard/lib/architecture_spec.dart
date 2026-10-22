@@ -28,6 +28,7 @@ ArchitectureSpec projectArchitecture() {
   const dependencies = <String, Set<String>>{
     'anime_info': {'auth', 'characters', 'play', 'user'},
     'character_info': {'characters'},
+    // Legacy download-selection UI still reads play state; the resolver does not.
     'download': {'play'},
     'home': {'calendar', 'play'},
     'play': {
@@ -149,7 +150,23 @@ ArchitectureSpec projectArchitecture() {
       SourceScope('lib/app/**.dart', Responsibility.composition),
     ]),
     ModuleSpec('core', 'lib/core', [
-      SourceScope('lib/core/**.dart', Responsibility.foundation),
+      CoreFoundationScope(),
+      SourceScope(
+        'lib/core/webview/video/video_webview_controller_factory.dart',
+        Responsibility.composition,
+      ),
+      SourceScope(
+        'lib/core/video_source/domain/**.dart',
+        Responsibility.domain,
+      ),
+      SourceScope(
+        'lib/core/video_source/application/**.dart',
+        Responsibility.business,
+      ),
+      SourceScope(
+        'lib/core/video_source/infrastructure/**.dart',
+        Responsibility.adapter,
+      ),
     ]),
     ModuleSpec('shared_models', 'lib/shared/models', [
       SourceScope('lib/shared/models/**.dart', Responsibility.model),
@@ -240,12 +257,24 @@ ArchitectureSpec projectArchitecture() {
   }
   return ArchitectureSpec(
     modules,
+    compositionOnly: {
+      'lib/core/video_source/infrastructure/webview_video_source_service.dart',
+      'lib/core/webview/video/video_webview_controller_factory.dart',
+    },
     strictScopes: {
       for (final rule in ['R03', 'R06', 'R09'])
-        rule: {'lib/features/auth/**.dart', 'lib/features/user/**.dart'},
+        rule: {
+          'lib/features/auth/**.dart',
+          'lib/features/user/**.dart',
+          'lib/core/video_source/**.dart',
+        },
+      'R05': {'lib/core/video_source/domain/**.dart'},
       // Routing/UI cycles are separate legacy work; business cycles are closed.
       'R07': {
         'lib/core/network/**.dart',
+        'lib/core/video_source/**.dart',
+        'lib/core/webview/video/**.dart',
+        'lib/features/download/application/video_source_resolver_pool.dart',
         'lib/features/auth/application/**.dart',
         'lib/features/user/application/**.dart',
       },
@@ -264,6 +293,15 @@ ArchitectureSpec projectArchitecture() {
       },
     },
   );
+}
+
+class CoreFoundationScope extends SourceScope {
+  CoreFoundationScope() : super('lib/core/**.dart', Responsibility.foundation);
+  @override
+  bool matches(String path) =>
+      super.matches(path) &&
+      !path.startsWith('lib/core/video_source/') &&
+      path != 'lib/core/webview/video/video_webview_controller_factory.dart';
 }
 
 class ProviderScope extends SourceScope {

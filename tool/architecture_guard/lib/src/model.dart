@@ -65,6 +65,7 @@ class ArchitectureSpec {
     this.domainPackages = const {},
     this.domainCoreTypes = const {},
     this.strictScopes = const {},
+    this.compositionOnly = const {},
   });
   final List<ModuleSpec> modules;
   // Only generator-owned cycles inside these exact groups are collapsed.
@@ -74,6 +75,7 @@ class ArchitectureSpec {
   final Set<String> domainCoreTypes;
   // Scoped rules cannot be frozen again after a business migration.
   final Map<String, Set<String>> strictScopes;
+  final Set<String> compositionOnly;
   static const rules = {
     'R01',
     'R02',
@@ -89,6 +91,7 @@ class ArchitectureSpec {
 
   bool isStrict(String rule, String source, {String? target}) =>
       strictRules.contains(rule) ||
+      rule == 'R04' && compositionOnly.contains(target) ||
       (strictScopes[rule]?.any(
             (pattern) =>
                 Glob(pattern).matches(source) ||
@@ -115,6 +118,15 @@ class ArchitectureSpec {
   void validate(Iterable<String> paths) {
     final files = paths.toSet();
     if (files.isEmpty) throw StateError('R08: source scan is empty');
+    for (final entry in compositionOnly) {
+      if (!files.contains(entry) ||
+          !{
+            Responsibility.adapter,
+            Responsibility.composition,
+          }.contains(ownerOf(entry).role)) {
+        throw StateError('R08: invalid composition-only implementation $entry');
+      }
+    }
     for (final entry in strictScopes.entries) {
       if (!rules.contains(entry.key) || entry.value.isEmpty) {
         throw StateError('R08: invalid scoped strict rule ${entry.key}');

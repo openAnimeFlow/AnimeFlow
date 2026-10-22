@@ -68,6 +68,10 @@ List<ArchitectureViolation> checkBoundaries(
     }
 
     for (final target in targets) {
+      if (spec.compositionOnly.contains(target) &&
+          source.role != Responsibility.composition) {
+        report('R04', target, '具体实现由装配层选择；消费者通过契约和依赖注入使用。');
+      }
       final destination = graph.libraries.contains(target)
           ? spec.ownerOf(target)
           : null;

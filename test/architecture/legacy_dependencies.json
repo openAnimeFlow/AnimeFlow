@@ -303,36 +303,6 @@
     },
     {
       "rule": "R06",
-      "source": "lib/features/download/application/video_source_resolver_pool.dart",
-      "target": "lib/features/play/application/video_source_service.dart",
-      "kind": "import",
-      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
-      "owner": "feature:download",
-      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R06",
-      "source": "lib/features/download/application/video_source_resolver_pool.dart",
-      "target": "lib/features/play/application/webview_video_source_service.dart",
-      "kind": "import",
-      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
-      "owner": "feature:download",
-      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R06",
-      "source": "lib/features/download/presentation/providers/download_provider.dart",
-      "target": "lib/features/play/application/video_source_service.dart",
-      "kind": "import",
-      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
-      "owner": "feature:download",
-      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R06",
       "source": "lib/features/download/presentation/widgets/download_episode_sheet.dart",
       "target": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
       "kind": "import",
@@ -913,106 +883,6 @@
     },
     {
       "rule": "R07",
-      "source": "lib/core/webview/video/impl/video_webview_android_impl.dart",
-      "target": "lib/core/webview/video/video_webview_controller.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/webview/video/impl/video_webview_apple_impl.dart",
-      "target": "lib/core/webview/video/video_webview_controller.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/webview/video/impl/video_webview_impl.dart",
-      "target": "lib/core/webview/video/video_webview_controller.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/webview/video/impl/video_webview_linux_impl.dart",
-      "target": "lib/core/webview/video/video_webview_controller.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/webview/video/impl/video_webview_windows_impl.dart",
-      "target": "lib/core/webview/video/video_webview_controller.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/webview/video/video_webview_controller.dart",
-      "target": "lib/core/webview/video/impl/video_webview_android_impl.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/webview/video/video_webview_controller.dart",
-      "target": "lib/core/webview/video/impl/video_webview_apple_impl.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/webview/video/video_webview_controller.dart",
-      "target": "lib/core/webview/video/impl/video_webview_impl.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/webview/video/video_webview_controller.dart",
-      "target": "lib/core/webview/video/impl/video_webview_linux_impl.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/webview/video/video_webview_controller.dart",
-      "target": "lib/core/webview/video/impl/video_webview_windows_impl.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
       "source": "lib/features/anime_info/presentation/pages/anime_info_page.dart",
       "target": "lib/app/router/app_router.dart",
       "kind": "import",
@@ -1473,38 +1343,8 @@
     },
     {
       "rule": "R07",
-      "source": "lib/features/download/application/video_source_resolver_pool.dart",
-      "target": "lib/features/play/application/video_source_service.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "feature:download",
-      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/features/download/application/video_source_resolver_pool.dart",
-      "target": "lib/features/play/application/webview_video_source_service.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "feature:download",
-      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
       "source": "lib/features/download/presentation/pages/download_page.dart",
       "target": "lib/app/router/app_router.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "feature:download",
-      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/features/download/presentation/providers/download_provider.dart",
-      "target": "lib/features/play/application/video_source_service.dart",
       "kind": "import",
       "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
       "owner": "feature:download",

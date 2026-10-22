@@ -14,6 +14,7 @@ import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/video_setting_dialog.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/ios_battery_icon.dart';
 import 'package:anime_flow/shared/widgets/network_icon.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';
@@ -26,8 +27,19 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 顶部区域控件
+@Dependencies([
+  playSession,
+  VideoUiNotifier,
+  PlayStateNotifier,
+  playExtra,
+  Episodes,
+  AnimeInfo,
+  subjectOnlineCount,
+  VideoSourceNotifier,
+])
 class TopAreaControl extends ConsumerStatefulWidget {
   const TopAreaControl({super.key});
 
@@ -47,6 +59,30 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
     super.initState();
     playController = ref.read(playSessionProvider);
     _skipDuration = AppSettings.skipDuration;
+  }
+
+  void _skipAhead() {
+    // 点击时读取最新进度，避免使用上次构建时的旧值。
+    final position = ref.read(playStateProvider).position;
+    ref.read(playSessionProvider).seekTo(
+          position + Duration(seconds: _skipDuration),
+        );
+    ref.read(videoUiProvider.notifier).restartControlsAutoHideTimer();
+  }
+
+  Future<void> _updateCollectionType(CollectType newType) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      await ref
+          .read(animeInfoProvider.notifier)
+          .updateCollectionType(newType.value);
+    } on AnimeFlowApiException catch (e) {
+      NotificationToast.show(e.message, title: l10n.updateFailed);
+      rethrow;
+    } catch (e) {
+      NotificationToast.show(e.toString(), title: l10n.updateFailed);
+      rethrow;
+    }
   }
 
   Future<T?> _showRightSlideDialog<T>({
@@ -92,7 +128,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
     final fullscreen =
         ref.watch(playStateProvider.select((s) => s.isFullscreen));
     final leftPadding = MediaQuery.of(context).padding.left;
-    // Keep the subtree mounted across auto-hide so stream subscriptions survive.
+    // 自动隐藏时保留子树，避免中断流订阅。
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(
         begin: isShowControlsUi ? 1 : 0,
@@ -232,12 +268,42 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                           (SystemUtil.isDesktop &&
                               isWideScreen &&
                               !isContentExpanded);
+                      // 只在进度跨过零时更新跳过按钮的可见性。
+                      final showSkip = (isWideScreen || fullscreen) &&
+                          ref.watch(playStateProvider.select(
+                            (state) => state.position > Duration.zero,
+                          ));
+                      final isLoggedIn = showContentActions &&
+                          ref.watch(isLoggedInProvider.select(
+                            (state) => state.value ?? false,
+                          ));
+                      final collection = isLoggedIn
+                          ? ref.watch(animeInfoProvider.select((state) {
+                              final subject = state.asData?.value;
+                              return subject == null
+                                  ? null
+                                  : (id: subject.id, type: subject.interest?.type);
+                            }))
+                          : null;
                       return Row(
                         children: [
-                          if (isWideScreen || fullscreen)
-                            _SkipButton(skipDuration: _skipDuration),
-                          if (showContentActions)
-                            const _CollectionControlButton(),
+                          if (showSkip)
+                            _SkipButton(
+                              skipDuration: _skipDuration,
+                              onPressed: _skipAhead,
+                            ),
+                          if (collection != null)
+                            _CollectionControlButton(
+                              key: ValueKey(collection.id),
+                              collectType:
+                                  collectTypeFromApiType(collection.type),
+                              onMenuOpen: videoUiStateController.cancelUiTimer,
+                              onMenuClose: () =>
+                                  videoUiStateController.hideControlsUi(
+                                duration: const Duration(seconds: 2),
+                              ),
+                              onCollectTypeChanged: _updateCollectionType,
+                            ),
                           if (showContentActions)
                             IconButton(
                               tooltip: l10n.settings,
@@ -407,7 +473,17 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const _OnlineCountIndicator(),
+              Consumer(builder: (context, ref, child) {
+                final canShow = ref.watch(playExtraProvider.select(
+                  (state) =>
+                      !state.isOfflineMode && state.playExtra.subjectId > 0,
+                ));
+                if (!canShow) return const SizedBox.shrink();
+                final onlineUsers = ref.watch(subjectOnlineCountProvider.select(
+                  (state) => state.asData?.value.onlineUsers ?? 0,
+                ));
+                return _OnlineCountIndicator(onlineUsers: onlineUsers);
+              }),
               if (SystemUtil.isMobile) ...[
                 const SizedBox(width: 8),
                 //电池图标
@@ -445,30 +521,19 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   }
 }
 
-class _SkipButton extends ConsumerWidget {
-  const _SkipButton({required this.skipDuration});
+class _SkipButton extends StatelessWidget {
+  const _SkipButton({required this.skipDuration, required this.onPressed});
 
   final int skipDuration;
+  final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Progress updates only affect visibility when crossing zero.
-    final hasPosition = ref.watch(
-      playStateProvider.select((state) => state.position > Duration.zero),
-    );
-    if (!hasPosition) return const SizedBox.shrink();
-
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Tooltip(
       message: l10n.skipSeconds(skipDuration),
       child: IconButton(
-        onPressed: () {
-          final position = ref.read(playStateProvider).position;
-          ref.read(playSessionProvider).seekTo(
-                position + Duration(seconds: skipDuration),
-              );
-          ref.read(videoUiProvider.notifier).restartControlsAutoHideTimer();
-        },
+        onPressed: onPressed,
         icon: SvgPicture.asset(
           AssetsPathConstants.blockGrove,
           width: 25,
@@ -480,36 +545,26 @@ class _SkipButton extends ConsumerWidget {
   }
 }
 
-class _CollectionControlButton extends ConsumerWidget {
-  const _CollectionControlButton();
+class _CollectionControlButton extends StatelessWidget {
+  const _CollectionControlButton({
+    super.key,
+    required this.collectType,
+    required this.onMenuOpen,
+    required this.onMenuClose,
+    required this.onCollectTypeChanged,
+  });
+
+  final CollectType? collectType;
+  final VoidCallback onMenuOpen;
+  final VoidCallback onMenuClose;
+  final Future<void> Function(CollectType) onCollectTypeChanged;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isLoggedIn = ref.watch(
-      isLoggedInProvider.select((state) => state.value ?? false),
-    );
-    if (!isLoggedIn) return const SizedBox.shrink();
-
-    final collection = ref.watch(
-      animeInfoProvider.select((state) {
-        final subject = state.asData?.value;
-        return subject == null
-            ? null
-            : (id: subject.id, type: subject.interest?.type);
-      }),
-    );
-    if (collection == null) return const SizedBox.shrink();
-
-    final l10n = AppLocalizations.of(context);
-    final collectType = collectTypeFromApiType(collection.type);
-    final videoUiStateController = ref.read(videoUiProvider.notifier);
+  Widget build(BuildContext context) {
     return CollectionButton(
-      key: ValueKey(collection.id),
       collectType: collectType,
-      onMenuOpen: videoUiStateController.cancelUiTimer,
-      onMenuClose: () => videoUiStateController.hideControlsUi(
-        duration: const Duration(seconds: 2),
-      ),
+      onMenuOpen: onMenuOpen,
+      onMenuClose: onMenuClose,
       buttonBuilder: (context, label, _, onPressed) {
         return IconButton(
           tooltip: label,
@@ -523,41 +578,19 @@ class _CollectionControlButton extends ConsumerWidget {
           ),
         );
       },
-      onCollectTypeChanged: (newType) async {
-        try {
-          await ref
-              .read(animeInfoProvider.notifier)
-              .updateCollectionType(newType.value);
-        } on AnimeFlowApiException catch (e) {
-          NotificationToast.show(e.message, title: l10n.updateFailed);
-          rethrow;
-        } catch (e) {
-          NotificationToast.show(e.toString(), title: l10n.updateFailed);
-          rethrow;
-        }
-      },
+      onCollectTypeChanged: onCollectTypeChanged,
     );
   }
 }
 
-class _OnlineCountIndicator extends ConsumerWidget {
-  const _OnlineCountIndicator();
+class _OnlineCountIndicator extends StatelessWidget {
+  const _OnlineCountIndicator({required this.onlineUsers});
+
+  final int onlineUsers;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final canShowOnlineCount = ref.watch(
-      playExtraProvider.select(
-        (state) => !state.isOfflineMode && state.playExtra.subjectId > 0,
-      ),
-    );
-    if (!canShowOnlineCount) return const SizedBox.shrink();
-
-    final onlineUsers = ref.watch(
-      subjectOnlineCountProvider.select(
-        (state) => state.asData?.value.onlineUsers,
-      ),
-    );
-    if (onlineUsers == null || onlineUsers <= 0) {
+  Widget build(BuildContext context) {
+    if (onlineUsers <= 0) {
       return const SizedBox.shrink();
     }
 

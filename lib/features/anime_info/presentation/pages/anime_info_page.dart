@@ -7,8 +7,16 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
-@Dependencies([AnimeInfo, animeInfoArgs])
-/// Standalone detail route owns navigation to a new playback session.
+/// 详情路由负责跳转到新的播放会话。
+@Dependencies([
+  animeInfoArgs,
+  AnimeInfo,
+  SubjectComments,
+  SubjectStills,
+  SubjectCharacters,
+  SubjectProducers,
+  SubjectRelated,
+])
 class AnimeInfoPage extends ConsumerWidget {
   const AnimeInfoPage({super.key});
 

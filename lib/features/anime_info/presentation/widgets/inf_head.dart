@@ -21,7 +21,9 @@ import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([AnimeInfo, SubjectComments, animeInfoArgs])
 class InfoHeadView extends StatelessWidget {
   final double statusBarHeight;
   final double contentHeight;
@@ -398,13 +400,21 @@ class InfoHeadView extends StatelessWidget {
                 collectType: collectTypeFromApiType(subjectItem.interest?.type),
                 offset: const Offset(0, 50),
                 onCollectTypeChanged: (type) async {
+                  final session =
+                      ref.read(currentFlowTokenProvider).value?.sessionId;
                   try {
                     final result = await ref
                         .read(animeInfoProvider.notifier)
                         .updateCollectionType(type.value);
-                    if (context.mounted) {
-                      showCollectionSaveNotice(context, result);
+                    if (!context.mounted ||
+                        ref.read(currentFlowTokenProvider).value?.sessionId !=
+                            session ||
+                        ref.read(animeInfoProvider).asData?.value.id !=
+                            subjectItem.id) {
+                      return;
                     }
+                    ref.read(subjectCommentsProvider.notifier).refresh();
+                    showCollectionSaveNotice(context, result);
                   } on AnimeFlowApiException catch (e) {
                     if (context.mounted) {
                       NotificationToast.show(

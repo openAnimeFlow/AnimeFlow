@@ -430,3 +430,34 @@ PlayPage 在 initState 使用 listenManual 持有会话与视频源的订阅，�
 
 日志：build/play-provider-lifecycle-business-tests.log、build/play-provider-lifecycle-architecture-tests.log、
 build/play-provider-lifecycle-full-analyze.log、build/play-provider-lifecycle-regression.log。
+
+## 详情与评论刷新职责收口
+
+2026-10-22：AnimeInfo.setAnimeInfo 仅更新详情与详情缓存，不再操作评论缓存或引用
+subjectCommentsProvider；AnimeInfo 的 scoped dependencies 仅保留 animeInfoArgs。
+SubjectComments.refresh 负责清理当前条目的评论缓存并使自身失效，新首页请求等待缓存清理，
+旧分页请求随 Provider 重建取消。评价和收藏成功回调分别协调详情与评论更新，保留页面、
+条目及会话有效性检查；相关组件和入口补齐 scoped 依赖声明，没有新增业务入口或抽象层。
+
+26 项详情功能测试通过，新增覆盖详情更新不触碰评论、评论刷新重置分页并隔离其他条目缓存、
+刷新后丢弃旧分页响应。应用静态分析零诊断；架构扫描为 496 个源码文件、435 个手写文件、
+442 个 library、2502 条依赖，181 条存量，新增 0、失效 0，未修改基线。
+Windows 应用热重载成功，无运行时异常；远程 Linux CI 和实际评价服务联调尚未验证。
+
+日志：build/anime-info-comments-decoupling-tests.log、build/anime-info-comments-decoupling-analyze.log、
+build/anime-info-comments-decoupling-architecture.log。
+
+## 详情模块静态检查收口
+
+2026-10-22：补齐角色、评论、剧照、关联条目的 scoped 依赖声明，并沿简介、详情视图和页面
+入口传播所用子组件的依赖；保留已添加的标题栏、制作人声明，删除制作人组件的多余导入。
+没有修改 Provider 生命周期、业务依赖关系或关闭任何静态检查规则。
+
+flutter analyze --no-pub --fatal-infos lib/features/anime_info 零诊断。
+另使用本机已解析的 riverpod_lint 3.1.9 / analyzer 14.6.0 插件运行时执行真实规则，
+18 个手写文件零诊断；内存覆盖移除评论组件依赖声明的反向样例成功触发 provider_dependencies，
+确认检查器实际执行，未修改应用依赖或磁盘源码以制造样例。
+26 项详情功能测试通过；全图 2510 条依赖，181 条存量，新增 0、失效 0，未修改基线。
+
+日志：build/anime-info-static-checks-analyze.log、build/anime-info-static-checks-riverpod.log、
+build/anime-info-static-checks-tests.log、build/anime-info-static-checks-architecture.log。

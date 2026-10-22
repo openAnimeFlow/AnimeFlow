@@ -7,8 +7,10 @@ import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/image_preview.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 条目预览图横向列表。
+@Dependencies([SubjectStills, animeInfoArgs])
 class SubjectStillsView extends ConsumerWidget {
   const SubjectStillsView({super.key});
 

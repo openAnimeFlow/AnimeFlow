@@ -68,8 +68,6 @@ class AnimeInfo extends _$AnimeInfo {
     state = AsyncData(subjectInfo);
     final repository = ref.read(animeInfoRepositoryProvider.notifier);
     repository.invalidateCache();
-    unawaited(repository.invalidateCommentsCache(subjectInfo.id));
-    ref.invalidate(subjectCommentsProvider);
     unawaited(repository.cacheSubject(subjectInfo,
         sessionId: ref.read(currentFlowTokenProvider).value?.sessionId));
   }
@@ -170,6 +168,17 @@ class SubjectComments extends _$SubjectComments {
         comments: comments,
         nextOffset: comments.data.length,
         hasNextPage: comments.data.isNotEmpty);
+  }
+
+  /// 清理当前条目的评论缓存，并取消旧请求、从首页重新加载。
+  void refresh() {
+    if (!ref.mounted) return;
+    final subjectId = ref.read(animeInfoArgsProvider).id;
+    // 清理任务先进入 Repository 队列，新请求会等待清理完成。
+    unawaited(ref
+        .read(animeInfoRepositoryProvider.notifier)
+        .invalidateCommentsCache(subjectId));
+    ref.invalidateSelf();
   }
 
   /// 滚动接近底部时加载更多：离开底部后重新武装，触底仅触发一次（postFrame 延后）。

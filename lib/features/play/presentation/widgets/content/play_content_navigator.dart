@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/anime_info_view.dart';

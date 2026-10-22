@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'dart:async';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/core/crawler/captcha_page_url.dart';
@@ -98,9 +99,7 @@ class ManualEpisodeSource {
   final String videoUrl;
 }
 
-@Riverpod(
-  dependencies: [Episodes, playExtra, PlayStateNotifier, playSession],
-)
+@Riverpod(dependencies: [Episodes, playExtra, playSession, PlayStateNotifier])
 class VideoSourceNotifier extends _$VideoSourceNotifier {
   final LiggLogger _logger = LiggLogger();
 

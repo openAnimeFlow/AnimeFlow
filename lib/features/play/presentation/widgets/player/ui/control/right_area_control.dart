@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/utils/player_screenshot.dart';

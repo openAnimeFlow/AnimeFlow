@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/features/play/presentation/extensions/player_kernel_localization.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';

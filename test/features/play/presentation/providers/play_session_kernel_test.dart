@@ -17,8 +17,6 @@ import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
-import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -315,7 +313,6 @@ class _Session extends PlaySession {
           shadersDirectory: Directory.systemTemp,
           playStateActions: state,
           readPlayState: () => state._value,
-          playbackIndicatorActions: _Indicators(),
           episodesActions: _Episodes(),
           danmaku: DanmakuSession(
             store: _DanmakuStore(),
@@ -460,22 +457,6 @@ class _State implements PlayStateNotifier {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-class _Indicators implements PlaybackIndicatorActions {
-  @override
-  VideoControlsIndicatorType centerIndicator =
-      VideoControlsIndicatorType.noIndicator;
-
-  @override
-  void showCenterIndicator(VideoControlsIndicatorType type) {
-    centerIndicator = type;
-  }
-
-  @override
-  void clearCenterIndicator() {
-    centerIndicator = VideoControlsIndicatorType.noIndicator;
-  }
 }
 
 class _Episodes implements Episodes {

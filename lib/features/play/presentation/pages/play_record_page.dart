@@ -143,6 +143,12 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    ref.listen(playHistoryProvider, (previous, next) {
+      final error = next.value?.syncError;
+      if (error == null || previous?.value?.syncError == error) return;
+      if (ModalRoute.of(context)?.isCurrent != true) return;
+      NotificationToast.show(l10n.syncStatusFailed, title: l10n.tip);
+    });
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.playbackHistory),
@@ -175,7 +181,7 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
         child: Consumer(
           builder: (context, ref, child) {
             final playHistoryAsync = ref.watch(playHistoryProvider);
-            final playHistoryList = playHistoryAsync.value;
+            final playHistoryList = playHistoryAsync.value?.records;
             if (playHistoryAsync.isLoading && playHistoryList == null) {
               return const Center(
                 child: CircularProgressIndicator(),

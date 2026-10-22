@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/app/router/model/play_route_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -347,7 +348,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
           canPop: !isFullscreen,
           onPopInvokedWithResult: (bool didPop, dynamic result) {
             if (!didPop && isFullscreen) {
-              playSession.exitFullScreen();
+              ref.read(videoUiProvider.notifier).exitFullScreen();
             }
           },
           child: content,

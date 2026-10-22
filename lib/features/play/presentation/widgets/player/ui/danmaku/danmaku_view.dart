@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';

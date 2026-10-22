@@ -5,12 +5,19 @@ import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
-import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'play_history_provider.g.dart';
+
+/// 同步失败时保留本地记录，错误由页面决定如何展示。
+class PlayHistoryState {
+  const PlayHistoryState({required this.records, this.syncError});
+
+  final List<PlayHistory> records;
+  final Object? syncError;
+}
 
 /// 播放记录列表状态与同步入口。
 ///
@@ -23,7 +30,7 @@ class PlayHistoryNotifier extends _$PlayHistoryNotifier {
   bool _autoSyncQueuedOrRunning = false;
 
   @override
-  Future<List<PlayHistory>> build() async {
+  Future<PlayHistoryState> build() async {
     _historyListenable = PlayHistoryService.listenable()
       ..addListener(_reloadState);
     ref.onDispose(() {
@@ -49,15 +56,16 @@ class PlayHistoryNotifier extends _$PlayHistoryNotifier {
     }
   }
 
-  Future<List<PlayHistory>> _loadHistories() async {
+  Future<PlayHistoryState> _loadHistories() async {
     final histories = await PlayHistoryService.getAll();
     histories.sort((a, b) => b.updateAt.compareTo(a.updateAt));
-    return histories;
+    return PlayHistoryState(records: histories);
   }
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(_loadHistories);
+    final result = await AsyncValue.guard(_loadHistories);
+    if (ref.mounted) state = result;
   }
 
   Future<void> _reloadState() async {
@@ -115,19 +123,29 @@ class PlayHistoryNotifier extends _$PlayHistoryNotifier {
 
   Future<void> _syncFromServer() async {
     const maxAttempts = 3;
+    Object? lastError;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      if (!ref.mounted) return;
       try {
         await _syncPendingAndRefresh();
+        if (!ref.mounted) return;
         await PlayHistoryService.syncFromServer();
         await _reloadState();
         return;
       } catch (e) {
+        lastError = e;
+        if (!ref.mounted) return;
         LiggLogger().e('自动同步播放记录失败(第 $attempt/$maxAttempts 次): $e');
         if (attempt < maxAttempts) {
           await Future<void>.delayed(Duration(seconds: attempt * 2));
         }
       }
     }
-    NotificationToast.show('播放记录自动同步失败，请稍后重试', title: '提示');
+    if (ref.mounted && lastError != null) {
+      state = AsyncData(PlayHistoryState(
+        records: state.value?.records ?? const [],
+        syncError: lastError,
+      ));
+    }
   }
 }

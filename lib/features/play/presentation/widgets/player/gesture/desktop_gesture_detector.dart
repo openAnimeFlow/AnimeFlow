@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -151,11 +152,11 @@ class _DesktopGestureDetectorState
       return KeyEventResult.handled;
     }
     if (shortcut[PlayerShortcutAction.enterFullscreen]!.contains(pressed)) {
-      playSession.toggleFullScreen();
+      ref.read(videoUiProvider.notifier).toggleFullScreen();
       return KeyEventResult.handled;
     }
     if (shortcut[PlayerShortcutAction.exitFullscreen]!.contains(pressed)) {
-      playSession.exitFullScreen();
+      ref.read(videoUiProvider.notifier).exitFullScreen();
       return KeyEventResult.handled;
     }
     if (shortcut[PlayerShortcutAction.screenshot]!.contains(pressed)) {
@@ -235,7 +236,7 @@ class _DesktopGestureDetectorState
             // 双击事件
             onDoubleTap: () {
               _focusNode.requestFocus();
-              playSession.toggleFullScreen();
+              ref.read(videoUiProvider.notifier).toggleFullScreen();
             },
 
             // 单击事件

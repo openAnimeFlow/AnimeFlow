@@ -4,27 +4,18 @@ import 'dart:typed_data';
 
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
-import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
 import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/features/play/application/system_volume_synchronizer.dart';
-import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
-import 'package:anime_flow/features/auth/auth_api.dart';
-import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/core/utils/vibrate.dart';
-import 'package:anime_flow/shared/widgets/windows_title_bar.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
@@ -32,88 +23,10 @@ import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/video_fit.dart';
-import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:window_manager/window_manager.dart';
 
 part 'play_provider.g.dart';
-
-@Riverpod(
-  dependencies: [
-    playExtra,
-    PlayStateNotifier,
-    DanmakuStateNotifier,
-    VideoUiNotifier,
-    Episodes,
-  ],
-)
-PlaySession playSession(Ref ref) {
-  ref.watch(playExtraProvider);
-  // 模式变化由下方 ref.listen 处理，不能 watch 重建整个播放会话。
-  final initialDanmakuChineseMode = ref.read(danmakuChineseModeProvider);
-  final playStateActions = ref.watch(playStateProvider.notifier);
-  final danmaku = DanmakuSession(
-    store: ref.watch(danmakuStateProvider.notifier),
-    converter: ref.watch(danmakuChineseConverterProvider),
-    initialChineseMode: initialDanmakuChineseMode,
-    readPlayback: () {
-      final state = ref.read(playStateProvider);
-      return DanmakuPlaybackSnapshot(
-        position: state.position,
-        duration: state.duration,
-        playing: state.playing,
-      );
-    },
-    currentUserId: () => ref.read(currentUserInfoProvider).value?.id,
-  );
-  final controller = PlaySession(
-    shadersDirectory: ref.watch(shadersDirectoryProvider).requireValue,
-    playStateActions: playStateActions,
-    readPlayState: () => ref.read(playStateProvider),
-    playbackIndicatorActions: ref.watch(videoUiProvider.notifier),
-    episodesActions: ref.watch(episodesProvider.notifier),
-    danmaku: danmaku,
-    engineFactory: ref.read(playerEngineFactoryProvider),
-    setEpisodeWatched: ({
-      required subjectId,
-      required episodeId,
-      required watched,
-    }) {
-      if (!ref.mounted) return;
-      ref.read(subjectEpisodesProvider(subjectId).notifier).setEpisodeWatched(
-            episodeId: episodeId,
-            watched: watched,
-          );
-    },
-  )..init();
-
-  ref.listen<DanmakuChineseMode>(
-    danmakuChineseModeProvider,
-    (previous, next) {
-      if (previous != next) {
-        unawaited(danmaku.applyChineseMode(next));
-      }
-    },
-  );
-
-  ref.listen<PlayState>(
-    playStateProvider,
-    (previous, next) {
-      controller._handlePlayStateChanged(
-        next,
-        isLoggedIn: ref.read(isLoggedInProvider).value ?? false,
-      );
-      controller._handlePlaybackPhaseChanged(
-        previous?.phase,
-        next.phase,
-      );
-    },
-  );
-  ref.onDispose(controller.dispose);
-
-  return controller;
-}
 
 @Riverpod(dependencies: [playExtra])
 class PlayStateNotifier extends _$PlayStateNotifier {
@@ -336,7 +249,6 @@ class PlaySession {
     required this.shadersDirectory,
     required PlayStateNotifier playStateActions,
     required PlayState Function() readPlayState,
-    required PlaybackIndicatorActions playbackIndicatorActions,
     required Episodes episodesActions,
     required this.danmaku,
     required this.engineFactory,
@@ -347,7 +259,6 @@ class PlaySession {
     }) setEpisodeWatched,
   })  : _playStateActions = playStateActions,
         _readPlayState = readPlayState,
-        _playbackIndicatorActions = playbackIndicatorActions,
         _episodesActions = episodesActions,
         _setEpisodeWatched = setEpisodeWatched;
 
@@ -356,7 +267,6 @@ class PlaySession {
   late final PlaybackProgressManager playbackProgressManager;
   final PlayStateNotifier _playStateActions;
   final PlayState Function() _readPlayState;
-  final PlaybackIndicatorActions _playbackIndicatorActions;
   final Episodes _episodesActions;
   final DanmakuSession danmaku;
   final void Function({
@@ -621,21 +531,6 @@ class PlaySession {
     }
   }
 
-  void _handlePlaybackPhaseChanged(
-    PlaybackPhase? previousPhase,
-    PlaybackPhase nextPhase,
-  ) {
-    if (previousPhase == nextPhase) {
-      return;
-    }
-    if (nextPhase == PlaybackPhase.playing ||
-        nextPhase == PlaybackPhase.buffering ||
-        nextPhase == PlaybackPhase.paused ||
-        nextPhase == PlaybackPhase.completed) {
-      _playbackIndicatorActions.finishParsingIndicator();
-    }
-  }
-
   /// 选中集与当前播放集不一致时清空弹幕数据与画布（切换集过程中）
   void clearDanmakuIfEpisodeMismatch(int selectedIndex) {
     if (selectedIndex != episode) {
@@ -651,9 +546,6 @@ class PlaySession {
     _clearPendingSeek();
     danmaku.dispose();
     unawaited(playbackProgressManager.save());
-    if (Platform.isWindows) {
-      WindowsTitleBarVisibility.reset();
-    }
     systemVolumeSynchronizer.dispose();
     _stopTimer?.cancel();
     unawaited(_playerSubscription?.cancel());
@@ -751,10 +643,7 @@ class PlaySession {
     );
   }
 
-  void _handlePlayStateChanged(PlayState state, {required bool isLoggedIn}) {
-    if (state.phase.keepsStartupIndicator) {
-      _playbackIndicatorActions.showParsingIndicator();
-    }
+  void handlePlayStateChanged(PlayState state, {required bool isLoggedIn}) {
     playbackProgressManager.updatePlaybackState(
       position: state.position,
       duration: state.duration,
@@ -771,14 +660,6 @@ class PlaySession {
     }
   }
 
-  ///更新缓冲状态
-  void _updateBufferingState(bool buffering) {
-    _playbackIndicatorActions.updateBufferingIndicator(
-      buffering,
-      isParsing: _readPlayState().phase.isResolving,
-    );
-  }
-
   void _updateEffectiveBufferingState({
     Duration? position,
     Duration? buffered,
@@ -791,7 +672,6 @@ class PlaySession {
         _isPositionPastBuffered(currentPosition, currentBuffered);
 
     _playStateActions.setBuffering(isBuffering);
-    _updateBufferingState(isBuffering);
   }
 
   bool _isPositionPastBuffered(Duration position, Duration buffered) {
@@ -815,52 +695,6 @@ class PlaySession {
   // 切换内容区域展开状态
   void toggleContentExpanded() {
     _playStateActions.toggleContentExpanded();
-  }
-
-  /// 进入全屏
-  void enterFullScreen() {
-    _playStateActions.setIsFullscreen(true);
-    if (Platform.isWindows) {
-      WindowsTitleBarVisibility.setForceHidden(true);
-    }
-    // 移动端全屏时自动横屏
-    SystemUtil.enterFullScreen();
-  }
-
-  /// 退出全屏
-  void exitFullScreen() {
-    _playStateActions.setIsFullscreen(false);
-    if (Platform.isWindows) {
-      unawaited(_exitWindowsFullScreen());
-    } else {
-      SystemUtil.exitFullScreen();
-    }
-  }
-
-  /// 先退出窗口全屏再恢复标题栏，避免 forceHidden 已 false 但 _windowFullScreen 仍为 true。
-  Future<void> _exitWindowsFullScreen() async {
-    await SystemUtil.exitFullScreen();
-    WindowsTitleBarVisibility.setForceHidden(false);
-  }
-
-  /// 切换全屏状态
-  void toggleFullScreen() {
-    if (_readPlayState().isFullscreen) {
-      exitFullScreen();
-    } else {
-      enterFullScreen();
-    }
-  }
-
-  /// 检测桌面端全屏状态
-  Future<void> checkDesktopFullscreen() async {
-    if (SystemUtil.isDesktop) {
-      final fullScreen = await windowManager.isFullScreen();
-      _playStateActions.setIsFullscreen(fullScreen);
-      if (Platform.isWindows) {
-        WindowsTitleBarVisibility.setForceHidden(fullScreen);
-      }
-    }
   }
 
   void switchToNextEpisode() => _episodesActions.switchToNextEpisode();

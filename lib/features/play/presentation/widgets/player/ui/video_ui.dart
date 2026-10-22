@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/gesture/desktop_gesture_detector.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/gesture/mobile_gesture_detector.dart';
 import 'package:anime_flow/core/utils/system_util.dart';

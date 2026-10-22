@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/recommendations.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/danmaku_card.dart';

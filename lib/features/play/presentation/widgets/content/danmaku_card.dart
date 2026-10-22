@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_search_provider.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';

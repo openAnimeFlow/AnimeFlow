@@ -1,6 +1,7 @@
-import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:async';
 
+import 'package:anime_flow/features/auth/auth_api.dart';
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
@@ -188,7 +189,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                           tooltip: fullscreen ? l10n.exitFullscreen : l10n.back,
                           onPressed: () {
                             if (fullscreen) {
-                              playController.exitFullScreen();
+                              videoUiStateController.exitFullScreen();
                             } else {
                               context.pop();
                             }
@@ -282,7 +283,10 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                               final subject = state.asData?.value;
                               return subject == null
                                   ? null
-                                  : (id: subject.id, type: subject.interest?.type);
+                                  : (
+                                      id: subject.id,
+                                      type: subject.interest?.type
+                                    );
                             }))
                           : null;
                       return Row(

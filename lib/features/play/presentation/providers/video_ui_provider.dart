@@ -1,6 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:window_manager/window_manager.dart';
+import 'package:anime_flow/shared/widgets/windows_title_bar.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -10,47 +16,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
 part 'video_ui_provider.g.dart';
-
-/// 播放会话所需的加载指示器操作。
-abstract interface class PlaybackIndicatorActions {
-  /// 居中指示器，可长期驻留（解析、缓冲、拖动进度）。
-  void showCenterIndicator(VideoControlsIndicatorType type);
-
-  /// 清除居中指示器。
-  void clearCenterIndicator();
-
-  VideoControlsIndicatorType get centerIndicator;
-}
-
-extension PlaybackLoadingIndicators on PlaybackIndicatorActions {
-  void showParsingIndicator() =>
-      showCenterIndicator(VideoControlsIndicatorType.parsingIndicator);
-
-  /// 解析结果落定后才释放解析指示器。
-  void finishParsingIndicator() {
-    if (centerIndicator == VideoControlsIndicatorType.parsingIndicator) {
-      clearCenterIndicator();
-    }
-  }
-
-  void updateBufferingIndicator(bool buffering, {required bool isParsing}) {
-    // Resource selection can show parsing before the resolver sets isParsing.
-    // Only the parse result handler should dismiss that indicator.
-    if (isParsing) {
-      showParsingIndicator();
-      return;
-    }
-    if (centerIndicator == VideoControlsIndicatorType.parsingIndicator) {
-      return;
-    }
-    if (buffering) {
-      showCenterIndicator(VideoControlsIndicatorType.bufferingIndicator);
-    } else if (centerIndicator ==
-        VideoControlsIndicatorType.bufferingIndicator) {
-      clearCenterIndicator();
-    }
-  }
-}
 
 class VideoUiState {
   const VideoUiState({
@@ -113,9 +78,8 @@ class VideoUiState {
   }
 }
 
-@Riverpod(dependencies: [playExtra])
-class VideoUiNotifier extends _$VideoUiNotifier
-    implements PlaybackIndicatorActions {
+@Riverpod(dependencies: [playExtra, PlayStateNotifier])
+class VideoUiNotifier extends _$VideoUiNotifier {
   Timer? _topIndicatorTimer;
   Timer? _controlsUiTimer;
   Timer? _timeUpdateTimer;
@@ -132,9 +96,6 @@ class VideoUiNotifier extends _$VideoUiNotifier
   int _runtimeRevision = 0;
 
   @override
-  VideoControlsIndicatorType get centerIndicator => state.centerIndicator;
-
-  @override
   VideoUiState build() {
     // Route arguments establish ownership; UI state lasts for the route.
     ref.read(playExtraProvider);
@@ -144,8 +105,16 @@ class VideoUiNotifier extends _$VideoUiNotifier
       currentTime: SystemUtil.getCurrentTimeWithoutSeconds(),
     );
     state = initialState;
+    // 展示层根据播放状态维护加载提示，业务会话不再持有 UI 操作接口。
+    ref.listen(
+      playStateProvider
+          .select((value) => (phase: value.phase, buffering: value.buffering)),
+      (previous, next) =>
+          _syncPlaybackIndicator(previous?.phase, next.phase, next.buffering),
+      fireImmediately: true,
+    );
     unawaited(_initializeRuntimeState(revision));
-    return initialState;
+    return state;
   }
 
   bool _isCurrentRuntime(int revision) =>
@@ -158,8 +127,60 @@ class VideoUiNotifier extends _$VideoUiNotifier
     await _initializeBattery(revision);
   }
 
+  /// 进入全屏
+  void enterFullScreen() {
+    ref.read(playStateProvider.notifier).setIsFullscreen(true);
+    if (Platform.isWindows) {
+      WindowsTitleBarVisibility.setForceHidden(true);
+    }
+    // 移动端全屏时自动横屏
+    SystemUtil.enterFullScreen();
+  }
+
+  /// 退出全屏
+  void exitFullScreen() {
+    ref.read(playStateProvider.notifier).setIsFullscreen(false);
+    if (Platform.isWindows) {
+      unawaited(_exitWindowsFullScreen());
+    } else {
+      SystemUtil.exitFullScreen();
+    }
+  }
+
+  /// 先退出窗口全屏再恢复标题栏，避免 forceHidden 已 false 但 _windowFullScreen 仍为 true。
+  Future<void> _exitWindowsFullScreen() async {
+    final revision = _runtimeRevision;
+    await SystemUtil.exitFullScreen();
+    if (_isCurrentRuntime(revision)) {
+      WindowsTitleBarVisibility.setForceHidden(false);
+    }
+  }
+
+  /// 切换全屏状态
+  void toggleFullScreen() {
+    if (ref.read(playStateProvider).isFullscreen) {
+      exitFullScreen();
+    } else {
+      enterFullScreen();
+    }
+  }
+
+  /// 检测桌面端全屏状态
+  Future<void> checkDesktopFullscreen() async {
+    if (SystemUtil.isDesktop) {
+      final revision = _runtimeRevision;
+      final fullScreen = await windowManager.isFullScreen();
+      if (!_isCurrentRuntime(revision)) return;
+      ref.read(playStateProvider.notifier).setIsFullscreen(fullScreen);
+      if (Platform.isWindows) {
+        WindowsTitleBarVisibility.setForceHidden(fullScreen);
+      }
+    }
+  }
+
   void _dispose() {
     _runtimeRevision++;
+    if (Platform.isWindows) WindowsTitleBarVisibility.reset();
     _topIndicatorTimer?.cancel();
     _controlsUiTimer?.cancel();
     _timeUpdateTimer?.cancel();
@@ -232,20 +253,39 @@ class VideoUiNotifier extends _$VideoUiNotifier
     );
   }
 
-  @override
-  void showCenterIndicator(VideoControlsIndicatorType type) {
-    if (state.centerIndicator == type) return;
-    state = state.copyWith(centerIndicator: type);
-  }
+  /// 手动选源时立即提示，后续由播放阶段变化接管。
+  void showParsingIndicator() =>
+      _setCenterIndicator(VideoControlsIndicatorType.parsingIndicator);
 
-  @override
-  void clearCenterIndicator() {
-    if (state.centerIndicator == VideoControlsIndicatorType.noIndicator) {
+  void _syncPlaybackIndicator(
+    PlaybackPhase? previousPhase,
+    PlaybackPhase phase,
+    bool buffering,
+  ) {
+    if (phase.keepsStartupIndicator) {
+      showParsingIndicator();
       return;
     }
-    state = state.copyWith(
-      centerIndicator: VideoControlsIndicatorType.noIndicator,
-    );
+    var indicator = state.centerIndicator;
+    if (indicator == VideoControlsIndicatorType.parsingIndicator) {
+      // 手动选源可能先展示提示；阶段尚未变化时，旧媒体的缓冲事件不能将其覆盖。
+      if (previousPhase == phase) return;
+      indicator = VideoControlsIndicatorType.noIndicator;
+    }
+    final terminal = phase == PlaybackPhase.idle ||
+        phase == PlaybackPhase.error ||
+        phase == PlaybackPhase.completed;
+    if (buffering && !terminal) {
+      indicator = VideoControlsIndicatorType.bufferingIndicator;
+    } else if (indicator == VideoControlsIndicatorType.bufferingIndicator) {
+      indicator = VideoControlsIndicatorType.noIndicator;
+    }
+    _setCenterIndicator(indicator);
+  }
+
+  void _setCenterIndicator(VideoControlsIndicatorType type) {
+    if (state.centerIndicator == type) return;
+    state = state.copyWith(centerIndicator: type);
   }
 
   void showOrHideControlsUi() {

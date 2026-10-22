@@ -1,8 +1,9 @@
+import 'dart:io';
+import 'dart:async';
+
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
 import 'package:anime_flow/features/play/presentation/extensions/video_fit_presentation.dart';
-import 'dart:async';
-import 'dart:io';
-
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -11,7 +12,6 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
-
 import 'ui/danmaku/danmaku_view.dart';
 import 'ui/video_ui.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
@@ -56,7 +56,7 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.addListener(this);
       // 检测桌面端全屏状态
-      playController.checkDesktopFullscreen();
+      videoUiStateController.checkDesktopFullscreen();
     }
   }
 
@@ -72,7 +72,7 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
   /// 窗口恢复时处理
   @override
   void onWindowRestore() {
-    playController.checkDesktopFullscreen();
+    videoUiStateController.checkDesktopFullscreen();
   }
 
   /// 窗口进入全屏时处理

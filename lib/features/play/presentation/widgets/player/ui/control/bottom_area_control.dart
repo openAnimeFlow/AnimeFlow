@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
@@ -519,7 +520,7 @@ class _BottomControlsContent extends ConsumerWidget {
                   duration: const Duration(milliseconds: 500),
                   child: IconButton(
                       onPressed: () {
-                        playController.toggleFullScreen();
+                        videoUiStateController.toggleFullScreen();
                       },
                       padding: const EdgeInsets.all(0),
                       icon: Icon(

@@ -5,9 +5,6 @@ import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:cupertino_ui/cupertino_ui.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
@@ -16,11 +13,6 @@ class Utils {
   static LiggLogger logger = LiggLogger();
   static const double kMobileBreakpoint = 480;
   static const double kTabletBreakpoint = 1024;
-
-  // --- 默认设计稿尺寸 ---
-  static const Size kMobileDesignSize = Size(375, 812); // 手机主流尺寸
-  static const Size kTabletDesignSize = Size(768, 1024); // 平板
-  static const Size kDesktopDesignSize = Size(1440, 900); // 桌面端
 
   // 从URL参数中解析 m3u8/mp4
   static String decodeVideoSource(String iframeUrl) {
@@ -127,39 +119,6 @@ class Utils {
 
   static bool get isDocumentStartScriptSupported =>
       _isDocumentStartScriptSupported ?? false;
-
-  // 根据屏幕宽度确定设计稿尺寸
-  // static Size getDesignSize(BuildContext context) {
-  //   double width = MediaQuery.of(context).size.width;
-  //
-  //   // 1. 桌面端 (Windows, MacOS, Web)
-  //   if (kIsWeb || isDesktop) {
-  //     // 如果窗口被用户拉得非常小，则回退到平板设计稿，避免字体缩到看不见
-  //     if (width < kMobileBreakpoint) return kMobileDesignSize;
-  //     if (width < kTabletBreakpoint) return kTabletDesignSize;
-  //     return kDesktopDesignSize;
-  //   }
-  //
-  //   // 2. 移动端 (iOS, Android)
-  //   if (width <= kMobileBreakpoint) {
-  //     return kMobileDesignSize;
-  //   } else {
-  //     return kTabletDesignSize;
-  //   }
-  // }
-
-  static Color generateDanmakuColor(int colorValue) {
-    // 提取颜色分量
-    int red = (colorValue >> 16) & 0xFF;
-    int green = (colorValue >> 8) & 0xFF;
-    int blue = colorValue & 0xFF;
-    // 创建Color对象
-    Color color = Color.fromARGB(255, red, green, blue);
-    return color;
-  }
-
-  /// 将 [color] 转为十进制 RGB 整数**：`R<<16 | G<<8 | B`（0～16777215）。
-  static int colorToDecimalRgb(Color color) => color.toARGB32() & 0xFFFFFF;
 
   ///计算百分率
   static String calculatePercentage(int value, int total) {

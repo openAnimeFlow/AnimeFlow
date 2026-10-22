@@ -1,7 +1,7 @@
+import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/features/user/application/user_state_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../application/bgm_collection_sync_provider.dart';
 
 /// Keeps discovery independent of the account settings page. Never starts a sync.
 class CollectionSyncLifecycle extends ConsumerStatefulWidget {

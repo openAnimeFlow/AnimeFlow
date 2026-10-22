@@ -69,23 +69,22 @@ List<ArchitectureViolation> checkCycles(
           edge.target,
           edge.kind,
           edge.line,
-          '循环中的具体依赖边；通过契约/依赖注入拆开业务和实现。',
+          '文件循环中的具体依赖边；拆开相互引用。',
         ),
   ];
-  // Feature-level cycles can exist without any individual file cycle.
+  // 不同文件之间可能没有环，但所在 feature 仍可能相互依赖。
   final featureEdges = eligible
       .where(
         (edge) =>
-            edge.source.startsWith('lib/features/') &&
-            edge.target.startsWith('lib/features/') &&
-            spec.ownerOf(edge.source).module.name !=
-                spec.ownerOf(edge.target).module.name,
+            spec.featureOf(edge.source) != null &&
+            spec.featureOf(edge.target) != null &&
+            spec.featureOf(edge.source) != spec.featureOf(edge.target),
       )
       .toList();
   adjacency.clear();
   for (final edge in featureEdges) {
-    final from = spec.ownerOf(edge.source).module.name;
-    final to = spec.ownerOf(edge.target).module.name;
+    final from = spec.featureOf(edge.source)!;
+    final to = spec.featureOf(edge.target)!;
     adjacency.putIfAbsent(from, () => {}).add(to);
     adjacency.putIfAbsent(to, () => {});
   }
@@ -98,8 +97,8 @@ List<ArchitectureViolation> checkCycles(
     if (!indices.containsKey(vertex)) visit(vertex);
   }
   for (final edge in featureEdges) {
-    final from = spec.ownerOf(edge.source).module.name;
-    final to = spec.ownerOf(edge.target).module.name;
+    final from = spec.featureOf(edge.source)!;
+    final to = spec.featureOf(edge.target)!;
     if (components[from] == components[to]) {
       violations.add(
         ArchitectureViolation(
@@ -108,7 +107,7 @@ List<ArchitectureViolation> checkCycles(
           edge.target,
           edge.kind,
           edge.line,
-          '功能模块循环中的具体依赖边；通过公开契约拆开双向业务依赖。',
+          '功能模块循环中的具体依赖边；拆开 feature 之间的相互引用。',
         ),
       );
     }

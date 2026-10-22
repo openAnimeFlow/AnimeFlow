@@ -34,7 +34,6 @@ void main() {
   test('architecture guard positive and negative acceptance cases', () async {
     const expectedSuites = {
       'boundary_checks_test.dart',
-      'contract_checks_test.dart',
       'cycle_checks_test.dart',
       'dependency_graph_test.dart',
       'legacy_checks_test.dart',

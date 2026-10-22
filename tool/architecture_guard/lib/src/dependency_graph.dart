@@ -22,7 +22,7 @@ String findProjectRoot([String? start]) {
     }
     final parent = directory.parent;
     if (parent.path == directory.path) {
-      throw StateError('R08: pubspec.yaml not found');
+      throw StateError('pubspec.yaml not found');
     }
     directory = parent;
   }
@@ -32,7 +32,7 @@ class ProjectUris {
   ProjectUris(this.root) {
     final config = File(p.join(root, '.dart_tool', 'package_config.json'));
     if (!config.existsSync()) {
-      throw StateError('R08: run flutter pub get first');
+      throw StateError('run flutter pub get first');
     }
     final json = jsonDecode(config.readAsStringSync()) as Map<String, dynamic>;
     for (final package in json['packages'] as List<dynamic>) {
@@ -46,7 +46,7 @@ class ProjectUris {
       );
     }
     if (!packages.containsKey('anime_flow')) {
-      throw StateError('R08: package config lacks anime_flow');
+      throw StateError('package config lacks anime_flow');
     }
   }
   final String root;
@@ -77,27 +77,27 @@ class ProjectUris {
   String relative(String path) =>
       p.relative(p.normalize(path), from: root).replaceAll(r'\', '/');
 
-  String normalize(String uri, String source, {bool validate = true}) {
+  String normalize(String uri, String source) {
     final parsed = Uri.parse(uri);
     if (parsed.hasFragment || parsed.hasQuery) {
-      throw StateError('R08: invalid source URI $uri');
+      throw StateError('invalid source URI $uri');
     }
     if (parsed.scheme == 'dart') {
       if (!sdkLibraries.contains(uri)) {
-        throw StateError('R08 $source: unknown SDK library $uri');
+        throw StateError('$source: unknown SDK library $uri');
       }
       return uri;
     }
     Uri resolved;
     if (parsed.scheme == 'package') {
       final slash = parsed.path.indexOf('/');
-      if (slash < 1) throw StateError('R08: invalid package URI $uri');
+      if (slash < 1) throw StateError('invalid package URI $uri');
       final name = parsed.path.substring(0, slash);
       final base = packages[name];
-      if (base == null) throw StateError('R08 $source: unknown package $name');
+      if (base == null) throw StateError('$source: unknown package $name');
       resolved = base.resolve(parsed.path.substring(slash + 1));
-      if (validate && !File.fromUri(resolved).existsSync()) {
-        throw StateError('R08 $source: dependency does not exist: $uri');
+      if (!File.fromUri(resolved).existsSync()) {
+        throw StateError('$source: dependency does not exist: $uri');
       }
       if (name != 'anime_flow') return uri;
     } else if (parsed.scheme.isEmpty || parsed.scheme == 'file') {
@@ -105,14 +105,14 @@ class ProjectUris {
           ? parsed
           : File(p.join(root, source)).absolute.uri.resolveUri(parsed);
     } else {
-      throw StateError('R08 $source: unsupported dependency $uri');
+      throw StateError('$source: unsupported dependency $uri');
     }
     final path = p.normalize(p.fromUri(resolved));
     if (!p.isWithin(p.join(root, 'lib'), path)) {
-      throw StateError('R08 $source: dependency escapes project lib: $uri');
+      throw StateError('$source: dependency escapes project lib: $uri');
     }
-    if (validate && !File(path).existsSync()) {
-      throw StateError('R08 $source: missing $uri');
+    if (!File(path).existsSync()) {
+      throw StateError('$source: missing $uri');
     }
     return relative(path);
   }
@@ -148,9 +148,7 @@ class ProjectUris {
         return candidate;
       }
     }
-    throw StateError(
-      'R08: cannot locate the real Dart SDK for semantic analysis',
-    );
+    throw StateError('cannot locate the Dart SDK for SDK URI validation');
   }
 }
 
@@ -159,7 +157,7 @@ DependencyGraph collectDependencies(String root, ArchitectureSpec spec) {
   final uris = ProjectUris(root);
   final directory = Directory(p.join(root, 'lib'));
   if (!directory.existsSync()) {
-    throw StateError('R08: lib directory does not exist');
+    throw StateError('lib directory does not exist');
   }
   final files =
       directory
@@ -181,7 +179,7 @@ DependencyGraph collectDependencies(String root, ArchitectureSpec spec) {
     );
     if (result.errors.isNotEmpty) {
       throw StateError(
-        'R08 $path: source parsing failed: ${result.errors.join('; ')}',
+        '$path: source parsing failed: ${result.errors.join('; ')}',
       );
     }
     units[path] = SourceUnit(
@@ -195,22 +193,19 @@ DependencyGraph collectDependencies(String root, ArchitectureSpec spec) {
   }
   if (units.keys.map((path) => path.toLowerCase()).toSet().length !=
       units.length) {
-    throw StateError('R08: case-colliding source paths are not portable');
+    throw StateError('case-colliding source paths are not portable');
   }
-  // Validate handwritten ownership plus generated libraries. Parts inherit their
-  // containing library's responsibility and never become independent modules.
+  // part 归属声明它的 library，不作为独立循环节点。
   final partOwners = <String, String>{};
   for (final source in units.values) {
     for (final directive in source.unit.directives.whereType<PartDirective>()) {
       final value = directive.uri.stringValue;
       if (value == null) {
-        throw StateError('R08 ${source.path}: invalid part URI');
+        throw StateError('${source.path}: invalid part URI');
       }
       final target = uris.normalize(value, source.path);
       if (!units.containsKey(target) || partOwners.containsKey(target)) {
-        throw StateError(
-          'R08: missing part or multiple library owners: $target',
-        );
+        throw StateError('missing part or multiple library owners: $target');
       }
       partOwners[target] = source.path;
     }
@@ -220,7 +215,7 @@ DependencyGraph collectDependencies(String root, ArchitectureSpec spec) {
     final owner = partOwners[source.path];
     if (isPart != (owner != null)) {
       throw StateError(
-        'R08 ${source.path}: inconsistent part/library relationship',
+        '${source.path}: inconsistent part/library relationship',
       );
     }
     source.libraryPath = owner;
@@ -239,12 +234,12 @@ DependencyGraph collectDependencies(String root, ArchitectureSpec spec) {
       for (final literal in literals) {
         final value = literal.stringValue;
         if (value == null) {
-          throw StateError('R08 ${source.path}: invalid import/export');
+          throw StateError('${source.path}: invalid import/export');
         }
         var target = uris.normalize(value, source.path);
         if (target.startsWith('lib/') && !units.containsKey(target)) {
           throw StateError(
-            'R08 ${source.path}: missing or case-mismatched project dependency $target',
+            '${source.path}: missing or case-mismatched project dependency $target',
           );
         }
         if (units.containsKey(target)) target = units[target]!.library;
@@ -254,7 +249,6 @@ DependencyGraph collectDependencies(String root, ArchitectureSpec spec) {
             target,
             directive is ExportDirective ? 'export' : 'import',
             source.unit.lineInfo.getLocation(literal.offset).lineNumber,
-            physicalSource: source.path,
           ),
         );
       }

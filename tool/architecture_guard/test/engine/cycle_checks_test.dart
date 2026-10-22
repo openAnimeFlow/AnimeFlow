@@ -1,4 +1,4 @@
-// Graph fixtures cover cycle shapes; the full-project gate checks the network.
+// 验收循环的图结构；全量门禁检查项目中的真实依赖。
 @Tags(['architecture'])
 library;
 
@@ -93,4 +93,41 @@ void main() {
       );
     },
   );
+  test('self imports in unclassified files remain cycles', () {
+    fixture = FixtureProject({'lib/custom/value.dart': "import 'value.dart';"});
+    final spec = fixtureSpec();
+    final violation = checkCycles(
+      collectDependencies(fixture.root, spec),
+      spec,
+    ).single;
+    expect(violation.source, 'lib/custom/value.dart');
+    expect(violation.target, violation.source);
+  });
+
+  test('conditional exports participate in cycles on every platform', () {
+    fixture = FixtureProject({
+      'lib/custom/a.dart':
+          "export 'safe.dart' if (dart.library.html) 'b.dart';",
+      'lib/custom/safe.dart': '',
+      'lib/custom/b.dart': "import 'a.dart';",
+    });
+    final spec = fixtureSpec();
+    final violations = checkCycles(
+      collectDependencies(fixture.root, spec),
+      spec,
+    );
+    expect(violations, hasLength(2));
+    expect(
+      violations.map((violation) => violation.kind),
+      containsAll(['import', 'export']),
+    );
+  });
+  test('a file directly under features is not treated as a feature module', () {
+    fixture = FixtureProject({
+      'lib/features/registry.dart': "export 'new_feature/domain/value.dart';",
+      'lib/features/new_feature/domain/value.dart': '',
+    });
+    final spec = fixtureSpec();
+    expect(checkCycles(collectDependencies(fixture.root, spec), spec), isEmpty);
+  });
 }

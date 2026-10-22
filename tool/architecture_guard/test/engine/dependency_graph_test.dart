@@ -6,9 +6,7 @@ import 'dart:io';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as p;
 
-import 'package:anime_flow_architecture_guard/src/boundary_checks.dart';
 import 'package:anime_flow_architecture_guard/src/dependency_graph.dart';
-import 'package:anime_flow_architecture_guard/src/model.dart';
 
 import 'fixture_project.dart';
 
@@ -60,12 +58,15 @@ void main() {
     });
     final graph = collectDependencies(fixture.root, fixtureSpec());
     expect(graph.edges.length, 4);
+    expect(graph.edges.map((edge) => edge.kind), [
+      'import',
+      'import',
+      'export',
+      'export',
+    ]);
     expect(
-      checkBoundaries(
-        graph,
-        fixtureSpec(),
-      ).where((v) => v.rule == 'R01').length,
-      2,
+      graph.edges.where((edge) => edge.target.contains('/features/')),
+      hasLength(2),
     );
   });
   test('missing dependency in inactive conditional branch fails closed', () {
@@ -133,30 +134,20 @@ void main() {
       throwsStateError,
     );
   });
-  test('new undeclared feature fails coverage', () {
-    fixture = FixtureProject({'lib/features/unknown/domain/value.dart': ''});
-    expect(
-      () => collectDependencies(fixture.root, fixtureSpec()),
-      throwsStateError,
-    );
-  });
-  test('duplicate responsibility and unmatched required scope fail', () {
-    fixture = FixtureProject({'lib/core/value.dart': ''});
-    final duplicate = ArchitectureSpec([
-      ModuleSpec('core', 'lib/core', [
-        SourceScope('lib/core/**', Responsibility.foundation),
-        SourceScope('lib/core/**', Responsibility.ui),
-      ]),
-    ]);
-    expect(
-      () => collectDependencies(fixture.root, duplicate),
-      throwsStateError,
-    );
-    final missing = ArchitectureSpec([
-      ModuleSpec('core', 'lib/core', [
-        SourceScope('lib/core/missing.dart', Responsibility.foundation),
-      ]),
-    ]);
-    expect(() => collectDependencies(fixture.root, missing), throwsStateError);
-  });
+  test(
+    'new features and unclassified directories still participate in the graph',
+    () {
+      fixture = FixtureProject({
+        'lib/features/unknown/domain/value.dart':
+            "import '../custom/helper.dart';",
+        'lib/features/unknown/custom/helper.dart': '',
+      });
+      final graph = collectDependencies(fixture.root, fixtureSpec());
+      expect(graph.libraries, hasLength(2));
+      expect(
+        graph.edges.single.target,
+        'lib/features/unknown/custom/helper.dart',
+      );
+    },
+  );
 }

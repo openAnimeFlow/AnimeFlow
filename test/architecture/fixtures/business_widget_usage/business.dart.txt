@@ -1,7 +1,0 @@
-import 'package:flutter/widgets.dart' as ui;
-
-typedef ViewFactory = ui.Widget Function();
-ViewFactory? factory;
-ui.BuildContext? context;
-Future<List<ui.Widget>> loadViews() async => [const ui.Text('business must return data')];
-Object inferredView() => const ui.Text('a wide return type must not conceal UI');

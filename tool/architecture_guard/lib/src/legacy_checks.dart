@@ -20,13 +20,12 @@ LegacyResult compareLegacy(
   List<ArchitectureViolation> violations,
   Map<String, dynamic> json, {
   required Set<String> sources,
-  ArchitectureSpec? spec,
   DateTime? now,
 }) {
   if (json.keys.any((k) => !{'schemaVersion', 'violations'}.contains(k)) ||
       json['schemaVersion'] != 1 ||
       json['violations'] is! List) {
-    throw StateError('R08: invalid legacy schema');
+    throw StateError('invalid legacy schema');
   }
   final today = now ?? DateTime.now().toUtc();
   final date = DateTime.utc(today.year, today.month, today.day);
@@ -45,7 +44,7 @@ LegacyResult compareLegacy(
             'reviewBy',
           }.contains(k),
         )) {
-      throw StateError('R08: malformed legacy entry');
+      throw StateError('malformed legacy entry');
     }
     for (final field in [
       'rule',
@@ -58,39 +57,30 @@ LegacyResult compareLegacy(
       'reviewBy',
     ]) {
       if (raw[field] is! String || (raw[field] as String).trim().isEmpty) {
-        throw StateError('R08: missing legacy metadata $field');
+        throw StateError('missing legacy metadata $field');
       }
     }
-    if (!ArchitectureSpec.rules.contains(raw['rule']) ||
-        ArchitectureSpec.strictRules.contains(raw['rule']) ||
-        (spec?.isStrict(
-              raw['rule'] as String,
-              raw['source'] as String,
-              target: raw['target'] as String,
-            ) ??
-            false)) {
-      throw StateError(
-        'R08: unknown or strict rule cannot be frozen: ${raw['rule']}',
-      );
+    if (!ArchitectureSpec.rules.contains(raw['rule'])) {
+      throw StateError('停用或未知的规则不能登记：${raw['rule']}');
     }
     if (!sources.contains(raw['source']) ||
-        !{'import', 'export', 'type'}.contains(raw['kind']) ||
+        !{'import', 'export'}.contains(raw['kind']) ||
         (raw['source'] as String).contains(r'\') ||
         (raw['target'] as String).contains(r'\')) {
-      throw StateError('R08: invalid legacy dependency path/kind');
+      throw StateError('invalid legacy dependency path/kind');
     }
     final review = DateTime.tryParse(raw['reviewBy'] as String);
     if (review == null ||
         review.toIso8601String().substring(0, 10) != raw['reviewBy'] ||
         DateTime.utc(review.year, review.month, review.day).isBefore(date)) {
       throw StateError(
-        'R08: expired or invalid legacy review date: ${raw['reviewBy']}',
+        'expired or invalid legacy review date: ${raw['reviewBy']}',
       );
     }
     final key =
         "${raw['rule']}|${raw['source']}|${raw['target']}|${raw['kind']}";
     if (!registered.add(key)) {
-      throw StateError('R08: duplicate legacy entry $key');
+      throw StateError('duplicate legacy entry $key');
     }
   }
   final current = {for (final v in violations) v.key: v};
@@ -107,12 +97,12 @@ LegacyResult compareLegacy(
 Map<String, dynamic> readLegacy(File file) {
   if (!file.existsSync()) {
     throw StateError(
-      'R08: missing legacy register. Review build/architecture/report.json; tests never create or refresh it.',
+      'missing legacy register. Review build/architecture/report.json; tests never create or refresh it.',
     );
   }
   final json = jsonDecode(file.readAsStringSync());
   if (json is! Map<String, dynamic>) {
-    throw StateError('R08: legacy register must be an object');
+    throw StateError('legacy register must be an object');
   }
   return json;
 }

@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 
 import 'package:anime_flow_architecture_guard/src/dependency_graph.dart';
 import 'package:anime_flow_architecture_guard/src/model.dart';
+import 'package:anime_flow_architecture_guard/architecture_spec.dart';
 
 class FixtureProject {
   FixtureProject(Map<String, String> files) {
@@ -45,54 +46,12 @@ class FixtureProject {
 }
 
 ArchitectureSpec fixtureSpec({
-  Set<String> publicB = const {},
-  Set<String> uiB = const {},
-  AccessMode mode = AccessMode.directApi,
   Map<String, Set<String>> generatedGroups = const {},
-}) => ArchitectureSpec([
-  ModuleSpec('core', 'lib/core', [
-    SourceScope('lib/core/**', Responsibility.foundation, required: false),
-  ]),
-  for (final name in ['a', 'b'])
-    ModuleSpec(
-      name,
-      'lib/features/$name',
-      [
-        SourceScope(
-          'lib/features/$name/application/**',
-          Responsibility.business,
-          mode: AccessMode.repository,
-          required: false,
-        ),
-        SourceScope(
-          'lib/features/$name/domain/**',
-          Responsibility.domain,
-          required: false,
-        ),
-        SourceScope(
-          'lib/features/$name/data/**',
-          Responsibility.data,
-          required: false,
-        ),
-        SourceScope(
-          'lib/features/$name/presentation/providers/**',
-          Responsibility.business,
-          mode: mode,
-          required: false,
-        ),
-        SourceScope(
-          'lib/features/$name/presentation/widgets/**',
-          Responsibility.ui,
-          required: false,
-        ),
-        SourceScope(
-          'lib/features/$name/api.dart',
-          Responsibility.business,
-          required: false,
-        ),
-      ],
-      dependencies: name == 'a' ? {'b'} : {},
-      apiEntries: name == 'b' ? publicB : {},
-      uiEntries: name == 'b' ? uiB : {},
-    ),
-], generatedGroups: generatedGroups);
+}) {
+  final project = projectArchitecture();
+  return ArchitectureSpec(
+    scopes: project.scopes,
+    uiLibraries: project.uiLibraries,
+    generatedGroups: generatedGroups,
+  );
+}

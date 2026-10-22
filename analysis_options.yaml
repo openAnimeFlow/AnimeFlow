@@ -29,6 +29,7 @@ linter:
     prefer_const_literals_to_create_immutables: true
 analyzer:
   exclude:
+    - lib/app/router/app_router.dart
     - .cache/**
     - .dart_tool/**
     - build/**

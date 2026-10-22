@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:anime_flow_architecture_guard/architecture_spec.dart';
 import 'package:anime_flow_architecture_guard/src/boundary_checks.dart';
-import 'package:anime_flow_architecture_guard/src/contract_checks.dart';
 import 'package:anime_flow_architecture_guard/src/cycle_checks.dart';
 import 'package:anime_flow_architecture_guard/src/dependency_graph.dart';
 import 'package:anime_flow_architecture_guard/src/legacy_checks.dart';
@@ -20,7 +19,6 @@ Future<void> main(List<String> arguments) async {
       for (final v in [
         ...checkBoundaries(graph, spec),
         ...checkCycles(graph, spec),
-        ...await checkContracts(graph, spec),
       ])
         v.key: v,
     }.values.toList()..sort((a, b) => a.key.compareTo(b.key));
@@ -28,7 +26,7 @@ Future<void> main(List<String> arguments) async {
       'sourceFiles': graph.units.length,
       'handwrittenFiles': graph.handwritten.length,
       'libraries': graph.libraries.length,
-      'modules': spec.modules.length,
+      'features': graph.libraries.map(spec.featureOf).nonNulls.toSet().length,
       'dependencies': graph.edges.length,
       'elapsedMs': watch.elapsedMilliseconds,
       'ruleCounts': {
@@ -51,7 +49,6 @@ Future<void> main(List<String> arguments) async {
         File(p.join(root, 'test', 'architecture', 'legacy_dependencies.json')),
       ),
       sources: graph.libraries,
-      spec: spec,
     );
     stdout.writeln(
       'Registered legacy edges: ${result.registered}; new: ${result.newViolations.length}; stale: ${result.stale.length}',

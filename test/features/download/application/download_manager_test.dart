@@ -261,8 +261,14 @@ void main() {
       final second = _episode(url: 'line-two')..lineIndex = 1;
       final manager = _manager(tempDir);
       final completed = <DownloadEpisode>[];
+      final allCompleted = Completer<void>();
       manager.onProgress = (_, __, episode, ___) {
-        if (episode.status == DownloadStatus.completed) completed.add(episode);
+        if (episode.status == DownloadStatus.completed) {
+          completed.add(episode);
+          if (completed.length == 2 && !allCompleted.isCompleted) {
+            allCompleted.complete();
+          }
+        }
       };
 
       await manager.enqueue(
@@ -281,7 +287,7 @@ void main() {
           networkMediaUrl: baseUri.resolve('/direct.mp4').toString(),
         ),
       );
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+      await allCompleted.future.timeout(const Duration(seconds: 5));
 
       expect(completed, hasLength(2));
       expect(first.downloadDirectory, isNot(second.downloadDirectory));

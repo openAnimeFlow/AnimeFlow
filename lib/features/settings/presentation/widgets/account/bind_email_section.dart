@@ -51,7 +51,7 @@ class _BindEmailSectionState extends ConsumerState<BindEmailSection> {
     }
 
     try {
-      await ref.read(accountControllerProvider.notifier).sendEmailCode(
+      await ref.read(accountControllerProvider).sendEmailCode(
             email: email,
             captchaId: _graphicCaptchaController.captchaId!,
             captcha: _graphicCaptchaController.text,
@@ -78,7 +78,7 @@ class _BindEmailSectionState extends ConsumerState<BindEmailSection> {
 
     setState(() => _isSubmitting = true);
     try {
-      await ref.read(accountControllerProvider.notifier).bindEmail(
+      await ref.read(accountControllerProvider).bindEmail(
             email: _emailController.text.trim(),
             password: _passwordController.text,
             emailCaptcha: _emailCodeController.text.trim(),

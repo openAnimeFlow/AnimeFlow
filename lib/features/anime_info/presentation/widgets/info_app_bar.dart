@@ -51,7 +51,8 @@ class InfoAppbar extends ConsumerWidget {
     AppLocalizations l10n,
   ) async {
     try {
-      final message = await ref.read(coverDownloadProvider)(image, name);
+      final message =
+          await ref.read(animeInfoProvider.notifier).downloadCover(image, name);
       NotificationToast.show(message, title: l10n.tip, maxWidth: 500);
     } on StoragePermissionDeniedException catch (e) {
       LiggLogger().e('保存图片失败:$e');

@@ -10,8 +10,7 @@ import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
-import 'package:anime_flow/features/auth/application/login_provider.dart';
-import 'package:anime_flow/features/auth/application/login_service.dart';
+import 'package:anime_flow/features/auth/application/account_provider.dart';
 import 'package:anime_flow/features/auth/application/oauth_notice_provider.dart';
 import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'package:anime_flow/features/user/application/user_collection_provider.dart';
@@ -130,7 +129,7 @@ void main() {
       collectionPageLoaderProvider.overrideWithValue((
               {required type, required offset, required sort, keyword}) async =>
           UserCollectionsItem(data: [], total: 0)),
-      loginServiceProvider.overrideWithValue(LoginService(
+      accountControllerProvider.overrideWith((ref) => AccountController(ref,
           emailLogin: (
                   {required email,
                   required password,
@@ -151,8 +150,9 @@ void main() {
       () async {
     await container.read(userCollectionsProvider.notifier).loadInitial(1);
     expect(await container.read(currentFlowTokenProvider.future), isNotNull);
-    await container.read(emailLoginProvider)(
-        email: 'user@test', password: 'secret');
+    await container
+        .read(accountControllerProvider)
+        .login(email: 'user@test', password: 'secret');
     expect((await container.read(currentFlowTokenProvider.future))?.sessionId,
         'second');
     expect(container.read(authSessionRevisionProvider), 1);
@@ -180,7 +180,7 @@ void main() {
         .updateNickname('Changed');
     await api.updateStarted.future;
     await container
-        .read(accountControllerProvider.notifier)
+        .read(accountControllerProvider)
         .clearUserInfo(notifyServer: false);
     expect(await container.read(currentUserInfoProvider.future), isNull);
     api.profileUpdate!.complete(ResponseBody.fromString(
@@ -203,7 +203,7 @@ void main() {
     sync.pendingTrigger = Completer<BgmCollectionSyncStatusItem>();
     final pending = notifier.triggerSync();
     await container
-        .read(accountControllerProvider.notifier)
+        .read(accountControllerProvider)
         .clearUserInfo(notifyServer: false);
     expect(sync.tokens.single.isCancelled, isTrue);
     expect(await container.read(bgmCollectionSyncProvider.future), isNull);

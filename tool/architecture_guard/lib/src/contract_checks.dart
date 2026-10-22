@@ -103,7 +103,7 @@ class _ContractVisitor extends GeneralizingAstVisitor<void> {
           (element is ExecutableElement ||
               element is PropertyAccessorElement)) {
         final target = uris.normalize(uri, source.path);
-        if (isApi(target)) {
+        if (isApi(target) || _isHttpRequest(element!)) {
           report(
             'R04',
             '$target#${element!.name}',
@@ -159,16 +159,59 @@ class _ContractVisitor extends GeneralizingAstVisitor<void> {
     }
   }
 
+  bool _isHttpRequest(Element element) {
+    const requests = {
+      'get',
+      'getUri',
+      'post',
+      'postUri',
+      'put',
+      'putUri',
+      'patch',
+      'patchUri',
+      'delete',
+      'deleteUri',
+      'head',
+      'headUri',
+      'request',
+      'requestUri',
+      'download',
+      'downloadUri',
+      'fetch',
+      'send',
+      'read',
+      'readBytes',
+      'getUrl',
+      'postUrl',
+      'putUrl',
+      'patchUrl',
+      'deleteUrl',
+      'headUrl',
+      'open',
+      'openUrl',
+    };
+    if (!requests.contains(element.name)) return false;
+    bool transport(String uri, String? owner) =>
+        uri.startsWith('package:dio/') ||
+        uri.startsWith('package:http/') ||
+        {'dart:io', 'dart:_http'}.contains(uri) && owner == 'HttpClient';
+    final library = element.library?.uri.toString() ?? '';
+    final owner = element.enclosingElement;
+    if (transport(library, owner?.name)) return true;
+    // Custom implementations/overrides still expose the transport's methods.
+    return owner is InterfaceElement &&
+        owner.allSupertypes.any(
+          (type) =>
+              transport(type.element.library.uri.toString(), type.element.name),
+        );
+  }
+
   void checkExport(Element element) {
-    if (element is InterfaceElement) {
-      checkType(element.thisType, 0);
-    }
-    final library = element.library?.uri.toString();
-    if (library == null) return;
-    final target = uris.normalize(library, source.path);
-    // Public interfaces must not leak implementation types through signatures.
-    void signature(DartType type, [Set<DartType>? seen]) {
-      seen ??= {};
+    final seen = <DartType>{};
+    final visiting = <InterfaceElement>{};
+    // Follow instantiated public surfaces, including Provider values, generated
+    // Provider supertypes, notifier/state types, and inherited generic members.
+    void signature(DartType type) {
       if (!seen.add(type)) return;
       checkType(type, 0);
       if (type is InterfaceType) {
@@ -182,37 +225,62 @@ class _ContractVisitor extends GeneralizingAstVisitor<void> {
                 uri.contains('/presentation/pages/') ||
                 uri.contains('/presentation/widgets/'))) {
           report('R06', '$uri#${type.element.name}', 0, '公开接口类型泄漏具体实现。');
+          return;
         }
         for (final argument in type.typeArguments) {
-          signature(argument, seen);
+          signature(argument);
         }
+        // Prevent expanding recursive generic members (e.g. Node<List<T>>).
+        if (!visiting.add(type.element)) return;
+        for (final supertype in type.allSupertypes) {
+          signature(supertype);
+        }
+        if (uri.startsWith('lib/')) {
+          for (final member in type.interfaceMembers.values) {
+            if (!member.isPrivate &&
+                uris
+                    .normalize(member.library.uri.toString(), source.path)
+                    .startsWith('lib/')) {
+              signature(member.type);
+            }
+          }
+        }
+        visiting.remove(type.element);
       } else if (type is FunctionType) {
-        signature(type.returnType, seen);
+        signature(type.returnType);
         for (final parameter in type.formalParameters) {
-          signature(parameter.type, seen);
+          signature(parameter.type);
+        }
+        for (final parameter in type.typeParameters) {
+          final bound = parameter.bound;
+          if (bound != null) signature(bound);
         }
       } else if (type is RecordType) {
         for (final field in [...type.positionalFields, ...type.namedFields]) {
-          signature(field.type, seen);
+          signature(field.type);
         }
+      } else if (type is TypeParameterType) {
+        signature(type.bound);
       }
     }
 
-    if (target.startsWith('lib/')) {
-      if (element is FunctionTypedElement) signature(element.type);
-      if (element is VariableElement) signature(element.type);
-      if (element is InterfaceElement) {
-        for (final field in element.fields) {
-          signature(field.type);
-        }
-        for (final method in element.methods) {
-          signature(method.type);
-        }
-        for (final constructor in element.constructors) {
-          signature(constructor.type);
+    if (element is FunctionTypedElement) signature(element.type);
+    if (element is VariableElement) signature(element.type);
+    if (element is TypeAliasElement) signature(element.aliasedType);
+    if (element is InterfaceElement) {
+      signature(element.thisType);
+      // Constructors/static members require an exported class symbol.
+      for (final member in [
+        ...element.constructors,
+        ...element.methods,
+        ...element.getters,
+        ...element.setters,
+      ]) {
+        if (!member.isPrivate &&
+            (member is ConstructorElement || member.isStatic)) {
+          signature(member.type);
         }
       }
-      if (element is TypeAliasElement) signature(element.aliasedType);
     }
   }
 }

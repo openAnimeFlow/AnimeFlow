@@ -53,7 +53,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     }
 
     try {
-      await ref.read(accountControllerProvider.notifier).sendEmailCode(
+      await ref.read(accountControllerProvider).sendEmailCode(
             email: email,
             captchaId: _graphicCaptchaController.captchaId!,
             captcha: _graphicCaptchaController.text,
@@ -81,7 +81,7 @@ class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
     setState(() => _isSubmitting = true);
     final l10n = AppLocalizations.of(context);
     try {
-      await ref.read(accountControllerProvider.notifier).resetPassword(
+      await ref.read(accountControllerProvider).resetPassword(
             email: _emailController.text.trim(),
             password: _passwordController.text,
             emailCaptcha: _emailCodeController.text.trim(),

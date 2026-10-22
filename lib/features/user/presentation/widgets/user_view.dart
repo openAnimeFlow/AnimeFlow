@@ -449,7 +449,7 @@ class _UserViewState extends ConsumerState<UserView>
                             onPressed: () async {
                               Navigator.of(dialogContext).pop();
                               await ref
-                                  .read(accountControllerProvider.notifier)
+                                  .read(accountControllerProvider)
                                   .clearUserInfo();
                             },
                             child: Text(l10n.confirm),

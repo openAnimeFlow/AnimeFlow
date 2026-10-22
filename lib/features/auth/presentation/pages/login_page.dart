@@ -2,8 +2,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/features/auth/application/login_provider.dart';
-import 'package:anime_flow/features/auth/application/user_oauth_controller.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/network_check_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -40,10 +39,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     setState(() => _isSubmitting = true);
     try {
-      await ref.read(emailLoginProvider)(
-        email: _accountController.text.trim(),
-        password: _passwordController.text,
-      );
+      await ref.read(accountControllerProvider).login(
+            email: _accountController.text.trim(),
+            password: _passwordController.text,
+          );
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
       NotificationToast.show(e.message, title: '提示');

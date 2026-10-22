@@ -14,11 +14,14 @@ class PlaybackScreenAwake with WidgetsBindingObserver {
   }
 
   late final StreamSubscription<PlayerEvent> _subscription;
-  Future<void>? _updates;
+  // Wakelock is process-wide. Pages withdraw only their own demand, and all
+  // native changes share one queue across overlapping page lifetimes.
+  static final _owners = <PlaybackScreenAwake>{};
+  static Future<void> _updates = Future<void>.value();
+  static bool _requested = false;
   Future<void>? _disposal;
   bool _disposed = false;
   bool _playing = false;
-  bool _requested = false;
 
   bool get _keepScreenOn =>
       !_disposed &&
@@ -44,13 +47,18 @@ class PlaybackScreenAwake with WidgetsBindingObserver {
     _update(force: state == AppLifecycleState.resumed && _playing);
   }
 
-  void _update({bool force = false}) {
-    final enabled = _keepScreenOn;
-    if (!force && enabled == _requested) return;
+  Future<void> _update({bool force = false}) {
+    if (_keepScreenOn) {
+      _owners.add(this);
+    } else {
+      _owners.remove(this);
+    }
+    final enabled = _owners.isNotEmpty;
+    if (!force && enabled == _requested) return _updates;
     _requested = enabled;
     // Preserve ordering: a delayed enable must not outlive the final disable.
-    _updates = (_updates ?? Future<void>.value()).then((_) async {
-      if (enabled && !_keepScreenOn) return;
+    return _updates = _updates.then((_) async {
+      if (enabled != _owners.isNotEmpty) return;
       try {
         await WakelockPlus.toggle(enable: enabled);
       } catch (error, stackTrace) {
@@ -66,8 +74,8 @@ class PlaybackScreenAwake with WidgetsBindingObserver {
     _disposed = true;
     WidgetsBinding.instance.removeObserver(this);
     final cancelling = _subscription.cancel();
-    _update();
+    final updating = _update();
     await cancelling;
-    await _updates;
+    await updating;
   }
 }

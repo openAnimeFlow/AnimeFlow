@@ -6,14 +6,39 @@ import 'package:anime_flow/core/network/interceptors/flow_refresh_token_intercep
 import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/features/auth/application/token_providers.dart';
 import 'session_provider.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/core/auth/models/flow_token.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 
-part 'account_provider.g.dart';
+typedef EmailLoginFn = Future<FlowToken> Function({
+  required String email,
+  required String password,
+  required String platform,
+});
 
-@Riverpod(keepAlive: true)
-class AccountController extends _$AccountController {
-  @override
-  void build() {}
+final accountControllerProvider = Provider((ref) => AccountController(ref));
+
+/// Stateless account commands, including credential persistence and session updates.
+class AccountController {
+  AccountController(this._ref, {EmailLoginFn? emailLogin})
+      : _emailLogin = emailLogin ?? FlowApi.emailLoginService;
+
+  final Ref _ref;
+  final EmailLoginFn _emailLogin;
+
+  /// A successful login updates the session even if its page has been closed.
+  Future<FlowToken> login(
+      {required String email, required String password}) async {
+    final token = await _emailLogin(
+      email: email.trim(),
+      password: password,
+      platform: SystemUtil.getDevice().toUpperCase(),
+    );
+    await _ref.read(flowTokenRepositoryProvider).saveToken(token);
+    await PresenceService.instance.heartbeatNow();
+    invalidateAuthSession(_ref);
+    return token;
+  }
 
   Future<CaptchaItem> generateCaptcha({String? captchaId}) =>
       FlowApi.generateCaptchaService(captchaId: captchaId);
@@ -63,11 +88,11 @@ class AccountController extends _$AccountController {
   }
 
   Future<void> clearUserInfo({bool notifyServer = true}) async {
-    final repository = ref.read(flowTokenRepositoryProvider);
+    final repository = _ref.read(flowTokenRepositoryProvider);
     FlowRefreshTokenInterceptor.invalidatePendingRefresh(repository);
     final sessionToken = await repository.getToken();
     await repository.removeToken();
-    invalidateAuthSession(ref);
+    invalidateAuthSession(_ref);
     await PresenceService.instance.heartbeatNow();
     if (!notifyServer || sessionToken == null) return;
     FlowApi.logoutService(sessionToken: sessionToken).catchError((error) {

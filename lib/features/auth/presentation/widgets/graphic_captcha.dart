@@ -61,10 +61,9 @@ class _GraphicCaptchaViewState extends ConsumerState<GraphicCaptchaView> {
     final previousCaptchaId = widget.controller.captcha?.captchaId;
     setState(() => _isLoading = true);
     try {
-      final captcha =
-          await ref.read(accountControllerProvider.notifier).generateCaptcha(
-                captchaId: previousCaptchaId,
-              );
+      final captcha = await ref.read(accountControllerProvider).generateCaptcha(
+            captchaId: previousCaptchaId,
+          );
       if (!mounted) return;
       setState(() {
         widget.controller.captcha = captcha;

@@ -37,7 +37,7 @@ final class AnimeInfoProvider
   AnimeInfo create() => AnimeInfo();
 }
 
-String _$animeInfoHash() => r'f8fe314e1154e0f3b4be37de3281a4e26770cfe4';
+String _$animeInfoHash() => r'97e03a3a265ef8de6fa589490b9e64343743c5f1';
 
 abstract class _$AnimeInfo extends $StreamNotifier<SubjectsInfoItem> {
   Stream<SubjectsInfoItem> build();

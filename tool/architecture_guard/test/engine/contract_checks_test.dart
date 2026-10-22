@@ -35,9 +35,38 @@ void main() {
       'lib/features/a/presentation/providers/widget.dart': "import 'package:flutter/widgets.dart';\nWidget load() => const Text('wrong');",
       'lib/features/a/presentation/widgets/view.dart': "import 'package:flutter/widgets.dart';\nWidget buildView() => const Text('allowed UI');",
       'lib/features/a/presentation/widgets/api.dart': "import 'package:anime_flow/core/network/api/value.dart' as api;\nint load() => api.ValueApi.load();",
-      'lib/features/b/api.dart': "export 'application/wrapper.dart' show create;\nexport 'package:flutter/widgets.dart' show Widget;",
-      'lib/features/b/application/wrapper.dart': "import '../data/repository.dart';\nRepository create() => Repository();",
-      'lib/features/b/data/repository.dart': 'class Repository {}',
+      'lib/features/a/presentation/widgets/dio.dart': "import 'package:dio/dio.dart';\nvoid request(Dio client) { client.get('/'); final send = client.post; send('/'); }",
+      'lib/features/a/presentation/widgets/http.dart': "import 'package:http/http.dart' as http;\nvoid request(http.Client client) { client.send(http.Request('GET', Uri.parse('https://example.invalid'))); http.get(Uri.parse('https://example.invalid')); }",
+      'lib/features/a/presentation/widgets/override.dart': "import 'package:dio/dio.dart';\nabstract class Transport implements Dio { @override Future<Response<T>> fetch<T>(RequestOptions options); }\nvoid request(Transport transport) { transport.fetch<int>(RequestOptions(path: '/')); }",
+      'lib/features/a/presentation/widgets/io.dart': "import 'dart:io';\nvoid request(HttpClient client) { client.openUrl('GET', Uri.parse('https://example.invalid')); }",
+      'lib/features/a/presentation/widgets/transport_types.dart': "import 'package:dio/dio.dart';\nclass Local { int get() => 1; }\nvoid cancel(CancelToken token) { token.cancel(); Local().get(); }",
+      'lib/features/a/presentation/providers/dio.dart': "import 'package:dio/dio.dart';\nFuture<void> request(Dio client) async { await client.get('/'); }",
+      'lib/features/b/api.dart': "export 'application/wrapper.dart' show create, commandsProvider, notifierProvider, inheritedProvider, safeProvider;\nexport 'package:flutter/widgets.dart' show Widget;",
+      'lib/features/b/application/wrapper.dart':
+          r'''import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../data/repository.dart';
+Repository create() => Repository();
+final commandsProvider = Provider((ref) => Commands());
+class Commands { ProviderRepository get repository => ProviderRepository(); }
+final notifierProvider = NotifierProvider<CommandsNotifier, int>(CommandsNotifier.new);
+class CommandsNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+  NotifierRepository get repository => NotifierRepository();
+}
+class Base<T> { T? get payload => null; }
+class Derived extends Base<InheritedRepository> {}
+// The entry type itself has no type arguments, like generated Provider classes.
+final inheritedProvider = Derived();
+final safeProvider = Provider((ref) => SafeCommands());
+class SafeCommands {
+  final PrivateRepository _repository = PrivateRepository();
+  int get value => _repository.hashCode;
+  Node<int> get tree => Node<int>();
+}
+class Node<T> { Node<List<T>> get next => Node<List<T>>(); }
+''',
+      'lib/features/b/data/repository.dart': 'class Repository {}\nclass ProviderRepository {}\nclass NotifierRepository {}\nclass InheritedRepository {}\nclass PrivateRepository {}',
     });
     final spec = fixtureSpec(publicB: {'lib/features/b/api.dart'});
     violations = await checkContracts(
@@ -129,6 +158,45 @@ void main() {
       );
     },
   );
+  test('UI rejects Dio, http and HttpClient calls/tear-offs, but permits cancellation types', () {
+    for (final name in ['dio', 'http', 'io', 'override']) {
+      expect(
+        violations.where(
+          (v) => v.source.endsWith('widgets/$name.dart') && v.rule == 'R04',
+        ),
+        isNotEmpty,
+        reason: name,
+      );
+    }
+    expect(
+      violations.where(
+        (v) =>
+            v.source.endsWith('widgets/transport_types.dart') ||
+            v.source.endsWith('providers/dio.dart'),
+      ),
+      isEmpty,
+    );
+  });
+  test('public Provider values, notifiers and instantiated inherited members cannot leak implementations', () {
+    final found = violations.where(
+      (v) => v.source == 'lib/features/b/api.dart' && v.rule == 'R06',
+    );
+    for (final name in [
+      'ProviderRepository',
+      'NotifierRepository',
+      'InheritedRepository',
+    ]) {
+      expect(
+        found.where((v) => v.target.endsWith('#$name')),
+        isNotEmpty,
+        reason: name,
+      );
+    }
+    expect(
+      found.where((v) => v.target.endsWith('#PrivateRepository')),
+      isEmpty,
+    );
+  });
   test(
     'semantic errors fail instead of returning an empty success report',
     () async {

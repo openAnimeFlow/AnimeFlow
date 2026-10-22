@@ -26,8 +26,6 @@ part 'anime_info_provider.g.dart';
 /// 路由可传入已加载的条目详情，供子页面复用，避免重复请求。
 final animeInfoInitialProvider = Provider<SubjectsInfoItem?>((ref) => null);
 
-final coverDownloadProvider = Provider((ref) => Api.downloadImage);
-
 // 每次构建独立管理请求，依赖变化导致重建时会取消上次构建发出的请求。
 CancelToken _requestCancelToken(Ref ref) {
   final token = CancelToken();
@@ -38,6 +36,9 @@ CancelToken _requestCancelToken(Ref ref) {
 @Riverpod(dependencies: [animeInfoArgs])
 class AnimeInfo extends _$AnimeInfo {
   bool _initialConsumed = false;
+
+  Future<String> downloadCover(String image, String name) =>
+      Api.downloadImage(image, name);
 
   @override
   Stream<SubjectsInfoItem> build() async* {

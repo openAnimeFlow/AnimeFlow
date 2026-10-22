@@ -53,7 +53,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     }
 
     try {
-      await ref.read(accountControllerProvider.notifier).sendEmailCode(
+      await ref.read(accountControllerProvider).sendEmailCode(
             email: email,
             captchaId: _graphicCaptchaController.captchaId!,
             captcha: _graphicCaptchaController.text,
@@ -82,7 +82,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
     setState(() => _isSubmitting = true);
     try {
-      await ref.read(accountControllerProvider.notifier).register(
+      await ref.read(accountControllerProvider).register(
             email: _emailController.text.trim(),
             password: _passwordController.text,
             emailCaptcha: _emailCodeController.text.trim(),

@@ -359,3 +359,52 @@ docs 目录仍按本地排除规则保留，接入和交付记录以本文件为
 提交前日志：build/phase6-commit-business-tests.log、build/phase6-commit-architecture-tests.log、
 build/phase6-commit-analyze.log；独立工具分析日志为 build/phase6-tool-analyze.log。
 生成器仍使用锁定版本，未调整 SDK 或依赖。
+
+
+## 架构审查修复与入口简化
+
+2026-10-22，Windows，Flutter 3.47.6 / Dart 3.13.5。
+
+PlaybackScreenAwake 按实例登记常亮需求，共享进程级所有者集合和原生操作队列。
+退出只移除当前页的需求；排队操作执行前重新核对需求，旧页的延迟关闭不会覆盖新页的开启。
+最后一个所有者释放后关闭常亮，前后台切换仍同步需求，恢复时重新申请。
+没有新增活动接口、服务工厂或 app 根组件包装。
+
+R04 除项目 API 外，也按调用符号与所属传输类型识别 Dio、http、dart:io HttpClient 的请求
+和方法引用，包含自定义实现的覆盖方法。UI 中使用 CancelToken、普通同名 get 方法仍合法；
+简单业务 Provider 可以直接请求 API 或使用 Dio，不通过禁止整包导入来强制 Repository。
+
+R06 检查公开对象的实例成员、Provider 值、Notifier/状态以及已替换泛型参数的继承成员。
+公开类符号还检查公开构造函数和静态成员；私有实现字段不视作公开接口。
+递归类型同时按类型与当前展开的类去重，避免 Node<List<T>> 一类类型无限展开。
+框架成员不作全库递归扫描，相关的实际类型参数和项目内公开成员仍会检查。
+
+AccountController 改为普通 Provider 提供的无状态命令对象，统一邮箱登录、令牌持久化、
+会话更新、退出、密码及验证码等命令。调用方直接 read(accountControllerProvider)，
+移除空 void Notifier、account_provider.g.dart、login_provider.dart 与 login_service.dart。
+邮箱登录成功后继续更新全局会话，登录页关闭不影响已完成的登录结果。
+封面下载并入既有 AnimeInfo 命令，移除仅转发 Api.downloadImage 的独立 Provider。
+没有增加 Repository 或额外命令接口。
+
+新增两项常亮行为测试，覆盖跨页延迟操作、共享需求、前后台切换、终止事件、数据源关闭及
+重复释放。原登录持久化测试迁为账户命令测试，并验证邮箱修剪、会话修订和凭证可见性。
+规则新增两项组合验收，覆盖三种 HTTP 入口、方法引用、自定义实现、合法取消类型及同名方法，
+以及 Provider/Notifier/泛型继承泄漏、私有字段和递归合法类型。
+一项旧下载测试改为等待两次完成事件，替代固定等待 100ms；保留文件隔离断言和超时保护。
+
+| 验证 | 结果 |
+| --- | --- |
+| 全量业务测试 | 487 项通过 |
+| 架构引擎验收 | 54 项通过 |
+| Flutter 架构集成入口 | 2 项通过 |
+| 静态分析 | 应用和独立工具包零诊断 |
+| 完整扫描 | 496 个源码文件、435 个手写文件、442 个 library、2498 条依赖 |
+| 存量门禁 | 181 条，新增 0、失效 0 |
+
+本次没有修改或扩充存量登记、职责模式、公开入口白名单或豁免。
+共享组件导航迁移仍待完成。Windows 应用热重启成功；真实设备交互、其他平台与远程 Actions
+尚未验证，尚未推送。
+
+日志位于 build/architecture-fixes-business-tests.log、build/architecture-fixes-architecture-tests.log、
+build/architecture-fixes-analyze.log、build/architecture-fixes-tool-analyze.log、
+build/architecture-fixes-targeted-tests.log 和 build/architecture-fixes-contract-tests.log。

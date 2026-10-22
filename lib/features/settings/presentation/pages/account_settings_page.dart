@@ -36,7 +36,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
   Future<void> _changePassword() async {
     final l10n = AppLocalizations.of(context);
-    final controller = ref.read(accountControllerProvider.notifier);
+    final controller = ref.read(accountControllerProvider);
     final changed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -69,7 +69,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
     if (confirmed != true || !context.mounted) return;
 
-    await ref.read(accountControllerProvider.notifier).clearUserInfo();
+    await ref.read(accountControllerProvider).clearUserInfo();
   }
 
   Future<void> _bindBangumi() async {

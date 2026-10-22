@@ -8,8 +8,28 @@ import 'control/middle_area_control.dart';
 import 'control/right_area_control.dart';
 import 'control/top_area_control.dart';
 import 'screenshot_preview.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
 
-///播放器ui
+/// 播放器 UI。
+@Dependencies([
+  playSession,
+  PlayStateNotifier,
+  VideoUiNotifier,
+  VideoSourceNotifier,
+  Episodes,
+  playExtra,
+  AnimeInfo,
+  subjectOnlineCount,
+  DanmakuStateNotifier
+])
 class VideoUi extends StatelessWidget {
   const VideoUi({super.key});
 

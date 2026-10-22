@@ -9,7 +9,9 @@ import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([Episodes, playExtra])
 class EpisodesDialog extends ConsumerStatefulWidget {
   static const double _loadMoreTriggerDistance = 80;
   static const double _estimatedEpisodeItemExtent = 86;

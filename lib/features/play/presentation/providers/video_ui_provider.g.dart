@@ -45,7 +45,7 @@ final class VideoUiNotifierProvider
   }
 }
 
-String _$videoUiNotifierHash() => r'3f5e7e12879725408ffcd139c6a24cb8def4f43b';
+String _$videoUiNotifierHash() => r'5d42d4add1f9269beb2f38a804012e24925bc665';
 
 abstract class _$VideoUiNotifier extends $Notifier<VideoUiState> {
   VideoUiState build();

@@ -14,9 +14,17 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 enum _SourceAction { downloadResources, openPageUrl, copyPageUrl }
 
+@Dependencies([
+  playSession,
+  VideoUiNotifier,
+  VideoSourceNotifier,
+  playExtra,
+  PlayStateNotifier
+])
 class VideoResourcesView extends ConsumerStatefulWidget {
   const VideoResourcesView({super.key});
 

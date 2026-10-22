@@ -27,8 +27,17 @@ import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 底部区域控件
+@Dependencies([
+  VideoUiNotifier,
+  PlayStateNotifier,
+  playSession,
+  DanmakuStateNotifier,
+  playExtra,
+  Episodes
+])
 class BottomAreaControl extends ConsumerWidget {
   const BottomAreaControl({super.key});
 
@@ -76,6 +85,14 @@ class BottomAreaControl extends ConsumerWidget {
   }
 }
 
+@Dependencies([
+  playSession,
+  VideoUiNotifier,
+  PlayStateNotifier,
+  DanmakuStateNotifier,
+  playExtra,
+  Episodes
+])
 class _BottomControlsContent extends ConsumerWidget {
   const _BottomControlsContent();
 
@@ -458,8 +475,23 @@ class _BottomControlsContent extends ConsumerWidget {
 
                 if (isWideScreen || fullscreen) ...[
                   //倍速按钮
-                  RateButton(
-                    playController: playController,
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final rate = ref.watch(
+                        playStateProvider.select((state) => state.rate),
+                      );
+                      return RateButton(
+                        value: rate,
+                        onChanged: (rate) =>
+                            playController.setPlaybackRate(rate),
+                        onMenuOpen: () =>
+                            videoUiStateController.cancelUiTimer(),
+                        onMenuClose: () =>
+                            videoUiStateController.hideControlsUi(
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
                   ),
                   // 画面填充按钮
                   Consumer(
@@ -505,6 +537,7 @@ class _BottomControlsContent extends ConsumerWidget {
   }
 }
 
+@Dependencies([PlayStateNotifier])
 class _MiniProgressBarVisibility extends ConsumerWidget {
   const _MiniProgressBarVisibility({required this.visible});
 
@@ -541,6 +574,7 @@ class _MiniProgressBarVisibility extends ConsumerWidget {
   }
 }
 
+@Dependencies([PlayStateNotifier])
 class _MiniProgressBar extends ConsumerWidget {
   const _MiniProgressBar();
 
@@ -561,6 +595,7 @@ class _MiniProgressBar extends ConsumerWidget {
   }
 }
 
+@Dependencies([DanmakuStateNotifier, playSession, VideoUiNotifier])
 class _DanmakuInputField extends ConsumerWidget {
   const _DanmakuInputField();
 

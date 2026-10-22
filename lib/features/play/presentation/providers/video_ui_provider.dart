@@ -131,18 +131,8 @@ class VideoUiNotifier extends _$VideoUiNotifier
   double _dragStartBrightness = 0.5;
   int _runtimeRevision = 0;
 
-  bool get isShowControlsUi => state.isShowControlsUi;
-  bool get isHorizontalDragging => state.isHorizontalDragging;
-  Duration get dragPosition => state.dragPosition;
-  VideoControlsIndicatorType get topIndicator => state.topIndicator;
   @override
   VideoControlsIndicatorType get centerIndicator => state.centerIndicator;
-  double get currentBrightness => state.currentBrightness;
-  bool get isBrightnessDragging => state.isBrightnessDragging;
-  String get currentTime => state.currentTime;
-  int get batteryLevel => state.batteryLevel;
-  BatteryState get batteryState => state.batteryState;
-  Uint8List? get screenshotPreviewBytes => state.screenshotPreviewBytes;
 
   @override
   VideoUiState build() {

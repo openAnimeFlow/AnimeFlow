@@ -11,7 +11,25 @@ import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
+import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
 
+@Dependencies([
+  playExtra,
+  AnimeInfo,
+  Episodes,
+  playSession,
+  PlayStateNotifier,
+  VideoUiNotifier,
+  VideoSourceNotifier,
+  DanmakuStateNotifier,
+  recommendation
+])
 class IntroduceView extends StatefulWidget {
   const IntroduceView({super.key, required this.onShowDetails});
 

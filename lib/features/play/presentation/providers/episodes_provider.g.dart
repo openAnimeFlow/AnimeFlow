@@ -8,15 +8,12 @@ part of 'episodes_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
 
 @ProviderFor(Episodes)
 final episodesProvider = EpisodesProvider._();
 
-/// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
 final class EpisodesProvider
     extends $AsyncNotifierProvider<Episodes, EpisodesData> {
-  /// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
   EpisodesProvider._()
       : super(
           from: null,
@@ -40,9 +37,7 @@ final class EpisodesProvider
   Episodes create() => Episodes();
 }
 
-String _$episodesHash() => r'8eccb00631b2ca0e39c53d47027c658efd68aca3';
-
-/// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
+String _$episodesHash() => r'cd6c01f10ad5f51814fc803acb59b7aedcbf3e08';
 
 abstract class _$Episodes extends $AsyncNotifier<EpisodesData> {
   FutureOr<EpisodesData> build();

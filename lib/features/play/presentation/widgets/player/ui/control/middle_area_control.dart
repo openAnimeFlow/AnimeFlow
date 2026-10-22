@@ -10,9 +10,11 @@ import 'package:anime_flow/features/play/presentation/widgets/play_pause_icon.da
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 播放器指示器
 /// 顶部提示与居中指示器各自成层，可同时展示且互不影响。
+@Dependencies([VideoUiNotifier, PlayStateNotifier])
 class MiddleAreaControl extends ConsumerWidget {
   const MiddleAreaControl({super.key});
 
@@ -51,6 +53,7 @@ class MiddleAreaControl extends ConsumerWidget {
 }
 
 /// 居中指示器：解析、缓冲与拖动进度，可长期驻留。
+@Dependencies([VideoUiNotifier, PlayStateNotifier])
 class _CenterIndicator extends ConsumerWidget {
   const _CenterIndicator({required this.type});
 
@@ -122,8 +125,8 @@ class _CenterIndicator extends ConsumerWidget {
             ),
             const SizedBox(height: 5),
             Consumer(builder: (context, ref, child) {
-              final statusMessage = ref
-                  .watch(playStateProvider.select((state) => state.statusMessage));
+              final statusMessage = ref.watch(
+                  playStateProvider.select((state) => state.statusMessage));
               return Text(
                 statusMessage,
                 style: const TextStyle(
@@ -141,6 +144,7 @@ class _CenterIndicator extends ConsumerWidget {
 }
 
 /// 顶部提示：音量、亮度、播放状态与倍速，可与其他指示器同时展示。
+@Dependencies([PlayStateNotifier, VideoUiNotifier])
 class _TopIndicator extends ConsumerWidget {
   const _TopIndicator({required this.type});
 

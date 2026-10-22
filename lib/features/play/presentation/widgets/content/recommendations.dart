@@ -7,7 +7,9 @@ import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([recommendation])
 class RecommendationsView extends ConsumerWidget {
   const RecommendationsView({super.key});
 
@@ -17,28 +19,26 @@ class RecommendationsView extends ConsumerWidget {
     final recommendations = ref.watch(recommendationProvider);
 
     return recommendations.when(
-      loading: () =>
-          _buildSection(
-            context,
-            l10n: l10n,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: LinearProgressIndicator(),
-            ),
+      loading: () => _buildSection(
+        context,
+        l10n: l10n,
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 12),
+          child: LinearProgressIndicator(),
+        ),
+      ),
+      error: (error, _) => _buildSection(
+        context,
+        l10n: l10n,
+        child: _RecommendationError(
+          message: resolveAnimeFlowErrorMessage(
+            error,
+            fallback: l10n.recommendationLoadFailed,
           ),
-      error: (error, _) =>
-          _buildSection(
-            context,
-            l10n: l10n,
-            child: _RecommendationError(
-              message: resolveAnimeFlowErrorMessage(
-                error,
-                fallback: l10n.recommendationLoadFailed,
-              ),
-              onRetry: () => ref.invalidate(recommendationProvider),
-              retryLabel: l10n.retry,
-            ),
-          ),
+          onRetry: () => ref.invalidate(recommendationProvider),
+          retryLabel: l10n.retry,
+        ),
+      ),
       data: (item) {
         if (item.data.isEmpty) {
           return const SizedBox.shrink();
@@ -76,9 +76,7 @@ class _RecommendationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme
-        .of(context)
-        .colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final title = subject.nameCN.isEmpty ? subject.name : subject.nameCN;
     final score = subject.rating.score;
 
@@ -86,14 +84,13 @@ class _RecommendationTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () =>
-            AnimeInfoRoute.fromExtra(
-              InfoRouteExtra(
-                id: subject.id,
-                name: title,
-                image: subject.images.large,
-              ),
-            ).push(context),
+        onTap: () => AnimeInfoRoute.fromExtra(
+          InfoRouteExtra(
+            id: subject.id,
+            name: title,
+            image: subject.images.large,
+          ),
+        ).push(context),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -183,20 +180,14 @@ class _RecommendationMeta extends StatelessWidget {
         Icon(
           icon,
           size: 14,
-          color: Theme
-              .of(context)
-              .colorScheme
-              .primary,
+          color: Theme.of(context).colorScheme.primary,
         ),
         const SizedBox(width: 3),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Theme
-                .of(context)
-                .colorScheme
-                .onSurfaceVariant,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -223,10 +214,7 @@ class _RecommendationError extends StatelessWidget {
         children: [
           Icon(
             Icons.error_outline,
-            color: Theme
-                .of(context)
-                .colorScheme
-                .error,
+            color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(width: 8),
           Expanded(

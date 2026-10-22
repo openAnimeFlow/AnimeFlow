@@ -239,7 +239,7 @@ class Episodes extends _$Episodes {
   }
 
   /// 在线模式下判断下一集是否已到播出日期，离线模式下判断本地是否有下一集。
-  bool get hasNextEpisode {
+  bool hasNextEpisode() {
     final current = _currentData;
     final episodesData = current?.episodes;
     if (current == null || episodesData == null || episodesData.data.isEmpty) {

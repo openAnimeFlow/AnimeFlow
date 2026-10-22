@@ -9,8 +9,10 @@ import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 弹幕设置弹窗
+@Dependencies([playSession])
 class DanmakuSettingDialog extends ConsumerStatefulWidget {
   const DanmakuSettingDialog({super.key});
 
@@ -374,7 +376,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                     max: 30,
                     divisions: 18,
                     labelBuilder: (value) =>
-                    '${l10n.fontSize}: ${value.toInt()}px',
+                        '${l10n.fontSize}: ${value.toInt()}px',
                     onChanged: (value) {
                       danmakuController.updateOption(
                         danmakuController.option.copyWith(fontSize: value),

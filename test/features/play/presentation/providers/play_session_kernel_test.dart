@@ -308,9 +308,13 @@ String _localPath(int episode) =>
 
 class _Session extends PlaySession {
   _Session(_Factory factory, {_State? state})
+      : this._(factory, state ?? _State());
+
+  _Session._(_Factory factory, _State state)
       : super(
           shadersDirectory: Directory.systemTemp,
-          playStateActions: state ?? _State(),
+          playStateActions: state,
+          readPlayState: () => state.value,
           playbackIndicatorActions: _Indicators(),
           episodesActions: _Episodes(),
           danmaku: DanmakuSession(
@@ -438,7 +442,6 @@ class _Settings implements Box<dynamic> {
 }
 
 class _State implements PlayStateNotifier {
-  @override
   PlayState value = const PlayState(playing: true);
   @override
   void setKernel(PlayerKernel kernel) {

@@ -10,8 +10,10 @@ import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 桌面端手势检测器
+@Dependencies([playSession, VideoUiNotifier, PlayStateNotifier])
 class DesktopGestureDetector extends ConsumerStatefulWidget {
   final Widget child;
 

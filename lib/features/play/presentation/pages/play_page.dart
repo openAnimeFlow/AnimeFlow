@@ -24,11 +24,35 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
+import 'package:anime_flow/features/play/presentation/providers/episode_comments_provider.dart';
 
 import '../widgets/content/comments_view.dart';
 import '../widgets/content/play_content_navigator.dart';
 import '../widgets/content/play_content_safe_area.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
 
+@Dependencies([
+  playSession,
+  PlayStateNotifier,
+  VideoUiNotifier,
+  VideoSourceNotifier,
+  Episodes,
+  playExtra,
+  AnimeInfo,
+  subjectOnlineCount,
+  DanmakuStateNotifier,
+  recommendation,
+  SubjectComments,
+  SubjectStills,
+  SubjectCharacters,
+  SubjectProducers,
+  SubjectRelated,
+  animeInfoArgs,
+  episodeComments
+])
 class PlayPage extends ConsumerStatefulWidget {
   const PlayPage({super.key});
 
@@ -57,9 +81,8 @@ class _PlayPageState extends ConsumerState<PlayPage>
   @override
   void initState() {
     super.initState();
-    videoSourceController = ref
-        .listenManual(videoSourceProvider.notifier, (_, __) {})
-        .read();
+    videoSourceController =
+        ref.listenManual(videoSourceProvider.notifier, (_, __) {}).read();
     playSession = ref.listenManual(playSessionProvider, (_, __) {}).read();
     _screenAwake = PlaybackScreenAwake(playSession.playbackCoordinator.events);
     _contentAnimationController = AnimationController(
@@ -347,6 +370,24 @@ int _compareDownloadEpisodes(DownloadEpisode a, DownloadEpisode b) {
   return a.episodeUrl.compareTo(b.episodeUrl);
 }
 
+@Dependencies([
+  playExtra,
+  AnimeInfo,
+  Episodes,
+  playSession,
+  PlayStateNotifier,
+  VideoUiNotifier,
+  VideoSourceNotifier,
+  DanmakuStateNotifier,
+  recommendation,
+  SubjectComments,
+  SubjectStills,
+  SubjectCharacters,
+  SubjectProducers,
+  SubjectRelated,
+  animeInfoArgs,
+  episodeComments
+])
 class _ContentView extends ConsumerStatefulWidget {
   const _ContentView({super.key});
 

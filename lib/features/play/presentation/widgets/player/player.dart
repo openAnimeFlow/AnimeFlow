@@ -14,7 +14,22 @@ import 'package:window_manager/window_manager.dart';
 
 import 'ui/danmaku/danmaku_view.dart';
 import 'ui/video_ui.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 
+@Dependencies([
+  playSession,
+  PlayStateNotifier,
+  VideoUiNotifier,
+  VideoSourceNotifier,
+  Episodes,
+  playExtra,
+  AnimeInfo,
+  subjectOnlineCount,
+  DanmakuStateNotifier
+])
 class PlayerView extends ConsumerStatefulWidget {
   const PlayerView({super.key});
 

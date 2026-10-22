@@ -120,20 +120,6 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   /// 规则执行引擎；传输实现固定为默认的真实 HTTP。
   final RuleEngine _ruleEngine = RuleEngine();
 
-  int get currentEpisodeIndex => state.currentEpisodeIndex;
-  List<ResourcesItem> get videoResources => state.videoResources;
-  String get webSiteTitle => state.webSiteTitle;
-  String get webSiteIcon => state.webSiteIcon;
-  String get resourceTitle => state.resourceTitle;
-  String get lineName => state.lineName;
-  String get videoUrl => state.videoUrl;
-  String get keyword => state.keyword;
-  bool get isSearchCompleted => state.isSearchCompleted;
-  int get selectedWebsiteIndex => state.selectedWebsiteIndex;
-  bool get userManuallySelected => state.userManuallySelected;
-  Map<int, ManualEpisodeSource> get manualEpisodeSources =>
-      state.manualEpisodeSources;
-
   bool _requiresCaptcha(CrawlConfigItem config) {
     return config.antiCrawlerConfig.enabled &&
         !CookieManager.instance.hasCookies(config.name);

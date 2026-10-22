@@ -13,7 +13,9 @@ import 'package:anime_flow/features/play/presentation/widgets/loading_animation.
 import 'package:anime_flow/features/play/presentation/widgets/episode_load_more_error.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([playSession, playExtra, Episodes, PlayStateNotifier])
 class EpisodesListView extends ConsumerStatefulWidget {
   const EpisodesListView({super.key});
 

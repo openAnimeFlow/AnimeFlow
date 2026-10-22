@@ -8,7 +8,9 @@ import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([episodeComments])
 class CommentsView extends ConsumerStatefulWidget {
   const CommentsView({super.key});
 
@@ -132,7 +134,8 @@ class _CommentsViewState extends ConsumerState<CommentsView>
               children: [
                 Text(
                   l10n.commentsTitle,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 Text(
@@ -254,7 +257,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      FormatTimeUtil.formatDate( comment.createdAt),
+                      FormatTimeUtil.formatDate(comment.createdAt),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,

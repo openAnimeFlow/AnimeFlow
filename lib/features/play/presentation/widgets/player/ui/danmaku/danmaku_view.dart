@@ -5,9 +5,11 @@ import 'package:anime_flow/features/settings/presentation/providers/font_provide
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 import 'canvas_danmaku_adapter.dart';
 
+@Dependencies([playSession, PlayStateNotifier])
 class DanmakuView extends ConsumerStatefulWidget {
   const DanmakuView({super.key});
 
@@ -17,7 +19,7 @@ class DanmakuView extends ConsumerStatefulWidget {
 
 class _DanmakuViewState extends ConsumerState<DanmakuView>
     with AutomaticKeepAliveClientMixin {
-  late final PlaySession playController;
+  late final PlaySession playSession;
 
   // 弹幕配置
   late double _strokeWidth;
@@ -38,7 +40,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
   @override
   void initState() {
     super.initState();
-    playController = ref.read(playSessionProvider);
+    playSession = ref.read(playSessionProvider);
 
     // 初始化弹幕配置
     _strokeWidth = AppSettings.danmakuStrokeWidth;
@@ -56,8 +58,8 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
 
   @override
   void dispose() {
-    if (identical(playController.danmaku.canvas, _adapter)) {
-      playController.danmaku.canvas = null;
+    if (identical(playSession.danmaku.canvas, _adapter)) {
+      playSession.danmaku.canvas = null;
     }
     super.dispose();
   }
@@ -82,7 +84,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
         createdController: (DanmakuController controller) {
           // 更新全局控制器引用
           _adapter = CanvasDanmakuAdapter(controller);
-          playController.danmaku.canvas = _adapter;
+          playSession.danmaku.canvas = _adapter;
           // 应用保存的设置
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted || !identical(_adapter?.controller, controller)) {

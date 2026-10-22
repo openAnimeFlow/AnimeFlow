@@ -58,7 +58,7 @@ PlaySession playSession(Ref ref) {
     converter: ref.watch(danmakuChineseConverterProvider),
     initialChineseMode: initialDanmakuChineseMode,
     readPlayback: () {
-      final state = playStateActions.value;
+      final state = ref.read(playStateProvider);
       return DanmakuPlaybackSnapshot(
         position: state.position,
         duration: state.duration,
@@ -70,6 +70,7 @@ PlaySession playSession(Ref ref) {
   final controller = PlaySession(
     shadersDirectory: ref.watch(shadersDirectoryProvider).requireValue,
     playStateActions: playStateActions,
+    readPlayState: () => ref.read(playStateProvider),
     playbackIndicatorActions: ref.watch(videoUiProvider.notifier),
     episodesActions: ref.watch(episodesProvider.notifier),
     danmaku: danmaku,
@@ -121,8 +122,6 @@ class PlayStateNotifier extends _$PlayStateNotifier {
     ref.watch(playExtraProvider);
     return const PlayState();
   }
-
-  PlayState get value => state;
 
   void setKernel(PlayerKernel value) {
     if (state.kernel == value) return;
@@ -336,6 +335,7 @@ class PlaySession {
   PlaySession({
     required this.shadersDirectory,
     required PlayStateNotifier playStateActions,
+    required PlayState Function() readPlayState,
     required PlaybackIndicatorActions playbackIndicatorActions,
     required Episodes episodesActions,
     required this.danmaku,
@@ -346,6 +346,7 @@ class PlaySession {
       required bool watched,
     }) setEpisodeWatched,
   })  : _playStateActions = playStateActions,
+        _readPlayState = readPlayState,
         _playbackIndicatorActions = playbackIndicatorActions,
         _episodesActions = episodesActions,
         _setEpisodeWatched = setEpisodeWatched;
@@ -354,6 +355,7 @@ class PlaySession {
   late final PlaybackCoordinator playbackCoordinator;
   late final PlaybackProgressManager playbackProgressManager;
   final PlayStateNotifier _playStateActions;
+  final PlayState Function() _readPlayState;
   final PlaybackIndicatorActions _playbackIndicatorActions;
   final Episodes _episodesActions;
   final DanmakuSession danmaku;
@@ -505,12 +507,14 @@ class PlaySession {
 
   Future<bool> _switchKernel(PlayerKernel target,
       {bool force = false, bool? hardwareDecoder}) async {
-    if (_isDisposed || _playStateActions.value.switchingKernel) return false;
+    if (_isDisposed || _readPlayState().switchingKernel) {
+      return false;
+    }
     if (!force && playbackCoordinator.kernel == target) return true;
 
     final source = _currentSource;
 
-    final state = _playStateActions.value;
+    final state = _readPlayState();
     final snapshot = PlayerSnapshot(
       source: source,
       position: state.position,
@@ -559,8 +563,8 @@ class PlaySession {
       _playStateActions.setPlaying(event.playing);
       if (event.playing) {
         _playStateActions.setPlaybackPhase(PlaybackPhase.playing);
-      } else if (_playStateActions.value.phase == PlaybackPhase.playing ||
-          _playStateActions.value.phase == PlaybackPhase.buffering) {
+      } else if (_readPlayState().phase == PlaybackPhase.playing ||
+          _readPlayState().phase == PlaybackPhase.buffering) {
         _playStateActions.setPlaybackPhase(PlaybackPhase.paused);
       }
       danmaku.onPlaybackChanged(event.playing);
@@ -574,12 +578,12 @@ class PlaySession {
     } else if (event is PlayerBufferingChanged) {
       _isPlayerBuffering = event.buffering;
       if (event.buffering &&
-          _playStateActions.value.phase != PlaybackPhase.resolving) {
+          _readPlayState().phase != PlaybackPhase.resolving) {
         _playStateActions.setPlaybackPhase(PlaybackPhase.buffering);
       } else if (!event.buffering &&
-          _playStateActions.value.phase == PlaybackPhase.buffering) {
+          _readPlayState().phase == PlaybackPhase.buffering) {
         _playStateActions.setPlaybackPhase(
-          _playStateActions.value.playing
+          _readPlayState().playing
               ? PlaybackPhase.playing
               : PlaybackPhase.paused,
         );
@@ -609,7 +613,7 @@ class PlaySession {
 
   void _autoSwitchToNextEpisode() {
     try {
-      if (_episodesActions.hasNextEpisode) {
+      if (_episodesActions.hasNextEpisode()) {
         _episodesActions.switchToNextEpisode();
       }
     } catch (e) {
@@ -771,7 +775,7 @@ class PlaySession {
   void _updateBufferingState(bool buffering) {
     _playbackIndicatorActions.updateBufferingIndicator(
       buffering,
-      isParsing: _playStateActions.value.phase.isResolving,
+      isParsing: _readPlayState().phase.isResolving,
     );
   }
 
@@ -780,7 +784,7 @@ class PlaySession {
     Duration? buffered,
     bool? playerBuffering,
   }) {
-    final playState = _playStateActions.value;
+    final playState = _readPlayState();
     final currentPosition = position ?? playState.position;
     final currentBuffered = buffered ?? playState.buffered;
     final isBuffering = (playerBuffering ?? _isPlayerBuffering) ||
@@ -841,7 +845,7 @@ class PlaySession {
 
   /// 切换全屏状态
   void toggleFullScreen() {
-    if (_playStateActions.value.isFullscreen) {
+    if (_readPlayState().isFullscreen) {
       exitFullScreen();
     } else {
       enterFullScreen();
@@ -869,7 +873,7 @@ class PlaySession {
   ///暂停/播放
   bool playOrPauseVideo() {
     if (_isStartupInProgress) return false;
-    if (_playStateActions.value.playing) {
+    if (_readPlayState().playing) {
       unawaited(playbackCoordinator.pause());
     } else {
       unawaited(playbackCoordinator.play());
@@ -878,8 +882,7 @@ class PlaySession {
   }
 
   /// 启动流程（解析、打开）进行中：此时播放器还没有可操作的媒体。
-  bool get _isStartupInProgress =>
-      _playStateActions.value.phase.keepsStartupIndicator;
+  bool get _isStartupInProgress => _readPlayState().phase.keepsStartupIndicator;
 
   void _applyPlaybackRate(double speed) {
     _playStateActions.setRate(speed);
@@ -890,7 +893,7 @@ class PlaySession {
   void setPlaybackRate(double speed, {bool temporary = false}) {
     if (temporary) {
       if (!_isSpeedBoosting) {
-        _speedBeforeBoost = _playStateActions.value.rate;
+        _speedBeforeBoost = _readPlayState().rate;
         _isSpeedBoosting = true;
       }
 
@@ -909,7 +912,7 @@ class PlaySession {
   /// 开始手动拖动进度：暂停播放并记住拖动前的播放状态。
   bool beginManualSeek() {
     if (_isStartupInProgress) return false;
-    _resumeAfterManualSeek = _playStateActions.value.playing;
+    _resumeAfterManualSeek = _readPlayState().playing;
     unawaited(playbackCoordinator.pause());
     return true;
   }
@@ -937,7 +940,7 @@ class PlaySession {
     final target = _clampSeekTarget(pos);
     // 落点确认前先以目标位置更新播放状态。
     _playStateActions.setPosition(target);
-    if (_playStateActions.value.duration > Duration.zero) {
+    if (_readPlayState().duration > Duration.zero) {
       _awaitSeekSettle(target);
     }
     unawaited(playbackCoordinator.seek(target));
@@ -948,7 +951,7 @@ class PlaySession {
   /// 把跳转目标收敛到片尾之前。
   Duration _clampSeekTarget(Duration position) {
     if (position < Duration.zero) return Duration.zero;
-    final duration = _playStateActions.value.duration;
+    final duration = _readPlayState().duration;
     if (duration <= Duration.zero) return position;
     final guard = duration > const Duration(seconds: 20)
         ? _seekEndGuard
@@ -1005,19 +1008,19 @@ class PlaySession {
   }
 
   void startVerticalDrag() {
-    _dragStartVolume = _playStateActions.value.volume;
+    _dragStartVolume = _readPlayState().volume;
     _playStateActions.setIsVerticalDragging(true);
   }
 
   void adjustVolumeByWheel(double delta) {
-    final newVolume = _playStateActions.value.volume + delta;
+    final newVolume = _readPlayState().volume + delta;
     _updateVolume(newVolume);
   }
 
   void updateVerticalDrag(double dragDistance, double screenHeight) {
     final volumeChange = -(dragDistance / screenHeight) * 100;
     final newVolume = _dragStartVolume + volumeChange;
-    final volume = _playStateActions.value.volume;
+    final volume = _readPlayState().volume;
     if (newVolume >= 100 && volume < 100) {
       vibrateHeavy();
     } else if (newVolume <= 0 && volume > 0) {
@@ -1049,8 +1052,7 @@ class PlaySession {
       _playStateActions.setScheduledStopDuration(totalSeconds);
 
       _stopTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        final scheduledStopDuration =
-            _playStateActions.value.scheduledStopDuration;
+        final scheduledStopDuration = _readPlayState().scheduledStopDuration;
         if (scheduledStopDuration > 0) {
           _playStateActions.setScheduledStopDuration(
             scheduledStopDuration - 1,

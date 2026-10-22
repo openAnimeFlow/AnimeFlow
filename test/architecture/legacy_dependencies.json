@@ -1430,6 +1430,46 @@
       "owner": "shared",
       "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
       "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/pages/play_page.dart",
+      "target": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "kind": "import",
+      "reason": "仅用于 Riverpod @Dependencies 作用域元数据；播放与条目详情已存在双向功能依赖，该具体边在存量登记中遗漏。",
+      "owner": "feature:play",
+      "cleanupTask": "统一清理 play 与 anime_info 的双向依赖，并同步调整作用域声明；不扩大为目录或模块豁免。",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/content/play_content_navigator.dart",
+      "target": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "kind": "import",
+      "reason": "仅用于 Riverpod @Dependencies 作用域元数据；播放与条目详情已存在双向功能依赖，该具体边在存量登记中遗漏。",
+      "owner": "feature:play",
+      "cleanupTask": "统一清理 play 与 anime_info 的双向依赖，并同步调整作用域声明；不扩大为目录或模块豁免。",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/player/player.dart",
+      "target": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "kind": "import",
+      "reason": "仅用于 Riverpod @Dependencies 作用域元数据；播放与条目详情已存在双向功能依赖，该具体边在存量登记中遗漏。",
+      "owner": "feature:play",
+      "cleanupTask": "统一清理 play 与 anime_info 的双向依赖，并同步调整作用域声明；不扩大为目录或模块豁免。",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/player/ui/video_ui.dart",
+      "target": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "kind": "import",
+      "reason": "仅用于 Riverpod @Dependencies 作用域元数据；播放与条目详情已存在双向功能依赖，该具体边在存量登记中遗漏。",
+      "owner": "feature:play",
+      "cleanupTask": "统一清理 play 与 anime_info 的双向依赖，并同步调整作用域声明；不扩大为目录或模块豁免。",
+      "reviewBy": "2026-11-22"
     }
   ]
 }

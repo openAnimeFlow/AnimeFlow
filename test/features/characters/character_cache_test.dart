@@ -146,6 +146,41 @@ void main() {
         hasLength(20));
   });
 
+  test('numeric scroll signals coalesce pagination without a scheduled frame',
+      () async {
+    final container = ProviderContainer(overrides: [
+      charactersArgsProvider.overrideWithValue(42),
+    ]);
+    addTearDown(container.dispose);
+    container.listen(charactersListProvider, (_, __) {});
+    await container.read(charactersListProvider.future);
+    final notifier = container.read(charactersListProvider.notifier);
+
+    notifier.onScroll(pixels: 950, maxScrollExtent: 1000);
+    notifier.onScroll(pixels: 980, maxScrollExtent: 1000);
+    // 同一轮滚动只排队一次，尚未执行同步状态修改或请求。
+    expect(adapter.requests, hasLength(1));
+    await pumpEventQueue();
+    expect(adapter.requests, hasLength(2));
+    expect(adapter.requests.last.queryParameters['offset'], 10);
+    expect(container.read(charactersListProvider).requireValue.characters.data,
+        hasLength(20));
+  });
+
+  test('disposing before queued pagination cancels the request', () async {
+    final container = ProviderContainer(overrides: [
+      charactersArgsProvider.overrideWithValue(42),
+    ]);
+    container.listen(charactersListProvider, (_, __) {});
+    await container.read(charactersListProvider.future);
+    container
+        .read(charactersListProvider.notifier)
+        .maybeAutoFillShortContent(0);
+    container.dispose();
+    await pumpEventQueue();
+    expect(adapter.requests, hasLength(1));
+  });
+
   test('list cache separates subjects, limits, offsets and role filters',
       () async {
     for (final args in [

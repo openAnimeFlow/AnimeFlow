@@ -47,9 +47,10 @@ class _CharacterPageState extends State<CharacterPage> {
           onNotification: (notification) {
             if (notification is ScrollUpdateNotification &&
                 notification.metrics.axis == Axis.vertical) {
-              ref
-                  .read(charactersListProvider.notifier)
-                  .onScroll(notification.metrics);
+              ref.read(charactersListProvider.notifier).onScroll(
+                    pixels: notification.metrics.pixels,
+                    maxScrollExtent: notification.metrics.maxScrollExtent,
+                  );
             }
             return false;
           },
@@ -105,7 +106,7 @@ class _CharacterPageState extends State<CharacterPage> {
                           ref
                               .read(charactersListProvider.notifier)
                               .maybeAutoFillShortContent(
-                                _scrollController.position,
+                                _scrollController.position.maxScrollExtent,
                               );
                         });
 

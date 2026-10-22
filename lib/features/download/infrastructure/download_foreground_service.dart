@@ -1,14 +1,14 @@
 import 'dart:io';
+import 'dart:ui' show Locale;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 class DownloadForegroundService {
   static const _serviceId = 4101;
   static const _pauseAllButtonId = 'pause_all';
   static Future<void> _operation = Future<void>.value();
-  static Locale? _localizationLocale;
+  static String? _localizationLanguageTag;
   static Future<AppLocalizations>? _localization;
   static bool _notificationPermissionRequested = false;
   static bool _initialized = false;
@@ -47,7 +47,7 @@ class DownloadForegroundService {
     required int completedTasks,
     required int totalTasks,
     required double speed,
-    required Locale locale,
+    required String languageTag,
   }) {
     _operation = _operation.then((_) async {
       if (!Platform.isAndroid) {
@@ -69,7 +69,7 @@ class DownloadForegroundService {
         }
       }
 
-      final l10n = await _loadLocalization(locale);
+      final l10n = await _loadLocalization(languageTag);
       final text = l10n.downloadNotificationStatus(
         activeTasks,
         completedTasks,
@@ -107,9 +107,16 @@ class DownloadForegroundService {
     return _operation;
   }
 
-  static Future<AppLocalizations> _loadLocalization(Locale locale) {
-    if (_localization == null || _localizationLocale != locale) {
-      _localizationLocale = locale;
+  static Future<AppLocalizations> _loadLocalization(String languageTag) {
+    if (_localization == null || _localizationLanguageTag != languageTag) {
+      _localizationLanguageTag = languageTag;
+      final locale = AppLocalizations.supportedLocales.firstWhere(
+        (locale) => locale.toLanguageTag() == languageTag,
+        orElse: () => const Locale.fromSubtags(
+          languageCode: 'zh',
+          scriptCode: 'Hans',
+        ),
+      );
       _localization = AppLocalizations.delegate.load(locale);
     }
     return _localization!;

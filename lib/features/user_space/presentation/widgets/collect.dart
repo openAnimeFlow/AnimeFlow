@@ -1,6 +1,5 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
+import 'package:anime_flow/features/user_space/presentation/providers/space_collections_provider.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/features/user_space/presentation/providers/user_space_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -21,12 +20,7 @@ class CollectView extends ConsumerStatefulWidget {
 
 class _CollectViewState extends ConsumerState<CollectView>
     with AutomaticKeepAliveClientMixin {
-  UserCollectionsItem? userCollections;
-  bool isLoading = false;
-  bool isLoadingMore = false;
-  bool hasMore = true;
   int _selectedCollectionType = 3;
-  final Map<int, UserCollectionsItem?> _collectionCache = {}; // 每个收藏类型的缓存
 
   List<String> get _tabs {
     const Map<int, String> collectionTypes = {
@@ -54,7 +48,9 @@ class _CollectViewState extends ConsumerState<CollectView>
   @override
   void initState() {
     super.initState();
-    _queryUserCollection();
+    Future.microtask(() {
+      if (mounted) _queryUserCollection();
+    });
   }
 
   @override
@@ -66,109 +62,32 @@ class _CollectViewState extends ConsumerState<CollectView>
       final metrics = notification.metrics;
       if (metrics.pixels >= metrics.maxScrollExtent - 200) {
         // 距离底部200像素时加载更多
-        if (!isLoadingMore && hasMore && userCollections != null) {
-          _queryUserCollection(loadMore: true);
-        }
+        ref
+            .read(spaceCollectionsProvider(widget.username).notifier)
+            .loadMore(_selectedCollectionType);
       }
     }
     return false; // 返回 false 让通知继续向上传递，这样外层 NestedScrollView 也能接收到滚动事件
   }
 
-  ///查询用户收藏
-  void _queryUserCollection(
-      {int? collectionType, bool loadMore = false}) async {
+  /// 标签选择只负责展示；请求、分页与缓存由 Provider 管理。
+  void _queryUserCollection({int? collectionType}) {
     final type = collectionType ?? _selectedCollectionType;
-
-    // 如果是切换类型，先检查缓存
-    if (!loadMore &&
-        _collectionCache.containsKey(type) &&
-        _collectionCache[type] != null) {
-      if (mounted) {
-        setState(() {
-          _selectedCollectionType = type;
-          userCollections = _collectionCache[type];
-          isLoading = false;
-          hasMore = (userCollections!.data.length < userCollections!.total);
-        });
-      }
-      return;
+    if (type != _selectedCollectionType) {
+      setState(() => _selectedCollectionType = type);
     }
+    ref
+        .read(spaceCollectionsProvider(widget.username).notifier)
+        .loadInitial(type);
+  }
 
-    // 如果没有缓存，发起请求
-    if (mounted) {
-      setState(() {
-        if (loadMore) {
-          isLoadingMore = true;
-        } else {
-          isLoading = true;
-          _selectedCollectionType = type;
-        }
+  @override
+  void didUpdateWidget(covariant CollectView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.username != widget.username) {
+      Future.microtask(() {
+        if (mounted) _queryUserCollection();
       });
-    }
-
-    try {
-      final userInfo =
-          ref.read(userSpaceProvider(widget.username)).requireValue;
-      final currentOffset = loadMore && userCollections != null
-          ? userCollections!.data.length
-          : 0;
-
-      final newCollections = await FlowApi.queryUserCollectionService(
-          userInfo.username,
-          type: type,
-          limit: 20,
-          offset: currentOffset);
-
-      if (mounted) {
-        setState(() {
-          if (loadMore && userCollections != null) {
-            // 加载更多：合并数据
-            final mergedData = [
-              ...userCollections!.data,
-              ...newCollections.data,
-            ];
-            userCollections = UserCollectionsItem(
-              data: mergedData,
-              total: newCollections.total,
-            );
-          } else {
-            // 首次加载或切换类型
-            userCollections = newCollections;
-          }
-
-          // 更新缓存
-          _collectionCache[type] = userCollections;
-
-          // 判断是否还有更多数据
-          hasMore = userCollections!.data.length < userCollections!.total;
-
-          isLoading = false;
-          isLoadingMore = false;
-        });
-      }
-    } catch (e) {
-      // 请求失败时，如果缓存中有数据，使用缓存数据
-      if (_collectionCache.containsKey(type) &&
-          _collectionCache[type] != null) {
-        if (mounted) {
-          setState(() {
-            if (!loadMore) {
-              userCollections = _collectionCache[type];
-            }
-            isLoading = false;
-            isLoadingMore = false;
-            hasMore = (userCollections?.data.length ?? 0) <
-                (userCollections?.total ?? 0);
-          });
-        }
-      } else {
-        if (mounted) {
-          setState(() {
-            isLoading = false;
-            isLoadingMore = false;
-          });
-        }
-      }
     }
   }
 
@@ -187,6 +106,12 @@ class _CollectViewState extends ConsumerState<CollectView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final result = ref.watch(
+        spaceCollectionsProvider(widget.username))[_selectedCollectionType];
+    final userCollections = result?.data;
+    final isLoading =
+        result == null || result.isLoading && userCollections == null;
+    final isLoadingMore = result?.isLoading == true && userCollections != null;
     final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
     return NotificationListener<ScrollNotification>(
       onNotification: _onScrollNotification,
@@ -296,9 +221,9 @@ class _CollectViewState extends ConsumerState<CollectView>
                           mainAxisSpacing: 8,
                           crossAxisSpacing: 8,
                         ),
-                        itemCount: userCollections!.data.length,
+                        itemCount: userCollections.data.length,
                         itemBuilder: (context, index) {
-                          final collection = userCollections!.data[index];
+                          final collection = userCollections.data[index];
                           return InkWell(
                             onTap: () {
                               final subject = InfoRouteExtra(

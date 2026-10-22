@@ -18,6 +18,37 @@ part 'user_collection_provider.g.dart';
 
 const _pageSize = 20;
 
+typedef CollectionEvaluation = Future<CollectionUpdateResult> Function(
+  int subjectId, {
+  int? type,
+  required int rate,
+  required List<String> tags,
+  required String comment,
+  required int subjectType,
+});
+
+final collectionEvaluationProvider = Provider<CollectionEvaluation>((ref) {
+  return (subjectId,
+      {type,
+      required rate,
+      required tags,
+      required comment,
+      required subjectType}) async {
+    final session = ref.read(currentFlowTokenProvider).value?.sessionId;
+    final result = await FlowApi.updateCollectionService(subjectId,
+        type: type,
+        rate: rate,
+        tags: tags,
+        comment: comment,
+        subjectType: subjectType);
+    if (ref.mounted &&
+        ref.read(currentFlowTokenProvider).value?.sessionId == session) {
+      ref.read(collectionRevisionProvider.notifier).changed();
+    }
+    return result;
+  };
+});
+
 typedef CollectionPageLoader = Future<UserCollectionsItem> Function({
   required int type,
   required int offset,

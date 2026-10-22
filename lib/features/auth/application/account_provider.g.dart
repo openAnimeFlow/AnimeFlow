@@ -41,7 +41,7 @@ final class AccountControllerProvider
   }
 }
 
-String _$accountControllerHash() => r'98a0b14742405729efacac481db0593631c8f82b';
+String _$accountControllerHash() => r'468ed1b84cfa5b8afbcca8e2d802fcabdca68e9a';
 
 abstract class _$AccountController extends $Notifier<void> {
   void build();

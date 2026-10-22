@@ -742,9 +742,11 @@ class FlowApi {
       {int subjectType = 2,
       required int type,
       required int limit,
-      required int offset}) async {
+      required int offset,
+      CancelToken? cancelToken}) async {
     final response = await _client.get(
       AnimeFlowApi.userCollections.replaceFirst('{username}', username),
+      cancelToken: cancelToken,
       queryParameters: {
         'subjectType': subjectType,
         'type': type,

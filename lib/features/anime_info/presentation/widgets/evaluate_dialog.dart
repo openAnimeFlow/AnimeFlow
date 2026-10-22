@@ -5,7 +5,6 @@ import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/collection_save_notice.dart';
 import 'package:anime_flow/features/user/user_api.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
@@ -79,7 +78,7 @@ class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
       final currentAnimeInfo = widget.subjectsInfo;
       final submittedType = _selectedType!;
       final submittedRate = _selectedRate;
-      final result = await FlowApi.updateCollectionService(
+      final result = await ref.read(collectionEvaluationProvider)(
         currentAnimeInfo.id,
         type: currentAnimeInfo.interest == null ? submittedType : null,
         rate: submittedRate,

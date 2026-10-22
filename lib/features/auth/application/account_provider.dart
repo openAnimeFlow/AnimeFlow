@@ -1,4 +1,6 @@
 import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/auth/models/captcha_item.dart';
+import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
@@ -12,6 +14,41 @@ part 'account_provider.g.dart';
 class AccountController extends _$AccountController {
   @override
   void build() {}
+
+  Future<CaptchaItem> generateCaptcha({String? captchaId}) =>
+      FlowApi.generateCaptchaService(captchaId: captchaId);
+
+  Future<void> sendEmailCode({
+    required String email,
+    required String captchaId,
+    required String captcha,
+  }) =>
+      FlowApi.sendEmailCodeService(
+          email: email, captchaId: captchaId, captcha: captcha);
+
+  Future<void> register({
+    required String email,
+    required String password,
+    required String emailCaptcha,
+  }) =>
+      FlowApi.registerService(
+          email: email, password: password, emailCaptcha: emailCaptcha);
+
+  Future<void> resetPassword({
+    required String email,
+    required String password,
+    required String emailCaptcha,
+  }) =>
+      FlowApi.forgotPasswordService(
+          email: email, password: password, emailCaptcha: emailCaptcha);
+
+  Future<FlowUsers> bindEmail({
+    required String email,
+    required String password,
+    required String emailCaptcha,
+  }) =>
+      FlowApi.bindEmailService(
+          email: email, password: password, emailCaptcha: emailCaptcha);
 
   Future<void> changePassword({
     required String oldPassword,

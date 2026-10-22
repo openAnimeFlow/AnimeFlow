@@ -305,3 +305,57 @@ build/playback-activity-simplification-analyze.log、build/playback-activity-sim
 
 已对连接中的 Windows 应用执行热重启，未发现运行时异常。实际长时间播放、全部内核的
 设备交互、其他平台与远程 Actions 尚未验证；本阶段不声称解决或复现此前的播放退出卡顿。
+
+
+## 第六阶段：简单功能收口，导航迁移待续
+
+2026-10-22，Windows，Flutter 3.47.6 / Dart 3.13.5。
+
+日历继续使用现有 Provider → API、请求取消、基础缓存和跨日失效，不增加 Repository、
+application 或 data 目录。calendar_api.dart 只导出 calendarProvider、CalendarSeason 和
+CalendarWithTags；首页与日历缓存测试使用同一个公开 Provider。日历 R03/R06/R09 严格检查，
+包括外部消费者导入内部文件的情况。
+
+注册、找回密码、验证码和绑定邮箱复用既有 AccountController；评价命令经 user_api 公开，
+成功且会话未变化时发布收藏修订通知。封面保存和弹幕搜索通过简单 Provider 访问 API。
+没有新增 Repository、只有单一实现的服务接口或完整目录模板。
+
+更新列表的首屏、分页、错误、并发抑制和取消归 Releases Provider；失败分页保留列表和页码，
+重试同一页。首屏保留显式重试，关闭 Riverpod 默认自动重试，避免错误页反复加载。
+刷新和销毁取消旧 token；即使请求实现忽略取消，迟到分页也不能覆盖新列表。
+用户空间收藏按用户保存各标签状态，Provider 负责分页和缓存；标签请求乱序返回相互隔离，
+失败保留已有数据与下一次请求的 offset。API 新增可选 CancelToken，离开页面时取消请求。
+页面继续负责表单、选中标签、滚动、错误文案和反馈显示。
+
+迁移范围启用严格 R04：auth、user、calendar、anime_info 的 widgets、用户空间、更新页及其
+Provider、绑定邮箱组件、弹幕搜索组件及其 Provider。简单业务 Provider 直接 API 和
+CancelToken 仍合法；已有复杂播放/下载用例继续使用 repository 模式并按精确基线约束。
+
+本次提交保留 BBCodeWidget 原有图片预览路由调用，不引入 ImagePreviewScope 或 app 全局
+回调装配；共享组件导航迁移尚未完成。相关 5 条 R07 登记保留原有身份和元数据，未增加新登记，
+未对该组件启用严格 R07，也没有扩大生成代码豁免。
+
+| 验证 | 结果 |
+| --- | --- |
+| 全量业务测试 | 485 项通过，本批新增 5 项 Provider 行为回归，删除原有 4 项弹幕输入框测试 |
+| 架构引擎验收 | 52 项通过，新增日历公开入口正反样例 |
+| Flutter 架构集成入口 | 2 项通过 |
+| 静态分析 | 应用与独立工具包零诊断 |
+| 存量门禁 | 181 条；新增 0、失效 0 |
+
+删除 14 条真实失效登记：R04 13、R06 1，其余身份和元数据保持不变。
+Widget 直接 API 调用已清零。全项目剩余 R03 3、R04 5、R06 32、R07 140、R09 1，
+R01/R02/R05/R08 为零。复杂播放/下载 Provider 对实现的引用、播放状态中的展示依赖、
+历史同步提示、其他跨功能内部引用和路由循环仍需逐项迁移；本批不代表全部架构债务清零。
+
+新增回归覆盖分页重复调用、失败重试与终止、首屏手动重试、刷新/退出取消、迟到结果、
+标签与用户隔离。既有日历缓存测试改走公开入口。未增加只验证函数转发的测试，
+未修改 CI/CD 工作流；已有 quality 门禁继续运行同一套策略和全图检查。
+
+此前已执行 Windows 热重启，提交前重新执行静态分析、全量业务测试和架构门禁。
+真实网络下全部页面的交互、其他平台和远程 Actions 尚未验证。docs 下的实施计划已同步，
+docs 目录仍按本地排除规则保留，接入和交付记录以本文件为准。未 push，未配置远程必需检查。
+
+提交前日志：build/phase6-commit-business-tests.log、build/phase6-commit-architecture-tests.log、
+build/phase6-commit-analyze.log；独立工具分析日志为 build/phase6-tool-analyze.log。
+生成器仍使用锁定版本，未调整 SDK 或依赖。

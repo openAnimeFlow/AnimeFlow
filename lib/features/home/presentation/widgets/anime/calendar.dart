@@ -1,5 +1,5 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/features/calendar/presentation/providers/calendar_provider.dart';
+import 'package:anime_flow/features/calendar/calendar_api.dart';
 import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/app_router.dart';

@@ -183,6 +183,7 @@ ArchitectureSpec projectArchitecture() {
     final scopes = <SourceScope>[];
     final apiEntries = switch (name) {
       'auth' => {'$root/auth_api.dart'},
+      'calendar' => {'$root/calendar_api.dart'},
       'user' => {'$root/user_api.dart', '$root/user_events.dart'},
       _ => <String>{},
     };
@@ -289,11 +290,24 @@ ArchitectureSpec projectArchitecture() {
           'lib/features/auth/**.dart',
           'lib/features/user/**.dart',
           'lib/core/video_source/**.dart',
+          'lib/features/calendar/**.dart',
           if (rule != 'R06') 'lib/features/play/domain/**.dart',
           if (rule != 'R06') 'lib/features/play/application/**.dart',
           if (rule == 'R09')
             'lib/features/play/presentation/providers/play_provider.dart',
         },
+      'R04': {
+        'lib/features/auth/**.dart',
+        'lib/features/user/**.dart',
+        'lib/features/calendar/**.dart',
+        'lib/features/anime_info/presentation/widgets/**.dart',
+        'lib/features/settings/presentation/pages/about/updates_page.dart',
+        'lib/features/settings/presentation/providers/releases_provider.dart',
+        'lib/features/settings/presentation/widgets/account/bind_email_section.dart',
+        'lib/features/user_space/**.dart',
+        'lib/features/play/presentation/widgets/content/danmaku_card.dart',
+        'lib/features/play/presentation/providers/danmaku_search_provider.dart',
+      },
       'R05': {
         'lib/core/video_source/domain/**.dart',
         'lib/features/play/domain/**.dart',

@@ -1,5 +1,6 @@
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:async';
+import 'package:anime_flow/core/network/api/api.dart';
 
 import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
 import 'package:anime_flow/features/characters/data/repositories/character_repository.dart';
@@ -24,6 +25,8 @@ part 'anime_info_provider.g.dart';
 
 /// 路由可传入已加载的条目详情，供子页面复用，避免重复请求。
 final animeInfoInitialProvider = Provider<SubjectsInfoItem?>((ref) => null);
+
+final coverDownloadProvider = Provider((ref) => Api.downloadImage);
 
 // 每次构建独立管理请求，依赖变化导致重建时会取消上次构建发出的请求。
 CancelToken _requestCancelToken(Ref ref) {

@@ -1,5 +1,5 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_search_provider.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -329,9 +329,9 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                                       errorText = null;
                                     });
                                     try {
-                                      final episodes = await FlowApi
-                                          .getDanDanEpisodesByDanDanBangumiID(
-                                              anime.animeId);
+                                      final episodes = await ref.read(
+                                          danmakuEpisodesProvider(anime.animeId)
+                                              .future);
                                       if (!dialogContext.mounted) return;
                                       dialogContext.pop();
                                       if (!mounted) return;
@@ -375,9 +375,9 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                           danmakuSearchResponse = null;
                         });
                         try {
-                          final response = await FlowApi.searchDanmakuEpisodes(
-                            danmakuFieldController.text,
-                          );
+                          final response = await ref.read(
+                              danmakuSearchProvider(danmakuFieldController.text)
+                                  .future);
                           if (!dialogContext.mounted) return;
                           setDialogState(() {
                             danmakuSearchResponse = response;

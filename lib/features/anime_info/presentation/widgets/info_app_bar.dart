@@ -1,6 +1,5 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/network/api_path.dart';
-import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/exception/storage_exception.dart';
@@ -46,12 +45,13 @@ class InfoAppbar extends ConsumerWidget {
   }
 
   Future<void> _downloadCover(
+    WidgetRef ref,
     String image,
     String name,
     AppLocalizations l10n,
   ) async {
     try {
-      final message = await Api.downloadImage(image, name);
+      final message = await ref.read(coverDownloadProvider)(image, name);
       NotificationToast.show(message, title: l10n.tip, maxWidth: 500);
     } on StoragePermissionDeniedException catch (e) {
       LiggLogger().e('保存图片失败:$e');
@@ -76,7 +76,7 @@ class InfoAppbar extends ConsumerWidget {
         _openInBrowser(url, l10n);
         break;
       case MoreMenuAction.downloadCover:
-        _downloadCover(args.image, args.name, l10n);
+        _downloadCover(ref, args.image, args.name, l10n);
         break;
       case MoreMenuAction.copyUrl:
         _copyUrl(context, url, l10n);

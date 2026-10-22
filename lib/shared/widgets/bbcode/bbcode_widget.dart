@@ -118,8 +118,9 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                     decorationColor: textColor,
                     fontSize: e.size.toDouble(),
                     color: textColor,
-                    backgroundColor:
-                    (!_isVisible && e.masked) ? const Color(0xFF555555) : null,
+                    backgroundColor: (!_isVisible && e.masked)
+                        ? const Color(0xFF555555)
+                        : null,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 );
@@ -162,7 +163,7 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 url = 'https://bangumi.tv/img/smiles/tv/${e.id - 23}.gif';
                 return WidgetSpan(
                   child: AnimationNetworkImage(
-                     url: url,
+                    url: url,
                   ),
                 );
               } else if (e is BBCodeMusume) {

@@ -1,5 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/features/settings/presentation/providers/releases_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/core/network_exception.dart';
 import 'package:anime_flow/shared/models/github_release.dart';
@@ -7,28 +8,22 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class UpdatesPage extends StatefulWidget {
+class UpdatesPage extends ConsumerStatefulWidget {
   const UpdatesPage({super.key});
 
   @override
-  State<UpdatesPage> createState() => _UpdatesPageState();
+  ConsumerState<UpdatesPage> createState() => _UpdatesPageState();
 }
 
-class _UpdatesPageState extends State<UpdatesPage> {
+class _UpdatesPageState extends ConsumerState<UpdatesPage> {
   final ScrollController _scrollController = ScrollController();
-  final List<GithubRelease> _releases = [];
-  int _page = 1;
-  bool _isLoading = true;
-  bool _isLoadingMore = false;
-  bool _hasMore = true;
-  Object? _error;
-  Object? _loadMoreError;
+  ReleasesState? get _data => ref.read(releasesProvider).asData?.value;
+  bool get _hasMore => _data?.hasMore ?? false;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    _loadInitial();
   }
 
   @override
@@ -40,61 +35,15 @@ class _UpdatesPageState extends State<UpdatesPage> {
   }
 
   Future<void> _loadInitial() async {
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-        _loadMoreError = null;
-        _page = 1;
-        _hasMore = true;
-        _releases.clear();
-      });
-    }
-
+    ref.invalidate(releasesProvider);
     try {
-      final releases = await FlowApi.getReleases(page: 1);
-      if (!mounted) return;
-      setState(() {
-        _releases.addAll(releases);
-        _hasMore = releases.isNotEmpty;
-        _isLoading = false;
-      });
-      _ensureScrollableOrLoadMore();
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _error = error;
-        _isLoading = false;
-      });
+      await ref.read(releasesProvider.future);
+    } catch (_) {
+      // 错误由 Provider 状态显示，保留刷新控件的正常结束行为。
     }
   }
 
-  Future<void> _loadMore() async {
-    if (_isLoadingMore || !_hasMore) return;
-    setState(() {
-      _isLoadingMore = true;
-      _loadMoreError = null;
-    });
-
-    try {
-      final nextPage = _page + 1;
-      final releases = await FlowApi.getReleases(page: nextPage);
-      if (!mounted) return;
-      setState(() {
-        _page = nextPage;
-        _releases.addAll(releases);
-        _hasMore = releases.isNotEmpty;
-        _isLoadingMore = false;
-      });
-      _ensureScrollableOrLoadMore();
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _loadMoreError = error;
-        _isLoadingMore = false;
-      });
-    }
-  }
+  Future<void> _loadMore() => ref.read(releasesProvider.notifier).loadMore();
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
@@ -105,7 +54,12 @@ class _UpdatesPageState extends State<UpdatesPage> {
 
   void _ensureScrollableOrLoadMore() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scrollController.hasClients || !_hasMore) return;
+      if (!mounted ||
+          !_scrollController.hasClients ||
+          !_hasMore ||
+          _data?.loadMoreError != null) {
+        return;
+      }
       if (_scrollController.position.maxScrollExtent <= 0) {
         _loadMore();
       }
@@ -115,16 +69,28 @@ class _UpdatesPageState extends State<UpdatesPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final result = ref.watch(releasesProvider);
+    ref.listen(releasesProvider, (_, next) {
+      if (next.asData?.value.isLoadingMore == false) {
+        _ensureScrollableOrLoadMore();
+      }
+    });
+    final data = result.asData?.value;
+    final releases = data?.releases ?? const <GithubRelease>[];
+    final isLoading = result.isLoading;
+    final error = result.error;
+    final isLoadingMore = data?.isLoadingMore ?? false;
+    final loadMoreError = data?.loadMoreError;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.projectUpdates)),
-      body: _isLoading
+      body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _error != null
+          : error != null
               ? _ErrorView(
-                  message: _errorMessage(_error, l10n),
+                  message: _errorMessage(error, l10n),
                   onRetry: _loadInitial,
                 )
-              : _releases.isEmpty
+              : releases.isEmpty
                   ? _ErrorView(
                       message: l10n.noData,
                       onRetry: _loadInitial,
@@ -135,18 +101,18 @@ class _UpdatesPageState extends State<UpdatesPage> {
                         controller: _scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
                         padding: const EdgeInsets.all(16),
-                        itemCount: _releases.length +
-                            (_isLoadingMore || _loadMoreError != null ? 1 : 0),
+                        itemCount: releases.length +
+                            (isLoadingMore || loadMoreError != null ? 1 : 0),
                         separatorBuilder: (_, __) => const SizedBox(height: 5),
                         itemBuilder: (context, index) {
-                          if (index == _releases.length) {
-                            if (_loadMoreError != null) {
+                          if (index == releases.length) {
+                            if (loadMoreError != null) {
                               return Center(
                                 child: TextButton.icon(
                                   onPressed: _loadMore,
                                   icon: const Icon(Icons.refresh),
                                   label: Text(
-                                    _errorMessage(_loadMoreError, l10n),
+                                    _errorMessage(loadMoreError, l10n),
                                   ),
                                 ),
                               );
@@ -159,7 +125,7 @@ class _UpdatesPageState extends State<UpdatesPage> {
                             );
                           }
                           return _ReleaseCard(
-                            release: _releases[index],
+                            release: releases[index],
                             initiallyExpanded: index == 0,
                           );
                         },

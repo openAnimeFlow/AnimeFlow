@@ -304,4 +304,54 @@ void main() {
       contains('R05'),
     );
   });
+  test('calendar shares simple state only through its public entry', () {
+    final project = projectArchitecture();
+    const consumer =
+        'lib/features/home/presentation/widgets/anime/calendar.dart';
+    const provider =
+        'lib/features/calendar/presentation/providers/calendar_provider.dart';
+    final home = project.modules.singleWhere((module) => module.name == 'home');
+    final calendar = project.modules.singleWhere(
+      (module) => module.name == 'calendar',
+    );
+    final spec = ArchitectureSpec([
+      ModuleSpec('core', 'lib/core', [
+        SourceScope('lib/core/**.dart', Responsibility.foundation),
+      ]),
+      ModuleSpec(
+        home.name,
+        home.root,
+        home.scopes.where((scope) => scope.matches(consumer)).toList(),
+        dependencies: home.dependencies.intersection({'calendar'}),
+      ),
+      ModuleSpec(
+        calendar.name,
+        calendar.root,
+        calendar.scopes,
+        apiEntries: calendar.apiEntries,
+      ),
+    ]);
+    fixture = FixtureProject({
+      consumer:
+          "import 'package:anime_flow/features/calendar/calendar_api.dart';",
+      'lib/features/calendar/calendar_api.dart': "export 'presentation/providers/calendar_provider.dart' show calendarProvider;",
+      provider: "import '../../../../core/network/api/calendar.dart';\nint calendarProvider() => load();",
+      'lib/core/network/api/calendar.dart': 'int load() => 1;',
+    });
+    expect(
+      checkBoundaries(collectDependencies(fixture.root, spec), spec),
+      isEmpty,
+    );
+    fixture.write(
+      consumer,
+      "import 'package:anime_flow/features/calendar/presentation/providers/calendar_provider.dart';",
+    );
+    expect(
+      checkBoundaries(
+        collectDependencies(fixture.root, spec),
+        spec,
+      ).map((violation) => violation.rule),
+      contains('R06'),
+    );
+  });
 }

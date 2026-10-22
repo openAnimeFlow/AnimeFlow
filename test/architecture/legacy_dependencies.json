@@ -33,76 +33,6 @@
     },
     {
       "rule": "R04",
-      "source": "lib/features/anime_info/presentation/widgets/evaluate_dialog.dart",
-      "target": "lib/core/network/api/flow_api.dart#updateCollectionService",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:anime_info",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/anime_info/presentation/widgets/info_app_bar.dart",
-      "target": "lib/core/network/api/api.dart#downloadImage",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:anime_info",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/auth/presentation/pages/forgot_password_page.dart",
-      "target": "lib/core/network/api/flow_api.dart#forgotPasswordService",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:auth",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/auth/presentation/pages/forgot_password_page.dart",
-      "target": "lib/core/network/api/flow_api.dart#sendEmailCodeService",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:auth",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/auth/presentation/pages/register_page.dart",
-      "target": "lib/core/network/api/flow_api.dart#registerService",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:auth",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/auth/presentation/pages/register_page.dart",
-      "target": "lib/core/network/api/flow_api.dart#sendEmailCodeService",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:auth",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/auth/presentation/widgets/graphic_captcha.dart",
-      "target": "lib/core/network/api/flow_api.dart#generateCaptchaService",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:auth",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
       "source": "lib/features/download/presentation/providers/download_provider.dart",
       "target": "lib/features/download/data/repositories/download_repository.dart",
       "kind": "import",
@@ -148,66 +78,6 @@
       "kind": "import",
       "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
       "owner": "feature:play",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/play/presentation/widgets/content/danmaku_card.dart",
-      "target": "lib/core/network/api/flow_api.dart#getDanDanEpisodesByDanDanBangumiID",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/play/presentation/widgets/content/danmaku_card.dart",
-      "target": "lib/core/network/api/flow_api.dart#searchDanmakuEpisodes",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/settings/presentation/pages/about/updates_page.dart",
-      "target": "lib/core/network/api/flow_api.dart#getReleases",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:settings",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
-      "target": "lib/core/network/api/flow_api.dart#bindEmailService",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:settings",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
-      "target": "lib/core/network/api/flow_api.dart#sendEmailCodeService",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:settings",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/user_space/presentation/widgets/collect.dart",
-      "target": "lib/core/network/api/flow_api.dart#queryUserCollectionService",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:user_space",
       "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
       "reviewBy": "2026-11-22"
     },
@@ -268,16 +138,6 @@
       "kind": "import",
       "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
       "owner": "feature:download",
-      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R06",
-      "source": "lib/features/home/presentation/widgets/anime/calendar.dart",
-      "target": "lib/features/calendar/presentation/providers/calendar_provider.dart",
-      "kind": "import",
-      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
-      "owner": "feature:home",
       "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
       "reviewBy": "2026-11-22"
     },

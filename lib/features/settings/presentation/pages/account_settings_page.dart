@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:math' as math;
 
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
@@ -10,10 +11,7 @@ import 'package:anime_flow/features/settings/presentation/widgets/account/bgm_co
 import 'package:anime_flow/features/settings/presentation/widgets/account/bind_email_section.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/account/change_password_dialog.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/features/user/application/user_oauth_controller.dart';
-import 'package:anime_flow/features/user/application/user_oauth_state.dart';
-import 'package:anime_flow/features/user/presentation/providers/account_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/network_check_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';

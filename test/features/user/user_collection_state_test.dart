@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/user/presentation/providers/user_collection_state.dart';
+import 'package:anime_flow/features/user/application/user_collection_state.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:flutter_test/flutter_test.dart';
 

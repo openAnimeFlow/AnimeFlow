@@ -1,16 +1,16 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:async';
 
 import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
 import 'package:anime_flow/features/characters/data/repositories/character_repository.dart';
-import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
+import 'package:anime_flow/features/user/user_events.dart';
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/models/bangumi/producers_item.dart';
 import 'package:anime_flow/shared/models/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
+import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/bangumi/interest_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';

@@ -6,14 +6,13 @@ import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
-import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
-import 'package:anime_flow/features/user/application/user_oauth_state.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/features/auth/application/token_providers.dart';
+import 'package:anime_flow/features/auth/application/user_oauth_state.dart';
+import 'token_providers.dart';
+import 'session_provider.dart';
+import 'oauth_notice_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
-import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -121,25 +120,23 @@ class UserOAuthController extends _$UserOAuthController {
     );
     await ref.read(flowTokenRepositoryProvider).saveToken(flowToken);
     await PresenceService.instance.heartbeatNow();
-    invalidateUserSession(ref);
-    NotificationToast.show('Bangumi 授权登录成功', title: '提示');
+    invalidateAuthSession(ref);
+    ref.read(oauthNoticeProvider.notifier).publish('Bangumi 授权登录成功');
     return flowToken;
   }
 
   Future<BangumiBindItem?> _completeBangumiBind(String code) async {
     final bind = await FlowApi.bindBangumiService(code: code);
-    ref.invalidate(bangumiBindProvider);
-    ref.invalidate(bgmCollectionSyncProvider);
-    NotificationToast.show('Bangumi 账号绑定成功', title: '提示');
+    ref.read(bangumiBindingRevisionProvider.notifier).changed();
+    ref.read(oauthNoticeProvider.notifier).publish('Bangumi 账号绑定成功');
     return bind;
   }
 
   /// 解绑当前账号绑定的 Bangumi 账号。
   Future<BangumiBindItem> unbindBangumi() async {
     final bind = await FlowApi.unbindBangumiService();
-    ref.invalidate(bangumiBindProvider);
-    ref.invalidate(bgmCollectionSyncProvider);
-    NotificationToast.show('Bangumi 账号已解绑', title: '提示');
+    ref.read(bangumiBindingRevisionProvider.notifier).changed();
+    ref.read(oauthNoticeProvider.notifier).publish('Bangumi 账号已解绑');
     return bind;
   }
 
@@ -152,11 +149,10 @@ class UserOAuthController extends _$UserOAuthController {
       final code = await FlowApi.pollBindCodeService(state: sessionId);
       if (code == null || code.isEmpty) {
         LiggLogger().w('轮询超时，未获取到 OAuth 授权码');
-        NotificationToast.show(
-          '授权超时，请重试',
-          title: '提示',
-          duration: const Duration(seconds: 10),
-        );
+        ref.read(oauthNoticeProvider.notifier).publish(
+              '授权超时，请重试',
+              duration: const Duration(seconds: 10),
+            );
         return false;
       }
 
@@ -201,11 +197,10 @@ class UserOAuthController extends _$UserOAuthController {
   }) {
     final message = _oauthErrorMessage(error, purpose);
     LiggLogger().e(message, error: error, stackTrace: stackTrace);
-    NotificationToast.show(
-      message,
-      title: '提示',
-      duration: const Duration(seconds: 10),
-    );
+    ref.read(oauthNoticeProvider.notifier).publish(
+          message,
+          duration: const Duration(seconds: 10),
+        );
   }
 }
 

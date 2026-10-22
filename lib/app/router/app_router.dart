@@ -39,7 +39,7 @@ import 'package:anime_flow/features/settings/presentation/pages/plugins/plugins.
 import 'package:anime_flow/features/settings/presentation/pages/theme.dart';
 import 'package:anime_flow/features/user_space/presentation/pages/user_space_page.dart';
 import 'package:anime_flow/shared/widgets/image_preview.dart';
-import 'package:anime_flow/features/user/application/user_oauth_controller.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/app/router/app_route_observer.dart';
@@ -54,7 +54,8 @@ import 'model/play_route_extra.dart';
 
 part 'app_router.g.dart';
 
-final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'root');
 
 @TypedStatefulShellRoute<MainShellRoute>(
   branches: [
@@ -522,7 +523,8 @@ class SettingWebsiteRoute extends GoRouteData with $SettingWebsiteRoute {
   const SettingWebsiteRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const WebsitePage();
+  Widget build(BuildContext context, GoRouterState state) =>
+      const WebsitePage();
 }
 
 class SettingUpdatesRoute extends GoRouteData with $SettingUpdatesRoute {

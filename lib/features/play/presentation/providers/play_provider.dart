@@ -16,7 +16,8 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
+import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';

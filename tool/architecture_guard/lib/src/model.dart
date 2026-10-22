@@ -37,6 +37,7 @@ class ModuleSpec {
     this.dependencies = const {},
     this.apiEntries = const {},
     this.pageEntries = const {},
+    this.uiEntries = const {},
   });
   final String name;
   final String root;
@@ -44,6 +45,8 @@ class ModuleSpec {
   final Set<String> dependencies;
   final Set<String> apiEntries;
   final Set<String> pageEntries;
+  // Explicit reusable presentation entries, available only to UI consumers.
+  final Set<String> uiEntries;
 }
 
 class Ownership {
@@ -61,6 +64,7 @@ class ArchitectureSpec {
     this.dataContracts = const {},
     this.domainPackages = const {},
     this.domainCoreTypes = const {},
+    this.strictScopes = const {},
   });
   final List<ModuleSpec> modules;
   // Only generator-owned cycles inside these exact groups are collapsed.
@@ -68,6 +72,8 @@ class ArchitectureSpec {
   final Map<String, String> dataContracts;
   final Set<String> domainPackages;
   final Set<String> domainCoreTypes;
+  // Scoped rules cannot be frozen again after a business migration.
+  final Map<String, Set<String>> strictScopes;
   static const rules = {
     'R01',
     'R02',
@@ -80,6 +86,17 @@ class ArchitectureSpec {
     'R09',
   };
   static const strictRules = {'R01', 'R02', 'R08'};
+
+  bool isStrict(String rule, String source, {String? target}) =>
+      strictRules.contains(rule) ||
+      (strictScopes[rule]?.any(
+            (pattern) =>
+                Glob(pattern).matches(source) ||
+                rule == 'R06' &&
+                    target != null &&
+                    Glob(pattern).matches(target),
+          ) ??
+          false);
 
   Ownership ownerOf(String path) {
     final matches = [
@@ -98,6 +115,16 @@ class ArchitectureSpec {
   void validate(Iterable<String> paths) {
     final files = paths.toSet();
     if (files.isEmpty) throw StateError('R08: source scan is empty');
+    for (final entry in strictScopes.entries) {
+      if (!rules.contains(entry.key) || entry.value.isEmpty) {
+        throw StateError('R08: invalid scoped strict rule ${entry.key}');
+      }
+      for (final pattern in entry.value) {
+        if (!files.any(Glob(pattern).matches)) {
+          throw StateError('R08: no source matches strict scope $pattern');
+        }
+      }
+    }
     final names = modules.map((m) => m.name).toSet();
     if (names.length != modules.length) {
       throw StateError('R08: duplicate module');
@@ -122,10 +149,21 @@ class ArchitectureSpec {
           throw StateError('R08: access mode requires business responsibility');
         }
       }
-      for (final entry in {...module.apiEntries, ...module.pageEntries}) {
+      for (final entry in {
+        ...module.apiEntries,
+        ...module.pageEntries,
+        ...module.uiEntries,
+      }) {
         if (!files.contains(entry) ||
             ownerOf(entry).module.name != module.name) {
           throw StateError('R08: missing or misplaced public entry $entry');
+        }
+      }
+      for (final entry in module.uiEntries) {
+        if (ownerOf(entry).role != Responsibility.ui) {
+          throw StateError(
+            'R08: presentation entry must have UI responsibility',
+          );
         }
       }
     }

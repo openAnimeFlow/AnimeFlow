@@ -8,15 +8,12 @@ part of 'account_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 当前 AnimeFlow 账号操作控制器。
 
 @ProviderFor(AccountController)
 final accountControllerProvider = AccountControllerProvider._();
 
-/// 当前 AnimeFlow 账号操作控制器。
 final class AccountControllerProvider
     extends $NotifierProvider<AccountController, void> {
-  /// 当前 AnimeFlow 账号操作控制器。
   AccountControllerProvider._()
       : super(
           from: null,
@@ -44,9 +41,7 @@ final class AccountControllerProvider
   }
 }
 
-String _$accountControllerHash() => r'97e61a994dc81e4dcef46bd78f30806e60c7666f';
-
-/// 当前 AnimeFlow 账号操作控制器。
+String _$accountControllerHash() => r'98a0b14742405729efacac481db0593631c8f82b';
 
 abstract class _$AccountController extends $Notifier<void> {
   void build();

@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/widgets/collection_save_notice.dart';
 import 'dart:ui';
 
@@ -11,7 +12,6 @@ import 'package:anime_flow/features/play/presentation/providers/subject_episodes
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/episodes_drawer.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';

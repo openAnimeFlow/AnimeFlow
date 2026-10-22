@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:anime_flow/core/cache/json_response_cache.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/settings/storage.dart';
-import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
+import 'package:anime_flow/features/user/user_events.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';

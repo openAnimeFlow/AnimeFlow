@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 
 import 'package:anime_flow_architecture_guard/src/legacy_checks.dart';
 import 'package:anime_flow_architecture_guard/src/model.dart';
+import 'package:anime_flow_architecture_guard/architecture_spec.dart';
 
 const source = 'lib/features/a/application/service.dart';
 const target = 'lib/features/a/presentation/widgets/view.dart';
@@ -39,6 +40,86 @@ Map<String, dynamic> register({
 };
 
 void main() {
+  test(
+    'migrated business rules and incoming API boundaries cannot be frozen',
+    () {
+      final spec = ArchitectureSpec(
+        [],
+        strictScopes: {
+          'R03': {'lib/features/a/application/**.dart'},
+          'R06': {'lib/features/a/**.dart'},
+        },
+      );
+      expect(
+        () => compareLegacy(
+          [violation],
+          register(),
+          sources: {source},
+          spec: spec,
+        ),
+        throwsStateError,
+      );
+      final incoming = register(rule: 'R06', destination: source);
+      final raw = (incoming['violations'] as List).single as Map;
+      raw['source'] = 'lib/features/b/application/service.dart';
+      expect(
+        () => compareLegacy(
+          [],
+          incoming,
+          sources: {raw['source'] as String},
+          spec: spec,
+        ),
+        throwsStateError,
+      );
+      // Unmigrated source/rule remains governed by exact legacy identities.
+      expect(
+        compareLegacy(
+          [violation],
+          register(),
+          sources: {source},
+          spec: ArchitectureSpec([]),
+        ).passes,
+        isTrue,
+      );
+    },
+  );
+  test(
+    'project policy closes user/auth business without hiding routing debt',
+    () {
+      final spec = projectArchitecture();
+      for (final feature in ['auth', 'user']) {
+        for (final rule in ['R03', 'R06', 'R07', 'R09']) {
+          expect(
+            spec.isStrict(rule, 'lib/features/$feature/application/new.dart'),
+            isTrue,
+          );
+        }
+      }
+      expect(
+        spec.isStrict(
+          'R07',
+          'lib/features/user/presentation/pages/user_page.dart',
+        ),
+        isFalse,
+      );
+      expect(
+        spec.modules.singleWhere((m) => m.name == 'auth').dependencies,
+        isEmpty,
+      );
+      expect(spec.modules.singleWhere((m) => m.name == 'user').dependencies, {
+        'auth',
+      });
+      expect(
+        () => ArchitectureSpec(
+          spec.modules,
+          strictScopes: {
+            'R03': {'lib/missing/**.dart'},
+          },
+        ).validate({'lib/main.dart'}),
+        throwsStateError,
+      );
+    },
+  );
   final date = DateTime.utc(2026, 10, 22);
   LegacyResult compare(
     List<ArchitectureViolation> values,

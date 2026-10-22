@@ -4,7 +4,7 @@ import 'package:anime_flow/core/cache/json_response_cache.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/anime_info/data/datasources/anime_info_local_data_source.dart';
 import 'package:anime_flow/features/anime_info/data/datasources/anime_info_remote_data_source.dart';
-import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
+import 'package:anime_flow/features/user/user_events.dart';
 import 'package:anime_flow/shared/models/bangumi/producers_item.dart';
 import 'package:anime_flow/shared/models/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';

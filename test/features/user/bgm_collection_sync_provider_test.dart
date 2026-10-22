@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:dio/dio.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +9,7 @@ import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/application/user_state_provider.dart';
 import 'package:anime_flow/features/user/data/repository/collection_sync_repository.dart';
 
 final session = Provider<String>((ref) => 'first');

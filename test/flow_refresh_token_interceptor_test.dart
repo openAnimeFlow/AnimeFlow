@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -14,9 +15,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:anime_flow/features/auth/application/token_providers.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
+import 'package:anime_flow/features/user/application/user_state_provider.dart';
+import 'package:anime_flow/features/user/application/user_collection_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 
@@ -76,6 +76,8 @@ class CachedUserInfo extends CurrentUserInfo {
 
   @override
   Future<FlowUsers?> build() async {
+    // Keep the production dependency while faking the profile response.
+    if (await ref.watch(currentFlowTokenProvider.future) == null) return null;
     if (_firstBuild) {
       _firstBuild = false;
       return FlowUsers(

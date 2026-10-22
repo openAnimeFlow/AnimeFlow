@@ -1,7 +1,7 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
 import 'package:anime_flow/features/user/presentation/widgets/user_view.dart';
-import 'package:anime_flow/features/user/presentation/providers/account_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/application/user_state_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';

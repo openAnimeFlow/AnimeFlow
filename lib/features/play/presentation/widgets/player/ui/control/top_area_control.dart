@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:async';
 
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
@@ -19,7 +20,6 @@ import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/play/presentation/widgets/source_drawers/video_source_drawers.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:material_ui/material_ui.dart';

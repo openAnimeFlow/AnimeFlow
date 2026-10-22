@@ -1,14 +1,16 @@
 import 'dart:async';
 
-import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
+import 'collection_revision_provider.dart';
+import 'collection_refresh_provider.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/enums/collection_sort.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_state.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/application/user_collection_state.dart';
+import 'package:anime_flow/features/user/application/user_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show Provider;
 
@@ -24,10 +26,9 @@ typedef CollectionPageLoader = Future<UserCollectionsItem> Function({
 });
 
 final collectionCancelProvider = Provider<Future<void> Function(int)>((ref) {
-  final repository = ref.watch(animeInfoRepositoryProvider.notifier);
   return (subjectId) async {
     await FlowApi.cancelCollectionService(subjectId);
-    repository.invalidateCache();
+    ref.read(collectionRevisionProvider.notifier).changed();
   };
 });
 
@@ -45,14 +46,13 @@ final collectionPageLoaderProvider = Provider<CollectionPageLoader>((ref) {
 final collectionTypeUpdateProvider =
     Provider<Future<CollectionUpdateResult> Function(UserCollectionData, int)>(
         (ref) {
-  final repository = ref.watch(animeInfoRepositoryProvider.notifier);
   return (collection, newType) async {
     final result = await FlowApi.updateCollectionService(
       collection.id,
       type: newType,
       subjectType: collection.type,
     );
-    repository.invalidateCache();
+    ref.read(collectionRevisionProvider.notifier).changed();
     return result;
   };
 });
@@ -64,6 +64,9 @@ class UserCollections extends _$UserCollections {
   @override
   UserCollectionsState build() {
     _session = Object();
+    ref.listen(authSessionRevisionProvider, (previous, next) => reset());
+    ref.listen(collectionRefreshProvider, (previous, next) => reset());
+    ref.onDispose(() => _session = Object());
     return const UserCollectionsState();
   }
 

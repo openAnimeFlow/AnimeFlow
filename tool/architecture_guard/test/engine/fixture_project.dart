@@ -46,6 +46,7 @@ class FixtureProject {
 
 ArchitectureSpec fixtureSpec({
   Set<String> publicB = const {},
+  Set<String> uiB = const {},
   AccessMode mode = AccessMode.directApi,
   Map<String, Set<String>> generatedGroups = const {},
 }) => ArchitectureSpec([
@@ -92,5 +93,6 @@ ArchitectureSpec fixtureSpec({
       ],
       dependencies: name == 'a' ? {'b'} : {},
       apiEntries: name == 'b' ? publicB : {},
+      uiEntries: name == 'b' ? uiB : {},
     ),
 ], generatedGroups: generatedGroups);

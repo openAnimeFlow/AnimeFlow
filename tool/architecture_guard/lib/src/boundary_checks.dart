@@ -98,6 +98,7 @@ List<ArchitectureViolation> checkBoundaries(
       }
       if (spec.dataContracts.containsKey(edge.source) &&
           destination != null &&
+          !(edge.kind == 'export' && spec.dataContracts.containsKey(target)) &&
           {
             Responsibility.ui,
             Responsibility.business,
@@ -134,6 +135,8 @@ List<ArchitectureViolation> checkBoundaries(
                   destination.module.name,
                 )) ||
             !(destination.module.apiEntries.contains(target) ||
+                source.role == Responsibility.ui &&
+                    destination.module.uiEntries.contains(target) ||
                 app && destination.module.pageEntries.contains(target))) {
           report('R06', target, '跨功能需使用批准的业务入口和登记的依赖方向。');
         }

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/foundation.dart';

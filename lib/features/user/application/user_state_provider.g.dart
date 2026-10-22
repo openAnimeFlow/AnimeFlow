@@ -9,80 +9,6 @@ part of 'user_state_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(CurrentFlowToken)
-final currentFlowTokenProvider = CurrentFlowTokenProvider._();
-
-final class CurrentFlowTokenProvider
-    extends $AsyncNotifierProvider<CurrentFlowToken, FlowToken?> {
-  CurrentFlowTokenProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'currentFlowTokenProvider',
-          isAutoDispose: false,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$currentFlowTokenHash();
-
-  @$internal
-  @override
-  CurrentFlowToken create() => CurrentFlowToken();
-}
-
-String _$currentFlowTokenHash() => r'97de2b4e00ba83c5e96af955961049ea65b4aaef';
-
-abstract class _$CurrentFlowToken extends $AsyncNotifier<FlowToken?> {
-  FutureOr<FlowToken?> build();
-  @$mustCallSuper
-  @override
-  void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<FlowToken?>, FlowToken?>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<FlowToken?>, FlowToken?>,
-        AsyncValue<FlowToken?>,
-        Object?,
-        Object?>;
-    element.handleCreate(ref, build);
-  }
-}
-
-@ProviderFor(isLoggedIn)
-final isLoggedInProvider = IsLoggedInProvider._();
-
-final class IsLoggedInProvider
-    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
-    with $FutureModifier<bool>, $FutureProvider<bool> {
-  IsLoggedInProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'isLoggedInProvider',
-          isAutoDispose: false,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$isLoggedInHash();
-
-  @$internal
-  @override
-  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<bool> create(Ref ref) {
-    return isLoggedIn(ref);
-  }
-}
-
-String _$isLoggedInHash() => r'34cdd0d8d6d6fb849bd0ab13e13c43188cd3c9dd';
-
 @ProviderFor(bangumiBind)
 final bangumiBindProvider = BangumiBindProvider._();
 
@@ -117,7 +43,7 @@ final class BangumiBindProvider extends $FunctionalProvider<
   }
 }
 
-String _$bangumiBindHash() => r'467d11536761f45b2e2ef2076e638e004106dbcc';
+String _$bangumiBindHash() => r'c30ea7f86670ed86c5b430ad4898c9d5cc248f40';
 
 @ProviderFor(CurrentUserInfo)
 final currentUserInfoProvider = CurrentUserInfoProvider._();
@@ -143,7 +69,7 @@ final class CurrentUserInfoProvider
   CurrentUserInfo create() => CurrentUserInfo();
 }
 
-String _$currentUserInfoHash() => r'6c51f6b76b3106703e9af0f161e259067538c608';
+String _$currentUserInfoHash() => r'577c4d1d52cd42d43dbf25289aa7bf0dc3e75415';
 
 abstract class _$CurrentUserInfo extends $AsyncNotifier<FlowUsers?> {
   FutureOr<FlowUsers?> build();

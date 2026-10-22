@@ -26,16 +26,22 @@ ArchitectureSpec projectArchitecture() {
   // Existing directions are recorded explicitly. Internal cross-feature edges
   // are separately frozen by R06 until each API entry has been introduced.
   const dependencies = <String, Set<String>>{
-    'anime_info': {'characters', 'play', 'user'},
-    'auth': {'user'},
+    'anime_info': {'auth', 'characters', 'play', 'user'},
     'character_info': {'characters'},
     'download': {'play'},
     'home': {'calendar', 'play'},
-    'play': {'anime_info', 'download', 'settings', 'shaders', 'source', 'user'},
+    'play': {
+      'anime_info',
+      'auth',
+      'download',
+      'settings',
+      'shaders',
+      'source',
+      'user',
+    },
     'settings': {'app_update', 'auth', 'download', 'play', 'source', 'user'},
-    'shell': {'user'},
-    'user': {'anime_info', 'auth'},
-    'user_space': {'user'},
+    'shell': {'auth', 'user'},
+    'user': {'auth'},
   };
   const uiProviders = {
     'play': {'video_ui_provider.dart', 'captcha_provider.dart'},
@@ -67,6 +73,7 @@ ArchitectureSpec projectArchitecture() {
       'lib/features/app_update/presentation/widgets/version_update_ui.dart',
     },
     'auth': {
+      'lib/features/auth/presentation/widgets/oauth_notice_listener.dart',
       'lib/features/auth/presentation/pages/forgot_password_page.dart',
       'lib/features/auth/presentation/pages/login_page.dart',
       'lib/features/auth/presentation/pages/oauth_callback_page.dart',
@@ -124,8 +131,7 @@ ArchitectureSpec projectArchitecture() {
       'lib/features/source/data/services/source_config_initializer.dart',
     },
     'user': {
-      'lib/features/user/application/collection_sync_lifecycle.dart',
-      'lib/features/user/application/user_oauth_controller.dart',
+      'lib/features/user/presentation/widgets/collection_sync_lifecycle.dart',
       'lib/features/user/presentation/pages/user_page.dart',
     },
     'user_space': {
@@ -156,6 +162,14 @@ ArchitectureSpec projectArchitecture() {
     final name = entry.key;
     final root = 'lib/features/$name';
     final scopes = <SourceScope>[];
+    final apiEntries = switch (name) {
+      'auth' => {'$root/auth_api.dart'},
+      'user' => {'$root/user_api.dart', '$root/user_events.dart'},
+      _ => <String>{},
+    };
+    for (final entry in apiEntries) {
+      scopes.add(SourceScope(entry, Responsibility.business));
+    }
     for (final layer in entry.value) {
       if (layer == 'presentation') {
         // Non-overlapping globs make unclassified files fail rather than silently
@@ -212,14 +226,32 @@ ArchitectureSpec projectArchitecture() {
         root,
         scopes,
         dependencies: dependencies[name] ?? {},
+        apiEntries: apiEntries,
+        uiEntries: name == 'auth'
+            ? {
+                'lib/features/auth/presentation/pages/login_page.dart',
+                'lib/features/auth/presentation/widgets/graphic_captcha.dart',
+                'lib/features/auth/presentation/widgets/send_code_button.dart',
+              }
+            : {},
         pageEntries: compositionEntries[name] ?? {},
       ),
     );
   }
   return ArchitectureSpec(
     modules,
+    strictScopes: {
+      for (final rule in ['R03', 'R06', 'R09'])
+        rule: {'lib/features/auth/**.dart', 'lib/features/user/**.dart'},
+      // Routing/UI cycles are separate legacy work; business cycles are closed.
+      'R07': {
+        'lib/features/auth/application/**.dart',
+        'lib/features/user/application/**.dart',
+      },
+    },
     domainCoreTypes: {'lib/core/constants/storage_key.dart'},
     dataContracts: {
+      'lib/features/user/user_events.dart': '公开的收藏修订通知契约，仅导出缓存失效信号。',
       'lib/features/user/application/collection_revision_provider.dart':
           '仅发布收藏修订信号，供缓存失效使用；不包含会话或同步业务编排。',
     },

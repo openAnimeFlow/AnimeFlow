@@ -1,57 +1,21 @@
 import 'dart:typed_data';
 
-import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
-import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
-import 'package:anime_flow/features/auth/application/token_providers.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
+import 'collection_refresh_provider.dart';
 import 'package:anime_flow/features/user/data/repository/user_repository_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'user_state_provider.g.dart';
 
-/// 使当前用户会话相关状态失效并触发重新读取。
-void invalidateUserSession(Ref ref) {
-  // Session expiry can originate from CurrentFlowToken itself. Use the
-  // container to invalidate dependents without creating a dependency cycle
-  // or accessing a ref after its provider has been invalidated.
-  final container = ref.container;
-  container.invalidate(currentFlowTokenProvider);
-  container.invalidate(isLoggedInProvider);
-  container.invalidate(currentUserInfoProvider);
-  container.invalidate(bangumiBindProvider);
-  container.invalidate(bgmCollectionSyncProvider);
-  container.invalidate(userCollectionsProvider);
-}
-
-@Riverpod(keepAlive: true)
-class CurrentFlowToken extends _$CurrentFlowToken {
-  @override
-  Future<FlowToken?> build() async {
-    FlowRefreshTokenInterceptor.onSessionExpired = () {
-      invalidateUserSession(ref);
-    };
-    FlowRefreshTokenInterceptor.onTokenRefreshed = () {
-      ref.invalidateSelf();
-    };
-    return ref.watch(flowTokenRepositoryProvider).getToken();
-  }
-}
-
-@Riverpod(keepAlive: true)
-Future<bool> isLoggedIn(Ref ref) async {
-  final token = await ref.watch(currentFlowTokenProvider.future);
-  return token != null;
-}
-
 @Riverpod(keepAlive: true)
 Future<BangumiBindItem?> bangumiBind(Ref ref) async {
-  final isLoggedIn = await ref.watch(isLoggedInProvider.future);
-  if (!isLoggedIn) {
+  ref.watch(bangumiBindingRevisionProvider);
+  final token = await ref.watch(currentFlowTokenProvider.future);
+  if (token == null) {
     return null;
   }
 
@@ -68,6 +32,9 @@ Future<BangumiBindItem?> bangumiBind(Ref ref) async {
 
 @Riverpod(keepAlive: true)
 class CurrentUserInfo extends _$CurrentUserInfo {
+  bool _currentSession(int revision) =>
+      ref.mounted && ref.read(authSessionRevisionProvider) == revision;
+
   void moveCollectionCount(int oldType, int newType) {
     final user = state.asData?.value;
     if (user == null || oldType == newType) return;
@@ -92,6 +59,7 @@ class CurrentUserInfo extends _$CurrentUserInfo {
 
   @override
   Future<FlowUsers?> build() async {
+    ref.watch(collectionRefreshProvider);
     final userRepository = ref.watch(userRepositoryProvider);
     final flowToken = await ref.watch(currentFlowTokenProvider.future);
     if (flowToken == null) {
@@ -111,8 +79,10 @@ class CurrentUserInfo extends _$CurrentUserInfo {
   }
 
   Future<String?> uploadAvatar(Uint8List imageBytes) async {
+    final revision = ref.read(authSessionRevisionProvider);
     try {
       final updatedUser = await FlowApi.uploadAvatarService(imageBytes);
+      if (!_currentSession(revision)) return '用户会话已变更';
       state = AsyncData(updatedUser);
       return null;
     } on AnimeFlowApiException catch (e) {
@@ -126,9 +96,11 @@ class CurrentUserInfo extends _$CurrentUserInfo {
   ///
   /// 返回 `null` 表示成功，否则返回错误描述字符串。
   Future<String?> updateNickname(String newNickname) async {
+    final revision = ref.read(authSessionRevisionProvider);
     try {
       final updatedUser =
           await FlowApi.updateUserInfoService(nickname: newNickname);
+      if (!_currentSession(revision)) return '用户会话已变更';
       state = AsyncData(updatedUser);
       return null;
     } on AnimeFlowApiException catch (e) {
@@ -143,10 +115,12 @@ class CurrentUserInfo extends _$CurrentUserInfo {
   /// 传入背景图的 ID（[BackgroundImageItem.id]），传入 `null` 清除背景。
   /// 返回 `null` 表示成功，否则返回错误描述字符串。
   Future<String?> updateBackground(int? backgroundId) async {
+    final revision = ref.read(authSessionRevisionProvider);
     try {
       final updatedUser = await FlowApi.updateUserInfoService(
         backgroundId: backgroundId,
       );
+      if (!_currentSession(revision)) return '用户会话已变更';
       state = AsyncData(updatedUser);
       return null;
     } on AnimeFlowApiException catch (e) {

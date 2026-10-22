@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/recommendations.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/danmaku_card.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/episodes.dart';
@@ -6,7 +7,6 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';

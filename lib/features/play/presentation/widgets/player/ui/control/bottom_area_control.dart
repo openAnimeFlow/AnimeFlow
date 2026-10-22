@@ -14,7 +14,7 @@ import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_progress_bar.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_time_display.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/danmaku_text_field.dart';

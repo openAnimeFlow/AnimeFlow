@@ -20,6 +20,7 @@ LegacyResult compareLegacy(
   List<ArchitectureViolation> violations,
   Map<String, dynamic> json, {
   required Set<String> sources,
+  ArchitectureSpec? spec,
   DateTime? now,
 }) {
   if (json.keys.any((k) => !{'schemaVersion', 'violations'}.contains(k)) ||
@@ -61,7 +62,13 @@ LegacyResult compareLegacy(
       }
     }
     if (!ArchitectureSpec.rules.contains(raw['rule']) ||
-        ArchitectureSpec.strictRules.contains(raw['rule'])) {
+        ArchitectureSpec.strictRules.contains(raw['rule']) ||
+        (spec?.isStrict(
+              raw['rule'] as String,
+              raw['source'] as String,
+              target: raw['target'] as String,
+            ) ??
+            false)) {
       throw StateError(
         'R08: unknown or strict rule cannot be frozen: ${raw['rule']}',
       );

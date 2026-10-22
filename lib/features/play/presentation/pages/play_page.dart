@@ -12,7 +12,7 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/player.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/app/router/app_route_observer.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/utils/system_util.dart';

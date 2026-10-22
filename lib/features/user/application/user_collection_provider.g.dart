@@ -41,7 +41,7 @@ final class UserCollectionsProvider
   }
 }
 
-String _$userCollectionsHash() => r'df5d48586195ea4a7487e3e9a9199567b179b843';
+String _$userCollectionsHash() => r'5e1f0520aee4544e1d45707d4921dda6a097c2c0';
 
 abstract class _$UserCollections extends $Notifier<UserCollectionsState> {
   UserCollectionsState build();

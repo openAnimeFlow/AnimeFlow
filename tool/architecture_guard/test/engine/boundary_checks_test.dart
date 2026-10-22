@@ -12,6 +12,61 @@ import 'fixture_project.dart';
 void main() {
   late FixtureProject fixture;
   tearDown(() => fixture.dispose());
+  test(
+    'reusable UI entries allow UI consumers but reject business consumers',
+    () {
+      const entry = 'lib/features/b/presentation/widgets/login.dart';
+      fixture = FixtureProject({
+        entry: '',
+        'lib/features/a/presentation/widgets/page.dart': "import 'package:anime_flow/features/b/presentation/widgets/login.dart';",
+        'lib/features/a/application/login.dart': "import 'package:anime_flow/features/b/presentation/widgets/login.dart';",
+      });
+      final spec = fixtureSpec(uiB: {entry});
+      final values = checkBoundaries(
+        collectDependencies(fixture.root, spec),
+        spec,
+      );
+      expect(
+        values.where((v) => v.source.contains('/widgets/page.dart')),
+        isEmpty,
+      );
+      expect(
+        values.where((v) => v.rule == 'R06').single.source,
+        'lib/features/a/application/login.dart',
+      );
+      expect(values.map((v) => v.rule), contains('R03'));
+    },
+  );
+  test(
+    'data may use a public signal export but signals cannot import business',
+    () {
+      const entry = 'lib/features/b/api.dart';
+      const signal = 'lib/features/b/application/signal.dart';
+      fixture = FixtureProject({
+        'lib/features/a/data/cache.dart':
+            "import 'package:anime_flow/features/b/api.dart';",
+        entry: "export 'application/signal.dart';",
+        signal: 'int revision = 0;',
+        'lib/features/b/application/service.dart': 'void run() {}',
+      });
+      final spec = ArchitectureSpec(
+        fixtureSpec(publicB: {entry}).modules,
+        dataContracts: {entry: 'Public signal', signal: 'Pure signal'},
+      );
+      expect(
+        checkBoundaries(collectDependencies(fixture.root, spec), spec),
+        isEmpty,
+      );
+      fixture.write(signal, "import 'service.dart';");
+      expect(
+        checkBoundaries(
+          collectDependencies(fixture.root, spec),
+          spec,
+        ).map((v) => v.rule),
+        contains('R02'),
+      );
+    },
+  );
   test('core cannot reach feature through barrel show/hide exports', () {
     fixture = FixtureProject({
       'lib/core/client.dart': "import 'barrel.dart' show Value;",

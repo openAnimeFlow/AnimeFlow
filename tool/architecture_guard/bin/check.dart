@@ -51,6 +51,7 @@ Future<void> main(List<String> arguments) async {
         File(p.join(root, 'test', 'architecture', 'legacy_dependencies.json')),
       ),
       sources: graph.libraries,
+      spec: spec,
     );
     stdout.writeln(
       'Registered legacy edges: ${result.registered}; new: ${result.newViolations.length}; stale: ${result.stale.length}',

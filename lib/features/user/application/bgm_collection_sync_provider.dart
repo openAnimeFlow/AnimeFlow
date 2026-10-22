@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show Provider;
 import 'dart:async';
 import 'package:anime_flow/features/user/data/repository/collection_sync_repository.dart';
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
+import 'package:anime_flow/shared/models/flow/collection_conflict_item.dart';
+import 'package:anime_flow/features/user/application/user_state_provider.dart';
+import 'collection_refresh_provider.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -43,6 +45,15 @@ class BgmCollectionSync extends _$BgmCollectionSync {
       _generation = Object();
       _stopConnection();
     });
+    void sessionChanged(int? previous, int next) {
+      _generation = Object();
+      _ready = false;
+      _stopConnection();
+      ref.invalidateSelf();
+    }
+
+    ref.listen(authSessionRevisionProvider, sessionChanged);
+    ref.listen(bangumiBindingRevisionProvider, sessionChanged);
     final token = await ref.watch(currentFlowTokenProvider.future);
     if (!_current(generation) || token == null) return null;
     final bind = await ref.watch(bangumiBindProvider.future);
@@ -70,6 +81,25 @@ class BgmCollectionSync extends _$BgmCollectionSync {
     final status = await ref.read(collectionSyncRepositoryProvider).trigger(
         subjectType, 'desktop-${DateTime.now().microsecondsSinceEpoch}');
     if (!_current(generation)) return;
+    _accept(status);
+  }
+
+  Future<List<CollectionConflictItem>> loadConflicts(
+      int taskId, int offset, int limit) async {
+    final generation = _generation;
+    final items = await ref
+        .read(collectionSyncRepositoryProvider)
+        .conflicts(taskId, offset, limit);
+    if (!_current(generation)) throw StateError('用户会话已变更');
+    return items;
+  }
+
+  Future<void> resolveConflicts(
+      int taskId, List<Map<String, dynamic>> items) async {
+    final generation = _generation;
+    final status =
+        await ref.read(collectionSyncRepositoryProvider).resolve(taskId, items);
+    if (!_current(generation)) throw StateError('用户会话已变更');
     _accept(status);
   }
 
@@ -123,8 +153,7 @@ class BgmCollectionSync extends _$BgmCollectionSync {
   }
 
   void _refreshCollections() {
-    ref.invalidate(currentUserInfoProvider);
-    ref.invalidate(userCollectionsProvider);
+    ref.read(collectionRefreshProvider.notifier).changed();
     ref.read(collectionRevisionProvider.notifier).changed();
   }
 

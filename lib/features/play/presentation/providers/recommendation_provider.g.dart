@@ -21,7 +21,7 @@ final class RecommendationProvider extends $FunctionalProvider<
           argument: null,
           retry: null,
           name: r'recommendationProvider',
-          isAutoDispose: false,
+          isAutoDispose: true,
           dependencies: <ProviderOrFamily>[playExtraProvider],
           $allTransitiveDependencies: <ProviderOrFamily>[
             RecommendationProvider.$allTransitiveDependencies0,
@@ -45,4 +45,4 @@ final class RecommendationProvider extends $FunctionalProvider<
   }
 }
 
-String _$recommendationHash() => r'706799299dd58e4207e96bb57906bc90c492787e';
+String _$recommendationHash() => r'2bab2f90a3c48922587cc93a1988bf30fce593da';

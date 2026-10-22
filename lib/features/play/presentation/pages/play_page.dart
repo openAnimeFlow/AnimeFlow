@@ -57,8 +57,10 @@ class _PlayPageState extends ConsumerState<PlayPage>
   @override
   void initState() {
     super.initState();
-    videoSourceController = ref.read(videoSourceProvider.notifier);
-    playSession = ref.read(playSessionProvider);
+    videoSourceController = ref
+        .listenManual(videoSourceProvider.notifier, (_, __) {})
+        .read();
+    playSession = ref.listenManual(playSessionProvider, (_, __) {}).read();
     _screenAwake = PlaybackScreenAwake(playSession.playbackCoordinator.events);
     _contentAnimationController = AnimationController(
       vsync: this,

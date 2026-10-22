@@ -40,14 +40,12 @@ import 'package:window_manager/window_manager.dart';
 part 'play_provider.g.dart';
 
 @Riverpod(
-  keepAlive: true,
   dependencies: [
-    shadersDirectory,
+    playExtra,
     PlayStateNotifier,
     DanmakuStateNotifier,
     VideoUiNotifier,
     Episodes,
-    playExtra,
   ],
 )
 PlaySession playSession(Ref ref) {
@@ -116,7 +114,7 @@ PlaySession playSession(Ref ref) {
   return controller;
 }
 
-@Riverpod(keepAlive: true, dependencies: [playExtra])
+@Riverpod(dependencies: [playExtra])
 class PlayStateNotifier extends _$PlayStateNotifier {
   @override
   PlayState build() {

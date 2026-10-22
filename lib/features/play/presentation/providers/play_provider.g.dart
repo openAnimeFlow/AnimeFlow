@@ -21,14 +21,13 @@ final class PlaySessionProvider
           argument: null,
           retry: null,
           name: r'playSessionProvider',
-          isAutoDispose: false,
+          isAutoDispose: true,
           dependencies: <ProviderOrFamily>[
-            shadersDirectoryProvider,
+            playExtraProvider,
             playStateProvider,
             danmakuStateProvider,
             videoUiProvider,
-            episodesProvider,
-            playExtraProvider
+            episodesProvider
           ],
           $allTransitiveDependencies: <ProviderOrFamily>{
             PlaySessionProvider.$allTransitiveDependencies0,
@@ -36,17 +35,14 @@ final class PlaySessionProvider
             PlaySessionProvider.$allTransitiveDependencies2,
             PlaySessionProvider.$allTransitiveDependencies3,
             PlaySessionProvider.$allTransitiveDependencies4,
-            PlaySessionProvider.$allTransitiveDependencies5,
           },
         );
 
-  static final $allTransitiveDependencies0 = shadersDirectoryProvider;
+  static final $allTransitiveDependencies0 = playExtraProvider;
   static final $allTransitiveDependencies1 = playStateProvider;
-  static final $allTransitiveDependencies2 =
-      PlayStateNotifierProvider.$allTransitiveDependencies0;
-  static final $allTransitiveDependencies3 = danmakuStateProvider;
-  static final $allTransitiveDependencies4 = videoUiProvider;
-  static final $allTransitiveDependencies5 = episodesProvider;
+  static final $allTransitiveDependencies2 = danmakuStateProvider;
+  static final $allTransitiveDependencies3 = videoUiProvider;
+  static final $allTransitiveDependencies4 = episodesProvider;
 
   @override
   String debugGetCreateSourceHash() => _$playSessionHash();
@@ -70,7 +66,7 @@ final class PlaySessionProvider
   }
 }
 
-String _$playSessionHash() => r'59bdabd9109198d95c86a873771e7961711807ff';
+String _$playSessionHash() => r'81e26552517ab2e34234b9f50f2d18076eedaea4';
 
 @ProviderFor(PlayStateNotifier)
 final playStateProvider = PlayStateNotifierProvider._();
@@ -83,7 +79,7 @@ final class PlayStateNotifierProvider
           argument: null,
           retry: null,
           name: r'playStateProvider',
-          isAutoDispose: false,
+          isAutoDispose: true,
           dependencies: <ProviderOrFamily>[playExtraProvider],
           $allTransitiveDependencies: <ProviderOrFamily>[
             PlayStateNotifierProvider.$allTransitiveDependencies0,
@@ -108,7 +104,7 @@ final class PlayStateNotifierProvider
   }
 }
 
-String _$playStateNotifierHash() => r'72f48f6a06748b3120279b9a63888ba5c991ab4e';
+String _$playStateNotifierHash() => r'1b2817d084efa0f90f3cc9ce1f5ed4138977b1b3';
 
 abstract class _$PlayStateNotifier extends $Notifier<PlayState> {
   PlayState build();

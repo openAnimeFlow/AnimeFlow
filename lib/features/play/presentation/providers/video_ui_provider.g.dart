@@ -20,7 +20,7 @@ final class VideoUiNotifierProvider
           argument: null,
           retry: null,
           name: r'videoUiProvider',
-          isAutoDispose: false,
+          isAutoDispose: true,
           dependencies: <ProviderOrFamily>[playExtraProvider],
           $allTransitiveDependencies: <ProviderOrFamily>[
             VideoUiNotifierProvider.$allTransitiveDependencies0,
@@ -45,7 +45,7 @@ final class VideoUiNotifierProvider
   }
 }
 
-String _$videoUiNotifierHash() => r'c0453183b661650198e6391e9ef0ffaa4cdf0b6d';
+String _$videoUiNotifierHash() => r'3f5e7e12879725408ffcd139c6a24cb8def4f43b';
 
 abstract class _$VideoUiNotifier extends $Notifier<VideoUiState> {
   VideoUiState build();

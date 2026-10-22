@@ -99,7 +99,6 @@ class ManualEpisodeSource {
 }
 
 @Riverpod(
-  keepAlive: true,
   dependencies: [Episodes, playExtra, PlayStateNotifier, playSession],
 )
 class VideoSourceNotifier extends _$VideoSourceNotifier {

@@ -113,8 +113,7 @@ class VideoUiState {
   }
 }
 
-// Keep controls alive while hidden, but own them in the playback route scope.
-@Riverpod(keepAlive: true, dependencies: [playExtra])
+@Riverpod(dependencies: [playExtra])
 class VideoUiNotifier extends _$VideoUiNotifier
     implements PlaybackIndicatorActions {
   Timer? _topIndicatorTimer;

@@ -307,7 +307,7 @@ build/playback-activity-simplification-analyze.log、build/playback-activity-sim
 设备交互、其他平台与远程 Actions 尚未验证；本阶段不声称解决或复现此前的播放退出卡顿。
 
 
-## 第六阶段：简单功能收口，导航迁移待续
+## 第六阶段：简单功能收口
 
 2026-10-22，Windows，Flutter 3.47.6 / Dart 3.13.5。
 
@@ -332,7 +332,8 @@ Provider、绑定邮箱组件、弹幕搜索组件及其 Provider。简单业务
 CancelToken 仍合法；已有复杂播放/下载用例继续使用 repository 模式并按精确基线约束。
 
 本次提交保留 BBCodeWidget 原有图片预览路由调用，不引入 ImagePreviewScope 或 app 全局
-回调装配；共享组件导航迁移尚未完成。相关 5 条 R07 登记保留原有身份和元数据，未增加新登记，
+回调装配；按用户决定，取消 BBCode 图片预览的显式回调迁移，不再列为本阶段待办。
+相关 5 条 R07 登记保留原有身份和元数据，未增加新登记，
 未对该组件启用严格 R07，也没有扩大生成代码豁免。
 
 | 验证 | 结果 |
@@ -402,9 +403,30 @@ AccountController 改为普通 Provider 提供的无状态命令对象，统一�
 | 存量门禁 | 181 条，新增 0、失效 0 |
 
 本次没有修改或扩充存量登记、职责模式、公开入口白名单或豁免。
-共享组件导航迁移仍待完成。Windows 应用热重启成功；真实设备交互、其他平台与远程 Actions
+BBCode 图片预览按用户决定保留原有路由调用，相关循环仍为存量。Windows 应用热重启成功；真实设备交互、其他平台与远程 Actions
 尚未验证，尚未推送。
 
 日志位于 build/architecture-fixes-business-tests.log、build/architecture-fixes-architecture-tests.log、
 build/architecture-fixes-analyze.log、build/architecture-fixes-tool-analyze.log、
 build/architecture-fixes-targeted-tests.log 和 build/architecture-fixes-contract-tests.log。
+
+## 播放 Provider 生命周期检查修复
+
+2026-10-22，Windows，Flutter 3.47.6 / Dart 3.13.5。
+
+播放会话、播放状态、视频源、弹幕状态、控制 UI、推荐和剧集评论改为自动销毁 Provider，
+消除 keepAlive Provider 引用自动销毁参数/剧集 Provider 的 15 处生命周期警告。
+PlayPage 在 initState 使用 listenManual 持有会话与视频源的订阅，由会话继续持有状态依赖；
+订阅在页面卸载时由 WidgetRef 自动关闭，不受控件隐藏或路由覆盖时的 watch 暂停影响。
+推荐和评论由现有页面及标签视图监听，保留原有视图状态维持机制，不扩大为全局常驻缓存。
+仅重新生成受影响的 Provider 文件，没有关闭 lint、延长共享剧集缓存的生命周期或修改存量登记。
+
+新增两项真实 Provider 链路回归：临时 UI 监听移除后会话/控件状态保留，最后一个持有者释放后
+内核和状态销毁；旧播放路由销毁不影响新路由会话。原生 UI 在测试中使用替身，未模拟长时间实际播放。
+
+验证：489 项业务测试、54 项架构引擎验收、2 项架构集成测试通过，应用静态分析零诊断。
+全图仍为 496 个源码文件、435 个手写文件、442 个 library、2499 条依赖；181 条存量，
+新增 0、失效 0。Windows 应用热重启成功，未发现运行时异常；本批尚未验证远程 Linux CI。
+
+日志：build/play-provider-lifecycle-business-tests.log、build/play-provider-lifecycle-architecture-tests.log、
+build/play-provider-lifecycle-full-analyze.log、build/play-provider-lifecycle-regression.log。

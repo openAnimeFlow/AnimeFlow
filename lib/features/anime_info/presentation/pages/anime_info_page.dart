@@ -5,13 +5,16 @@ import 'package:anime_flow/features/anime_info/presentation/providers/anime_info
 import 'package:anime_flow/features/anime_info/presentation/widgets/anime_info_view.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([AnimeInfo, animeInfoArgs])
 /// Standalone detail route owns navigation to a new playback session.
 class AnimeInfoPage extends ConsumerWidget {
   const AnimeInfoPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    @Dependencies([AnimeInfo, animeInfoArgs])
     void openPlayer([int? episodeId]) {
       final subject = ref.read(animeInfoProvider).asData?.value;
       if (subject == null) return;

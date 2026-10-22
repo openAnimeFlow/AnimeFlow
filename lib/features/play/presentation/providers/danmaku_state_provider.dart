@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'danmaku_state_provider.g.dart';
 
-@Riverpod(keepAlive: true, dependencies: [playExtra])
+@Riverpod(dependencies: [playExtra])
 class DanmakuStateNotifier extends _$DanmakuStateNotifier
     implements DanmakuStore {
   @override

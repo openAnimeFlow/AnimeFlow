@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'recommendation_provider.g.dart';
 
-@Riverpod(keepAlive: true, dependencies: [playExtra])
+@Riverpod(dependencies: [playExtra])
 Future<SubjectItem> recommendation(Ref ref) {
   final subjectId = ref.watch(playExtraProvider).playExtra.subjectId;
   return FlowApi.getBangumiRecommendationService(subjectId);

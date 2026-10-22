@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:anime_flow/core/constants/constants.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/core/network/clients/flow_client.dart';
+import 'package:anime_flow/core/network/core/flow_response.dart';
 import 'package:anime_flow/core/network/core/api_signature.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/core/auth/repository/token_repository.dart';
@@ -21,8 +20,8 @@ class FlowRefreshTokenInterceptor extends Interceptor {
   FlowRefreshTokenInterceptor(
     this._dio,
     this._flowTokenRepository, {
-    RefreshFlowToken? refreshToken,
-  }) : _refreshToken = refreshToken ?? FlowApi.flowRefreshTokenService;
+    required RefreshFlowToken refreshToken,
+  }) : _refreshToken = refreshToken;
 
   static const skipKey = 'skipFlowTokenRefresh';
   static const _retriedKey = 'flowTokenRetried';
@@ -53,8 +52,8 @@ class FlowRefreshTokenInterceptor extends Interceptor {
     try {
       if (!await _refreshTokenIfNeeded(response.requestOptions)) {
         if (_isPresenceRequest(response.requestOptions)) {
-          return handler.resolve(
-              await _retryWithoutFlowToken(response.requestOptions));
+          return handler
+              .resolve(await _retryWithoutFlowToken(response.requestOptions));
         }
         return handler.next(response);
       }
@@ -77,7 +76,8 @@ class FlowRefreshTokenInterceptor extends Interceptor {
     try {
       if (!await _refreshTokenIfNeeded(err.requestOptions)) {
         if (_isPresenceRequest(err.requestOptions)) {
-          return handler.resolve(await _retryWithoutFlowToken(err.requestOptions));
+          return handler
+              .resolve(await _retryWithoutFlowToken(err.requestOptions));
         }
         return handler.next(err);
       }

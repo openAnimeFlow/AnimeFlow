@@ -33,28 +33,8 @@
     },
     {
       "rule": "R04",
-      "source": "lib/features/anime_info/presentation/widgets/episodes_drawer.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:anime_info",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
       "source": "lib/features/anime_info/presentation/widgets/evaluate_dialog.dart",
       "target": "lib/core/network/api/flow_api.dart#updateCollectionService",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:anime_info",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/anime_info/presentation/widgets/inf_head.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
       "kind": "type",
       "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
       "owner": "feature:anime_info",
@@ -93,26 +73,6 @@
     },
     {
       "rule": "R04",
-      "source": "lib/features/auth/presentation/pages/forgot_password_page.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:auth",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/auth/presentation/pages/login_page.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:auth",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
       "source": "lib/features/auth/presentation/pages/register_page.dart",
       "target": "lib/core/network/api/flow_api.dart#registerService",
       "kind": "type",
@@ -133,28 +93,8 @@
     },
     {
       "rule": "R04",
-      "source": "lib/features/auth/presentation/pages/register_page.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:auth",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
       "source": "lib/features/auth/presentation/widgets/graphic_captcha.dart",
       "target": "lib/core/network/api/flow_api.dart#generateCaptchaService",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:auth",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/auth/presentation/widgets/graphic_captcha.dart",
-      "target": "lib/core/network/clients/flow_client.dart#toString",
       "kind": "type",
       "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
       "owner": "feature:auth",
@@ -243,98 +183,8 @@
     },
     {
       "rule": "R04",
-      "source": "lib/features/play/presentation/widgets/content/episodes.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/play/presentation/widgets/content/introduce_view.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/play/presentation/widgets/content/recommendations.dart",
-      "target": "lib/core/network/clients/flow_client.dart#resolveAnimeFlowErrorMessage",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/play/presentation/widgets/episode_load_more_error.dart",
-      "target": "lib/core/network/clients/flow_client.dart#resolveAnimeFlowErrorMessage",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/play/presentation/widgets/player/ui/control/bottom_area_control.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/play/presentation/widgets/player/ui/control/top_area_control.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
       "source": "lib/features/settings/presentation/pages/about/updates_page.dart",
       "target": "lib/core/network/api/flow_api.dart#getReleases",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:settings",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/settings/presentation/pages/about/updates_page.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:settings",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
-      "target": "lib/core/network/clients/flow_client.dart#resolveAnimeFlowErrorMessage",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:settings",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/settings/presentation/widgets/account/bgm_collection_sync_section.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
       "kind": "type",
       "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
       "owner": "feature:settings",
@@ -358,36 +208,6 @@
       "kind": "type",
       "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
       "owner": "feature:settings",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:settings",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/settings/presentation/widgets/account/change_password_dialog.dart",
-      "target": "lib/core/network/clients/flow_client.dart#resolveAnimeFlowErrorMessage",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:settings",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/user/presentation/widgets/collection_tab_view.dart",
-      "target": "lib/core/network/clients/flow_client.dart#message",
-      "kind": "type",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:user",
       "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
       "reviewBy": "2026-11-22"
     },
@@ -1029,66 +849,6 @@
       "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
       "owner": "app",
       "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/network/api/flow_api.dart",
-      "target": "lib/core/network/clients/flow_client.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "步骤 9.3 网络刷新环路分离",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/network/clients/flow_client.dart",
-      "target": "lib/core/network/core/dio_factory.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "步骤 9.3 网络刷新环路分离",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/network/clients/flow_client.dart",
-      "target": "lib/core/network/interceptors/flow_refresh_token_interceptor.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "步骤 9.3 网络刷新环路分离",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/network/core/dio_factory.dart",
-      "target": "lib/core/network/interceptors/flow_refresh_token_interceptor.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "步骤 9.3 网络刷新环路分离",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/network/interceptors/flow_refresh_token_interceptor.dart",
-      "target": "lib/core/network/api/flow_api.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "步骤 9.3 网络刷新环路分离",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
-      "source": "lib/core/network/interceptors/flow_refresh_token_interceptor.dart",
-      "target": "lib/core/network/clients/flow_client.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "core",
-      "cleanupTask": "步骤 9.3 网络刷新环路分离",
       "reviewBy": "2026-11-22"
     },
     {

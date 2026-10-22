@@ -28,13 +28,6 @@ void main() {
       expect(item.requiresNewerClient, isFalse);
     });
 
-    test('目录声明的 api 高于当前客户端时标记为需要更新', () {
-      final item = PluginCatalogItem.fromJson(_entry(api: 99));
-
-      expect(item.api, '99');
-      expect(item.requiresNewerClient, isTrue);
-    });
-
     test('目录声明当前客户端级别时兼容', () {
       final item = PluginCatalogItem.fromJson(_entry(api: 2));
 
@@ -44,6 +37,7 @@ void main() {
     test('目录声明高于当前客户端一级时标记为需要更新', () {
       final item = PluginCatalogItem.fromJson(_entry(api: 3));
 
+      expect(item.api, '3');
       expect(item.requiresNewerClient, isTrue);
     });
 

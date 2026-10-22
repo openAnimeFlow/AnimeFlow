@@ -20,7 +20,9 @@ flutter test --no-pub --exclude-tags architecture
 
 macOS/Linux 用 cd 进入工具包安装依赖后，再返回项目根目录执行 Flutter 命令。
 架构入口通过普通 dart test 执行引擎验收，再对完整 lib 执行源码和类型检查。
-两者都必须成功；测试文件清单和 architecture 标签同时检查，防止丢失验收入口。
+两者都必须成功；保留验收文件清单，并读取测试运行器的 JSON 报告，确认每个文件实际
+执行了非跳过测试。额外运行反向标签筛选，要求没有测试被收集，避免全部或部分用例漏标。
+标签校验不依赖注解位于文件首行、使用哪种引号或如何换行。
 
 ## 当前规则
 
@@ -127,3 +129,74 @@ R07 160、R09 4；R01/R02/R08 为零。用户业务三文件循环和 auth/user 
 
 已连接 IDE 的 Dart Tooling Daemon 检查运行实例，未发现连接中的 Flutter 应用，
 因此没有可执行热重载的实例。实际设备交互、Linux 和远程 Actions 尚未验证。
+
+## 第三阶段：令牌刷新链路
+
+2026-10-22，Windows，Flutter 3.47.6 / Dart 3.13.5。
+
+原来的 FlowApi → FlowClient → DioFactory → FlowRefreshTokenInterceptor → FlowApi
+环路已消除。拦截器必须注入 RefreshFlowToken，不选择默认业务 API。异常和响应解析
+归 core/network/core/flow_response.dart，FlowClient 导出原有符号供现有调用者继续使用。
+
+DioFactory 创建独立的 animeFlowRefreshDio，装配 FlowTokenRefreshClient.refresh 后
+注入主客户端拦截器。刷新 transport 不安装刷新拦截器，复用相同端点池、TLS、超时、UA
+及日志配置；reset 关闭主 transport 和刷新 transport。刷新请求签名后只发送 refreshToken，
+不附带旧访问令牌。未使用的 FlowApi.flowRefreshTokenService 已删除。
+
+保留并发刷新合并、跨 Dio 共享、晚到 401、重试一次、退出 generation 和新登录隔离。
+HTTP 200 业务 401、HTTP 401 明确报告 refresh_token_invalid 时使会话失效；超时、
+无关 401、限流、服务器失败和响应格式错误保留凭据。HTTP 429/500 的矛盾业务字段
+不能触发凭据删除。刷新失败不会再次触发刷新请求，也不会重放普通原请求。
+
+core/network 全目录的 R07 进入严格范围，不允许重新登记网络循环。删除 6 条旧循环边，
+以及 18 条只使用异常/消息类型的 R04 登记；这些类型现在声明在底层契约中，语义检查
+不再将它们当作 API 调用。其余存量身份和元数据保持原样，没有新增存量。
+
+| 验证 | 结果 |
+| --- | --- |
+| 全量业务测试 | 476 项通过，比第二阶段新增 16 项 |
+| 架构引擎验收 | 50 项通过，包含刷新依赖环路正反样例 |
+| Flutter 架构集成入口 | 2 项通过 |
+| 静态分析 | 应用与独立工具包零诊断 |
+| 完整扫描 | 482 个源码文件、429 个 library、2464 条依赖 |
+| 存量门禁 | 221 条；新增 0、失效 0；网络目录循环 0 |
+
+剩余全项目规则计数为 R03 3、R04 19、R05 4、R06 37、R07 154、R09 4；
+R01/R02/R08 为零。路由、播放和下载的其他循环仍留待后续阶段处理。
+
+验证命令：
+
+```powershell
+flutter test --no-pub test/core/network/flow_token_refresh_client_test.dart test/flow_refresh_token_interceptor_test.dart
+flutter test --no-pub --exclude-tags architecture
+flutter test --no-pub test/architecture --tags architecture
+flutter analyze --no-pub --fatal-infos
+# 在 tool/architecture_guard 中执行：
+dart analyze --fatal-infos
+```
+
+本地日志位于 build/phase3-business-tests.log、build/phase3-architecture-tests.log。
+HTTP 测试使用替身 adapter 验证真实工厂装配和请求链路，没有访问生产服务。
+已连接 IDE 的 DTD，未发现运行中的 Flutter 应用，无法执行热重载。
+实际服务联调、设备交互、Linux 与远程 Actions 尚未验证。
+
+## 测试精简记录
+
+2026-10-22，在第三阶段基础上精简 4 个重复案例：
+
+- 删除仅更换文件名的刷新环路 fixture，保留通用循环形状、循环新增边和真实全图门禁。
+- 删除重复的同步进度修订测试，由真实资料和集合刷新集成测试继续覆盖。
+- 合并刷新失效文案测试，在“只清理一次”案例中使用不匹配中文提示的错误消息，
+  同时保护按错误原因判断和凭据清理行为。
+- 合并插件高版本判断，在相邻版本边界中保留数值转字符串的断言。
+
+工作流的 needs 按依赖集合比较，兼容字符串与数组，并忽略依赖排列顺序；
+操作系统矩阵也按无序列表比较。质量门禁、来源 SHA、发布前置条件等约束继续保留。
+
+验证结果：473 项业务测试、49 项架构引擎测试、2 项 Flutter 架构集成测试通过；
+应用与独立工具包静态分析零诊断。存量仍为 221 条，新增 0、失效 0。
+测试计数减少反映重复案例合并，不代表已测量的行覆盖率变化。
+
+隔离样例额外验证了等价 YAML 形式可通过、删除 quality 依赖仍会失败、标签注解前可有
+注释且可使用不同引号，以及部分用例漏标能被反向筛选发现。没有修改实际工作流来做探测。
+日志位于 build/test-optimization-business.log 和 build/test-optimization-architecture.log。

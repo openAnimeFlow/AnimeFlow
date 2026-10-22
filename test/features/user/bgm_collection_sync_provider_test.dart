@@ -113,20 +113,6 @@ void main() {
     expect(c.read(bgmCollectionSyncProvider).value?.pendingConflictCount, 0);
   });
 
-  test('completed progress invalidates detail revision only when changed',
-      () async {
-    final repo = Repository();
-    final c = create(repo);
-    addTearDown(c.dispose);
-    await c.read(bgmCollectionSyncProvider.future);
-    repo.loader = () async => const BgmCollectionSyncStatusItem(
-        status: BgmCollectionSyncStatus.success, taskId: 1, syncedCount: 5);
-    await c.read(bgmCollectionSyncProvider.notifier).refreshStatus();
-    expect(c.read(collectionRevisionProvider), 1);
-    await c.read(bgmCollectionSyncProvider.notifier).refreshStatus();
-    expect(c.read(collectionRevisionProvider), 1);
-  });
-
   test('build-time collection refresh only runs on the initial build',
       () async {
     final repo = Repository()

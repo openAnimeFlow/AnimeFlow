@@ -48,20 +48,72 @@ void main() {
     expect(suites.map((file) => p.basename(file.path)).toSet(), expectedSuites,
         reason:
             'Acceptance suite inventory changed; review the inventory with the test changes.');
-    for (final file in suites) {
-      expect(
-          file.readAsStringSync().startsWith("@Tags(['architecture'])"), isTrue,
-          reason:
-              'Acceptance suite must be selected by the CI architecture tag: ${file.path}');
-    }
+    final report =
+        File(p.join(root, 'build', 'architecture', 'engine-tests.json'));
+    report.parent.createSync(recursive: true);
+    if (report.existsSync()) report.deleteSync();
     await run([
       'test',
       '--reporter',
       'expanded',
       '--concurrency=1',
+      '--file-reporter',
+      'json:${p.relative(report.path, from: tool)}',
       '--tags',
       'architecture'
     ]);
+    final suiteNames = <int, String>{};
+    final testSuites = <int, int>{};
+    final executedSuites = <int>{};
+    for (final line
+        in report.readAsLinesSync().where((line) => line.isNotEmpty)) {
+      final event = jsonDecode(line) as Map<String, dynamic>;
+      if (event['type'] == 'suite') {
+        final suite = event['suite'] as Map;
+        suiteNames[suite['id'] as int] = p.basename(suite['path'] as String);
+      } else if (event['type'] == 'testStart') {
+        final test = event['test'] as Map;
+        testSuites[test['id'] as int] = test['suiteID'] as int;
+      } else if (event['type'] == 'testDone' &&
+          event['hidden'] == false &&
+          event['skipped'] == false &&
+          event['result'] == 'success') {
+        executedSuites.add(testSuites[event['testID']]!);
+      }
+    }
+    expect(executedSuites.map((id) => suiteNames[id]).toSet(), expectedSuites,
+        reason:
+            'Every acceptance suite must actually run non-skipped tests under the architecture tag.');
+
+    // The inverse selector must collect nothing, including partially untagged suites.
+    final excluded = await Process.run(
+        dart,
+        [
+          'test',
+          '--reporter',
+          'json',
+          '--exclude-tags',
+          'architecture',
+        ],
+        workingDirectory: tool);
+    final events = const LineSplitter()
+        .convert(excluded.stdout as String)
+        .where((line) => line.isNotEmpty)
+        .map((line) => jsonDecode(line) as Map<String, dynamic>)
+        .toList();
+    final diagnostic = '${excluded.stdout}\n${excluded.stderr}';
+    expect(
+        events.where((event) => event['type'] == 'allSuites').single['count'],
+        0,
+        reason:
+            'Untagged architecture tests would escape the CI selector.\n$diagnostic');
+    expect(events.where((event) => event['type'] == 'done').single['success'],
+        isTrue,
+        reason:
+            'An empty selection must not hide a runner failure.\n$diagnostic');
+    expect(excluded.exitCode, isNot(0),
+        reason:
+            'Expected the test runner to report no tests selected.\n$diagnostic');
   }, timeout: const Timeout(Duration(minutes: 8)));
   test('complete source graph obeys the architecture specification', () async {
     await run([

@@ -1,3 +1,4 @@
+// Graph fixtures cover cycle shapes; the full-project gate checks the network.
 @Tags(['architecture'])
 library;
 

@@ -245,6 +245,7 @@ ArchitectureSpec projectArchitecture() {
         rule: {'lib/features/auth/**.dart', 'lib/features/user/**.dart'},
       // Routing/UI cycles are separate legacy work; business cycles are closed.
       'R07': {
+        'lib/core/network/**.dart',
         'lib/features/auth/application/**.dart',
         'lib/features/user/application/**.dart',
       },

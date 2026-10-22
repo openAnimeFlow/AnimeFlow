@@ -9,6 +9,12 @@ import 'package:yaml/yaml.dart';
 
 import 'package:anime_flow_architecture_guard/src/dependency_graph.dart';
 
+Set<String> dependencies(Map job) => switch (job['needs']) {
+  String value => {value},
+  List values => values.cast<String>().toSet(),
+  _ => throw FormatException('Expected job.needs to be a string or a list'),
+};
+
 void main() {
   final root = findProjectRoot();
   Map workflow(String name) => loadYaml(
@@ -27,7 +33,7 @@ void main() {
     expect(jobs['quality']['with']['source_sha'], r'${{ github.sha }}');
     for (final platform in platforms) {
       final job = jobs['build-$platform'] as Map;
-      expect(job['needs'], 'quality');
+      expect(dependencies(job), {'quality'});
       expect(checkouts(job).single['with']['ref'], r'${{ github.sha }}');
     }
   });
@@ -41,10 +47,10 @@ void main() {
         isTrue,
       );
       final jobs = quality['jobs'] as Map;
-      expect(jobs['architecture']['strategy']['matrix']['os'], [
-        'ubuntu-latest',
-        'windows-latest',
-      ]);
+      expect(
+        jobs['architecture']['strategy']['matrix']['os'],
+        unorderedEquals(['ubuntu-latest', 'windows-latest']),
+      );
       for (final name in ['architecture', 'unit-tests']) {
         expect(
           checkouts(jobs[name] as Map).single['with']['ref'],
@@ -95,14 +101,14 @@ void main() {
         jobs['resolve-source']['steps'].last['env']['INPUT_TAG'],
         r'${{ inputs.tag }}',
       );
-      expect(jobs['quality']['needs'], 'resolve-source');
+      expect(dependencies(jobs['quality'] as Map), {'resolve-source'});
       expect(
         jobs['quality']['with']['source_sha'],
         r'${{ needs.resolve-source.outputs.source_sha }}',
       );
       for (final platform in platforms) {
         final job = jobs['build-$platform'] as Map;
-        expect(job['needs'], ['resolve-source', 'quality']);
+        expect(dependencies(job), {'resolve-source', 'quality'});
         expect(
           checkouts(job).single['with']['ref'],
           r'${{ needs.resolve-source.outputs.source_sha }}',
@@ -110,7 +116,7 @@ void main() {
       }
       final release = jobs['release'] as Map;
       expect(
-        release['needs'],
+        dependencies(release),
         containsAll([
           'resolve-source',
           'quality',

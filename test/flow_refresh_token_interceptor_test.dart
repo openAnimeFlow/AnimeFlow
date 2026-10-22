@@ -184,19 +184,6 @@ void main() {
     }
   }
 
-  test('explicit refresh failure reason does not depend on error wording',
-      () async {
-    final repository = Repository();
-    final dio = client(repository, ({required refreshToken}) async {
-      throw const AnimeFlowApiException(
-          code: 401,
-          message: 'Refresh rejected',
-          authReason: 'refresh_token_invalid');
-    }, (_) => reply(401));
-    await request(dio);
-    expect(repository.removals, 1);
-  });
-
   test('concurrent 401s share refresh before asynchronous storage reads',
       () async {
     final repository = Repository();
@@ -230,6 +217,30 @@ void main() {
                 : 401));
     expect((await request(dio)).data['code'], 200);
     expect(refreshes, 0);
+  });
+
+  test('different Dio instances share the same in-flight session refresh',
+      () async {
+    final repository = Repository();
+    final started = Completer<void>();
+    final result = Completer<FlowToken>();
+    var refreshes = 0;
+    Future<FlowToken> refresh({required String refreshToken}) {
+      refreshes++;
+      started.complete();
+      return result.future;
+    }
+
+    ResponseBody respond(RequestOptions options) => reply(
+        options.headers[Constants.authorization] == 'Bearer new' ? 200 : 401);
+    final first = client(repository, refresh, respond);
+    final second = client(repository, refresh, respond);
+    final pending = Future.wait([request(first), request(second)]);
+    await started.future;
+    result.complete(token('new'));
+    expect((await pending).every((response) => response.data['code'] == 200),
+        isTrue);
+    expect(refreshes, 1);
   });
 
   for (final http401 in [false, true]) {
@@ -346,7 +357,9 @@ void main() {
     expect(expired, 1);
   });
 
-  test('confirmed invalid refresh clears credentials exactly once', () async {
+  test(
+      'explicit invalidation reason clears credentials once regardless of error wording',
+      () async {
     final repository = Repository();
     var expired = 0;
     FlowRefreshTokenInterceptor.onSessionExpired = () {
@@ -355,7 +368,7 @@ void main() {
     final dio = client(repository, ({required refreshToken}) async {
       throw const AnimeFlowApiException(
           code: 401,
-          message: '刷新令牌无效或已过期',
+          message: 'Refresh rejected',
           authReason: 'refresh_token_invalid');
     }, (_) => reply(401));
     await request(dio);

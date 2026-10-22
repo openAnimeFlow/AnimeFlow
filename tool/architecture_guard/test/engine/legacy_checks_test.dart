@@ -87,6 +87,10 @@ void main() {
     'project policy closes user/auth business without hiding routing debt',
     () {
       final spec = projectArchitecture();
+      expect(
+        spec.isStrict('R07', 'lib/core/network/interceptors/new.dart'),
+        isTrue,
+      );
       for (final feature in ['auth', 'user']) {
         for (final rule in ['R03', 'R06', 'R07', 'R09']) {
           expect(

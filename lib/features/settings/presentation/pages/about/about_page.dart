@@ -11,15 +11,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
-class AboutSettingsPage extends ConsumerStatefulWidget {
+@Dependencies([settingsLayout])
+class AboutSettingsPage extends StatefulWidget {
   const AboutSettingsPage({super.key});
 
   @override
-  ConsumerState<AboutSettingsPage> createState() => _AboutSettingsPageState();
+  State<AboutSettingsPage> createState() => _AboutSettingsPageState();
 }
 
-class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
+class _AboutSettingsPageState extends State<AboutSettingsPage> {
   late bool autoUpdate;
 
   @override
@@ -86,7 +88,8 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
               ),
             ),
             SingleChildScrollView(
-              padding: EdgeInsets.only(top: topPadding, bottom: paddingOf.bottom),
+              padding:
+                  EdgeInsets.only(top: topPadding, bottom: paddingOf.bottom),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1500),
@@ -133,7 +136,8 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                             const SizedBox(height: 16),
                             const Divider(),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15),
                               child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -151,23 +155,30 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                                   ]),
                             ),
                             const Divider(),
-                            ListTile(
-                              title: Text(l10n.checkForUpdates),
-                              trailing:
-                                  const Icon(Icons.browser_updated_outlined),
-                              onTap: () async {
-                                final notifier =
-                                    ref.read(appInfoProvider.notifier);
-                                final result = await notifier.checkVersion();
-                                if (!context.mounted) return;
-                                await handleVersionCheckResult(
-                                  context,
-                                  result,
-                                  onStartDownload: notifier.performUpdateDownload,
-                                  onDownloadedPackageAction:
-                                      notifier.openDownloadedPackage,
-                                  onCancelDownload: notifier.cancelUpdateDownload,
-                                  notifyWhenUpToDate: true,
+                            Consumer(
+                              builder: (context, ref, _) {
+                                return ListTile(
+                                  title: Text(l10n.checkForUpdates),
+                                  trailing: const Icon(
+                                      Icons.browser_updated_outlined),
+                                  onTap: () async {
+                                    final notifier =
+                                        ref.read(appInfoProvider.notifier);
+                                    final result =
+                                        await notifier.checkVersion();
+                                    if (!context.mounted) return;
+                                    await handleVersionCheckResult(
+                                      context,
+                                      result,
+                                      onStartDownload:
+                                          notifier.performUpdateDownload,
+                                      onDownloadedPackageAction:
+                                          notifier.openDownloadedPackage,
+                                      onCancelDownload:
+                                          notifier.cancelUpdateDownload,
+                                      notifyWhenUpToDate: true,
+                                    );
+                                  },
                                 );
                               },
                             ),

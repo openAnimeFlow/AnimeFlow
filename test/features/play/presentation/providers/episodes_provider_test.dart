@@ -5,7 +5,9 @@ import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([Episodes])
 void main() {
   group('Episodes offline mode', () {
     test('builds episodes from completed download snapshot', () async {

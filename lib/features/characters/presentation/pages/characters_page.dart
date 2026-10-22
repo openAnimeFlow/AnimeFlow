@@ -7,8 +7,10 @@ import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 角色列表页面
+@Dependencies([CharactersList])
 class CharacterPage extends StatefulWidget {
   const CharacterPage({super.key});
 

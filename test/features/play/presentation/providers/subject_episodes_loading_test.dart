@@ -12,6 +12,7 @@ import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 class _GuestToken extends CurrentFlowToken {
   @override
@@ -58,6 +59,7 @@ EpisodesItem _page(List<int> ids, int total) => EpisodesItem(
 
 Future<void> _flush() => Future<void>.delayed(Duration.zero);
 
+@Dependencies([Episodes])
 void main() {
   late Directory directory;
   late ProviderContainer container;

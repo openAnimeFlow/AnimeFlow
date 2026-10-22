@@ -17,12 +17,14 @@ import 'package:anime_flow/shared/widgets/network_check_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
 import 'package:anime_flow/features/settings/presentation/widgets/account/account_content.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/account/avatar_dialog.dart';
 
+@Dependencies([settingsLayout])
 class AccountSettingsPage extends ConsumerStatefulWidget {
   const AccountSettingsPage({super.key});
 

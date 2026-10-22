@@ -8,6 +8,7 @@ import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:go_router/go_router.dart';
 
 void _exitSettings(BuildContext context) {
@@ -65,6 +66,7 @@ class _SettingsLayout extends StatelessWidget {
 }
 
 /// Root settings route: menu on narrow screens, default category on wide screens.
+@Dependencies([settingsLayout])
 class SettingsMenuPage extends ConsumerWidget {
   const SettingsMenuPage({super.key});
 

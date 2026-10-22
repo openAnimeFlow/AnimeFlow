@@ -7,7 +7,9 @@ import 'package:anime_flow/core/utils/bgm_utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([CharacterWorks])
 class CharacterWorksView extends StatelessWidget {
   const CharacterWorksView({super.key});
 

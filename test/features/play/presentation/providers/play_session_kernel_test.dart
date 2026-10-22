@@ -78,7 +78,7 @@ void main() {
       addTearDown(() => debugDefaultTargetPlatformOverride = null);
       final factory = _Factory();
       final state = _State()
-        ..value = const PlayState(playing: true, volume: 35);
+        .._value = const PlayState(playing: true, volume: 35);
       final session = _Session(factory, state: state);
       await session.playbackCoordinator.initialize();
       addTearDown(session.playbackCoordinator.dispose);
@@ -88,7 +88,7 @@ void main() {
         expect(await session.setHardwareDecoder(enabled), isTrue);
         expect(factory.engines.last.volume,
             platform == TargetPlatform.fuchsia ? 35 : 100);
-        expect(state.value.volume, 35);
+        expect(state._value.volume, 35);
       }
       expect(await session.switchKernel(PlayerKernel.fvp), isTrue);
       expect(factory.engines.last.volume,
@@ -101,7 +101,7 @@ void main() {
       () async {
     final factory = _Factory();
     final state = _State()
-      ..value = const PlayState(playing: true, videoFit: VideoFit.cover);
+      .._value = const PlayState(playing: true, videoFit: VideoFit.cover);
     final session = _Session(factory, state: state);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
@@ -119,7 +119,7 @@ void main() {
     expect(Storage.setting.get(PlaybackKey.hardwareDecoder), isTrue);
     expect(factory.engines, hasLength(3));
     expect(factory.decoderOptions, [true, false, true]);
-    expect(state.value.videoFit, VideoFit.cover);
+    expect(state._value.videoFit, VideoFit.cover);
   });
 
   test(
@@ -234,7 +234,7 @@ void main() {
     const duration = Duration(minutes: 24);
     final factory = _Factory();
     final state = _State()
-      ..value = const PlayState(
+      .._value = const PlayState(
         playing: true,
         duration: duration,
         position: Duration(minutes: 10),
@@ -249,13 +249,13 @@ void main() {
 
     final target = duration - const Duration(seconds: 1);
     expect(factory.engines.last.seekPositions, [target]);
-    expect(state.value.position, target);
+    expect(state._value.position, target);
   });
 
   test('startup phase ignores play and seek requests', () async {
     final factory = _Factory();
     final state = _State()
-      ..value = const PlayState(
+      .._value = const PlayState(
         phase: PlaybackPhase.resolving,
         duration: Duration(minutes: 24),
       );
@@ -274,10 +274,10 @@ void main() {
     expect(engine.playCalls, 0);
     expect(engine.pauseCalls, 0);
     expect(engine.seekPositions, isEmpty);
-    expect(state.value.position, Duration.zero);
+    expect(state._value.position, Duration.zero);
 
     // 启动结束后恢复正常的播放与跳转。
-    state.value = state.value.copyWith(
+    state._value = state._value.copyWith(
       phase: PlaybackPhase.playing,
       playing: true,
     );
@@ -314,7 +314,7 @@ class _Session extends PlaySession {
       : super(
           shadersDirectory: Directory.systemTemp,
           playStateActions: state,
-          readPlayState: () => state.value,
+          readPlayState: () => state._value,
           playbackIndicatorActions: _Indicators(),
           episodesActions: _Episodes(),
           danmaku: DanmakuSession(
@@ -442,20 +442,20 @@ class _Settings implements Box<dynamic> {
 }
 
 class _State implements PlayStateNotifier {
-  PlayState value = const PlayState(playing: true);
+  PlayState _value = const PlayState(playing: true);
   @override
   void setKernel(PlayerKernel kernel) {
-    value = value.copyWith(kernel: kernel);
+    _value = _value.copyWith(kernel: kernel);
   }
 
   @override
   void setSwitchingKernel(bool switching) {
-    value = value.copyWith(switchingKernel: switching);
+    _value = _value.copyWith(switchingKernel: switching);
   }
 
   @override
   void setPosition(Duration position) {
-    value = value.copyWith(position: position);
+    _value = _value.copyWith(position: position);
   }
 
   @override

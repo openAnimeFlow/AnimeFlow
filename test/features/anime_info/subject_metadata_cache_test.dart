@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 class Adapter implements HttpClientAdapter {
   final requests = <RequestOptions>[];
@@ -110,6 +111,7 @@ final related = <String, dynamic>{
   ],
 };
 
+@Dependencies([SubjectProducers, SubjectRelated])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;

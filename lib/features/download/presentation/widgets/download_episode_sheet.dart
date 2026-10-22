@@ -14,7 +14,9 @@ import 'package:anime_flow/shared/models/player/play/video/episode_resources_ite
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([VideoSourceNotifier, playExtra])
 Future<void> showDownloadEpisodeSheet(BuildContext context, WidgetRef ref) {
   final container = ProviderScope.containerOf(context);
   return showModalBottomSheet<void>(
@@ -44,6 +46,7 @@ Future<void> showDownloadEpisodeSheet(BuildContext context, WidgetRef ref) {
   );
 }
 
+@Dependencies([VideoSourceNotifier, playExtra])
 class DownloadEpisodeSheet extends ConsumerStatefulWidget {
   const DownloadEpisodeSheet({
     super.key,

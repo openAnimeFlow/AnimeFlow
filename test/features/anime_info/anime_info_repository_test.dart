@@ -109,7 +109,10 @@ void main() {
   late ProviderContainer repositoryContainer;
 
   AnimeInfoRepository createRepository() {
-    repositoryContainer = ProviderContainer(retry: (_, __) => null);
+    repositoryContainer = ProviderContainer(
+      retry: (_, __) => null,
+      overrides: [currentFlowTokenProvider.overrideWith(GuestToken.new)],
+    );
     addTearDown(repositoryContainer.dispose);
     return repositoryContainer.read(animeInfoRepositoryProvider.notifier);
   }
@@ -145,7 +148,6 @@ void main() {
         parent: repositoryContainer,
         retry: (_, __) => null,
         overrides: [
-          currentFlowTokenProvider.overrideWith(GuestToken.new),
           animeInfoArgsProvider
               .overrideWithValue(InfoRouteExtra(id: 42, name: '', image: '')),
         ]);

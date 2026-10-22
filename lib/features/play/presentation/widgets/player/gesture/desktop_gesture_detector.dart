@@ -4,7 +4,7 @@ import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/utils/player_screenshot.dart';
-import 'package:anime_flow/features/play/domain/player/player_shortcut.dart';
+import 'package:anime_flow/core/settings/player_shortcut_settings.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';

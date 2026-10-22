@@ -85,6 +85,42 @@ void main() {
   );
   test('project policy closes user/auth business without hiding routing debt', () {
     final spec = projectArchitecture();
+    expect(
+      spec.isStrict(
+        'R05',
+        'lib/features/play/application/playback_coordinator.dart',
+      ),
+      isTrue,
+    );
+    for (final implementation in [
+      'lib/features/play/infrastructure/player/player_engine_factory.dart',
+      'lib/features/play/infrastructure/player/media_kit/media_kit_engine.dart',
+      'lib/features/play/infrastructure/player/fvp/fvp_engine.dart',
+    ]) {
+      expect(spec.isStrict('R04', source, target: implementation), isTrue);
+    }
+    expect(
+      spec
+          .ownerOf(
+            'lib/features/play/infrastructure/player/player_engine_factory.dart',
+          )
+          .role,
+      Responsibility.composition,
+    );
+    expect(
+      spec.isStrict(
+        'R05',
+        'lib/features/play/domain/player/player_engine.dart',
+      ),
+      isTrue,
+    );
+    expect(
+      spec.isStrict(
+        'R09',
+        'lib/features/play/application/playback_coordinator.dart',
+      ),
+      isTrue,
+    );
     const implementation =
         'lib/core/video_source/infrastructure/webview_video_source_service.dart';
     expect(

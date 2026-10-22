@@ -35,6 +35,8 @@ macOS/Linux 用 cd 进入工具包安装依赖后，再返回项目根目录执�
 - 同时检查文件和功能模块循环，以具体依赖边登记，已有循环内新增边也会失败。
 - 只有精确登记的生成国际化内部关系折叠，不忽略其他业务循环。
 - 收藏修订信号是精确登记的数据失效契约；其自身不能再依赖业务流程或数据实现。
+- `pureBusiness` 中登记的纯业务逻辑遵守 R05，不能通过公共模型或重导出间接引入
+  Flutter、状态管理或原生实现；该规则不接受存量豁免。
 
 ## 存量与失败报告
 
@@ -245,3 +247,61 @@ test/features/download/application/video_source_resolver_pool_test.dart，使用
 假解析器，覆盖并发、FIFO、参数传递、取消、超时、初始化失败、迟到结果、销毁及恢复。
 全量日志位于 build/phase4-business-tests.log、build/phase4-architecture-tests.log。
 实际设备 WebView、Linux 和远程 Actions 尚未验证；无运行实例时无法执行热重载。
+
+## 第五阶段：播放器职责拆分
+
+2026-10-22，Windows，Flutter 3.47.6 / Dart 3.13.5。
+
+PlayerEngine 只暴露播放控制、事件和截图字节；PlayerVideoSurface 是独立的渲染适配接口，
+由 PlayerView 使用。MediaKit/FVP 实现两种接口，业务协调器和播放业务 Provider 不再构建
+Widget。PlayState 和 PlayerSnapshot 使用 VideoFit，展示扩展转换为 BoxFit。
+
+PlaybackCoordinator 通过 player_engine.dart 中的 PlayerEngineFactory 函数类型创建内核，
+没有额外的工厂接口类或实现类。硬解配置显式传入，
+只有成功切换后才提交配置；失败保留旧内核及旧配置。app/composition/player_bindings.dart
+选择原生创建函数，通过 bootstrap 的 ProviderContainer 注入。未装配时明确失败。
+原生工厂不读取全局设置，业务逻辑不选择 MediaKit/FVP 的具体实现。
+
+生命周期观察和屏幕常亮由展示层 PlaybackScreenAwake 负责，PlayPage 创建并持有监听器，
+监听现有播放事件，无需领域活动接口或额外工厂 Provider。退出页面立即取消订阅、解除
+生命周期监听，并按顺序关闭常亮，不等待播放器原生操作排空。协调器独立等待已提交的原生
+操作完成后释放内核。纯 Dart 串行队列移入 core/async，供协调器与原生适配器共同使用。
+
+快捷键动作枚举归 shared/models/player；键盘/滚轮映射归 core/input，持久化归 core/settings。
+播放页与设置页使用同一配置适配，保留旧设置键、单个数字及数字列表格式、滚轮 -1/-2 编码和
+无效配置的默认回退。设置页不再依赖 play 内部领域文件。
+
+弹幕模型、会话和画布契约使用 ARGB 整数，Canvas 适配器构造 Color；UI 发送时转换为整数，
+API 和离线 JSON 继续传输原来的 RGB 数字。业务模型不再导入绘图库或 UI 工具类。
+
+唯一架构策略声明纯业务范围：快捷键动作/弹幕模型、协调器、弹幕画布契约、状态和分发算法。
+R05 检查其传递依赖，也检查所有播放器 domain；绘图、Flutter 生命周期或平台能力不能通过模型/barrel 绕过。
+新增登记必须对应现有业务文件。播放器 application/domain 与播放会话 Provider 的 R09
+已严格化；播放器核心的 R07 严格检查。原生创建函数和两个具体内核只允许装配职责引用。
+没有扩大全局豁免，也未要求简单页面新增 Repository。
+
+| 验证 | 结果 |
+| --- | --- |
+| 全量业务测试 | 487 项通过，新增 4 项并合并 1 项与内核无关的重复事件案例 |
+| 架构引擎验收 | 51 项通过，包含纯业务传递依赖正反样例及配置验证 |
+| Flutter 架构集成入口 | 2 项通过 |
+| 静态分析 | 应用与独立工具包零诊断 |
+| 完整扫描 | 493 个源码文件、433 个手写文件、440 个 library、2486 条依赖 |
+| 存量门禁 | 195 条；新增 0、失效 0 |
+
+清理 10 条登记：R04 1、R05 4、R06 1、R07 1、R09 3；其余登记身份和元数据不变。
+全项目剩余 R03 3、R04 18、R06 33、R07 140、R09 1；R01/R02/R05/R08 为零。
+展示层的路由、窗口标题栏、历史提示与跨功能依赖仍按精确基线约束，留待第六阶段。
+
+新增/增强回归验证截图字节与销毁排队、硬解选项注入和失败回滚、画面适配状态保留、旧快捷键
+配置读取和持久化，以及弹幕颜色解析与原有发送协议。原有内核切换成功/失败、并发开源、
+前后台常亮、延迟启用后的释放与重复销毁测试继续通过。常亮测试移到展示层，直接验证
+事件订阅、数据源关闭和页面退出清理，合并不再依赖内核种类的重复事件案例。
+
+本地日志：build/phase5-business-tests.log、build/phase5-architecture-tests.log、
+build/playback-activity-simplification-analyze.log、build/playback-activity-simplification-codegen.log。
+生成器沿用原锁定版本，仍有 analyzer 9
+语法支持落后于 Dart 3.13 的已知提示；应用与独立架构分析均通过，没有升级生成器生态。
+
+已对连接中的 Windows 应用执行热重启，未发现运行时异常。实际长时间播放、全部内核的
+设备交互、其他平台与远程 Actions 尚未验证；本阶段不声称解决或复现此前的播放退出卡顿。

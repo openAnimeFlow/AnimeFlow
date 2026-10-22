@@ -571,8 +571,8 @@ class _DanmakuInputField extends ConsumerWidget {
     int type,
     Color color,
   ) async {
-    final success =
-        await playController.danmaku.send(text, type: type, color: color);
+    final success = await playController.danmaku
+        .send(text, type: type, color: color.toARGB32());
     if (!context.mounted) return;
     final l10n = AppLocalizations.of(context);
     if (!success) {

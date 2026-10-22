@@ -66,6 +66,7 @@ class ArchitectureSpec {
     this.domainCoreTypes = const {},
     this.strictScopes = const {},
     this.compositionOnly = const {},
+    this.pureBusiness = const {},
   });
   final List<ModuleSpec> modules;
   // Only generator-owned cycles inside these exact groups are collapsed.
@@ -76,6 +77,8 @@ class ArchitectureSpec {
   // Scoped rules cannot be frozen again after a business migration.
   final Map<String, Set<String>> strictScopes;
   final Set<String> compositionOnly;
+  // Selected business contracts/models/algorithms follow domain dependency purity.
+  final Set<String> pureBusiness;
   static const rules = {
     'R01',
     'R02',
@@ -92,6 +95,7 @@ class ArchitectureSpec {
   bool isStrict(String rule, String source, {String? target}) =>
       strictRules.contains(rule) ||
       rule == 'R04' && compositionOnly.contains(target) ||
+      rule == 'R05' && pureBusiness.contains(source) ||
       (strictScopes[rule]?.any(
             (pattern) =>
                 Glob(pattern).matches(source) ||
@@ -118,6 +122,15 @@ class ArchitectureSpec {
   void validate(Iterable<String> paths) {
     final files = paths.toSet();
     if (files.isEmpty) throw StateError('R08: source scan is empty');
+    for (final entry in pureBusiness) {
+      if (!files.contains(entry) ||
+          !{
+            Responsibility.business,
+            Responsibility.model,
+          }.contains(ownerOf(entry).role)) {
+        throw StateError('R08: invalid pure business source $entry');
+      }
+    }
     for (final entry in compositionOnly) {
       if (!files.contains(entry) ||
           !{

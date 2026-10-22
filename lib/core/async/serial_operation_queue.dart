@@ -1,6 +1,6 @@
-/// Serializes native player work without letting a failure block later work.
-class PlayerOperationQueue {
-  PlayerOperationQueue({required this.ensureReady});
+/// Serializes asynchronous work without letting a failure block later work.
+class SerialOperationQueue {
+  SerialOperationQueue({required this.ensureReady});
 
   final void Function() ensureReady;
   Future<void> _tail = Future<void>.value();

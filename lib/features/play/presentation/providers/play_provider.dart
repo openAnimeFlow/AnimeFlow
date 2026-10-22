@@ -30,9 +30,10 @@ import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
-import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
+import 'package:anime_flow/features/play/domain/player/player_engine.dart';
+import 'package:anime_flow/features/play/domain/player/video_fit.dart';
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -74,7 +75,7 @@ PlaySession playSession(Ref ref) {
     playbackIndicatorActions: ref.watch(videoUiProvider.notifier),
     episodesActions: ref.watch(episodesProvider.notifier),
     danmaku: danmaku,
-    engineFactory: const PlayerEngineFactory(),
+    engineFactory: ref.read(playerEngineFactoryProvider),
     setEpisodeWatched: ({
       required subjectId,
       required episodeId,
@@ -152,7 +153,7 @@ class PlayStateNotifier extends _$PlayStateNotifier {
     state = state.copyWith(isFullscreen: value);
   }
 
-  void setVideoFit(BoxFit value) {
+  void setVideoFit(VideoFit value) {
     if (state.videoFit == value) return;
     state = state.copyWith(videoFit: value);
   }
@@ -208,7 +209,7 @@ class PlayState {
   final bool isWideScreen;
   final bool isContentExpanded;
   final bool isFullscreen;
-  final BoxFit videoFit;
+  final VideoFit videoFit;
   final PlaybackPhase phase;
   final String statusMessage;
   final bool playing;
@@ -228,7 +229,7 @@ class PlayState {
     this.isWideScreen = false,
     this.isContentExpanded = true,
     this.isFullscreen = false,
-    this.videoFit = BoxFit.contain,
+    this.videoFit = VideoFit.contain,
     this.phase = PlaybackPhase.idle,
     this.statusMessage = '',
     this.playing = false,
@@ -249,7 +250,7 @@ class PlayState {
     bool? isWideScreen,
     bool? isContentExpanded,
     bool? isFullscreen,
-    BoxFit? videoFit,
+    VideoFit? videoFit,
     PlaybackPhase? phase,
     String? statusMessage,
     bool? playing,
@@ -446,6 +447,9 @@ class PlaySession {
     playbackCoordinator = PlaybackCoordinator(
       engineFactory: engineFactory,
       adBlocker: adBlocker,
+      hardwareDecoder: AppSettings.hardwareDecoder,
+      reportError: (message, error, stackTrace) =>
+          LiggLogger().e(message, error: error, stackTrace: stackTrace),
     );
     scheduleMicrotask(() {
       if (!_isDisposed) {
@@ -490,8 +494,8 @@ class PlaySession {
         await AppSettings.setHardwareDecoder(enabled);
         var applied = false;
         try {
-          applied =
-              await _switchKernel(playbackCoordinator.kernel, force: true);
+          applied = await _switchKernel(playbackCoordinator.kernel,
+              force: true, hardwareDecoder: enabled);
           return applied;
         } finally {
           if (!_isDisposed) _playStateActions.setSwitchingKernel(false);
@@ -501,7 +505,8 @@ class PlaySession {
         }
       });
 
-  Future<bool> _switchKernel(PlayerKernel target, {bool force = false}) async {
+  Future<bool> _switchKernel(PlayerKernel target,
+      {bool force = false, bool? hardwareDecoder}) async {
     if (_isDisposed || _playStateActions.value.switchingKernel) return false;
     if (!force && playbackCoordinator.kernel == target) return true;
 
@@ -525,6 +530,7 @@ class PlaySession {
     };
     final switched = await playbackCoordinator.switchKernel(target, snapshot,
         force: force,
+        hardwareDecoder: hardwareDecoder,
         shaders: force && shaderList.isNotEmpty
             ? Utils.buildShadersAbsolutePath(shadersDirectory.path, shaderList)
             : null);
@@ -858,7 +864,7 @@ class PlaySession {
   void switchToNextEpisode() => _episodesActions.switchToNextEpisode();
 
   /// 切换视频画面填充模式
-  void toggleVideoFit(BoxFit fits) {
+  void toggleVideoFit(VideoFit fits) {
     _playStateActions.setVideoFit(fits);
   }
 
@@ -1085,10 +1091,6 @@ class PlaySession {
         ? ''
         : Utils.buildShadersAbsolutePath(shadersDirectory.path, shaders));
     _playStateActions.setSuperResolutionType(type == 2 || type == 3 ? type : 1);
-  }
-
-  Widget buildVideoSurface({required BoxFit fit}) {
-    return playbackCoordinator.buildVideoSurface(fit: fit);
   }
 
   Future<Uint8List?> takeScreenshot() => playbackCoordinator.screenshot();

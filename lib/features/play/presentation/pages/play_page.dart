@@ -12,6 +12,7 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/player.dart';
+import 'package:anime_flow/features/play/presentation/utils/playback_screen_awake.dart';
 import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/app/router/app_route_observer.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
@@ -38,6 +39,7 @@ class PlayPage extends ConsumerStatefulWidget {
 class _PlayPageState extends ConsumerState<PlayPage>
     with SingleTickerProviderStateMixin, RouteAware {
   late final PlaySession playSession;
+  late final PlaybackScreenAwake _screenAwake;
   late final VideoSourceNotifier videoSourceController;
   late final AnimationController _contentAnimationController;
   late final Animation<double> _contentSizeFactor;
@@ -57,6 +59,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
     super.initState();
     videoSourceController = ref.read(videoSourceProvider.notifier);
     playSession = ref.read(playSessionProvider);
+    _screenAwake = PlaybackScreenAwake(playSession.playbackCoordinator.events);
     _contentAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
@@ -74,6 +77,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
 
   @override
   void dispose() {
+    unawaited(_screenAwake.dispose());
     PresenceService.instance.clearPlaybackContext();
     if (_subscribedRouteObserver) {
       appRouteObserver.unsubscribe(this);
@@ -375,8 +379,8 @@ class _ContentViewState extends ConsumerState<_ContentView>
       NotificationToast.show(l10n.loginBeforeDanmaku, title: l10n.pleaseLogin);
       return;
     }
-    final success =
-        await playSession.danmaku.send(text, type: type, color: color);
+    final success = await playSession.danmaku
+        .send(text, type: type, color: color.toARGB32());
     if (!mounted) return;
     NotificationToast.show(
       success ? l10n.danmakuSent : l10n.danmakuUnsupported,

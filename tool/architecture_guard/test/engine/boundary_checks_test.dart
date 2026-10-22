@@ -13,6 +13,62 @@ import 'fixture_project.dart';
 void main() {
   late FixtureProject fixture;
   tearDown(() => fixture.dispose());
+  test('pure business ports reject platform leaks transitively without reversing domain dependencies', () {
+    const coordinator = 'lib/features/a/application/coordinator.dart';
+    const port = 'lib/features/a/application/port.dart';
+    const engine = 'lib/features/a/domain/engine.dart';
+    const queue = 'lib/core/queue.dart';
+    const model = 'lib/shared/models/value.dart';
+    fixture = FixtureProject({
+      coordinator: "import 'port.dart';\nimport '../domain/engine.dart';\nimport '../../../core/queue.dart';",
+      port: "import '../domain/engine.dart';\nimport '../../../shared/models/value.dart';",
+      engine: 'abstract class Engine {}',
+      queue: "import 'dart:async';",
+      model: 'class Value {}',
+      'lib/features/a/presentation/widgets/render.dart': '',
+    });
+    final modules = [
+      ...fixtureSpec().modules,
+      ModuleSpec('shared_models', 'lib/shared/models', [
+        SourceScope('lib/shared/models/**.dart', Responsibility.model),
+      ]),
+    ];
+    final spec = ArchitectureSpec(
+      modules,
+      pureBusiness: {coordinator, port, model},
+      domainCoreTypes: {queue},
+    );
+    expect(
+      checkBoundaries(collectDependencies(fixture.root, spec), spec),
+      isEmpty,
+    );
+    fixture.write(model, "import 'package:flutter/widgets.dart';");
+    fixture.write(engine, "import '../application/port.dart';");
+    final violations = checkBoundaries(
+      collectDependencies(fixture.root, spec),
+      spec,
+    );
+    expect(
+      violations.where((v) => v.rule == 'R05').map((v) => v.source).toSet(),
+      {coordinator, port, model, engine},
+    );
+    for (final invalid in [
+      'lib/missing.dart',
+      'lib/features/a/presentation/widgets/render.dart',
+    ]) {
+      expect(
+        () => ArchitectureSpec(modules, pureBusiness: {invalid}).validate({
+          coordinator,
+          port,
+          engine,
+          queue,
+          model,
+          'lib/features/a/presentation/widgets/render.dart',
+        }),
+        throwsStateError,
+      );
+    }
+  });
   test('shared video resolution keeps contracts pure and implementation selection in composition', () {
     const service =
         'lib/core/video_source/infrastructure/webview_video_source_service.dart';
@@ -22,15 +78,20 @@ void main() {
     const providers = 'lib/core/video_source/application/providers.dart';
     const consumer = 'lib/features/a/application/resolve.dart';
     final project = projectArchitecture();
-    final spec = ArchitectureSpec([
-      project.modules.singleWhere((module) => module.name == 'core'),
-      ModuleSpec('app', 'lib/app', [
-        SourceScope('lib/app/**.dart', Responsibility.composition),
-      ]),
-      ModuleSpec('a', 'lib/features/a', [
-        SourceScope('lib/features/a/**.dart', Responsibility.business),
-      ]),
-    ], compositionOnly: project.compositionOnly);
+    final spec = ArchitectureSpec(
+      [
+        project.modules.singleWhere((module) => module.name == 'core'),
+        ModuleSpec('app', 'lib/app', [
+          SourceScope('lib/app/**.dart', Responsibility.composition),
+        ]),
+        ModuleSpec('a', 'lib/features/a', [
+          SourceScope('lib/features/a/**.dart', Responsibility.business),
+        ]),
+      ],
+      compositionOnly: project.compositionOnly
+          .where((p) => p.startsWith('lib/core/'))
+          .toSet(),
+    );
     fixture = FixtureProject({
       'lib/app/setup.dart': "import '../core/video_source/infrastructure/webview_video_source_service.dart';\nimport '../core/webview/video/video_webview_controller_factory.dart';",
       'lib/core/webview/video/base.dart': 'abstract class NativeController {}',

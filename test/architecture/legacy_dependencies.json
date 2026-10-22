@@ -114,16 +114,6 @@
     {
       "rule": "R04",
       "source": "lib/features/play/presentation/providers/play_provider.dart",
-      "target": "lib/features/play/infrastructure/player/player_engine_factory.dart",
-      "kind": "import",
-      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R04",
-      "source": "lib/features/play/presentation/providers/play_provider.dart",
       "target": "lib/features/shaders/shaders_controller.dart",
       "kind": "import",
       "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
@@ -219,46 +209,6 @@
       "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
       "owner": "feature:user_space",
       "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R05",
-      "source": "lib/features/play/domain/player/player_engine.dart",
-      "target": "package:material_ui/material_ui.dart",
-      "kind": "import",
-      "reason": "现有播放器领域类型依赖 UI 或设置存储，待分离播放控制、渲染及快捷键持久化。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.5 播放器职责拆分",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R05",
-      "source": "lib/features/play/domain/player/player_shortcut.dart",
-      "target": "lib/core/settings/app_settings.dart",
-      "kind": "import",
-      "reason": "现有播放器领域类型依赖 UI 或设置存储，待分离播放控制、渲染及快捷键持久化。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.5 播放器职责拆分",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R05",
-      "source": "lib/features/play/domain/player/player_shortcut.dart",
-      "target": "package:flutter/services.dart",
-      "kind": "import",
-      "reason": "现有播放器领域类型依赖 UI 或设置存储，待分离播放控制、渲染及快捷键持久化。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.5 播放器职责拆分",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R05",
-      "source": "lib/features/play/domain/player/player_snapshot.dart",
-      "target": "package:material_ui/material_ui.dart",
-      "kind": "import",
-      "reason": "现有播放器领域类型依赖 UI 或设置存储，待分离播放控制、渲染及快捷键持久化。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.5 播放器职责拆分",
       "reviewBy": "2026-11-22"
     },
     {
@@ -485,16 +435,6 @@
       "rule": "R06",
       "source": "lib/features/settings/presentation/pages/playback_settings.dart",
       "target": "lib/features/play/presentation/extensions/player_kernel_localization.dart",
-      "kind": "import",
-      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
-      "owner": "feature:settings",
-      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R06",
-      "source": "lib/features/settings/presentation/pages/player_shortcuts_page.dart",
-      "target": "lib/features/play/domain/player/player_shortcut.dart",
       "kind": "import",
       "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
       "owner": "feature:settings",
@@ -1803,16 +1743,6 @@
     },
     {
       "rule": "R07",
-      "source": "lib/features/settings/presentation/pages/player_shortcuts_page.dart",
-      "target": "lib/features/play/domain/player/player_shortcut.dart",
-      "kind": "import",
-      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
-      "owner": "feature:settings",
-      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R07",
       "source": "lib/features/settings/presentation/pages/plugins/plugins.dart",
       "target": "lib/app/router/app_router.dart",
       "kind": "import",
@@ -2013,37 +1943,7 @@
     },
     {
       "rule": "R09",
-      "source": "lib/features/play/application/playback_coordinator.dart",
-      "target": "package:flutter/src/widgets/framework.dart#Widget",
-      "kind": "type",
-      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R09",
-      "source": "lib/features/play/domain/player/player_engine.dart",
-      "target": "package:flutter/src/widgets/framework.dart#Widget",
-      "kind": "type",
-      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R09",
       "source": "lib/features/play/presentation/providers/play_history_provider.dart",
-      "target": "package:flutter/src/widgets/framework.dart#Widget",
-      "kind": "type",
-      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
-      "owner": "feature:play",
-      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
-      "reviewBy": "2026-11-22"
-    },
-    {
-      "rule": "R09",
-      "source": "lib/features/play/presentation/providers/play_provider.dart",
       "target": "package:flutter/src/widgets/framework.dart#Widget",
       "kind": "type",
       "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",

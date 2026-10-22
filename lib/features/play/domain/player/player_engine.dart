@@ -1,7 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:material_ui/material_ui.dart';
-
 import 'player_capabilities.dart';
 import 'player_event.dart';
 import 'player_kernel.dart';
@@ -11,8 +9,6 @@ abstract interface class PlayerEngine {
   PlayerKernel get kernel;
   PlayerCapabilities get capabilities;
   Stream<PlayerEvent> get events;
-
-  Widget buildVideoSurface({required BoxFit fit});
 
   Future<void> initialize();
   Future<void> open(
@@ -30,3 +26,10 @@ abstract interface class PlayerEngine {
   Future<void> setShaders(String shaderList);
   Future<void> dispose();
 }
+
+/// Injects engine creation without requiring a separate factory class.
+typedef PlayerEngineFactory = PlayerEngine Function(
+  PlayerKernel kernel, {
+  required bool adBlocker,
+  required bool hardwareDecoder,
+});

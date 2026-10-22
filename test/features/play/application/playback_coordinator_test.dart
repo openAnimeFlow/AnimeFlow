@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:anime_flow/features/play/domain/player/video_fit.dart';
 import 'dart:async';
 
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
@@ -7,33 +9,41 @@ import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
-import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wakelock_plus_platform_interface/messages.g.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  late List<bool> calls;
-  Future<void> Function(bool enable)? beforeToggle;
-  const channel = BasicMessageChannel<Object?>(
-    'dev.flutter.pigeon.wakelock_plus_platform_interface.WakelockPlusApi.toggle',
-    WakelockPlusApi.pigeonChannelCodec,
-  );
-  final messenger =
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-  setUp(() {
-    calls = <bool>[];
-    beforeToggle = null;
-    messenger.setMockDecodedMessageHandler<Object?>(channel, (message) async {
-      final enabled = ((message as List).single as ToggleMessage).enable!;
-      calls.add(enabled);
-      await beforeToggle?.call(enabled);
-      return <Object?>[null];
+  test(
+      'screenshot returns bytes while disposal drains active work and cancels queued commands',
+      () async {
+    final started = Completer<void>();
+    final gate = Completer<void>();
+    final bytes = Uint8List.fromList([1, 2, 3]);
+    final factory = _FakeEngineFactory(configure: (engine) {
+      engine.screenshotBytes = bytes;
+      engine.beforeOperation = (operation) async {
+        if (operation == 'screenshot') {
+          started.complete();
+          await gate.future;
+        }
+      };
     });
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
+    await coordinator.initialize();
+    final screenshot = coordinator.screenshot();
+    await started.future;
+    final disposal = coordinator.dispose();
+    expect(factory.created.single.disposeCount, 0);
+    final cancelled = coordinator.screenshot();
+    gate.complete();
+    expect(await screenshot, same(bytes));
+    expect(await cancelled, isNull);
+    await disposal;
+    expect(factory.created.single.disposeCount, 1);
   });
-  tearDown(() => messenger.setMockDecodedMessageHandler(channel, null));
 
   test('concurrent initialization shares one engine and one operation',
       () async {
@@ -47,8 +57,11 @@ void main() {
         }
       };
     });
-    final coordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
     addTearDown(coordinator.dispose);
     final first = coordinator.initialize();
     await started.future;
@@ -72,8 +85,11 @@ void main() {
         }
       };
     });
-    final coordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
     final initializing = coordinator.initialize();
     await started.future;
     final engine = factory.created.single;
@@ -92,8 +108,11 @@ void main() {
 
   test('disposal releases a failed initialization and closes events', () async {
     final factory = _FakeEngineFactory(failKernel: PlayerKernel.mediaKit);
-    final coordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
     await expectLater(coordinator.initialize(), throwsStateError);
     expect(factory.created.single.disposeCount, 0);
     final eventsDone = coordinator.events.drain<void>();
@@ -106,8 +125,11 @@ void main() {
       'disposal before initialization closes events without creating an engine',
       () async {
     final factory = _FakeEngineFactory();
-    final coordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
     final eventsDone = coordinator.events.drain<void>();
     await coordinator.dispose();
     await eventsDone;
@@ -124,8 +146,11 @@ void main() {
         }
       };
     });
-    final coordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
     addTearDown(coordinator.dispose);
     await coordinator.initialize();
     expect(
@@ -150,8 +175,11 @@ void main() {
         }
       };
     });
-    final coordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
     addTearDown(coordinator.dispose);
     await coordinator.initialize();
     final errors = <PlayerError>[];
@@ -183,8 +211,11 @@ void main() {
         };
       },
     );
-    final coordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
     addTearDown(coordinator.dispose);
     await coordinator.initialize();
     expect(
@@ -195,145 +226,54 @@ void main() {
     expect(factory.created.last.disposeCount, 1);
   });
 
-  test('engine disposal failure still closes events and releases wakelock',
-      () async {
+  test('engine disposal failure still closes events', () async {
     final factory = _FakeEngineFactory(configure: (engine) {
       engine.beforeOperation = (operation) async {
         if (operation == 'dispose') throw StateError('native disposal failed');
       };
     });
-    final coordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
     await coordinator.initialize();
-    factory.created.single.emit(const PlayerPlayingChanged(true));
-    await Future<void>.delayed(Duration.zero);
-    expect(calls, [true]);
     final eventsDone = coordinator.events.drain<void>();
     await coordinator.dispose();
     await eventsDone;
-    expect(calls, [true, false]);
     expect(factory.created.single.disposeCount, 1);
   });
 
-  for (final kernel in PlayerKernel.values) {
-    test('$kernel controls wakelock through playback and terminal events',
-        () async {
-      final factory = _FakeEngineFactory();
-      final coordinator = PlaybackCoordinator(
-        engineFactory: factory,
-        adBlocker: false,
-      );
-      addTearDown(coordinator.dispose);
-      await coordinator.initialize(kernel: kernel);
-      final engine = factory.created.single;
-      Future<void> emit(PlayerEvent event) async {
-        engine.emit(event);
-        await Future<void>.delayed(Duration.zero);
-      }
-
-      await emit(const PlayerPlayingChanged(true));
-      await emit(const PlayerPlayingChanged(true));
-      await emit(const PlayerBufferingChanged(true));
-      expect(calls, [true]);
-      await emit(const PlayerPlayingChanged(false));
-      expect(calls, [true, false]);
-      await emit(const PlayerPlayingChanged(true));
-      await emit(const PlayerCompleted());
-      expect(calls, [true, false, true, false]);
-      await emit(const PlayerPlayingChanged(true));
-      await emit(PlayerError(StateError('playback failed')));
-      expect(calls.last, isFalse);
-      await emit(const PlayerPlayingChanged(true));
-      await coordinator.dispose();
-      expect(calls.last, isFalse);
-    });
-  }
-
-  test('background releases wakelock and foreground reacquires it', () async {
-    final binding = WidgetsBinding.instance;
-    addTearDown(() =>
-        binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed));
-    final factory = _FakeEngineFactory();
-    final coordinator = PlaybackCoordinator(
-      engineFactory: factory,
-      adBlocker: false,
-    );
-    addTearDown(coordinator.dispose);
-    await coordinator.initialize(kernel: PlayerKernel.fvp);
-    final engine = factory.created.single;
-    engine.emit(const PlayerPlayingChanged(true));
-    await Future<void>.delayed(Duration.zero);
-    expect(calls, [true]);
-
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-    await Future<void>.delayed(Duration.zero);
-    expect(calls, [true, false]);
-    engine.emit(const PlayerPlayingChanged(true));
-    await Future<void>.delayed(Duration.zero);
-    expect(calls, [true, false]);
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await Future<void>.delayed(Duration.zero);
-    expect(calls, [true, false, true]);
-    engine.emit(const PlayerPlayingChanged(false));
-    await Future<void>.delayed(Duration.zero);
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await Future<void>.delayed(Duration.zero);
-    expect(calls, [true, false, true, false]);
-  });
-
-  test('dispose waits for delayed enable and releases it afterwards', () async {
-    final enableStarted = Completer<void>();
-    final enableGate = Completer<void>();
-    beforeToggle = (enable) async {
-      if (enable) {
-        enableStarted.complete();
-        await enableGate.future;
-      }
-    };
-    final factory = _FakeEngineFactory();
-    final coordinator = PlaybackCoordinator(
-      engineFactory: factory,
-      adBlocker: false,
-    );
-    await coordinator.initialize(kernel: PlayerKernel.fvp);
-    factory.created.single.emit(const PlayerPlayingChanged(true));
-    await enableStarted.future;
-    var disposed = false;
-    final disposal = coordinator.dispose().then((_) => disposed = true);
-    await Future<void>.delayed(Duration.zero);
-    expect(disposed, isFalse);
-    expect(calls, [true]);
-    enableGate.complete();
-    await disposal;
-    expect(calls, [true, false]);
-    coordinator.didChangeAppLifecycleState(AppLifecycleState.resumed);
-    await Future<void>.delayed(Duration.zero);
-    expect(calls, [true, false]);
-  });
-
   for (final fails in [false, true]) {
-    test('kernel switch restores wakelock (failure: $fails)', () async {
+    test(
+        'kernel switch forwards pause and resumed playback events (failure: $fails)',
+        () async {
       final factory = _FakeEngineFactory(
         failKernel: fails ? PlayerKernel.fvp : null,
         configure: (engine) => engine.emitPlayingChanges = true,
       );
       final coordinator = PlaybackCoordinator(
-        engineFactory: factory,
+        engineFactory: factory.create,
         adBlocker: false,
+        hardwareDecoder: true,
       );
       addTearDown(coordinator.dispose);
+      final playing = <bool>[];
+      final subscription = coordinator.events.listen((event) {
+        if (event is PlayerPlayingChanged) playing.add(event.playing);
+      });
+      addTearDown(subscription.cancel);
       await coordinator.initialize();
       await coordinator.play();
       await Future<void>.delayed(Duration.zero);
-      expect(calls, [true]);
+      expect(playing, [true]);
       expect(await coordinator.switchKernel(PlayerKernel.fvp, _snapshot()),
           !fails);
       await Future<void>.delayed(Duration.zero);
-      expect(calls, [true, false, true]);
+      expect(playing, [true, false, true]);
       await coordinator.stop();
       await Future<void>.delayed(Duration.zero);
-      expect(calls.last, isFalse);
+      expect(playing.last, isFalse);
     });
   }
 
@@ -352,8 +292,11 @@ void main() {
           }
         };
       });
-      final coordinator =
-          PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+      final coordinator = PlaybackCoordinator(
+        engineFactory: factory.create,
+        adBlocker: false,
+        hardwareDecoder: true,
+      );
       await coordinator.initialize();
       final switching = coordinator.switchKernel(PlayerKernel.fvp, _snapshot());
       await started.future;
@@ -387,8 +330,11 @@ void main() {
         }
       };
     });
-    final coordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
     addTearDown(coordinator.dispose);
     await coordinator.initialize();
     final switching = coordinator.switchKernel(PlayerKernel.fvp, _snapshot());
@@ -408,8 +354,11 @@ void main() {
 
   test('switches kernel before a video source is available', () async {
     final factory = _FakeEngineFactory();
-    final coordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
     addTearDown(coordinator.dispose);
     await coordinator.initialize();
     final switched = await coordinator.switchKernel(
@@ -420,7 +369,7 @@ void main() {
             volume: 65,
             rate: 1.25,
             wasPlaying: false,
-            fit: BoxFit.contain));
+            fit: VideoFit.contain));
     expect(switched, isTrue);
     expect(coordinator.kernel, PlayerKernel.fvp);
     expect(factory.created.first.pauseCount, 0);
@@ -434,8 +383,9 @@ void main() {
   test('switches kernel and restores the playback snapshot', () async {
     final factory = _FakeEngineFactory();
     final coordinator = PlaybackCoordinator(
-      engineFactory: factory,
+      engineFactory: factory.create,
       adBlocker: false,
+      hardwareDecoder: true,
     );
     addTearDown(coordinator.dispose);
 
@@ -447,7 +397,7 @@ void main() {
       volume: 65,
       rate: 1.25,
       wasPlaying: true,
-      fit: BoxFit.contain,
+      fit: VideoFit.contain,
     );
 
     final switched = await coordinator.switchKernel(PlayerKernel.fvp, snapshot);
@@ -468,8 +418,9 @@ void main() {
       () async {
     final factory = _FakeEngineFactory(failKernel: PlayerKernel.fvp);
     final coordinator = PlaybackCoordinator(
-      engineFactory: factory,
+      engineFactory: factory.create,
       adBlocker: false,
+      hardwareDecoder: true,
     );
     addTearDown(coordinator.dispose);
 
@@ -483,7 +434,7 @@ void main() {
         volume: 100,
         rate: 1,
         wasPlaying: true,
-        fit: BoxFit.contain,
+        fit: VideoFit.contain,
       ),
     );
 
@@ -498,8 +449,9 @@ void main() {
   test('forwards engine events through the coordinator', () async {
     final factory = _FakeEngineFactory();
     final coordinator = PlaybackCoordinator(
-      engineFactory: factory,
+      engineFactory: factory.create,
       adBlocker: false,
+      hardwareDecoder: true,
     );
     addTearDown(coordinator.dispose);
 
@@ -517,18 +469,18 @@ PlayerSnapshot _snapshot() => PlayerSnapshot(
       volume: 100,
       rate: 1,
       wasPlaying: true,
-      fit: BoxFit.contain,
+      fit: VideoFit.contain,
     );
 
-class _FakeEngineFactory extends PlayerEngineFactory {
+class _FakeEngineFactory {
   _FakeEngineFactory({this.failKernel, this.configure});
 
   final PlayerKernel? failKernel;
   final void Function(_FakePlayerEngine)? configure;
   final created = <_FakePlayerEngine>[];
 
-  @override
-  PlayerEngine create(PlayerKernel kernel, {required bool adBlocker}) {
+  PlayerEngine create(PlayerKernel kernel,
+      {required bool adBlocker, required bool hardwareDecoder}) {
     final engine = _FakePlayerEngine(
       kernel,
       shouldFail: kernel == failKernel,
@@ -555,15 +507,13 @@ class _FakePlayerEngine implements PlayerEngine {
   Future<void> Function(String operation)? beforeOperation;
   double? volume;
   double? rate;
+  Uint8List? screenshotBytes;
 
   @override
   final capabilities = const PlayerCapabilities();
 
   @override
   Stream<PlayerEvent> get events => _events.stream;
-
-  @override
-  Widget buildVideoSurface({required BoxFit fit}) => const SizedBox();
 
   @override
   Future<void> initialize() async {
@@ -611,7 +561,10 @@ class _FakePlayerEngine implements PlayerEngine {
   Future<void> setRate(double rate) async => this.rate = rate;
 
   @override
-  Future<Uint8List?> screenshot() async => null;
+  Future<Uint8List?> screenshot() async {
+    await beforeOperation?.call('screenshot');
+    return screenshotBytes;
+  }
 
   @override
   Future<void> setShaders(String shaderList) async {}

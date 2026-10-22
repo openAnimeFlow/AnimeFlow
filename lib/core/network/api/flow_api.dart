@@ -1,6 +1,5 @@
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/crawler/item/bgm_user_statistics_item.dart';
@@ -417,9 +416,9 @@ class FlowApi {
     required String message,
     required double time,
     required int type,
-    required Color color,
+    required int color,
   }) async {
-    final colorValue = Utils.colorToDecimalRgb(color);
+    final colorValue = color & 0xffffff;
     return _client.post(
       AnimeFlowApi.danmaku,
       data: {

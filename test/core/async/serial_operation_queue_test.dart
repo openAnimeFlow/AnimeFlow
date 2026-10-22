@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:anime_flow/features/play/infrastructure/player/player_operation_queue.dart';
+import 'package:anime_flow/core/async/serial_operation_queue.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('pending native work completes before the next operation starts',
       () async {
-    final queue = PlayerOperationQueue(ensureReady: () {});
+    final queue = SerialOperationQueue(ensureReady: () {});
     final started = Completer<void>();
     final gate = Completer<void>();
     final operations = <String>[];
@@ -30,7 +30,7 @@ void main() {
   });
 
   test('a failed operation does not prevent later operations', () async {
-    final queue = PlayerOperationQueue(ensureReady: () {});
+    final queue = SerialOperationQueue(ensureReady: () {});
     final opening =
         queue.run<void>(() async => throw StateError('open failed'));
     final failure = expectLater(opening, throwsStateError);
@@ -43,7 +43,7 @@ void main() {
   test('disposal cancels queued commands while allowing active work to drain',
       () async {
     var disposed = false;
-    final queue = PlayerOperationQueue(ensureReady: () {
+    final queue = SerialOperationQueue(ensureReady: () {
       if (disposed) throw StateError('disposed');
     });
     final started = Completer<void>();

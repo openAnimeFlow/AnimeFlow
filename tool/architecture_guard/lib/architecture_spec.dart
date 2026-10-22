@@ -97,6 +97,8 @@ ArchitectureSpec projectArchitecture() {
     'play': {
       'lib/features/play/presentation/pages/play_page.dart',
       'lib/features/play/presentation/pages/play_record_page.dart',
+      'lib/features/play/application/player_bindings.dart',
+      'lib/features/play/infrastructure/player/player_engine_factory.dart',
     },
     'ranking': {'lib/features/ranking/presentation/pages/ranking_page.dart'},
     'search': {
@@ -221,6 +223,14 @@ ArchitectureSpec projectArchitecture() {
             ),
           );
         }
+      } else if (name == 'play' && layer == 'infrastructure') {
+        scopes.add(PlayAdapterScope());
+        scopes.add(
+          SourceScope(
+            '$root/infrastructure/player/player_engine_factory.dart',
+            Responsibility.composition,
+          ),
+        );
       } else {
         scopes.add(
           SourceScope('$root/$layer/**.dart', switch (layer) {
@@ -257,9 +267,21 @@ ArchitectureSpec projectArchitecture() {
   }
   return ArchitectureSpec(
     modules,
+    pureBusiness: {
+      'lib/shared/models/player/player_shortcut_action.dart',
+      'lib/shared/models/player/danmaku/danmaku_module.dart',
+      'lib/features/play/application/playback_coordinator.dart',
+      'lib/features/play/application/danmaku_canvas.dart',
+      'lib/features/play/application/danmaku_state.dart',
+      'lib/features/play/application/danmaku_dispatch_scheduler.dart',
+    },
+    domainCoreTypes: {'lib/core/async/serial_operation_queue.dart'},
     compositionOnly: {
       'lib/core/video_source/infrastructure/webview_video_source_service.dart',
       'lib/core/webview/video/video_webview_controller_factory.dart',
+      'lib/features/play/infrastructure/player/player_engine_factory.dart',
+      'lib/features/play/infrastructure/player/media_kit/media_kit_engine.dart',
+      'lib/features/play/infrastructure/player/fvp/fvp_engine.dart',
     },
     strictScopes: {
       for (final rule in ['R03', 'R06', 'R09'])
@@ -267,8 +289,15 @@ ArchitectureSpec projectArchitecture() {
           'lib/features/auth/**.dart',
           'lib/features/user/**.dart',
           'lib/core/video_source/**.dart',
+          if (rule != 'R06') 'lib/features/play/domain/**.dart',
+          if (rule != 'R06') 'lib/features/play/application/**.dart',
+          if (rule == 'R09')
+            'lib/features/play/presentation/providers/play_provider.dart',
         },
-      'R05': {'lib/core/video_source/domain/**.dart'},
+      'R05': {
+        'lib/core/video_source/domain/**.dart',
+        'lib/features/play/domain/**.dart',
+      },
       // Routing/UI cycles are separate legacy work; business cycles are closed.
       'R07': {
         'lib/core/network/**.dart',
@@ -277,9 +306,12 @@ ArchitectureSpec projectArchitecture() {
         'lib/features/download/application/video_source_resolver_pool.dart',
         'lib/features/auth/application/**.dart',
         'lib/features/user/application/**.dart',
+        'lib/features/play/domain/**.dart',
+        'lib/features/play/application/playback_coordinator.dart',
+        'lib/features/play/application/player_bindings.dart',
+        'lib/features/play/infrastructure/player/**.dart',
       },
     },
-    domainCoreTypes: {'lib/core/constants/storage_key.dart'},
     dataContracts: {
       'lib/features/user/user_events.dart': '公开的收藏修订通知契约，仅导出缓存失效信号。',
       'lib/features/user/application/collection_revision_provider.dart':
@@ -293,6 +325,16 @@ ArchitectureSpec projectArchitecture() {
       },
     },
   );
+}
+
+class PlayAdapterScope extends SourceScope {
+  PlayAdapterScope()
+    : super('lib/features/play/infrastructure/**.dart', Responsibility.adapter);
+  @override
+  bool matches(String path) =>
+      super.matches(path) &&
+      path !=
+          'lib/features/play/infrastructure/player/player_engine_factory.dart';
 }
 
 class CoreFoundationScope extends SourceScope {

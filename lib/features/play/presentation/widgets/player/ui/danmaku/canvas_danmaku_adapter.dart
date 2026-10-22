@@ -10,7 +10,7 @@ class CanvasDanmakuAdapter implements DanmakuCanvas {
   final DanmakuController controller;
 
   @override
-  void addDanmaku(Danmaku danmaku, int? currentUserId, {Color? color}) {
+  void addDanmaku(Danmaku danmaku, int? currentUserId, {int? color}) {
     final type = switch (danmaku.type) {
       4 => DanmakuItemType.bottom,
       5 => DanmakuItemType.top,
@@ -19,7 +19,7 @@ class CanvasDanmakuAdapter implements DanmakuCanvas {
     try {
       controller.addDanmaku(DanmakuContentItem(
         danmaku.message,
-        color: color ?? danmaku.color,
+        color: Color(color ?? danmaku.color),
         type: type,
         selfSend:
             danmaku.bgmUserId != null && danmaku.bgmUserId == currentUserId,

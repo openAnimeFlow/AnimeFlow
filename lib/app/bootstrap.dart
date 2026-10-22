@@ -16,6 +16,7 @@ import 'package:anime_flow/core/network/image/image_cache_manager.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/app/composition/player_bindings.dart';
 import 'package:anime_flow/features/source/data/services/source_config_initializer.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,7 +60,8 @@ Future<void> bootstrap() async {
     });
   }
 
-  final container = ProviderContainer(overrides: videoSourceOverrides);
+  final container = ProviderContainer(
+      overrides: [...videoSourceOverrides, ...playerOverrides]);
   container.read(appInfoProvider);
   unawaited(container.read(shadersDirectoryProvider.future));
   unawaited(SourceConfigInitializer().initialize());

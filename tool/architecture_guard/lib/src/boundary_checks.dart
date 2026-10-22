@@ -16,6 +16,9 @@ List<ArchitectureViolation> checkBoundaries(
   final visited = <String>{};
   for (final edge in graph.edges) {
     final source = spec.ownerOf(edge.source);
+    final pure =
+        source.role == Responsibility.domain ||
+        spec.pureBusiness.contains(edge.source);
     final targets = <String>{};
     bool domainAllows(String target) {
       if (target.startsWith('dart:')) {
@@ -36,6 +39,8 @@ List<ArchitectureViolation> checkBoundaries(
       final owner = spec.ownerOf(target);
       return owner.role == Responsibility.domain ||
           owner.role == Responsibility.model ||
+          source.role != Responsibility.domain &&
+              spec.pureBusiness.contains(target) ||
           spec.domainCoreTypes.contains(target);
     }
 
@@ -45,7 +50,7 @@ List<ArchitectureViolation> checkBoundaries(
       for (final exported in graph.exportedFrom(target)) {
         follow(exported.target);
       }
-      if (source.role == Responsibility.domain && domainAllows(target)) {
+      if (pure && domainAllows(target)) {
         for (final dependency in graph.edges.where(
           (e) => e.source == target && e.kind == 'import',
         )) {
@@ -111,8 +116,8 @@ List<ArchitectureViolation> checkBoundaries(
           }.contains(destination.role)) {
         report('R02', target, '批准的数据失效信号不能执行业务流程或依赖数据实现。');
       }
-      if (source.role == Responsibility.domain && !domainAllows(target)) {
-        report('R05', target, '领域契约只依赖纯业务类型，不依赖 UI、状态管理或具体实现。');
+      if (pure && !domainAllows(target)) {
+        report('R05', target, '纯业务契约/逻辑不依赖 UI、状态管理、平台或具体实现。');
       }
       if (source.role == Responsibility.business &&
           source.mode == AccessMode.repository &&

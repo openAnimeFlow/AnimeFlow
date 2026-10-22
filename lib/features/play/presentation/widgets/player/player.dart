@@ -1,3 +1,5 @@
+import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
+import 'package:anime_flow/features/play/presentation/extensions/video_fit_presentation.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -115,7 +117,9 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
             return Positioned.fill(
               child: KeyedSubtree(
                 key: ValueKey((kernel, switching)),
-                child: playController.buildVideoSurface(fit: videoFit),
+                child: (playController.playbackCoordinator.engine
+                        as PlayerVideoSurface)
+                    .buildVideoSurface(fit: videoFit.boxFit),
               ),
             );
           },

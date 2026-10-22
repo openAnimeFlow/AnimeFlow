@@ -45,11 +45,11 @@ dependencies:
     git:
       url: https://github.com/openAnimeFlow/bot_toast.git
       ref: 383ac490589aeb42704e1daadb362e59e2054175
-  material_ui: ^1.5.0
-  cupertino_ui: ^1.1.1
+  material_ui: ^1.5.0 # 提供 Material Design 风格的 Flutter 界面组件。
+  cupertino_ui: ^1.1.1 # 提供 iOS 风格的 Flutter 界面组件。
 
   # 音视频播放与设备控制
-  media_kit:
+  media_kit: # 提供跨平台音视频播放与播放控制能力。
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
@@ -125,7 +125,7 @@ dependencies:
   device_info_plus: ^13.3.0 # 读取设备型号、操作系统和平台相关信息。
   battery_plus: ^7.1.1 # 读取设备电池电量、充电状态和电池状态。
   connectivity_plus: ^6.0.5 # 查询网络连接类型并监听连接状态变化。
-  connectivity_plus_platform_interface: ^2.1.0 # 获取未经类型去重的网络切换事件。
+  connectivity_plus_platform_interface: ^2.1.0 # 定义网络连接状态插件的跨平台接口契约。
   window_manager: ^0.5.1 # 管理桌面应用窗口的尺寸、位置、状态和事件。
   url_launcher: ^6.3.2 # 调用平台应用打开 URL、电话号码、邮件等外部资源。
   flutter_opencc_plus: ^0.1.4 # 使用 OpenCC 在繁简中文及相关变体之间转换文本。
@@ -193,9 +193,9 @@ flutter_native_splash:
 
 dev_dependencies:
   # 测试与代码质量
-  flutter_test: # 提供 Flutter widget、单元和集成测试工具。
+  flutter_test: # 提供 Flutter 单元测试、Widget 测试和测试断言工具。
     sdk: flutter
-  fake_async: ^1.3.3 # 使用可控时钟验证网络测速防抖和超时。
+  fake_async: ^1.3.3 # 模拟时间推进，控制定时器和微任务以测试异步代码。
   flutter_lints: ^6.0.0 # 提供 Flutter 官方推荐的 Dart 静态检查规则。
   riverpod_lint: ^3.1.3 # 提供针对 Riverpod 用法的静态分析规则。
   wakelock_plus_platform_interface: ^1.7.0 # 定义屏幕常亮插件的跨平台接口契约。

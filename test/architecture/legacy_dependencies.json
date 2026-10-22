@@ -1,0 +1,3465 @@
+{
+  "schemaVersion": 1,
+  "violations": [
+    {
+      "rule": "R03",
+      "source": "lib/features/play/presentation/providers/play_history_provider.dart",
+      "target": "lib/shared/widgets/notification_toast.dart",
+      "kind": "import",
+      "reason": "现有业务流程引用展示层状态或 UI 辅助能力，后续分离职责并改为单向业务依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2 用户状态分离；其他播放/导航引用分别在 9.5、9.6 清理",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R03",
+      "source": "lib/features/play/presentation/providers/play_provider.dart",
+      "target": "lib/features/play/presentation/providers/video_ui_provider.dart",
+      "kind": "import",
+      "reason": "现有业务流程引用展示层状态或 UI 辅助能力，后续分离职责并改为单向业务依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2 用户状态分离；其他播放/导航引用分别在 9.5、9.6 清理",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R03",
+      "source": "lib/features/play/presentation/providers/play_provider.dart",
+      "target": "lib/shared/widgets/windows_title_bar.dart",
+      "kind": "import",
+      "reason": "现有业务流程引用展示层状态或 UI 辅助能力，后续分离职责并改为单向业务依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2 用户状态分离；其他播放/导航引用分别在 9.5、9.6 清理",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R03",
+      "source": "lib/features/user/application/bgm_collection_sync_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "kind": "import",
+      "reason": "现有业务流程引用展示层状态或 UI 辅助能力，后续分离职责并改为单向业务依赖。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户状态分离；其他播放/导航引用分别在 9.5、9.6 清理",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R03",
+      "source": "lib/features/user/application/bgm_collection_sync_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有业务流程引用展示层状态或 UI 辅助能力，后续分离职责并改为单向业务依赖。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户状态分离；其他播放/导航引用分别在 9.5、9.6 清理",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R03",
+      "source": "lib/features/user/application/collection_sync_lifecycle.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有业务流程引用展示层状态或 UI 辅助能力，后续分离职责并改为单向业务依赖。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户状态分离；其他播放/导航引用分别在 9.5、9.6 清理",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R03",
+      "source": "lib/features/user/application/user_oauth_controller.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有业务流程引用展示层状态或 UI 辅助能力，后续分离职责并改为单向业务依赖。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户状态分离；其他播放/导航引用分别在 9.5、9.6 清理",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R03",
+      "source": "lib/features/user/application/user_oauth_controller.dart",
+      "target": "lib/shared/widgets/notification_toast.dart",
+      "kind": "import",
+      "reason": "现有业务流程引用展示层状态或 UI 辅助能力，后续分离职责并改为单向业务依赖。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户状态分离；其他播放/导航引用分别在 9.5、9.6 清理",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/anime_info/presentation/widgets/episodes_drawer.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/anime_info/presentation/widgets/evaluate_dialog.dart",
+      "target": "lib/core/network/api/flow_api.dart#updateCollectionService",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/anime_info/presentation/widgets/inf_head.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/anime_info/presentation/widgets/info_app_bar.dart",
+      "target": "lib/core/network/api/api.dart#downloadImage",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/auth/presentation/pages/forgot_password_page.dart",
+      "target": "lib/core/network/api/flow_api.dart#forgotPasswordService",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/auth/presentation/pages/forgot_password_page.dart",
+      "target": "lib/core/network/api/flow_api.dart#sendEmailCodeService",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/auth/presentation/pages/forgot_password_page.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/auth/presentation/pages/login_page.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/auth/presentation/pages/register_page.dart",
+      "target": "lib/core/network/api/flow_api.dart#registerService",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/auth/presentation/pages/register_page.dart",
+      "target": "lib/core/network/api/flow_api.dart#sendEmailCodeService",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/auth/presentation/pages/register_page.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/auth/presentation/widgets/graphic_captcha.dart",
+      "target": "lib/core/network/api/flow_api.dart#generateCaptchaService",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/auth/presentation/widgets/graphic_captcha.dart",
+      "target": "lib/core/network/clients/flow_client.dart#toString",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/download/presentation/providers/download_provider.dart",
+      "target": "lib/features/download/data/repositories/download_repository.dart",
+      "kind": "import",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/providers/play_provider.dart",
+      "target": "lib/features/play/infrastructure/player/player_engine_factory.dart",
+      "kind": "import",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/providers/play_provider.dart",
+      "target": "lib/features/shaders/shaders_controller.dart",
+      "kind": "import",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "target": "lib/features/play/data/repository/subject_episodes_repository.dart",
+      "kind": "import",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "target": "package:dio/dio.dart",
+      "kind": "import",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/providers/video_source_provider.dart",
+      "target": "lib/features/play/data/repository/play_repository.dart",
+      "kind": "import",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/widgets/content/danmaku_card.dart",
+      "target": "lib/core/network/api/flow_api.dart#getDanDanEpisodesByDanDanBangumiID",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/widgets/content/danmaku_card.dart",
+      "target": "lib/core/network/api/flow_api.dart#searchDanmakuEpisodes",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/widgets/content/episodes.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/widgets/content/introduce_view.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/widgets/content/recommendations.dart",
+      "target": "lib/core/network/clients/flow_client.dart#resolveAnimeFlowErrorMessage",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/widgets/episode_load_more_error.dart",
+      "target": "lib/core/network/clients/flow_client.dart#resolveAnimeFlowErrorMessage",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/widgets/player/ui/control/bottom_area_control.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/play/presentation/widgets/player/ui/control/top_area_control.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/settings/presentation/pages/about/updates_page.dart",
+      "target": "lib/core/network/api/flow_api.dart#getReleases",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/settings/presentation/pages/about/updates_page.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "target": "lib/core/network/clients/flow_client.dart#resolveAnimeFlowErrorMessage",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/settings/presentation/widgets/account/bgm_collection_sync_section.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
+      "target": "lib/core/network/api/flow_api.dart#bindEmailService",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
+      "target": "lib/core/network/api/flow_api.dart#sendEmailCodeService",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/settings/presentation/widgets/account/change_password_dialog.dart",
+      "target": "lib/core/network/clients/flow_client.dart#resolveAnimeFlowErrorMessage",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/user/presentation/widgets/collection_tab_view.dart",
+      "target": "lib/core/network/clients/flow_client.dart#message",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R04",
+      "source": "lib/features/user_space/presentation/widgets/collect.dart",
+      "target": "lib/core/network/api/flow_api.dart#queryUserCollectionService",
+      "kind": "type",
+      "reason": "现有 Widget 直接访问 API，或复杂用例 Provider 引用具体数据实现；简单 Provider 直接访问 API 不在本项登记范围。",
+      "owner": "feature:user_space",
+      "cleanupTask": "步骤 9.4/9.5 复杂播放下载用例；步骤 9.6 展示层请求收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R05",
+      "source": "lib/features/play/domain/player/player_engine.dart",
+      "target": "package:material_ui/material_ui.dart",
+      "kind": "import",
+      "reason": "现有播放器领域类型依赖 UI 或设置存储，待分离播放控制、渲染及快捷键持久化。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.5 播放器职责拆分",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R05",
+      "source": "lib/features/play/domain/player/player_shortcut.dart",
+      "target": "lib/core/settings/app_settings.dart",
+      "kind": "import",
+      "reason": "现有播放器领域类型依赖 UI 或设置存储，待分离播放控制、渲染及快捷键持久化。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.5 播放器职责拆分",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R05",
+      "source": "lib/features/play/domain/player/player_shortcut.dart",
+      "target": "package:flutter/services.dart",
+      "kind": "import",
+      "reason": "现有播放器领域类型依赖 UI 或设置存储，待分离播放控制、渲染及快捷键持久化。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.5 播放器职责拆分",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R05",
+      "source": "lib/features/play/domain/player/player_snapshot.dart",
+      "target": "package:material_ui/material_ui.dart",
+      "kind": "import",
+      "reason": "现有播放器领域类型依赖 UI 或设置存储，待分离播放控制、渲染及快捷键持久化。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.5 播放器职责拆分",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/data/repositories/anime_info_repository.dart",
+      "target": "lib/features/user/application/collection_revision_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "target": "lib/features/characters/data/repositories/character_repository.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "target": "lib/features/user/application/collection_revision_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/presentation/widgets/anime_info_view.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/presentation/widgets/episodes_drawer.dart",
+      "target": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/presentation/widgets/episodes_drawer.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/presentation/widgets/evaluate_dialog.dart",
+      "target": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/presentation/widgets/evaluate_dialog.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/presentation/widgets/inf_head.dart",
+      "target": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/anime_info/presentation/widgets/inf_head.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/auth/presentation/pages/login_page.dart",
+      "target": "lib/features/user/application/user_oauth_controller.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/auth/presentation/pages/login_page.dart",
+      "target": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/auth/presentation/pages/login_page.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/auth/presentation/pages/oauth_callback_page.dart",
+      "target": "lib/features/user/application/user_oauth_controller.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/auth/presentation/pages/oauth_callback_page.dart",
+      "target": "lib/features/user/application/user_oauth_state.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/character_info/presentation/providers/character_info_provider.dart",
+      "target": "lib/features/characters/data/repositories/character_repository.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:character_info",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/download/application/video_source_resolver_pool.dart",
+      "target": "lib/features/play/application/video_source_service.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/download/application/video_source_resolver_pool.dart",
+      "target": "lib/features/play/application/webview_video_source_service.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/download/presentation/providers/download_provider.dart",
+      "target": "lib/features/play/application/video_source_service.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/download/presentation/widgets/download_episode_sheet.dart",
+      "target": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/download/presentation/widgets/download_episode_sheet.dart",
+      "target": "lib/features/play/presentation/providers/video_source_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/home/presentation/widgets/anime/calendar.dart",
+      "target": "lib/features/calendar/presentation/providers/calendar_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/home/presentation/widgets/anime/play_record.dart",
+      "target": "lib/features/play/presentation/providers/play_history_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/data/repository/subject_episodes_repository.dart",
+      "target": "lib/features/user/application/collection_revision_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/pages/play_page.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/providers/play_history_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/providers/play_provider.dart",
+      "target": "lib/features/shaders/shaders_controller.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/providers/play_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "target": "lib/features/user/application/collection_revision_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/providers/video_source_provider.dart",
+      "target": "lib/features/source/application/providers/source_repository_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/widgets/content/introduce_view.dart",
+      "target": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/widgets/content/introduce_view.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/widgets/content/play_content_navigator.dart",
+      "target": "lib/features/anime_info/presentation/widgets/anime_info_view.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/widgets/content/resources.dart",
+      "target": "lib/features/download/presentation/widgets/download_episode_sheet.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/widgets/player/ui/control/bottom_area_control.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/widgets/player/ui/control/top_area_control.dart",
+      "target": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/widgets/player/ui/control/top_area_control.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/play/presentation/widgets/player/ui/danmaku/danmaku_view.dart",
+      "target": "lib/features/settings/presentation/providers/font_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/about/about_page.dart",
+      "target": "lib/features/app_update/application/app_info_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/about/about_page.dart",
+      "target": "lib/features/app_update/presentation/widgets/version_update_ui.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "target": "lib/features/auth/presentation/pages/login_page.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "target": "lib/features/user/application/user_oauth_controller.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "target": "lib/features/user/application/user_oauth_state.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "target": "lib/features/user/presentation/providers/account_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/danmaku_setting_page.dart",
+      "target": "lib/features/play/application/danmaku_chinese_mode.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/danmaku_setting_page.dart",
+      "target": "lib/features/play/presentation/providers/danmaku_chinese_mode_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/download_settings.dart",
+      "target": "lib/features/download/application/download_directory/download_directory_platform.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/download_settings.dart",
+      "target": "lib/features/download/presentation/providers/download_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/playback_settings.dart",
+      "target": "lib/features/play/domain/player/player_kernel.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/playback_settings.dart",
+      "target": "lib/features/play/presentation/extensions/player_kernel_localization.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/player_shortcuts_page.dart",
+      "target": "lib/features/play/domain/player/player_shortcut.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/plugins/add_plugins.dart",
+      "target": "lib/features/source/application/providers/source_repository_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/plugins/add_plugins.dart",
+      "target": "lib/features/source/data/repositories/source_repository.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/plugins/download_plugins.dart",
+      "target": "lib/features/source/application/providers/plugin_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/plugins/download_plugins.dart",
+      "target": "lib/features/source/application/providers/source_repository_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/plugins/download_plugins.dart",
+      "target": "lib/features/source/data/repositories/source_repository.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/plugins/plugin_install_message.dart",
+      "target": "lib/features/source/data/repositories/source_repository.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/plugins/plugins.dart",
+      "target": "lib/features/source/application/providers/plugin_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/plugins/plugins.dart",
+      "target": "lib/features/source/application/providers/source_configs_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/plugins/plugins.dart",
+      "target": "lib/features/source/application/providers/source_repository_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/plugins/plugins.dart",
+      "target": "lib/features/source/data/repositories/source_repository.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/pages/settings_page.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/providers/account/account_background_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/widgets/account/account_content.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/widgets/account/bgm_collection_sync_section.dart",
+      "target": "lib/features/user/application/bgm_collection_sync_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
+      "target": "lib/features/auth/presentation/widgets/graphic_captcha.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
+      "target": "lib/features/auth/presentation/widgets/send_code_button.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/widgets/account/collection_conflicts_dialog.dart",
+      "target": "lib/features/user/application/bgm_collection_sync_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/widgets/account/collection_conflicts_dialog.dart",
+      "target": "lib/features/user/data/repository/collection_sync_repository.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/settings/presentation/widgets/account/collection_conflicts_dialog.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/shell/presentation/pages/app_shell_page.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:shell",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/user/application/user_oauth_controller.dart",
+      "target": "lib/features/auth/application/token_providers.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/user/presentation/pages/user_page.dart",
+      "target": "lib/features/auth/presentation/pages/login_page.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/user/presentation/providers/account_provider.dart",
+      "target": "lib/features/auth/application/token_providers.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "target": "lib/features/anime_info/data/repositories/anime_info_repository.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "target": "lib/features/auth/application/token_providers.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R06",
+      "source": "lib/features/user_space/presentation/providers/user_space_provider.dart",
+      "target": "lib/features/user/data/repository/user_repository_provider.dart",
+      "kind": "import",
+      "reason": "现有跨功能调用使用内部文件，待引入稳定公开业务入口；只登记当前这一条依赖。",
+      "owner": "feature:user_space",
+      "cleanupTask": "步骤 9.2/9.4/9.6 按功能逐项收口公开入口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/anime_info/presentation/pages/anime_info_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/anime_preview/presentation/pages/anime_preview.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/auth/presentation/pages/login_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/auth/presentation/pages/oauth_callback_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/calendar/presentation/pages/calendar_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/character_info/presentation/pages/character_info_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/characters/presentation/pages/characters_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/download/presentation/pages/download_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/home/presentation/pages/home_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/play/presentation/pages/play_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/play/presentation/pages/play_record_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/ranking/presentation/pages/ranking_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/search/presentation/pages/search_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/settings/presentation/pages/about/about_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/settings/presentation/pages/about/website_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/settings/presentation/pages/plugins/plugins.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/settings/presentation/pages/settings_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/settings/presentation/pages/theme.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/shell/presentation/pages/app_shell_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/user/presentation/pages/user_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/app/router/app_router.dart",
+      "target": "lib/features/user_space/presentation/pages/user_space_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "app",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/network/api/flow_api.dart",
+      "target": "lib/core/network/clients/flow_client.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "步骤 9.3 网络刷新环路分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/network/clients/flow_client.dart",
+      "target": "lib/core/network/core/dio_factory.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "步骤 9.3 网络刷新环路分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/network/clients/flow_client.dart",
+      "target": "lib/core/network/interceptors/flow_refresh_token_interceptor.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "步骤 9.3 网络刷新环路分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/network/core/dio_factory.dart",
+      "target": "lib/core/network/interceptors/flow_refresh_token_interceptor.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "步骤 9.3 网络刷新环路分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/network/interceptors/flow_refresh_token_interceptor.dart",
+      "target": "lib/core/network/api/flow_api.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "步骤 9.3 网络刷新环路分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/network/interceptors/flow_refresh_token_interceptor.dart",
+      "target": "lib/core/network/clients/flow_client.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "步骤 9.3 网络刷新环路分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/captcha/captcha_webview_controller.dart",
+      "target": "lib/core/webview/captcha/impl/captcha_webview_inappwebview_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/captcha/captcha_webview_controller.dart",
+      "target": "lib/core/webview/captcha/impl/captcha_webview_linux_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/captcha/captcha_webview_controller.dart",
+      "target": "lib/core/webview/captcha/impl/captcha_webview_windows_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/captcha/impl/captcha_webview_inappwebview_impl.dart",
+      "target": "lib/core/webview/captcha/captcha_webview_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/captcha/impl/captcha_webview_linux_impl.dart",
+      "target": "lib/core/webview/captcha/captcha_webview_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/captcha/impl/captcha_webview_windows_impl.dart",
+      "target": "lib/core/webview/captcha/captcha_webview_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/video/impl/video_webview_android_impl.dart",
+      "target": "lib/core/webview/video/video_webview_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/video/impl/video_webview_apple_impl.dart",
+      "target": "lib/core/webview/video/video_webview_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/video/impl/video_webview_impl.dart",
+      "target": "lib/core/webview/video/video_webview_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/video/impl/video_webview_linux_impl.dart",
+      "target": "lib/core/webview/video/video_webview_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/video/impl/video_webview_windows_impl.dart",
+      "target": "lib/core/webview/video/video_webview_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/video/video_webview_controller.dart",
+      "target": "lib/core/webview/video/impl/video_webview_android_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/video/video_webview_controller.dart",
+      "target": "lib/core/webview/video/impl/video_webview_apple_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/video/video_webview_controller.dart",
+      "target": "lib/core/webview/video/impl/video_webview_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/video/video_webview_controller.dart",
+      "target": "lib/core/webview/video/impl/video_webview_linux_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/core/webview/video/video_webview_controller.dart",
+      "target": "lib/core/webview/video/impl/video_webview_windows_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "core",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/data/repositories/anime_info_repository.dart",
+      "target": "lib/features/user/application/collection_revision_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/pages/anime_info_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/pages/anime_info_page.dart",
+      "target": "lib/features/anime_info/presentation/widgets/anime_info_view.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "target": "lib/features/user/application/collection_revision_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/anime_info_view.dart",
+      "target": "lib/features/anime_info/presentation/widgets/inf_head.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/anime_info_view.dart",
+      "target": "lib/features/anime_info/presentation/widgets/synopsis.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/anime_info_view.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/characters.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/episodes_drawer.dart",
+      "target": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/episodes_drawer.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/evaluate_dialog.dart",
+      "target": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/evaluate_dialog.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/inf_head.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/inf_head.dart",
+      "target": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/inf_head.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/info_comment.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/related.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/subject_stills.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/synopsis.dart",
+      "target": "lib/features/anime_info/presentation/widgets/characters.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/synopsis.dart",
+      "target": "lib/features/anime_info/presentation/widgets/info_comment.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/synopsis.dart",
+      "target": "lib/features/anime_info/presentation/widgets/related.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_info/presentation/widgets/synopsis.dart",
+      "target": "lib/features/anime_info/presentation/widgets/subject_stills.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/anime_preview/presentation/pages/anime_preview.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:anime_preview",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/app_update/application/apply_updates_controller.dart",
+      "target": "lib/features/app_update/application/apply_updates_impl/apply_updates_android_controller_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:app_update",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/app_update/application/apply_updates_controller.dart",
+      "target": "lib/features/app_update/application/apply_updates_impl/apply_updates_ios_controller_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:app_update",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/app_update/application/apply_updates_controller.dart",
+      "target": "lib/features/app_update/application/apply_updates_impl/apply_updates_linux_controller_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:app_update",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/app_update/application/apply_updates_controller.dart",
+      "target": "lib/features/app_update/application/apply_updates_impl/apply_updates_macos_controller_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:app_update",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/app_update/application/apply_updates_controller.dart",
+      "target": "lib/features/app_update/application/apply_updates_impl/apply_updates_windows_controller_impl.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:app_update",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/app_update/application/apply_updates_impl/apply_updates_android_controller_impl.dart",
+      "target": "lib/features/app_update/application/apply_updates_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:app_update",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/app_update/application/apply_updates_impl/apply_updates_ios_controller_impl.dart",
+      "target": "lib/features/app_update/application/apply_updates_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:app_update",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/app_update/application/apply_updates_impl/apply_updates_linux_controller_impl.dart",
+      "target": "lib/features/app_update/application/apply_updates_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:app_update",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/app_update/application/apply_updates_impl/apply_updates_macos_controller_impl.dart",
+      "target": "lib/features/app_update/application/apply_updates_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:app_update",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/app_update/application/apply_updates_impl/apply_updates_windows_controller_impl.dart",
+      "target": "lib/features/app_update/application/apply_updates_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:app_update",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/auth/presentation/pages/login_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/auth/presentation/pages/login_page.dart",
+      "target": "lib/features/user/application/user_oauth_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/auth/presentation/pages/login_page.dart",
+      "target": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/auth/presentation/pages/login_page.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/auth/presentation/pages/oauth_callback_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/auth/presentation/pages/oauth_callback_page.dart",
+      "target": "lib/features/user/application/user_oauth_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/auth/presentation/pages/oauth_callback_page.dart",
+      "target": "lib/features/user/application/user_oauth_state.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:auth",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/calendar/presentation/pages/calendar_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:calendar",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/character_info/presentation/pages/character_info_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:character_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/character_info/presentation/pages/character_info_page.dart",
+      "target": "lib/features/character_info/presentation/widgets/character_comments.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:character_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/character_info/presentation/pages/character_info_page.dart",
+      "target": "lib/features/character_info/presentation/widgets/character_voice_actors.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:character_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/character_info/presentation/pages/character_info_page.dart",
+      "target": "lib/features/character_info/presentation/widgets/character_works.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:character_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/character_info/presentation/widgets/character_comments.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:character_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/character_info/presentation/widgets/character_comments.dart",
+      "target": "lib/shared/widgets/bbcode/bbcode_widget.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:character_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/character_info/presentation/widgets/character_voice_actors.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:character_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/character_info/presentation/widgets/character_works.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:character_info",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/characters/presentation/pages/characters_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:characters",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/application/download_directory/download_directory_platform.dart",
+      "target": "lib/features/download/application/download_directory/impl/android_download_directory_platform.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/application/download_directory/download_directory_platform.dart",
+      "target": "lib/features/download/application/download_directory/impl/desktop_download_directory_platform.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/application/download_directory/download_directory_platform.dart",
+      "target": "lib/features/download/application/download_directory/impl/macos_download_directory_platform.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/application/download_directory/download_directory_platform.dart",
+      "target": "lib/features/download/application/download_directory/impl/unsupported_download_directory_platform.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/application/download_directory/impl/android_download_directory_platform.dart",
+      "target": "lib/features/download/application/download_directory/download_directory_platform.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/application/download_directory/impl/desktop_download_directory_platform.dart",
+      "target": "lib/features/download/application/download_directory/download_directory_platform.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/application/download_directory/impl/macos_download_directory_platform.dart",
+      "target": "lib/features/download/application/download_directory/download_directory_platform.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/application/download_directory/impl/unsupported_download_directory_platform.dart",
+      "target": "lib/features/download/application/download_directory/download_directory_platform.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "后续独立变更：拆分平台契约与具体工厂实现",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/application/video_source_resolver_pool.dart",
+      "target": "lib/features/play/application/video_source_service.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/application/video_source_resolver_pool.dart",
+      "target": "lib/features/play/application/webview_video_source_service.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/presentation/pages/download_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/presentation/providers/download_provider.dart",
+      "target": "lib/features/play/application/video_source_service.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/presentation/widgets/download_episode_sheet.dart",
+      "target": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/download/presentation/widgets/download_episode_sheet.dart",
+      "target": "lib/features/play/presentation/providers/video_source_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:download",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/home/presentation/pages/home_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/home/presentation/pages/home_page.dart",
+      "target": "lib/features/home/presentation/widgets/anime/anime_view.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/home/presentation/pages/home_page.dart",
+      "target": "lib/features/home/presentation/widgets/community/community_view.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/home/presentation/widgets/anime/anime_view.dart",
+      "target": "lib/features/home/presentation/widgets/anime/calendar.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/home/presentation/widgets/anime/anime_view.dart",
+      "target": "lib/features/home/presentation/widgets/anime/play_record.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/home/presentation/widgets/anime/anime_view.dart",
+      "target": "lib/features/home/presentation/widgets/anime/popular_anime.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/home/presentation/widgets/anime/calendar.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/home/presentation/widgets/anime/play_record.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/home/presentation/widgets/anime/popular_anime.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/home/presentation/widgets/community/community_view.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:home",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/data/repository/subject_episodes_repository.dart",
+      "target": "lib/features/user/application/collection_revision_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/pages/play_page.dart",
+      "target": "lib/features/play/presentation/widgets/content/comments_view.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/pages/play_page.dart",
+      "target": "lib/features/play/presentation/widgets/content/play_content_navigator.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/pages/play_page.dart",
+      "target": "lib/features/play/presentation/widgets/player/player.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/pages/play_page.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/pages/play_record_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/providers/play_history_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/providers/play_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "target": "lib/features/user/application/collection_revision_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/providers/subject_episodes_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/content/comments_view.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/content/comments_view.dart",
+      "target": "lib/shared/widgets/bbcode/bbcode_widget.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/content/introduce_view.dart",
+      "target": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/content/introduce_view.dart",
+      "target": "lib/features/play/presentation/widgets/content/recommendations.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/content/introduce_view.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/content/play_content_navigator.dart",
+      "target": "lib/features/anime_info/presentation/widgets/anime_info_view.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/content/play_content_navigator.dart",
+      "target": "lib/features/play/presentation/widgets/content/introduce_view.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/content/recommendations.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/content/resources.dart",
+      "target": "lib/features/download/presentation/widgets/download_episode_sheet.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/player/player.dart",
+      "target": "lib/features/play/presentation/widgets/player/ui/video_ui.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/player/ui/control/bottom_area_control.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/player/ui/control/top_area_control.dart",
+      "target": "lib/features/anime_info/presentation/providers/anime_info_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/player/ui/control/top_area_control.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/player/ui/danmaku/danmaku_view.dart",
+      "target": "lib/features/settings/presentation/providers/font_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/player/ui/screenshot_preview.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/play/presentation/widgets/player/ui/video_ui.dart",
+      "target": "lib/features/play/presentation/widgets/player/ui/screenshot_preview.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/ranking/presentation/pages/ranking_page.dart",
+      "target": "lib/features/ranking/presentation/widgets/ranking_grid.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:ranking",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/ranking/presentation/widgets/ranking_grid.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:ranking",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/search/presentation/pages/search_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:search",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/search/presentation/pages/search_page.dart",
+      "target": "lib/features/search/presentation/widgets/search_details_content.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:search",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/search/presentation/pages/search_page.dart",
+      "target": "lib/features/search/presentation/widgets/search_omitted_content.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:search",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/search/presentation/widgets/search_details_content.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:search",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/search/presentation/widgets/search_omitted_content.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:search",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/about/about_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/about/website_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "target": "lib/features/auth/presentation/pages/login_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "target": "lib/features/user/application/user_oauth_controller.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "target": "lib/features/user/application/user_oauth_state.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "target": "lib/features/user/presentation/providers/account_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/danmaku_setting_page.dart",
+      "target": "lib/features/play/application/danmaku_chinese_mode.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/danmaku_setting_page.dart",
+      "target": "lib/features/play/presentation/providers/danmaku_chinese_mode_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/download_settings.dart",
+      "target": "lib/features/download/application/download_directory/download_directory_platform.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/download_settings.dart",
+      "target": "lib/features/download/presentation/providers/download_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/playback_settings.dart",
+      "target": "lib/features/play/domain/player/player_kernel.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/playback_settings.dart",
+      "target": "lib/features/play/presentation/extensions/player_kernel_localization.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/player_shortcuts_page.dart",
+      "target": "lib/features/play/domain/player/player_shortcut.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/plugins/plugins.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/settings_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/settings_page.dart",
+      "target": "lib/features/settings/presentation/pages/account_settings_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/settings_page.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/pages/theme.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/providers/account/account_background_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/widgets/account/account_content.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/widgets/account/bgm_collection_sync_section.dart",
+      "target": "lib/features/user/application/bgm_collection_sync_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
+      "target": "lib/features/auth/presentation/widgets/graphic_captcha.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
+      "target": "lib/features/auth/presentation/widgets/send_code_button.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/widgets/account/bind_email_section.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/widgets/account/collection_conflicts_dialog.dart",
+      "target": "lib/features/user/application/bgm_collection_sync_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/widgets/account/collection_conflicts_dialog.dart",
+      "target": "lib/features/user/data/repository/collection_sync_repository.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/settings/presentation/widgets/account/collection_conflicts_dialog.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:settings",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/shell/presentation/pages/app_shell_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:shell",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/application/bgm_collection_sync_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/application/bgm_collection_sync_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/application/user_oauth_controller.dart",
+      "target": "lib/features/auth/application/token_providers.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/pages/user_page.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/pages/user_page.dart",
+      "target": "lib/features/auth/presentation/pages/login_page.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/pages/user_page.dart",
+      "target": "lib/features/user/presentation/widgets/user_view.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/providers/account_provider.dart",
+      "target": "lib/features/auth/application/token_providers.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "target": "lib/features/anime_info/data/repositories/anime_info_repository.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "target": "lib/features/auth/application/token_providers.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "target": "lib/features/user/application/bgm_collection_sync_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/providers/user_state_provider.dart",
+      "target": "lib/features/user/presentation/providers/user_collection_provider.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/widgets/collection_sync_pending_banner.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/widgets/collection_tab_view.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/widgets/user_view.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/widgets/user_view.dart",
+      "target": "lib/features/user/presentation/widgets/collection_sync_pending_banner.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user/presentation/widgets/user_view.dart",
+      "target": "lib/features/user/presentation/widgets/collection_tab_view.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户会话与同步依赖分离",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user_space/presentation/pages/user_space_page.dart",
+      "target": "lib/features/user_space/presentation/widgets/collect.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user_space",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user_space/presentation/pages/user_space_page.dart",
+      "target": "lib/features/user_space/presentation/widgets/intro.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user_space",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user_space/presentation/widgets/collect.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user_space",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/features/user_space/presentation/widgets/intro.dart",
+      "target": "lib/shared/widgets/bbcode/bbcode_widget.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "feature:user_space",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/shared/widgets/bbcode/bbcode_widget.dart",
+      "target": "lib/app/router/app_router.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "shared",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/shared/widgets/bbcode/generated/BBCodeListener.dart",
+      "target": "lib/shared/widgets/bbcode/generated/BBCodeParser.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "shared",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R07",
+      "source": "lib/shared/widgets/bbcode/generated/BBCodeParser.dart",
+      "target": "lib/shared/widgets/bbcode/generated/BBCodeListener.dart",
+      "kind": "import",
+      "reason": "当前文件或功能模块循环中的具体依赖边；新增或替换循环边不在本项允许范围。",
+      "owner": "shared",
+      "cleanupTask": "步骤 9.4/9.5/9.6 播放解析、功能协作与导航依赖收口",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R09",
+      "source": "lib/features/play/application/playback_coordinator.dart",
+      "target": "package:flutter/src/widgets/framework.dart#Widget",
+      "kind": "type",
+      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R09",
+      "source": "lib/features/play/domain/player/player_engine.dart",
+      "target": "package:flutter/src/widgets/framework.dart#Widget",
+      "kind": "type",
+      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R09",
+      "source": "lib/features/play/presentation/providers/play_history_provider.dart",
+      "target": "package:flutter/src/widgets/framework.dart#Widget",
+      "kind": "type",
+      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R09",
+      "source": "lib/features/play/presentation/providers/play_provider.dart",
+      "target": "package:flutter/src/widgets/framework.dart#Widget",
+      "kind": "type",
+      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
+      "owner": "feature:play",
+      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R09",
+      "source": "lib/features/user/application/collection_sync_lifecycle.dart",
+      "target": "package:flutter/src/widgets/framework.dart#BuildContext",
+      "kind": "type",
+      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R09",
+      "source": "lib/features/user/application/collection_sync_lifecycle.dart",
+      "target": "package:flutter/src/widgets/framework.dart#State",
+      "kind": "type",
+      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R09",
+      "source": "lib/features/user/application/collection_sync_lifecycle.dart",
+      "target": "package:flutter/src/widgets/framework.dart#Widget",
+      "kind": "type",
+      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R09",
+      "source": "lib/features/user/application/collection_sync_lifecycle.dart",
+      "target": "package:flutter_riverpod/src/core.dart#WidgetRef",
+      "kind": "type",
+      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
+      "reviewBy": "2026-11-22"
+    },
+    {
+      "rule": "R09",
+      "source": "lib/features/user/application/user_oauth_controller.dart",
+      "target": "package:flutter/src/widgets/framework.dart#Widget",
+      "kind": "type",
+      "reason": "现有业务代码携带 Widget/BuildContext 等 UI 对象，待将渲染或界面生命周期适配迁至展示层。",
+      "owner": "feature:user",
+      "cleanupTask": "步骤 9.2 用户生命周期适配；步骤 9.5 播放渲染；步骤 9.6 提示组件适配",
+      "reviewBy": "2026-11-22"
+    }
+  ]
+}

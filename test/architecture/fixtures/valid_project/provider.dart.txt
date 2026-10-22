@@ -1,0 +1,9 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/core/network/api/value.dart';
+
+final valueProvider = Provider<int>((ref) {
+  final token = CancelToken();
+  if (token.isCancelled) return 0;
+  return ValueApi.load();
+});

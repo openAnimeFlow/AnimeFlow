@@ -1,0 +1,4 @@
+# Architecture tests remain part of the normal full test suite.
+# CI runs this tag separately from business tests.
+tags:
+  architecture:

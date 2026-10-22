@@ -1,0 +1,2 @@
+# Keep the isolated analyzer's dependencies and plugin loading independent.
+include: package:lints/recommended.yaml

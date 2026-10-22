@@ -26,7 +26,33 @@ env:
   ANIME_FLOW_SECRET: ${{ secrets.ANIME_FLOW_SECRET }}
 
 jobs:
+  resolve-source:
+    name: Resolve release source
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      source_sha: ${{ steps.source.outputs.source_sha }}
+      tag: ${{ steps.source.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - name: Resolve the selected remote tag
+        id: source
+        shell: bash
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: bash tool/ci/resolve_release_source.sh
+
+  quality:
+    needs: resolve-source
+    uses: ./.github/workflows/quality.yml
+    with:
+      source_sha: ${{ needs.resolve-source.outputs.source_sha }}
+
   build-ios:
+    needs: [resolve-source, quality]
     name: Build iOS
     if: >-
       github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'ios'
@@ -35,6 +61,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.resolve-source.outputs.source_sha }}
 
       - name: Extract version
         shell: bash
@@ -92,6 +120,7 @@ jobs:
           path: AnimeFlow-ios-${{ env.VERSION }}.ipa
 
   build-android:
+    needs: [resolve-source, quality]
     name: Build Android
     if: >-
       github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'android'
@@ -100,6 +129,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.resolve-source.outputs.source_sha }}
 
       - name: Extract version
         shell: bash
@@ -183,6 +214,7 @@ jobs:
           if-no-files-found: ignore
 
   build-windows:
+    needs: [resolve-source, quality]
     name: Build Windows
     if: >-
       github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'windows'
@@ -191,6 +223,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.resolve-source.outputs.source_sha }}
 
       - name: Extract version (Windows)
         shell: pwsh
@@ -287,6 +321,7 @@ jobs:
           if-no-files-found: ignore
 
   build-linux:
+    needs: [resolve-source, quality]
     name: Build Linux
     if: >-
       github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'linux'
@@ -295,6 +330,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.resolve-source.outputs.source_sha }}
 
       - name: Extract version
         shell: bash
@@ -404,6 +441,7 @@ jobs:
           if-no-files-found: ignore
 
   build-macos:
+    needs: [resolve-source, quality]
     name: Build macOS
     if: >-
       github.event_name != 'workflow_dispatch' || inputs.platform == 'all' || inputs.platform == 'macos'
@@ -412,6 +450,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.resolve-source.outputs.source_sha }}
 
       - name: Extract version
         shell: bash
@@ -465,25 +505,42 @@ jobs:
           if-no-files-found: ignore
 
   release:
-    needs: [build-ios, build-android, build-windows, build-linux, build-macos]
+    needs: [resolve-source, quality, build-ios, build-android, build-windows, build-linux, build-macos]
     # Unselected platforms are skipped; publish only after all selected builds succeed.
     if: >-
       ${{ !cancelled() &&
           !contains(needs.*.result, 'failure') &&
           !contains(needs.*.result, 'cancelled') &&
-          contains(needs.*.result, 'success') }}
+          needs.quality.result == 'success' &&
+          (needs.build-ios.result == 'success' ||
+           needs.build-android.result == 'success' ||
+           needs.build-windows.result == 'success' ||
+           needs.build-linux.result == 'success' ||
+           needs.build-macos.result == 'success') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.resolve-source.outputs.source_sha }}
 
       - name: Extract version
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "TAG_NAME=v${VERSION}" >> $GITHUB_ENV
+
+      - name: Record release source
+        env:
+          SOURCE_SHA: ${{ needs.resolve-source.outputs.source_sha }}
+          SOURCE_TAG: ${{ needs.resolve-source.outputs.tag }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          with open('source-metadata.json', 'w', encoding='utf-8') as stream:
+              json.dump({key: os.environ[key] for key in ['SOURCE_SHA', 'SOURCE_TAG', 'VERSION']}, stream, indent=2)
+          PY
 
       - name: Generate release notes
         run: |
@@ -513,10 +570,12 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.TAG_NAME }}
+          tag_name: ${{ needs.resolve-source.outputs.tag }}
+          target_commitish: ${{ needs.resolve-source.outputs.source_sha }}
           name: AnimeFlow ${{ env.VERSION }}
           body_path: release_notes.md
           files: |
+            source-metadata.json
             artifacts/ios/*.ipa
             artifacts/android/*.apk
             artifacts/windows/*.zip

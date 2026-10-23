@@ -42,6 +42,7 @@ ArchitectureSpec projectArchitecture() => ArchitectureSpec(
     'package:flutter/src/rendering/**',
     'package:flutter/src/painting/**',
     'package:material_ui/**',
+    'package:cupertino_ui/**',
   },
   generatedGroups: {
     // 只折叠生成器固定产生的国际化内部循环，仍检查其对外依赖。

@@ -83,6 +83,8 @@ void main() {
     for (final uri in [
       'package:flutter/widgets.dart',
       'package:flutter/material.dart',
+      'package:cupertino_ui/cupertino_ui.dart',
+      'package:cupertino_ui/src/button.dart',
       'dart:ui',
     ]) {
       fixture.write(source, "import '$uri';");
@@ -94,6 +96,24 @@ void main() {
         uri,
       );
     }
+  });
+
+  test('business cannot import Cupertino UI through a local re-export', () {
+    const source = 'lib/features/a/application/service.dart';
+    const ui = 'package:cupertino_ui/cupertino_ui.dart';
+    fixture = FixtureProject({
+      source: "import '../../../core/barrel.dart';",
+      'lib/core/barrel.dart': "export '$ui';",
+      'lib/features/a/presentation/widgets/page.dart': "import '$ui';",
+    });
+    final spec = fixtureSpec();
+    final violation = checkBoundaries(
+      collectDependencies(fixture.root, spec),
+      spec,
+    ).single;
+    expect(violation.rule, 'R03');
+    expect(violation.source, source);
+    expect(violation.target, ui);
   });
 
   test('business providers may depend on other business providers and concrete APIs', () {

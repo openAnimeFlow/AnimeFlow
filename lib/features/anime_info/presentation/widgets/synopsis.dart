@@ -92,11 +92,7 @@ class InfoSynopsisView extends StatelessWidget {
         ),
       ),
       SliverToBoxAdapter(
-        child: _buildContainer(
-          context,
-          const CharactersView(),
-          topPadding: 10
-        ),
+        child: _buildContainer(context, const CharactersView(), topPadding: 10),
       ),
       SliverToBoxAdapter(
         child: _buildContainer(
@@ -135,9 +131,10 @@ class InfoSynopsisView extends StatelessWidget {
 
             if (metrics.axis == Axis.vertical &&
                 scrollInfo is ScrollUpdateNotification) {
-              ref
-                  .read(subjectCommentsProvider.notifier)
-                  .onCommentsScroll(metrics);
+              ref.read(subjectCommentsProvider.notifier).onCommentsScroll(
+                    pixels: metrics.pixels,
+                    maxScrollExtent: metrics.maxScrollExtent,
+                  );
 
               final bool shouldShowButton = scrollInfo.metrics.pixels >= 300;
 

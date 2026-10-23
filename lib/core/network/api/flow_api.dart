@@ -29,6 +29,7 @@ import 'package:anime_flow/shared/models/player/danmaku/danmaku_episode_response
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/shared/models/flow/background_image_item.dart';
+import 'package:anime_flow/shared/models/flow/subject_wallpaper.dart';
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/shared/models/flow/collection_conflict_item.dart';
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
@@ -469,6 +470,26 @@ class FlowApi {
     final response = await _client.get('${AnimeFlowApi.subjects}/$id',
         cancelToken: cancelToken);
     return SubjectsInfoItem.fromJson(response.data);
+  }
+
+  /// 按番剧分页获取壁纸墙
+  static Future<SubjectWallpaperPage> getSubjectWallpapersService({
+    required SortType sort,
+    required int page,
+    required int pageSize,
+    CancelToken? cancelToken,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.subjectWallpapers,
+      queryParameters: {
+        'sort': sort.value,
+        'page': page,
+        'pageSize': pageSize,
+      },
+      cancelToken: cancelToken,
+    );
+    return SubjectWallpaperPage.fromJson(
+        Map<String, dynamic>.from(response.data));
   }
 
   /// 获取条目预览图

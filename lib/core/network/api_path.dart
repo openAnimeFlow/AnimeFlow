@@ -135,6 +135,9 @@ class AnimeFlowApi {
       ///条目
       subjects = '/api/v1/bangumi/subjects',
 
+      /// 番剧壁纸墙
+      subjectWallpapers = '/api/wallpapers',
+
       ///章节
       episodes = '/api/v1/bangumi/subjects/{subjectId}/episodes',
 

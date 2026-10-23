@@ -1,0 +1,69 @@
+import 'dart:async';
+
+import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/app/router/model/wallpaper_detail_args.dart';
+import 'package:anime_flow/features/home/presentation/pages/wallpaper_detail_page.dart';
+import 'package:material_ui/material_ui.dart';
+
+/// 保持列表挂载，宽屏原位查看详情，窄屏使用完整详情路由。
+class WallpaperBrowser extends StatefulWidget {
+  const WallpaperBrowser({super.key, required this.listBuilder});
+
+  final Widget Function(BuildContext, ValueChanged<WallpaperDetailArgs>)
+      listBuilder;
+
+  @override
+  State<WallpaperBrowser> createState() => _WallpaperBrowserState();
+}
+
+class _WallpaperBrowserState extends State<WallpaperBrowser> {
+  WallpaperDetailArgs? _selected;
+  bool _wide = false;
+  bool _handoffScheduled = false;
+
+  void _open(WallpaperDetailArgs args) {
+    if (_wide) {
+      setState(() => _selected = args);
+    } else {
+      unawaited(WallpaperDetailRoute($extra: args).push(context));
+    }
+  }
+
+  void _close() => setState(() => _selected = null);
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          _wide = constraints.maxWidth >= 1000;
+          final selected = _selected;
+          if (!_wide && selected != null && !_handoffScheduled) {
+            _handoffScheduled = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _handoffScheduled = false;
+              if (!mounted || _wide || _selected != selected) return;
+              _close();
+              _open(selected);
+            });
+          }
+          final showDetail = _wide && selected != null;
+          final listWidth = (constraints.maxWidth * 0.4).clamp(360.0, 600.0);
+          // 列表始终位于 Row 的第一个槽位，打开/关闭详情不会重建其状态。
+          return Row(children: [
+            Expanded(child: widget.listBuilder(context, _open)),
+            if (showDetail) const VerticalDivider(width: 1),
+            SizedBox(
+              width: showDetail ? constraints.maxWidth - listWidth - 1 : 0,
+              child: showDetail
+                  ? WallpaperDetailPage(
+                      key: ValueKey(
+                          (selected.subject.subjectId, selected.initialUrl)),
+                      args: selected,
+                      onClose: _close,
+                      onOpenRelated: _open,
+                    )
+                  : null,
+            ),
+          ]);
+        },
+      );
+}

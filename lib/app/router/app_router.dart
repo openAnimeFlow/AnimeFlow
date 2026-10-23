@@ -14,6 +14,7 @@ import 'package:anime_flow/features/user/presentation/pages/user_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/oauth_callback_page.dart';
 import 'package:anime_flow/features/ranking/presentation/pages/ranking_page.dart';
 import 'package:anime_flow/features/home/presentation/pages/home_page.dart';
+import 'package:anime_flow/features/home/presentation/pages/wallpaper_detail_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/register_page.dart';
 import 'package:anime_flow/features/search/presentation/pages/image_search_page.dart';
 import 'package:anime_flow/features/search/presentation/pages/search_page.dart';
@@ -50,6 +51,7 @@ import 'package:go_router/go_router.dart';
 
 import 'model/character_info_extra.dart';
 import 'model/image_viewer_extra.dart';
+import 'model/wallpaper_detail_args.dart';
 import 'model/play_route_extra.dart';
 
 part 'app_router.g.dart';
@@ -369,6 +371,17 @@ class ImageSearchRoute extends GoRouteData with $ImageSearchRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const ImageSearchPage();
+}
+
+@TypedGoRoute<WallpaperDetailRoute>(path: '/wallpaper')
+class WallpaperDetailRoute extends GoRouteData with $WallpaperDetailRoute {
+  const WallpaperDetailRoute({required this.$extra});
+
+  final WallpaperDetailArgs $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      WallpaperDetailPage(args: $extra);
 }
 
 @TypedGoRoute<ImagePreviewRoute>(path: '/image-preview')

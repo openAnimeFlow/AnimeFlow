@@ -1,4 +1,33 @@
 {
+  "wallpaperImageSize": "圖片尺寸",
+  "wallpaperBackdrop": "橫向劇照",
+  "wallpaperPoster": "直向海報",
+  "wallpaperImageCount": "共 {count} 張圖片",
+  "wallpaperDownload": "下載桌布",
+  "wallpaperShare": "分享",
+  "wallpaperCopyLink": "複製連結",
+  "wallpaperMore": "更多桌布",
+  "wallpaperViewAnime": "查看動畫",
+  "wallpaperPrevious": "上一張",
+  "wallpaperNext": "下一張",
+  "wallpaperThumbnail": "第 {index} 張圖片",
+  "wallpaperActionFailed": "操作失敗，請重試",
+  "@wallpaperImageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperThumbnail": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  }
+,
+  "wallpapers": "壁紙",
   "changePassword": "修改密碼",
   "oldPassword": "舊密碼",
   "enterOldPassword": "請輸入舊密碼",

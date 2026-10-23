@@ -103,6 +103,90 @@ abstract class AppLocalizations {
         languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant')
   ];
 
+  /// No description provided for @wallpaperImageSize.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'图片尺寸'**
+  String get wallpaperImageSize;
+
+  /// No description provided for @wallpaperBackdrop.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'横向剧照'**
+  String get wallpaperBackdrop;
+
+  /// No description provided for @wallpaperPoster.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'竖向海报'**
+  String get wallpaperPoster;
+
+  /// No description provided for @wallpaperImageCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'共 {count} 张图片'**
+  String wallpaperImageCount(int count);
+
+  /// No description provided for @wallpaperDownload.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载壁纸'**
+  String get wallpaperDownload;
+
+  /// No description provided for @wallpaperShare.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'分享'**
+  String get wallpaperShare;
+
+  /// No description provided for @wallpaperCopyLink.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'复制链接'**
+  String get wallpaperCopyLink;
+
+  /// No description provided for @wallpaperMore.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'更多壁纸'**
+  String get wallpaperMore;
+
+  /// No description provided for @wallpaperViewAnime.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'查看番剧'**
+  String get wallpaperViewAnime;
+
+  /// No description provided for @wallpaperPrevious.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'上一张'**
+  String get wallpaperPrevious;
+
+  /// No description provided for @wallpaperNext.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下一张'**
+  String get wallpaperNext;
+
+  /// No description provided for @wallpaperThumbnail.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'第 {index} 张图片'**
+  String wallpaperThumbnail(int index);
+
+  /// No description provided for @wallpaperActionFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'操作失败，请重试'**
+  String get wallpaperActionFailed;
+
+  /// No description provided for @wallpapers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'壁纸'**
+  String get wallpapers;
+
   /// No description provided for @changePassword.
   ///
   /// In zh_Hans, this message translates to:

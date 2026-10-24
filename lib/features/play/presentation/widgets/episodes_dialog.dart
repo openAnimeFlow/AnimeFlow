@@ -3,7 +3,7 @@ import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/episode_load_more_error.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:material_ui/material_ui.dart';

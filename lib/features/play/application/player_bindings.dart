@@ -10,7 +10,7 @@ import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

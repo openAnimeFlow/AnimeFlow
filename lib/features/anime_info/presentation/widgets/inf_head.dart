@@ -8,7 +8,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/episodes_drawer.dart';

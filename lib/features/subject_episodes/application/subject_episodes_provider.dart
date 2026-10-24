@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:anime_flow/features/play/data/repository/subject_episodes_repository.dart';
+import 'package:anime_flow/features/subject_episodes/data/repositories/subject_episodes_repository.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/user/user_events.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';

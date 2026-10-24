@@ -7,7 +7,7 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/fit_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/rate_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/shader_button.dart';

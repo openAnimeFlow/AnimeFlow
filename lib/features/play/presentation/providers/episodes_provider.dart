@@ -1,5 +1,5 @@
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';

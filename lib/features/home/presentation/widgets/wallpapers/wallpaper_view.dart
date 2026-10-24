@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/router/model/wallpaper_detail_args.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/core/flow_response.dart';
@@ -11,6 +10,7 @@ import 'package:anime_flow/features/home/presentation/widgets/wallpapers/justifi
 import 'package:anime_flow/features/home/presentation/widgets/wallpapers/wallpaper_browser.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 class WallpaperView extends StatefulWidget {
@@ -123,8 +123,9 @@ class _WallpaperViewState extends State<WallpaperView>
                                     label: Text(entry.value),
                                     selected: _controller.sort == entry.key,
                                     onSelected: (selected) {
-                                      if (selected)
+                                      if (selected) {
                                         unawaited(_refresh(sort: entry.key));
+                                      }
                                     },
                                   ),
                               ],
@@ -248,7 +249,9 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
   void _scheduleRatioUpdate() {
     if (_pendingRatios.isEmpty ||
         _ratioUpdateTimer != null ||
-        (_scrollPosition?.isScrollingNotifier.value ?? false)) return;
+        (_scrollPosition?.isScrollingNotifier.value ?? false)) {
+      return;
+    }
     // 合并异步到达的图片尺寸，拖动和惯性滚动期间保持行位置稳定。
     _ratioUpdateTimer = Timer(const Duration(milliseconds: 100), () {
       _ratioUpdateTimer = null;
@@ -336,7 +339,7 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
                     if (open != null) {
                       open(args);
                     } else {
-                      WallpaperDetailRoute($extra: args).push(context);
+                      context.push<void>('/wallpaper', extra: args);
                     }
                   },
                   imageWidth: rows[index].widths[i],

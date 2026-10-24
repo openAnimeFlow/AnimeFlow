@@ -1,6 +1,5 @@
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/crawler/item/bgm_user_statistics_item.dart';
@@ -30,6 +29,7 @@ import 'package:anime_flow/shared/models/player/danmaku/danmaku_episode_response
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/shared/models/flow/background_image_item.dart';
+import 'package:anime_flow/shared/models/flow/subject_wallpaper.dart';
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/shared/models/flow/collection_conflict_item.dart';
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
@@ -417,9 +417,9 @@ class FlowApi {
     required String message,
     required double time,
     required int type,
-    required Color color,
+    required int color,
   }) async {
-    final colorValue = Utils.colorToDecimalRgb(color);
+    final colorValue = color & 0xffffff;
     return _client.post(
       AnimeFlowApi.danmaku,
       data: {
@@ -470,6 +470,26 @@ class FlowApi {
     final response = await _client.get('${AnimeFlowApi.subjects}/$id',
         cancelToken: cancelToken);
     return SubjectsInfoItem.fromJson(response.data);
+  }
+
+  /// 按番剧分页获取壁纸墙
+  static Future<SubjectWallpaperPage> getSubjectWallpapersService({
+    required SortType sort,
+    required int page,
+    required int pageSize,
+    CancelToken? cancelToken,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.subjectWallpapers,
+      queryParameters: {
+        'sort': sort.value,
+        'page': page,
+        'pageSize': pageSize,
+      },
+      cancelToken: cancelToken,
+    );
+    return SubjectWallpaperPage.fromJson(
+        Map<String, dynamic>.from(response.data));
   }
 
   /// 获取条目预览图
@@ -743,9 +763,11 @@ class FlowApi {
       {int subjectType = 2,
       required int type,
       required int limit,
-      required int offset}) async {
+      required int offset,
+      CancelToken? cancelToken}) async {
     final response = await _client.get(
       AnimeFlowApi.userCollections.replaceFirst('{username}', username),
+      cancelToken: cancelToken,
       queryParameters: {
         'subjectType': subjectType,
         'type': type,
@@ -829,18 +851,6 @@ class FlowApi {
         'emailCaptcha': emailCaptcha,
       },
     );
-  }
-
-  /// 刷新 AnimeFlow token
-  static Future<FlowToken> flowRefreshTokenService({
-    required String refreshToken,
-  }) async {
-    final response = await _client.post(
-      AnimeFlowApi.flowRefreshToken,
-      data: {'refreshToken': refreshToken},
-      skipFlowTokenRefresh: true,
-    );
-    return FlowToken.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// 登出当前会话，销毁服务端 token（无本地 token 时跳过）

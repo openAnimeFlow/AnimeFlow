@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/settings/storage.dart';
@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 class Adapter implements HttpClientAdapter {
   final requests = <RequestOptions>[];
@@ -110,6 +111,7 @@ final related = <String, dynamic>{
   ],
 };
 
+@Dependencies([SubjectProducers, SubjectRelated])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;

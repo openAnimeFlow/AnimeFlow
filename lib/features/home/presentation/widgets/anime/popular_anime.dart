@@ -1,7 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:anime_flow/shared/widgets/card_skeleton.dart';
 import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
@@ -50,13 +50,16 @@ class PopularAnimeView extends ConsumerWidget {
                 if (index < hotState.items.length) {
                   final subject = hotState.items[index].subject;
                   return InkWell(
-                    onTap: () => AnimeInfoRoute.fromExtra(InfoRouteExtra(
-                      id: subject.id,
-                      name: subject.nameCN.isEmpty
-                          ? subject.name
-                          : subject.nameCN,
-                      image: subject.images.large,
-                    )).push(context),
+                    onTap: () =>
+                        appNavigatorOf(context).openAnimeInfoFromExtra<void>(
+                            context,
+                            InfoRouteExtra(
+                              id: subject.id,
+                              name: subject.nameCN.isEmpty
+                                  ? subject.name
+                                  : subject.nameCN,
+                              image: subject.images.large,
+                            )),
                     child: SubjectCard(
                       image: subject.images.large,
                       title: subject.nameCN.isEmpty

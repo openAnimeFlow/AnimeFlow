@@ -1,20 +1,20 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:async';
+import 'package:anime_flow/core/network/api/api.dart';
 
 import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
 import 'package:anime_flow/features/characters/data/repositories/character_repository.dart';
-import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
+import 'package:anime_flow/features/user/user_events.dart';
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/models/bangumi/producers_item.dart';
 import 'package:anime_flow/shared/models/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
+import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/bangumi/interest_item.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
-import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,6 +35,9 @@ CancelToken _requestCancelToken(Ref ref) {
 @Riverpod(dependencies: [animeInfoArgs])
 class AnimeInfo extends _$AnimeInfo {
   bool _initialConsumed = false;
+
+  Future<String> downloadCover(String image, String name) =>
+      Api.downloadImage(image, name);
 
   @override
   Stream<SubjectsInfoItem> build() async* {
@@ -64,8 +67,6 @@ class AnimeInfo extends _$AnimeInfo {
     state = AsyncData(subjectInfo);
     final repository = ref.read(animeInfoRepositoryProvider.notifier);
     repository.invalidateCache();
-    unawaited(repository.invalidateCommentsCache(subjectInfo.id));
-    ref.invalidate(subjectCommentsProvider);
     unawaited(repository.cacheSubject(subjectInfo,
         sessionId: ref.read(currentFlowTokenProvider).value?.sessionId));
   }
@@ -168,12 +169,23 @@ class SubjectComments extends _$SubjectComments {
         hasNextPage: comments.data.isNotEmpty);
   }
 
-  /// 滚动接近底部时加载更多：离开底部后重新武装，触底仅触发一次（postFrame 延后）。
-  void onCommentsScroll(ScrollMetrics metrics) {
-    if (metrics.maxScrollExtent <= 0) return;
+  /// 清理当前条目的评论缓存，并取消旧请求、从首页重新加载。
+  void refresh() {
+    if (!ref.mounted) return;
+    final subjectId = ref.read(animeInfoArgsProvider).id;
+    // 清理任务先进入 Repository 队列，新请求会等待清理完成。
+    unawaited(ref
+        .read(animeInfoRepositoryProvider.notifier)
+        .invalidateCommentsCache(subjectId));
+    ref.invalidateSelf();
+  }
 
-    final nearBottom =
-        metrics.pixels >= metrics.maxScrollExtent - _loadMoreThreshold;
+  /// 滚动接近底部时加载更多：离开底部后重新武装，触底仅触发一次（postFrame 延后）。
+  void onCommentsScroll(
+      {required double pixels, required double maxScrollExtent}) {
+    if (maxScrollExtent <= 0) return;
+
+    final nearBottom = pixels >= maxScrollExtent - _loadMoreThreshold;
     if (!nearBottom) {
       _armedForBottomLoad = true;
       return;

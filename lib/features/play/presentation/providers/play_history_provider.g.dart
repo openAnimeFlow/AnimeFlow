@@ -8,15 +8,24 @@ part of 'play_history_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 播放记录的统一入口，负责读取列表并在本地数据变化后自动刷新。
+/// 播放记录列表状态与同步入口。
+///
+/// 持久化和远程同步由 [PlayHistoryService] 负责，本类只负责将结果
+/// 暴露为 Riverpod 状态，并在本地数据变化后刷新列表。
 
 @ProviderFor(PlayHistoryNotifier)
 final playHistoryProvider = PlayHistoryNotifierProvider._();
 
-/// 播放记录的统一入口，负责读取列表并在本地数据变化后自动刷新。
+/// 播放记录列表状态与同步入口。
+///
+/// 持久化和远程同步由 [PlayHistoryService] 负责，本类只负责将结果
+/// 暴露为 Riverpod 状态，并在本地数据变化后刷新列表。
 final class PlayHistoryNotifierProvider
-    extends $AsyncNotifierProvider<PlayHistoryNotifier, List<PlayHistory>> {
-  /// 播放记录的统一入口，负责读取列表并在本地数据变化后自动刷新。
+    extends $AsyncNotifierProvider<PlayHistoryNotifier, PlayHistoryState> {
+  /// 播放记录列表状态与同步入口。
+  ///
+  /// 持久化和远程同步由 [PlayHistoryService] 负责，本类只负责将结果
+  /// 暴露为 Riverpod 状态，并在本地数据变化后刷新列表。
   PlayHistoryNotifierProvider._()
       : super(
           from: null,
@@ -37,20 +46,23 @@ final class PlayHistoryNotifierProvider
 }
 
 String _$playHistoryNotifierHash() =>
-    r'828a342c30429d68c2387ae00575e57432dfed19';
+    r'fb8d6355223e9293a5b862cc59e39102702d5d12';
 
-/// 播放记录的统一入口，负责读取列表并在本地数据变化后自动刷新。
+/// 播放记录列表状态与同步入口。
+///
+/// 持久化和远程同步由 [PlayHistoryService] 负责，本类只负责将结果
+/// 暴露为 Riverpod 状态，并在本地数据变化后刷新列表。
 
-abstract class _$PlayHistoryNotifier extends $AsyncNotifier<List<PlayHistory>> {
-  FutureOr<List<PlayHistory>> build();
+abstract class _$PlayHistoryNotifier extends $AsyncNotifier<PlayHistoryState> {
+  FutureOr<PlayHistoryState> build();
   @$mustCallSuper
   @override
   void runBuild() {
     final ref =
-        this.ref as $Ref<AsyncValue<List<PlayHistory>>, List<PlayHistory>>;
+        this.ref as $Ref<AsyncValue<PlayHistoryState>, PlayHistoryState>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<List<PlayHistory>>, List<PlayHistory>>,
-        AsyncValue<List<PlayHistory>>,
+        AnyNotifier<AsyncValue<PlayHistoryState>, PlayHistoryState>,
+        AsyncValue<PlayHistoryState>,
         Object?,
         Object?>;
     element.handleCreate(ref, build);

@@ -1,12 +1,14 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/features/play/domain/player/player_shortcut.dart';
+import 'package:anime_flow/core/settings/player_shortcut_settings.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([settingsLayout])
 class PlayerShortcutsPage extends ConsumerStatefulWidget {
   const PlayerShortcutsPage({super.key});
 

@@ -8,9 +8,9 @@ import 'package:anime_flow/core/auth/repository/token_repository.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/storage.dart';
-import 'package:anime_flow/features/auth/application/token_providers.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/user/data/repository/user_profile_cache.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/application/user_state_provider.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -271,8 +271,8 @@ void main() {
     await pumpEventQueue();
     tokens.value = null;
     final invalidateSession =
-        Provider<void>((ref) => invalidateUserSession(ref));
-    c.read(invalidateSession);
+        Provider<void Function()>((ref) => () => invalidateAuthSession(ref));
+    c.read(invalidateSession)();
     expect(await c.read(currentUserInfoProvider.future), isNull);
     pending.complete(reply('late'));
     await pumpEventQueue();

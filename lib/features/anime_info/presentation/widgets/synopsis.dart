@@ -1,5 +1,6 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/characters.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/details.dart';
@@ -13,8 +14,18 @@ import 'package:anime_flow/shared/widgets/expandable_text.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
-/// 条目详情信息展示ui
+/// 条目详情信息展示。
+@Dependencies([
+  AnimeInfo,
+  SubjectComments,
+  SubjectStills,
+  SubjectCharacters,
+  SubjectProducers,
+  SubjectRelated,
+  animeInfoArgs,
+])
 class InfoSynopsisView extends StatelessWidget {
   final ValueChanged<bool>? onScrollChanged;
 
@@ -81,11 +92,7 @@ class InfoSynopsisView extends StatelessWidget {
         ),
       ),
       SliverToBoxAdapter(
-        child: _buildContainer(
-          context,
-          const CharactersView(),
-          topPadding: 10
-        ),
+        child: _buildContainer(context, const CharactersView(), topPadding: 10),
       ),
       SliverToBoxAdapter(
         child: _buildContainer(
@@ -124,9 +131,10 @@ class InfoSynopsisView extends StatelessWidget {
 
             if (metrics.axis == Axis.vertical &&
                 scrollInfo is ScrollUpdateNotification) {
-              ref
-                  .read(subjectCommentsProvider.notifier)
-                  .onCommentsScroll(metrics);
+              ref.read(subjectCommentsProvider.notifier).onCommentsScroll(
+                    pixels: metrics.pixels,
+                    maxScrollExtent: metrics.maxScrollExtent,
+                  );
 
               final bool shouldShowButton = scrollInfo.metrics.pixels >= 300;
 

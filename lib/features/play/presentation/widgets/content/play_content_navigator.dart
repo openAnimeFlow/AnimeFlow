@@ -1,16 +1,40 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/anime_info_view.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/introduce_view.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
 
-/// Owns only the introduction/detail stack; links to other subjects and
-/// characters remain application routes above the player.
+/// 管理播放器内的简介与详情导航，其他条目和角色通过应用路由打开。
+@Dependencies([
+  playExtra,
+  animeInfoArgs,
+  AnimeInfo,
+  Episodes,
+  playSession,
+  PlayStateNotifier,
+  VideoUiNotifier,
+  VideoSourceNotifier,
+  DanmakuStateNotifier,
+  recommendation,
+  SubjectComments,
+  SubjectStills,
+  SubjectCharacters,
+  SubjectProducers,
+  SubjectRelated,
+])
 class PlayContentNavigator extends ConsumerStatefulWidget {
   const PlayContentNavigator({super.key, required this.isActive});
   final bool isActive;
@@ -117,8 +141,8 @@ class _PlayContentNavigatorState extends ConsumerState<PlayContentNavigator>
                   absorbing: _busy,
                   child: AnimeInfoView(
                     onPlay: () => _play(
-                          () => ref.read(playSessionProvider).startPlaying(),
-                        ),
+                      () => ref.read(playSessionProvider).startPlaying(),
+                    ),
                     onPlayEpisode: (id) => _play(() => _selectEpisode(id)),
                   ),
                 ),

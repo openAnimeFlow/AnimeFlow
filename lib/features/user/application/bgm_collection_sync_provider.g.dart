@@ -33,7 +33,7 @@ final class BgmCollectionSyncProvider extends $AsyncNotifierProvider<
   BgmCollectionSync create() => BgmCollectionSync();
 }
 
-String _$bgmCollectionSyncHash() => r'e2bdfe78361b0f0e2ff6f05d53d35b14ffee21f9';
+String _$bgmCollectionSyncHash() => r'bce50f303325199bf651fc89ac93b865b225d8c1';
 
 abstract class _$BgmCollectionSync
     extends $AsyncNotifier<BgmCollectionSyncStatusItem?> {

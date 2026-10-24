@@ -1,7 +1,10 @@
-import 'dart:async';
 import 'dart:io';
+import 'dart:async';
 
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
+import 'package:anime_flow/features/play/presentation/extensions/video_fit_presentation.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
@@ -9,10 +12,24 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
-
 import 'ui/danmaku/danmaku_view.dart';
 import 'ui/video_ui.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 
+@Dependencies([
+  playSession,
+  PlayStateNotifier,
+  VideoUiNotifier,
+  VideoSourceNotifier,
+  Episodes,
+  playExtra,
+  AnimeInfo,
+  subjectOnlineCount,
+  DanmakuStateNotifier
+])
 class PlayerView extends ConsumerStatefulWidget {
   const PlayerView({super.key});
 
@@ -39,7 +56,7 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.addListener(this);
       // 检测桌面端全屏状态
-      playController.checkDesktopFullscreen();
+      videoUiStateController.checkDesktopFullscreen();
     }
   }
 
@@ -55,7 +72,7 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
   /// 窗口恢复时处理
   @override
   void onWindowRestore() {
-    playController.checkDesktopFullscreen();
+    videoUiStateController.checkDesktopFullscreen();
   }
 
   /// 窗口进入全屏时处理
@@ -115,7 +132,9 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
             return Positioned.fill(
               child: KeyedSubtree(
                 key: ValueKey((kernel, switching)),
-                child: playController.buildVideoSurface(fit: videoFit),
+                child: (playController.playbackCoordinator.engine
+                        as PlayerVideoSurface)
+                    .buildVideoSurface(fit: videoFit.boxFit),
               ),
             );
           },

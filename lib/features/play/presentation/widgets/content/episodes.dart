@@ -1,11 +1,12 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/features/play/presentation/widgets/layout_toggle_icon.dart';
@@ -13,7 +14,9 @@ import 'package:anime_flow/features/play/presentation/widgets/loading_animation.
 import 'package:anime_flow/features/play/presentation/widgets/episode_load_more_error.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([playSession, playExtra, Episodes, PlayStateNotifier])
 class EpisodesListView extends ConsumerStatefulWidget {
   const EpisodesListView({super.key});
 

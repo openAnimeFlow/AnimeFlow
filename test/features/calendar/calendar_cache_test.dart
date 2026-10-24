@@ -5,7 +5,7 @@ import 'dart:typed_data';
 
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/settings/storage.dart';
-import 'package:anime_flow/features/calendar/presentation/providers/calendar_provider.dart';
+import 'package:anime_flow/features/calendar/calendar_api.dart';
 import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

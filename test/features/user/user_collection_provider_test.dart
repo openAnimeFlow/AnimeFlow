@@ -5,9 +5,12 @@ import 'dart:io';
 import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/storage.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_state.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/application/user_collection_provider.dart';
+import 'package:anime_flow/features/user/application/user_collection_state.dart';
+import 'package:anime_flow/features/user/application/user_state_provider.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
+import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
+import 'package:anime_flow/features/user/application/collection_refresh_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/enums/collection_sort.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
@@ -55,6 +58,50 @@ void main() {
   tearDownAll(() async {
     await Hive.close();
     await settingsDirectory.delete(recursive: true);
+  });
+
+  for (final sessionChange in [true, false]) {
+    for (final fail in [true, false]) {
+      test(
+          'revision reset discards pending page: session=$sessionChange error=$fail',
+          () async {
+        final page = Completer<UserCollectionsItem>();
+        final container = ProviderContainer(overrides: [
+          collectionPageLoaderProvider.overrideWithValue((
+                  {required type, required offset, required sort, keyword}) =>
+              page.future),
+        ]);
+        addTearDown(container.dispose);
+        final pending =
+            container.read(userCollectionsProvider.notifier).loadInitial(1);
+        if (sessionChange) {
+          container.read(authSessionRevisionProvider.notifier).changed();
+        } else {
+          container.read(collectionRefreshProvider.notifier).changed();
+        }
+        expect(container.read(userCollectionsProvider).tabs, isEmpty);
+        if (fail) {
+          page.completeError(StateError('Old response'));
+        } else {
+          page.complete(UserCollectionsItem(data: [_item(1)], total: 1));
+        }
+        await pending;
+        expect(container.read(userCollectionsProvider).tabs, isEmpty);
+      });
+    }
+  }
+
+  test('cache eviction signal preserves optimistic collection pages', () async {
+    final container = ProviderContainer(overrides: [
+      collectionPageLoaderProvider.overrideWithValue((
+              {required type, required offset, required sort, keyword}) async =>
+          UserCollectionsItem(data: [_item(1)], total: 1)),
+    ]);
+    addTearDown(container.dispose);
+    await container.read(userCollectionsProvider.notifier).loadInitial(1);
+    final pages = container.read(userCollectionsProvider);
+    container.read(collectionRevisionProvider.notifier).changed();
+    expect(container.read(userCollectionsProvider), same(pages));
   });
 
   test('saved sort is restored per category by a new provider and after reset',

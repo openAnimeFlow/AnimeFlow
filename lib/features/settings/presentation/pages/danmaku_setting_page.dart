@@ -1,3 +1,4 @@
+import 'package:anime_flow/core/settings/danmaku_font_provider.dart';
 import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
@@ -8,8 +9,10 @@ import 'package:anime_flow/shared/models/font_item.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
+@Dependencies([settingsLayout])
 class DanmakuSettingPage extends ConsumerStatefulWidget {
   const DanmakuSettingPage({super.key});
 
@@ -70,7 +73,8 @@ class _DanmakuSettingPageState extends ConsumerState<DanmakuSettingPage> {
           ),
         ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.only(left: 10, right: 10, bottom: paddingOf.bottom),
+          padding:
+              EdgeInsets.only(left: 10, right: 10, bottom: paddingOf.bottom),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1500),
@@ -202,7 +206,8 @@ class _DanmakuSettingPageState extends ConsumerState<DanmakuSettingPage> {
                                         ),
                                         const SizedBox(width: 4),
                                         AnimatedRotation(
-                                          turns: _isChineseModeMenuOpen ? 0.5 : 0,
+                                          turns:
+                                              _isChineseModeMenuOpen ? 0.5 : 0,
                                           duration: const Duration(
                                             milliseconds: 180,
                                           ),
@@ -300,7 +305,8 @@ class _DanmakuSettingPageState extends ConsumerState<DanmakuSettingPage> {
                               FontDownloadStatus.done)
                           .toList()
                         ..sort((a, b) => a.name.compareTo(b.name));
-                      final selectedFamily = ref.watch(danmakuFontFamilyProvider);
+                      final selectedFamily =
+                          ref.watch(danmakuFontFamilyProvider);
                       final options = [
                         const _DanmakuFontOption.project(),
                         ...downloadedFonts.map(_DanmakuFontOption.downloaded),

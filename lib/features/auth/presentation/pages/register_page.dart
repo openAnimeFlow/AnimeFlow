@@ -3,21 +3,22 @@ import 'dart:async';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/auth/presentation/widgets/send_code_button.dart';
 import 'package:anime_flow/features/auth/presentation/widgets/graphic_captcha.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -52,11 +53,11 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     try {
-      await FlowApi.sendEmailCodeService(
-        email: email,
-        captchaId: _graphicCaptchaController.captchaId!,
-        captcha: _graphicCaptchaController.text,
-      );
+      await ref.read(accountControllerProvider).sendEmailCode(
+            email: email,
+            captchaId: _graphicCaptchaController.captchaId!,
+            captcha: _graphicCaptchaController.text,
+          );
       if (!mounted) return false;
       NotificationToast.show(l10n.emailCodeSent, title: l10n.tip);
       // 图形验证码校验成功后服务端会删除，需刷新以便再次发送
@@ -81,11 +82,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
     setState(() => _isSubmitting = true);
     try {
-      await FlowApi.registerService(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        emailCaptcha: _emailCodeController.text.trim(),
-      );
+      await ref.read(accountControllerProvider).register(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            emailCaptcha: _emailCodeController.text.trim(),
+          );
       if (!mounted) return;
       NotificationToast.show(l10n.registerSuccess, title: l10n.tip);
       context.pop();

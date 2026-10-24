@@ -4,7 +4,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/search/presentation/providers/search_controller.dart';
 import 'package:anime_flow/features/search/presentation/widgets/search_details_content.dart';
 import 'package:anime_flow/features/search/presentation/widgets/search_omitted_content.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
@@ -606,9 +606,9 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 10),
                                 onPressed: () async {
-                                  final keyword = await const ImageSearchRoute()
-                                      .push(context);
-                                  if (keyword != null && keyword is String) {
+                                  final keyword = await appNavigatorOf(context)
+                                      .openImageSearch(context);
+                                  if (keyword != null) {
                                     await onSearch(keyword);
                                   }
                                 },

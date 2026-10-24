@@ -40,7 +40,7 @@ final class FontRepoCdnProvider extends $NotifierProvider<FontRepoCdn, bool> {
   }
 }
 
-String _$fontRepoCdnHash() => r'f25c9d597fcd0b83bfc9d6e06aae601c0355b3ea';
+String _$fontRepoCdnHash() => r'edc7dcf4e1a6cdf815695df8eac4e9cb8b4c4d5d';
 
 abstract class _$FontRepoCdn extends $Notifier<bool> {
   bool build();
@@ -77,7 +77,7 @@ final class FontProvider extends $AsyncNotifierProvider<Font, List<FontItem>> {
   Font create() => Font();
 }
 
-String _$fontHash() => r'4a6e1766c02c3e8e570ae862e1bb6ca4e12101e7';
+String _$fontHash() => r'12bdf02a6482ab2fb139321fea0d57a3a892120e';
 
 abstract class _$Font extends $AsyncNotifier<List<FontItem>> {
   FutureOr<List<FontItem>> build();
@@ -126,7 +126,7 @@ final class FontNetworkTasksProvider
   }
 }
 
-String _$fontNetworkTasksHash() => r'0d8ca26895c27c9a03e4cbce4db546688ce78cc4';
+String _$fontNetworkTasksHash() => r'4c7d088788512617dc69b882d6fb372e1f6751c3';
 
 abstract class _$FontNetworkTasks extends $Notifier<int> {
   int build();
@@ -173,7 +173,7 @@ final class DownloadedFontMetasProvider
 }
 
 String _$downloadedFontMetasHash() =>
-    r'ae67b96a01466ce3cb40a97ddf6db1c0c3415f6c';
+    r'3c92b838fd0ef616c777b4d49ece33c6f848ba7f';
 
 abstract class _$DownloadedFontMetas extends $Notifier<Map<String, FontItem>> {
   Map<String, FontItem> build();
@@ -238,7 +238,7 @@ final class FontDownloadProvider
   }
 }
 
-String _$fontDownloadHash() => r'8e69dced0de0dd1236f0337c5be0b63043ffb212';
+String _$fontDownloadHash() => r'21d073f53ff43ba3c06f946f42b667fadbabae0d';
 
 final class FontDownloadFamily extends $Family
     with
@@ -318,7 +318,7 @@ final class SelectedFontProvider
   }
 }
 
-String _$selectedFontHash() => r'd80f4f85a9d501dc7cccda538b30e181f607efaf';
+String _$selectedFontHash() => r'c54f804201dcc1b7b4f84bad4b71b90ae6391736';
 
 abstract class _$SelectedFont extends $Notifier<String?> {
   String? build();
@@ -328,111 +328,6 @@ abstract class _$SelectedFont extends $Notifier<String?> {
     final ref = this.ref as $Ref<String?, String?>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<String?, String?>, String?, Object?, Object?>;
-    element.handleCreate(ref, build);
-  }
-}
-
-/// 弹幕专用字体。为空时跟随项目主题字体。
-
-@ProviderFor(DanmakuFontFamily)
-final danmakuFontFamilyProvider = DanmakuFontFamilyProvider._();
-
-/// 弹幕专用字体。为空时跟随项目主题字体。
-final class DanmakuFontFamilyProvider
-    extends $NotifierProvider<DanmakuFontFamily, String?> {
-  /// 弹幕专用字体。为空时跟随项目主题字体。
-  DanmakuFontFamilyProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'danmakuFontFamilyProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$danmakuFontFamilyHash();
-
-  @$internal
-  @override
-  DanmakuFontFamily create() => DanmakuFontFamily();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(String? value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<String?>(value),
-    );
-  }
-}
-
-String _$danmakuFontFamilyHash() => r'57d6eac345329b4ef25e83d3fb53e2baa2bebe99';
-
-/// 弹幕专用字体。为空时跟随项目主题字体。
-
-abstract class _$DanmakuFontFamily extends $Notifier<String?> {
-  String? build();
-  @$mustCallSuper
-  @override
-  void runBuild() {
-    final ref = this.ref as $Ref<String?, String?>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<String?, String?>, String?, Object?, Object?>;
-    element.handleCreate(ref, build);
-  }
-}
-
-/// 是否在弹幕画布中应用项目或自定义字体。
-
-@ProviderFor(DanmakuFontEnabled)
-final danmakuFontEnabledProvider = DanmakuFontEnabledProvider._();
-
-/// 是否在弹幕画布中应用项目或自定义字体。
-final class DanmakuFontEnabledProvider
-    extends $NotifierProvider<DanmakuFontEnabled, bool> {
-  /// 是否在弹幕画布中应用项目或自定义字体。
-  DanmakuFontEnabledProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'danmakuFontEnabledProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$danmakuFontEnabledHash();
-
-  @$internal
-  @override
-  DanmakuFontEnabled create() => DanmakuFontEnabled();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(bool value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<bool>(value),
-    );
-  }
-}
-
-String _$danmakuFontEnabledHash() =>
-    r'02efaa7fcc5e613446b3a1bce9d88d024083e553';
-
-/// 是否在弹幕画布中应用项目或自定义字体。
-
-abstract class _$DanmakuFontEnabled extends $Notifier<bool> {
-  bool build();
-  @$mustCallSuper
-  @override
-  void runBuild() {
-    final ref = this.ref as $Ref<bool, bool>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<bool, bool>, bool, Object?, Object?>;
     element.handleCreate(ref, build);
   }
 }

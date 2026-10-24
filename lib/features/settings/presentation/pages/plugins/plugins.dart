@@ -1,9 +1,10 @@
+import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'dart:math' as math;
 
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/features/source/application/providers/plugin_provider.dart';
 import 'package:anime_flow/features/source/application/providers/source_configs_provider.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_install_message.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
@@ -14,8 +15,10 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
+@Dependencies([settingsLayout])
 class PluginsPage extends ConsumerStatefulWidget {
   const PluginsPage({super.key});
 
@@ -183,14 +186,15 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
               actions: [
                 IconButton(
                   onPressed: () {
-                    const SettingDownloadPluginsRoute().push(context);
+                    appNavigatorOf(context).openSettings<void>(context,
+                        destination: SettingsDestination.downloadPlugins);
                   },
                   icon: const Icon(Icons.cloud_download_outlined, size: 30),
                 ),
                 IconButton(
                   icon: const Icon(Icons.save_as_outlined, size: 30),
                   onPressed: () {
-                    const SettingAddPluginsRoute().push(context);
+                    appNavigatorOf(context).openPluginEditor<void>(context);
                   },
                 ),
               ],
@@ -225,8 +229,9 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
                 final isPluginBusy = _busyPluginNames.contains(data.name);
                 return InkWell(
                   key: ValueKey(data.name),
-                  onTap: () => SettingAddPluginsRoute(editPluginKey: data.name)
-                      .push(context),
+                  onTap: () => appNavigatorOf(context).openPluginEditor<void>(
+                      context,
+                      editPluginKey: data.name),
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 2),
                     padding: const EdgeInsets.symmetric(vertical: 5),

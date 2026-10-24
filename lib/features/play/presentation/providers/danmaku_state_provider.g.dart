@@ -20,7 +20,7 @@ final class DanmakuStateNotifierProvider
           argument: null,
           retry: null,
           name: r'danmakuStateProvider',
-          isAutoDispose: false,
+          isAutoDispose: true,
           dependencies: <ProviderOrFamily>[playExtraProvider],
           $allTransitiveDependencies: <ProviderOrFamily>[
             DanmakuStateNotifierProvider.$allTransitiveDependencies0,
@@ -46,7 +46,7 @@ final class DanmakuStateNotifierProvider
 }
 
 String _$danmakuStateNotifierHash() =>
-    r'6ecd9670a3b714d8ef35821158243469104ad8cd';
+    r'6b53205e87ba3181fb2d684d20f0eafd09815547';
 
 abstract class _$DanmakuStateNotifier extends $Notifier<DanmakuState> {
   DanmakuState build();

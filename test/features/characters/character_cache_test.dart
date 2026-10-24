@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:anime_flow/app/router/model/character_info_extra.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/shared/navigation/args/character_info_extra.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
+import 'package:anime_flow/features/characters/presentation/providers/characters_args_provider.dart';
+import 'package:anime_flow/features/character_info/presentation/providers/character_info_args_provider.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/settings/storage.dart';
@@ -18,6 +20,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 class Adapter implements HttpClientAdapter {
   final requests = <RequestOptions>[];
@@ -70,6 +73,7 @@ Map<String, dynamic> detail(int id, {String name = '角色'}) => {
       },
     };
 
+@Dependencies([SubjectCharacters, CharactersList, CharacterInfoDetail])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
@@ -142,6 +146,41 @@ void main() {
     expect(adapter.requests.last.queryParameters['offset'], 10);
     expect(c.read(charactersListProvider).requireValue.characters.data,
         hasLength(20));
+  });
+
+  test('numeric scroll signals coalesce pagination without a scheduled frame',
+      () async {
+    final container = ProviderContainer(overrides: [
+      charactersArgsProvider.overrideWithValue(42),
+    ]);
+    addTearDown(container.dispose);
+    container.listen(charactersListProvider, (_, __) {});
+    await container.read(charactersListProvider.future);
+    final notifier = container.read(charactersListProvider.notifier);
+
+    notifier.onScroll(pixels: 950, maxScrollExtent: 1000);
+    notifier.onScroll(pixels: 980, maxScrollExtent: 1000);
+    // 同一轮滚动只排队一次，尚未执行同步状态修改或请求。
+    expect(adapter.requests, hasLength(1));
+    await pumpEventQueue();
+    expect(adapter.requests, hasLength(2));
+    expect(adapter.requests.last.queryParameters['offset'], 10);
+    expect(container.read(charactersListProvider).requireValue.characters.data,
+        hasLength(20));
+  });
+
+  test('disposing before queued pagination cancels the request', () async {
+    final container = ProviderContainer(overrides: [
+      charactersArgsProvider.overrideWithValue(42),
+    ]);
+    container.listen(charactersListProvider, (_, __) {});
+    await container.read(charactersListProvider.future);
+    container
+        .read(charactersListProvider.notifier)
+        .maybeAutoFillShortContent(0);
+    container.dispose();
+    await pumpEventQueue();
+    expect(adapter.requests, hasLength(1));
   });
 
   test('list cache separates subjects, limits, offsets and role filters',

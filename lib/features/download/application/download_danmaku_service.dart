@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:anime_flow/features/download/application/download_directory/download_directory_factory.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/download_directory/restore_download_directory_access.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
@@ -120,7 +120,7 @@ class DownloadDanmakuService implements IDownloadDanmakuService {
     final parts = [
       danmaku.time.toStringAsFixed(2),
       danmaku.type.toString(),
-      Utils.colorToDecimalRgb(danmaku.color).toString(),
+      (danmaku.color & 0xffffff).toString(),
       danmaku.source,
       if (danmaku.bgmUserId != null) danmaku.bgmUserId.toString(),
     ];

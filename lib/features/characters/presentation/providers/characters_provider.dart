@@ -1,9 +1,7 @@
 import 'package:anime_flow/features/characters/data/repositories/character_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
+import 'package:anime_flow/features/characters/presentation/providers/characters_args_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'characters_provider.g.dart';
@@ -52,13 +50,12 @@ class CharactersList extends _$CharactersList {
     return CharactersViewState(characters: characters);
   }
 
-  void onScroll(ScrollMetrics metrics) {
-    maybeAutoFillShortContent(metrics);
+  void onScroll({required double pixels, required double maxScrollExtent}) {
+    maybeAutoFillShortContent(maxScrollExtent);
 
-    if (metrics.maxScrollExtent <= 0) return;
+    if (maxScrollExtent <= 0) return;
 
-    final nearBottom =
-        metrics.pixels >= metrics.maxScrollExtent - _loadMoreThreshold;
+    final nearBottom = pixels >= maxScrollExtent - _loadMoreThreshold;
     if (!nearBottom) {
       _armedForBottomLoad = true;
       return;
@@ -72,13 +69,14 @@ class CharactersList extends _$CharactersList {
 
     _armedForBottomLoad = false;
     _loadMoreScheduled = true;
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
+    // 当前同步通知结束后再请求，合并同一轮的重复分页信号。
+    Future<void>.microtask(() async {
       _loadMoreScheduled = false;
       await loadMore();
     });
   }
 
-  void maybeAutoFillShortContent(ScrollMetrics metrics) {
+  void maybeAutoFillShortContent(double maxScrollExtent) {
     if (_autoFillScheduled) return;
 
     final current = state.asData?.value;
@@ -86,10 +84,11 @@ class CharactersList extends _$CharactersList {
       return;
     }
 
-    if (metrics.maxScrollExtent > _shortContentThreshold) return;
+    if (maxScrollExtent > _shortContentThreshold) return;
 
     _autoFillScheduled = true;
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
+    // 当前同步通知结束后再请求，合并同一轮的重复分页信号。
+    Future<void>.microtask(() async {
       _autoFillScheduled = false;
       await loadMore();
     });

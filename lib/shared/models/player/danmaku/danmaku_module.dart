@@ -1,6 +1,3 @@
-import 'package:anime_flow/core/utils/utils.dart';
-import 'package:material_ui/material_ui.dart';
-
 class Danmaku {
   // 弹幕内容
   String message;
@@ -14,8 +11,8 @@ class Danmaku {
   // 弹幕类型 (1-普通弹幕，4-底部弹幕，5-顶部弹幕)
   int type;
 
-  // 弹幕颜色
-  Color color;
+  // 弹幕颜色，使用 0xAARRGGBB 整数表示。
+  int color;
 
   // 弹幕来源 ([BiliBili], [Gamer])
   String source;
@@ -38,7 +35,7 @@ class Danmaku {
     List<String> parts = json['p'].split(',');
     double timeValue = double.parse(parts[0]);
     int typeValue = int.parse(parts[1]);
-    Color color = Utils.generateDanmakuColor(int.parse(parts[2]));
+    final color = 0xff000000 | (int.parse(parts[2]) & 0xffffff);
     String sourceValue = parts[3];
     final int? bgmUserIdValue =
         parts.length > 4 ? int.tryParse(parts[4]) : null;

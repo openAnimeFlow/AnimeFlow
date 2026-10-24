@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'episode_comments_provider.g.dart';
 
-@Riverpod(keepAlive: true, dependencies: [Episodes])
+@Riverpod(dependencies: [Episodes])
 Future<List<EpisodeComment>> episodeComments(Ref ref) async {
   final episodeId = ref.watch(
     episodesProvider.select((episodes) => episodes.value?.episodeId ?? 0),

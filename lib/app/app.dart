@@ -10,7 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/shared/widgets/windows_title_bar.dart';
 import 'package:anime_flow/app/app_version.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
-import 'package:anime_flow/features/user/application/collection_sync_lifecycle.dart';
+import 'package:anime_flow/features/user/presentation/widgets/collection_sync_lifecycle.dart';
+import 'package:anime_flow/features/auth/presentation/widgets/oauth_notice_listener.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
             var body = BotToastInit()(context, child);
             body = AppVersionUpdateListener(child: body);
             body = CollectionSyncLifecycle(child: body);
+            body = OAuthNoticeListener(child: body);
             if (Platform.isWindows) {
               body = WindowsTitleBar(
                 title: 'AnimeFlow',

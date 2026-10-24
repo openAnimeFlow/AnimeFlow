@@ -11,7 +11,6 @@ import 'package:anime_flow/features/play/application/danmaku_canvas.dart';
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
@@ -53,7 +52,7 @@ void main() {
       );
 
       expect(
-        await session.send(' hello ', type: 5, color: const Color(0xff123456)),
+        await session.send(' hello ', type: 5, color: 0xff123456),
         isTrue,
       );
 
@@ -346,7 +345,7 @@ class _Canvas implements DanmakuCanvas {
   int? lastCurrentUserId;
 
   @override
-  void addDanmaku(Danmaku danmaku, int? currentUserId, {Color? color}) {
+  void addDanmaku(Danmaku danmaku, int? currentUserId, {int? color}) {
     lastDanmaku = danmaku;
     lastCurrentUserId = currentUserId;
   }

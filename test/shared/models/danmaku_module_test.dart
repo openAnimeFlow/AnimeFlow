@@ -1,5 +1,4 @@
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -9,7 +8,7 @@ void main() {
         message: '鼠标',
         time: 1.5,
         type: 1,
-        color: Colors.white,
+        color: 0xffffffff,
         source: 'BiliBili',
       );
 
@@ -29,6 +28,10 @@ void main() {
 
       expect(danmaku.message, '开放中文转换');
       expect(danmaku.originalMessage, '开放中文转换');
+      expect(danmaku.color, 0xffffffff);
+      expect(
+          Danmaku.fromJson({'m': 'color', 'p': '1.5,1,1193046,BiliBili'}).color,
+          0xff123456);
     });
   });
 }

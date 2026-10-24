@@ -9,6 +9,52 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get wallpaperImageSize => 'Image size';
+
+  @override
+  String get wallpaperBackdrop => 'Backdrop';
+
+  @override
+  String get wallpaperPoster => 'Poster';
+
+  @override
+  String wallpaperImageCount(int count) {
+    return '$count images';
+  }
+
+  @override
+  String get wallpaperDownload => 'Download wallpaper';
+
+  @override
+  String get wallpaperShare => 'Share';
+
+  @override
+  String get wallpaperCopyLink => 'Copy link';
+
+  @override
+  String get wallpaperMore => 'More wallpapers';
+
+  @override
+  String get wallpaperViewAnime => 'View anime';
+
+  @override
+  String get wallpaperPrevious => 'Previous image';
+
+  @override
+  String get wallpaperNext => 'Next image';
+
+  @override
+  String wallpaperThumbnail(int index) {
+    return 'Image $index';
+  }
+
+  @override
+  String get wallpaperActionFailed => 'Something went wrong. Please try again.';
+
+  @override
+  String get wallpapers => 'Wallpapers';
+
+  @override
   String get changePassword => 'Change password';
 
   @override

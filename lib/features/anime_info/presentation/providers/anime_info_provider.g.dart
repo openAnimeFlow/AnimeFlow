@@ -37,7 +37,7 @@ final class AnimeInfoProvider
   AnimeInfo create() => AnimeInfo();
 }
 
-String _$animeInfoHash() => r'f8fe314e1154e0f3b4be37de3281a4e26770cfe4';
+String _$animeInfoHash() => r'ee212d46069c87b1071eaede8ecb86a1b5f99ee9';
 
 abstract class _$AnimeInfo extends $StreamNotifier<SubjectsInfoItem> {
   Stream<SubjectsInfoItem> build();
@@ -128,7 +128,7 @@ final class SubjectCommentsProvider
   SubjectComments create() => SubjectComments();
 }
 
-String _$subjectCommentsHash() => r'16c109ade684240f87a5eb43b18337c418aafe62';
+String _$subjectCommentsHash() => r'8f088ac01170663a21ddebce5915306bb6f8bd42';
 
 abstract class _$SubjectComments
     extends $AsyncNotifier<SubjectCommentsViewState> {

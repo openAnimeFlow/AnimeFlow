@@ -3,7 +3,7 @@ import 'package:anime_flow/features/characters/data/repositories/character_repos
 import 'package:anime_flow/shared/models/bangumi/character_comments_item.dart';
 import 'package:anime_flow/shared/models/bangumi/character_detail_item.dart';
 import 'package:anime_flow/shared/models/bangumi/character_subjects_item.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/character_info/presentation/providers/character_info_args_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'dart:async';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/core/crawler/captcha_page_url.dart';
@@ -11,22 +12,16 @@ import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
-import 'package:anime_flow/features/play/application/video_source_service.dart';
-import 'package:anime_flow/features/play/application/webview_video_source_service.dart';
+import 'package:anime_flow/core/video_source/domain/video_source.dart';
+import 'package:anime_flow/core/video_source/application/video_source_providers.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'video_source_provider.g.dart';
-
-/// 播放解析 WebView 的生命周期独立于页面状态。
-final webViewVideoSourceProvider = Provider<WebViewVideoSourceService>((ref) {
-  return WebViewVideoSourceService.shared;
-});
 
 class VideoSourceState {
   const VideoSourceState({
@@ -104,10 +99,7 @@ class ManualEpisodeSource {
   final String videoUrl;
 }
 
-@Riverpod(
-  keepAlive: true,
-  dependencies: [Episodes, playExtra, PlayStateNotifier, playSession],
-)
+@Riverpod(dependencies: [Episodes, playExtra, playSession, PlayStateNotifier])
 class VideoSourceNotifier extends _$VideoSourceNotifier {
   final LiggLogger _logger = LiggLogger();
 
@@ -121,24 +113,11 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   int? _autoSelectEpisodeIndex;
   String? _preferredAutoSelectWebsiteName;
   int _videoPageLoadToken = 0;
+  VideoSourceCancellation? _resolution;
   final Set<String> _attemptedAutoLoadUrls = {};
 
   /// 规则执行引擎；传输实现固定为默认的真实 HTTP。
   final RuleEngine _ruleEngine = RuleEngine();
-
-  int get currentEpisodeIndex => state.currentEpisodeIndex;
-  List<ResourcesItem> get videoResources => state.videoResources;
-  String get webSiteTitle => state.webSiteTitle;
-  String get webSiteIcon => state.webSiteIcon;
-  String get resourceTitle => state.resourceTitle;
-  String get lineName => state.lineName;
-  String get videoUrl => state.videoUrl;
-  String get keyword => state.keyword;
-  bool get isSearchCompleted => state.isSearchCompleted;
-  int get selectedWebsiteIndex => state.selectedWebsiteIndex;
-  bool get userManuallySelected => state.userManuallySelected;
-  Map<int, ManualEpisodeSource> get manualEpisodeSources =>
-      state.manualEpisodeSources;
 
   bool _requiresCaptcha(CrawlConfigItem config) {
     return config.antiCrawlerConfig.enabled &&
@@ -165,6 +144,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   }
 
   Future<void> _dispose() async {
+    _resolution?.cancel();
+    _resolution = null;
     _searchSessionId++;
     _videoPageLoadToken++;
     _websiteRequestTokens.clear();
@@ -878,8 +859,9 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
     if (!ref.mounted) return false;
     final loadToken = ++_videoPageLoadToken;
-    final webViewVideoProvider = ref.read(webViewVideoSourceProvider);
-    webViewVideoProvider.cancel();
+    _resolution?.cancel();
+    final cancellation = _resolution = VideoSourceCancellation();
+    final webViewVideoProvider = ref.read(playbackVideoSourceProvider);
 
     final playController = ref.read(playSessionProvider);
     ref.read(playStateProvider.notifier).setPlaybackPhase(
@@ -889,9 +871,6 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
 
     if (!ref.mounted || loadToken != _videoPageLoadToken) return false;
 
-    await webViewVideoProvider.ensureInitialized();
-    if (!ref.mounted) return false;
-    if (loadToken != _videoPageLoadToken) return false;
     var offset = 0;
     final subject = ref.read(playExtraProvider).playExtra;
     final episodesState =
@@ -904,7 +883,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     final subjectCover = subject.subjectCover;
     final subjectAlias = subject.subjectAliases;
     final position = await PlayRepository.getPlayHistory(subjectId);
-    if (!ref.mounted) return false;
+    if (!ref.mounted || loadToken != _videoPageLoadToken) return false;
     if (position != null &&
         position.position > 0 &&
         position.episodeId == episodeId) {
@@ -912,8 +891,12 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
 
     try {
-      final source = await webViewVideoProvider.resolve(url,
-          useLegacyParser: false, offset: offset);
+      final source = await webViewVideoProvider.resolve(
+          VideoSourceResolveRequest(
+              episodeUrl: url,
+              offset: offset,
+              cancellation: cancellation,
+              timeout: const Duration(seconds: 15)));
       if (!ref.mounted) return false;
       final canUseResult = loadToken == _videoPageLoadToken &&
           (shouldUseResult == null || shouldUseResult());

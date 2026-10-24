@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:math' as math;
 
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
@@ -10,21 +11,20 @@ import 'package:anime_flow/features/settings/presentation/widgets/account/bgm_co
 import 'package:anime_flow/features/settings/presentation/widgets/account/bind_email_section.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/account/change_password_dialog.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/features/user/application/user_oauth_controller.dart';
-import 'package:anime_flow/features/user/application/user_oauth_state.dart';
-import 'package:anime_flow/features/user/presentation/providers/account_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/network_check_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
 import 'package:anime_flow/features/settings/presentation/widgets/account/account_content.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/account/avatar_dialog.dart';
 
+@Dependencies([settingsLayout])
 class AccountSettingsPage extends ConsumerStatefulWidget {
   const AccountSettingsPage({super.key});
 
@@ -38,7 +38,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
   Future<void> _changePassword() async {
     final l10n = AppLocalizations.of(context);
-    final controller = ref.read(accountControllerProvider.notifier);
+    final controller = ref.read(accountControllerProvider);
     final changed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -71,7 +71,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
     if (confirmed != true || !context.mounted) return;
 
-    await ref.read(accountControllerProvider.notifier).clearUserInfo();
+    await ref.read(accountControllerProvider).clearUserInfo();
   }
 
   Future<void> _bindBangumi() async {

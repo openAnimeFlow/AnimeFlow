@@ -1,9 +1,4 @@
-import 'dart:io';
 import 'dart:async';
-
-import 'impl/captcha_webview_inappwebview_impl.dart';
-import 'impl/captcha_webview_linux_impl.dart';
-import 'impl/captcha_webview_windows_impl.dart';
 
 abstract class CaptchaWebviewController<T> {
   /// Webview controller
@@ -74,17 +69,4 @@ abstract class CaptchaWebviewController<T> {
 
   /// 释放 WebView 资源
   void dispose();
-}
-
-class CaptchaWebviewControllerFactory {
-  static CaptchaWebviewController getController() {
-    if (Platform.isWindows) {
-      return CaptchaWebviewWindowsImpl();
-    }
-    if (Platform.isLinux) {
-      return CaptchaWebviewLinuxImpl();
-    }
-    // Android, iOS, macOS
-    return CaptchaWebviewInAppWebviewImpl();
-  }
 }

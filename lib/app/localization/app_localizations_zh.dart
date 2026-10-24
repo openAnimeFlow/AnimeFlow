@@ -9,6 +9,52 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get wallpaperImageSize => '圖片尺寸';
+
+  @override
+  String get wallpaperBackdrop => '橫向劇照';
+
+  @override
+  String get wallpaperPoster => '直向海報';
+
+  @override
+  String wallpaperImageCount(int count) {
+    return '共 $count 張圖片';
+  }
+
+  @override
+  String get wallpaperDownload => '下載桌布';
+
+  @override
+  String get wallpaperShare => '分享';
+
+  @override
+  String get wallpaperCopyLink => '複製連結';
+
+  @override
+  String get wallpaperMore => '更多桌布';
+
+  @override
+  String get wallpaperViewAnime => '查看動畫';
+
+  @override
+  String get wallpaperPrevious => '上一張';
+
+  @override
+  String get wallpaperNext => '下一張';
+
+  @override
+  String wallpaperThumbnail(int index) {
+    return '第 $index 張圖片';
+  }
+
+  @override
+  String get wallpaperActionFailed => '操作失敗，請重試';
+
+  @override
+  String get wallpapers => '壁紙';
+
+  @override
   String get changePassword => '修改密碼';
 
   @override
@@ -2449,6 +2495,52 @@ class AppLocalizationsZh extends AppLocalizations {
 /// The translations for Chinese, using the Han script (`zh_Hans`).
 class AppLocalizationsZhHans extends AppLocalizationsZh {
   AppLocalizationsZhHans() : super('zh_Hans');
+
+  @override
+  String get wallpaperImageSize => '图片尺寸';
+
+  @override
+  String get wallpaperBackdrop => '横向剧照';
+
+  @override
+  String get wallpaperPoster => '竖向海报';
+
+  @override
+  String wallpaperImageCount(int count) {
+    return '共 $count 张图片';
+  }
+
+  @override
+  String get wallpaperDownload => '下载壁纸';
+
+  @override
+  String get wallpaperShare => '分享';
+
+  @override
+  String get wallpaperCopyLink => '复制链接';
+
+  @override
+  String get wallpaperMore => '更多壁纸';
+
+  @override
+  String get wallpaperViewAnime => '查看番剧';
+
+  @override
+  String get wallpaperPrevious => '上一张';
+
+  @override
+  String get wallpaperNext => '下一张';
+
+  @override
+  String wallpaperThumbnail(int index) {
+    return '第 $index 张图片';
+  }
+
+  @override
+  String get wallpaperActionFailed => '操作失败，请重试';
+
+  @override
+  String get wallpapers => '壁纸';
 
   @override
   String get changePassword => '修改密码';
@@ -4892,6 +4984,52 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   AppLocalizationsZhHantHk() : super('zh_Hant_HK');
 
   @override
+  String get wallpaperImageSize => '圖片尺寸';
+
+  @override
+  String get wallpaperBackdrop => '橫向劇照';
+
+  @override
+  String get wallpaperPoster => '直向海報';
+
+  @override
+  String wallpaperImageCount(int count) {
+    return '共 $count 張圖片';
+  }
+
+  @override
+  String get wallpaperDownload => '下載桌布';
+
+  @override
+  String get wallpaperShare => '分享';
+
+  @override
+  String get wallpaperCopyLink => '複製連結';
+
+  @override
+  String get wallpaperMore => '更多桌布';
+
+  @override
+  String get wallpaperViewAnime => '查看動畫';
+
+  @override
+  String get wallpaperPrevious => '上一張';
+
+  @override
+  String get wallpaperNext => '下一張';
+
+  @override
+  String wallpaperThumbnail(int index) {
+    return '第 $index 張圖片';
+  }
+
+  @override
+  String get wallpaperActionFailed => '操作失敗，請重試';
+
+  @override
+  String get wallpapers => '壁紙';
+
+  @override
   String get changePassword => '修改密碼';
 
   @override
@@ -7332,6 +7470,52 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
 class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   AppLocalizationsZhHantTw() : super('zh_Hant_TW');
+
+  @override
+  String get wallpaperImageSize => '圖片尺寸';
+
+  @override
+  String get wallpaperBackdrop => '橫向劇照';
+
+  @override
+  String get wallpaperPoster => '直向海報';
+
+  @override
+  String wallpaperImageCount(int count) {
+    return '共 $count 張圖片';
+  }
+
+  @override
+  String get wallpaperDownload => '下載桌布';
+
+  @override
+  String get wallpaperShare => '分享';
+
+  @override
+  String get wallpaperCopyLink => '複製連結';
+
+  @override
+  String get wallpaperMore => '更多桌布';
+
+  @override
+  String get wallpaperViewAnime => '查看動畫';
+
+  @override
+  String get wallpaperPrevious => '上一張';
+
+  @override
+  String get wallpaperNext => '下一張';
+
+  @override
+  String wallpaperThumbnail(int index) {
+    return '第 $index 張圖片';
+  }
+
+  @override
+  String get wallpaperActionFailed => '操作失敗，請重試';
+
+  @override
+  String get wallpapers => '桌布';
 
   @override
   String get changePassword => '修改密碼';

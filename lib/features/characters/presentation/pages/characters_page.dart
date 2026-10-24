@@ -1,14 +1,16 @@
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/features/characters/presentation/providers/characters_provider.dart';
-import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/app/router/model/character_info_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/character_info_extra.dart';
 import 'package:anime_flow/core/utils/bgm_utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 角色列表页面
+@Dependencies([CharactersList])
 class CharacterPage extends StatefulWidget {
   const CharacterPage({super.key});
 
@@ -45,9 +47,10 @@ class _CharacterPageState extends State<CharacterPage> {
           onNotification: (notification) {
             if (notification is ScrollUpdateNotification &&
                 notification.metrics.axis == Axis.vertical) {
-              ref
-                  .read(charactersListProvider.notifier)
-                  .onScroll(notification.metrics);
+              ref.read(charactersListProvider.notifier).onScroll(
+                    pixels: notification.metrics.pixels,
+                    maxScrollExtent: notification.metrics.maxScrollExtent,
+                  );
             }
             return false;
           },
@@ -103,7 +106,7 @@ class _CharacterPageState extends State<CharacterPage> {
                           ref
                               .read(charactersListProvider.notifier)
                               .maybeAutoFillShortContent(
-                                _scrollController.position,
+                                _scrollController.position.maxScrollExtent,
                               );
                         });
 
@@ -174,19 +177,18 @@ class _CharacterPageState extends State<CharacterPage> {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
-          CharacterInfoRoute(
-            id: characterData.character.id,
-            name: characterData.character.nameCN.isNotEmpty
-                ? characterData.character.nameCN
-                : characterData.character.name,
-            image: characterData.character.images.large,
-            $extra: CharacterInfoExtra(
-              characterId: characterData.character.id,
-              characterName: characterData.character.name,
-              characterImage: characterData.character.images.large,
-              casts: characterData.casts,
-            ),
-          ).push(context);
+          appNavigatorOf(context).openCharacterInfo<void>(context,
+              id: characterData.character.id,
+              name: characterData.character.nameCN.isNotEmpty
+                  ? characterData.character.nameCN
+                  : characterData.character.name,
+              image: characterData.character.images.large,
+              extra: CharacterInfoExtra(
+                characterId: characterData.character.id,
+                characterName: characterData.character.name,
+                characterImage: characterData.character.images.large,
+                casts: characterData.casts,
+              ));
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

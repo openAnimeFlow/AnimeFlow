@@ -1,3 +1,4 @@
+import 'package:anime_flow/core/network/clients/flow_token_refresh_client.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
 import 'package:anime_flow/core/network/flow/flow_http_client_adapter.dart';
@@ -17,6 +18,7 @@ class DioFactory {
   static Dio? _pluginDio;
   static Dio? _downloadDio;
   static Dio? _animeFlowDio;
+  static Dio? _animeFlowRefreshDio;
 
   static Dio get apiDio => _apiDio ??= _create(
         NetworkConfig.fromSettings(),
@@ -28,6 +30,20 @@ class DioFactory {
 
   static Dio get animeFlowDio {
     if (_animeFlowDio != null) return _animeFlowDio!;
+    final dio = _createAnimeFlowTransport();
+    final refreshClient = FlowTokenRefreshClient(animeFlowRefreshDio);
+    dio.interceptors.add(
+      FlowRefreshTokenInterceptor(dio, FlowTokenStorage.instance,
+          refreshToken: refreshClient.refresh),
+    );
+    return _animeFlowDio = dio;
+  }
+
+  /// Dedicated refresh transport. It never installs the session interceptor.
+  static Dio get animeFlowRefreshDio =>
+      _animeFlowRefreshDio ??= _createAnimeFlowTransport();
+
+  static Dio _createAnimeFlowTransport() {
     final dio = _create(
       NetworkConfig.fromSettings(
         connectTimeout: const Duration(seconds: 15),
@@ -49,10 +65,7 @@ class DioFactory {
       }
       handler.next(options);
     }));
-    dio.interceptors.add(
-      FlowRefreshTokenInterceptor(dio, FlowTokenStorage.instance),
-    );
-    return _animeFlowDio = dio;
+    return dio;
   }
 
   static Dio get githubDio => _githubDio ??= _create(
@@ -85,11 +98,13 @@ class DioFactory {
   /// 清空工厂缓存
   static void reset() {
     _animeFlowDio?.close();
+    _animeFlowRefreshDio?.close();
     _apiDio = null;
     _githubDio = null;
     _pluginDio = null;
     _downloadDio = null;
     _animeFlowDio = null;
+    _animeFlowRefreshDio = null;
   }
 
   static Dio _create(

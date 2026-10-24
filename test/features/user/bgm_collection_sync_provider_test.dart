@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:dio/dio.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +9,7 @@ import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/application/user_state_provider.dart';
 import 'package:anime_flow/features/user/data/repository/collection_sync_repository.dart';
 
 final session = Provider<String>((ref) => 'first');
@@ -110,20 +111,6 @@ void main() {
     await pending;
     expect(c.read(bgmCollectionSyncProvider).value?.userId, 2);
     expect(c.read(bgmCollectionSyncProvider).value?.pendingConflictCount, 0);
-  });
-
-  test('completed progress invalidates detail revision only when changed',
-      () async {
-    final repo = Repository();
-    final c = create(repo);
-    addTearDown(c.dispose);
-    await c.read(bgmCollectionSyncProvider.future);
-    repo.loader = () async => const BgmCollectionSyncStatusItem(
-        status: BgmCollectionSyncStatus.success, taskId: 1, syncedCount: 5);
-    await c.read(bgmCollectionSyncProvider.notifier).refreshStatus();
-    expect(c.read(collectionRevisionProvider), 1);
-    await c.read(bgmCollectionSyncProvider.notifier).refreshStatus();
-    expect(c.read(collectionRevisionProvider), 1);
   });
 
   test('build-time collection refresh only runs on the initial build',

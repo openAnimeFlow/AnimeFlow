@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/domain/player/video_fit.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -14,11 +15,8 @@ import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
-import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
-import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -78,7 +76,7 @@ void main() {
       addTearDown(() => debugDefaultTargetPlatformOverride = null);
       final factory = _Factory();
       final state = _State()
-        ..value = const PlayState(playing: true, volume: 35);
+        .._value = const PlayState(playing: true, volume: 35);
       final session = _Session(factory, state: state);
       await session.playbackCoordinator.initialize();
       addTearDown(session.playbackCoordinator.dispose);
@@ -88,7 +86,7 @@ void main() {
         expect(await session.setHardwareDecoder(enabled), isTrue);
         expect(factory.engines.last.volume,
             platform == TargetPlatform.fuchsia ? 35 : 100);
-        expect(state.value.volume, 35);
+        expect(state._value.volume, 35);
       }
       expect(await session.switchKernel(PlayerKernel.fvp), isTrue);
       expect(factory.engines.last.volume,
@@ -100,7 +98,9 @@ void main() {
       'hardware decoding defaults on and persists changes while rebuilding the same kernel',
       () async {
     final factory = _Factory();
-    final session = _Session(factory);
+    final state = _State()
+      .._value = const PlayState(playing: true, videoFit: VideoFit.cover);
+    final session = _Session(factory, state: state);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
     expect(await session.setHardwareDecoder(true), isTrue);
@@ -116,6 +116,28 @@ void main() {
     expect(await session.setHardwareDecoder(true), isTrue);
     expect(Storage.setting.get(PlaybackKey.hardwareDecoder), isTrue);
     expect(factory.engines, hasLength(3));
+    expect(factory.decoderOptions, [true, false, true]);
+    expect(state._value.videoFit, VideoFit.cover);
+  });
+
+  test(
+      'failed decoder rebuild rolls back settings and keeps the active engine options',
+      () async {
+    final factory = _Factory();
+    final session = _Session(factory);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session.initPlayState(_request(1));
+    final original = factory.engines.single;
+    factory.beforeOpen = (_) async => throw StateError('decoder unavailable');
+    expect(await session.setHardwareDecoder(false), isFalse);
+    expect(Storage.setting.get(PlaybackKey.hardwareDecoder), isTrue);
+    expect(session.playbackCoordinator.hardwareDecoder, isTrue);
+    expect(original.disposeCount, 0);
+    expect(factory.engines.last.disposeCount, 1);
+    factory.beforeOpen = null;
+    expect(await session.switchKernel(PlayerKernel.fvp), isTrue);
+    expect(factory.decoderOptions, [true, false, true]);
   });
 
   test('episode context stays on the old episode until switching finishes',
@@ -210,7 +232,7 @@ void main() {
     const duration = Duration(minutes: 24);
     final factory = _Factory();
     final state = _State()
-      ..value = const PlayState(
+      .._value = const PlayState(
         playing: true,
         duration: duration,
         position: Duration(minutes: 10),
@@ -225,13 +247,13 @@ void main() {
 
     final target = duration - const Duration(seconds: 1);
     expect(factory.engines.last.seekPositions, [target]);
-    expect(state.value.position, target);
+    expect(state._value.position, target);
   });
 
   test('startup phase ignores play and seek requests', () async {
     final factory = _Factory();
     final state = _State()
-      ..value = const PlayState(
+      .._value = const PlayState(
         phase: PlaybackPhase.resolving,
         duration: Duration(minutes: 24),
       );
@@ -250,10 +272,10 @@ void main() {
     expect(engine.playCalls, 0);
     expect(engine.pauseCalls, 0);
     expect(engine.seekPositions, isEmpty);
-    expect(state.value.position, Duration.zero);
+    expect(state._value.position, Duration.zero);
 
     // 启动结束后恢复正常的播放与跳转。
-    state.value = state.value.copyWith(
+    state._value = state._value.copyWith(
       phase: PlaybackPhase.playing,
       playing: true,
     );
@@ -284,10 +306,13 @@ String _localPath(int episode) =>
 
 class _Session extends PlaySession {
   _Session(_Factory factory, {_State? state})
+      : this._(factory, state ?? _State());
+
+  _Session._(_Factory factory, _State state)
       : super(
           shadersDirectory: Directory.systemTemp,
-          playStateActions: state ?? _State(),
-          playbackIndicatorActions: _Indicators(),
+          playStateActions: state,
+          readPlayState: () => state._value,
           episodesActions: _Episodes(),
           danmaku: DanmakuSession(
             store: _DanmakuStore(),
@@ -300,12 +325,15 @@ class _Session extends PlaySession {
             ),
             currentUserId: () => null,
           ),
-          engineFactory: factory,
+          engineFactory: factory.create,
           setEpisodeWatched: (
               {required subjectId, required episodeId, required watched}) {},
         ) {
-    playbackCoordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    playbackCoordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
     playbackProgressManager = _Progress();
   }
 }
@@ -318,11 +346,13 @@ class _DanmakuStore implements DanmakuStore {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-class _Factory extends PlayerEngineFactory {
+class _Factory {
   final engines = <_Engine>[];
+  final decoderOptions = <bool>[];
   Future<void> Function(_Engine)? beforeOpen;
-  @override
-  PlayerEngine create(PlayerKernel kernel, {required bool adBlocker}) {
+  PlayerEngine create(PlayerKernel kernel,
+      {required bool adBlocker, required bool hardwareDecoder}) {
+    decoderOptions.add(hardwareDecoder);
     final engine = _Engine(kernel, this);
     engines.add(engine);
     return engine;
@@ -409,41 +439,24 @@ class _Settings implements Box<dynamic> {
 }
 
 class _State implements PlayStateNotifier {
-  @override
-  PlayState value = const PlayState(playing: true);
+  PlayState _value = const PlayState(playing: true);
   @override
   void setKernel(PlayerKernel kernel) {
-    value = value.copyWith(kernel: kernel);
+    _value = _value.copyWith(kernel: kernel);
   }
 
   @override
   void setSwitchingKernel(bool switching) {
-    value = value.copyWith(switchingKernel: switching);
+    _value = _value.copyWith(switchingKernel: switching);
   }
 
   @override
   void setPosition(Duration position) {
-    value = value.copyWith(position: position);
+    _value = _value.copyWith(position: position);
   }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-class _Indicators implements PlaybackIndicatorActions {
-  @override
-  VideoControlsIndicatorType centerIndicator =
-      VideoControlsIndicatorType.noIndicator;
-
-  @override
-  void showCenterIndicator(VideoControlsIndicatorType type) {
-    centerIndicator = type;
-  }
-
-  @override
-  void clearCenterIndicator() {
-    centerIndicator = VideoControlsIndicatorType.noIndicator;
-  }
 }
 
 class _Episodes implements Episodes {

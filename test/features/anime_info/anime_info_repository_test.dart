@@ -1,10 +1,11 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/core/cache/json_response_cache.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
@@ -14,13 +15,14 @@ import 'package:anime_flow/features/anime_info/data/datasources/anime_info_local
 import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 class GuestToken extends CurrentFlowToken {
   @override
@@ -97,6 +99,7 @@ SubjectsInfoItem subject(String name) => SubjectsInfoItem.fromJson({
       'images': <String, String>{},
     });
 
+@Dependencies([AnimeInfo, SubjectComments])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory cacheDirectory;
@@ -106,7 +109,10 @@ void main() {
   late ProviderContainer repositoryContainer;
 
   AnimeInfoRepository createRepository() {
-    repositoryContainer = ProviderContainer(retry: (_, __) => null);
+    repositoryContainer = ProviderContainer(
+      retry: (_, __) => null,
+      overrides: [currentFlowTokenProvider.overrideWith(GuestToken.new)],
+    );
     addTearDown(repositoryContainer.dispose);
     return repositoryContainer.read(animeInfoRepositoryProvider.notifier);
   }
@@ -116,6 +122,8 @@ void main() {
     cacheDirectory = await Directory.systemTemp.createTemp('anime_info_test_');
     Hive.init(cacheDirectory.path);
     Storage.animeInfoCache = await Hive.openBox<String>('anime_info_cache');
+    Storage.subjectCommentsCache =
+        await Hive.openBox<String>('subject_comments');
   });
   tearDownAll(() async {
     await Hive.close();
@@ -123,6 +131,7 @@ void main() {
   });
   setUp(() async {
     await Storage.animeInfoCache.clear();
+    await Storage.subjectCommentsCache.clear();
     remote = PendingAdapter();
     DioFactory.animeFlowDio.interceptors.clear();
     DioFactory.animeFlowDio.httpClientAdapter = remote;
@@ -133,12 +142,12 @@ void main() {
     DioFactory.reset();
   });
 
+  @Dependencies([AnimeInfo])
   ProviderContainer createContainer() {
     final container = ProviderContainer(
         parent: repositoryContainer,
         retry: (_, __) => null,
         overrides: [
-          currentFlowTokenProvider.overrideWith(GuestToken.new),
           animeInfoArgsProvider
               .overrideWithValue(InfoRouteExtra(id: 42, name: '', image: '')),
         ]);
@@ -165,6 +174,26 @@ void main() {
     expect((await result).name, 'fresh');
     expect(container.read(animeInfoProvider).isLoading, isFalse);
     expect(local.read(42, sessionId: null)!.subject.name, 'fresh');
+  });
+
+  test('updating details leaves comments cache and provider untouched',
+      () async {
+    final container = createContainer();
+    final initial = container.read(animeInfoProvider.future);
+    await remote.waitForRequests(1);
+    remote.requests.single.complete(reply(subject: subject('before')));
+    await initial;
+    await Storage.subjectCommentsCache.put('42:20:0', 'cached comments');
+
+    final updated = subject('updated');
+    container.read(animeInfoProvider.notifier).setAnimeInfo(updated);
+    await repository.cacheSubject(updated, sessionId: null);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(container.read(animeInfoProvider).requireValue.name, 'updated');
+    expect(Storage.subjectCommentsCache.get('42:20:0'), 'cached comments');
+    expect(container.exists(subjectCommentsProvider), isFalse);
+    expect(remote.requests, hasLength(1));
   });
 
   test('failure of an invalidated request retries; current failure is surfaced',

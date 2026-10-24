@@ -1,4 +1,33 @@
 {
+  "wallpaperImageSize": "图片尺寸",
+  "wallpaperBackdrop": "横向剧照",
+  "wallpaperPoster": "竖向海报",
+  "wallpaperImageCount": "共 {count} 张图片",
+  "wallpaperDownload": "下载壁纸",
+  "wallpaperShare": "分享",
+  "wallpaperCopyLink": "复制链接",
+  "wallpaperMore": "更多壁纸",
+  "wallpaperViewAnime": "查看番剧",
+  "wallpaperPrevious": "上一张",
+  "wallpaperNext": "下一张",
+  "wallpaperThumbnail": "第 {index} 张图片",
+  "wallpaperActionFailed": "操作失败，请重试",
+  "@wallpaperImageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperThumbnail": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  }
+,
+  "wallpapers": "壁纸",
   "changePassword": "修改密码",
   "oldPassword": "旧密码",
   "enterOldPassword": "请输入旧密码",

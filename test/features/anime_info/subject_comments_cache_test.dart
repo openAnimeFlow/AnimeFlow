@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/settings/storage.dart';
@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 class Adapter implements HttpClientAdapter {
   final requests = <RequestOptions>[];
@@ -64,6 +65,7 @@ ResponseBody reply(Object? data, {int code = 200}) => ResponseBody.fromString(
       },
     );
 
+@Dependencies([SubjectComments])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
@@ -101,6 +103,7 @@ void main() {
     DioFactory.reset();
   });
 
+  @Dependencies([SubjectComments])
   ProviderContainer container() {
     final c = ProviderContainer(
         parent: repositoryContainer,
@@ -212,6 +215,58 @@ void main() {
     expect(Storage.subjectCommentsCache.containsKey('43:20:20'), isTrue);
     await repository.getComments(42, limit: 20, offset: 20);
     expect(adapter.requests, hasLength(5));
+  });
+
+  test('explicit refresh resets pagination and clears only its subject cache',
+      () async {
+    adapter.respond = (options) => reply(page(
+        options.queryParameters['offset'] == 0
+            ? List.generate(20, (index) => index + 1)
+            : [21]));
+    final c = container();
+    await c.read(subjectCommentsProvider.future);
+    final notifier = c.read(subjectCommentsProvider.notifier);
+    await notifier.loadMore();
+    await repository.getComments(43, limit: 20, offset: 20);
+    expect(c.read(subjectCommentsProvider).requireValue.nextOffset, 21);
+
+    adapter.respond = (_) => reply(page([100]));
+    notifier.refresh();
+    final refreshed = await c.read(subjectCommentsProvider.future);
+
+    expect(refreshed.comments.data.single.id, 100);
+    expect(refreshed.nextOffset, 1);
+    expect(adapter.requests, hasLength(4));
+    expect(adapter.requests.last.queryParameters['offset'], 0);
+    expect(Storage.subjectCommentsCache.containsKey('42:20:20'), isFalse);
+    expect(Storage.subjectCommentsCache.containsKey('43:20:20'), isTrue);
+  });
+
+  test('refresh discards a late pagination response', () async {
+    final c = container();
+    await c.read(subjectCommentsProvider.future);
+    final started = Completer<void>();
+    final pending = Completer<ResponseBody>();
+    adapter.respond = (options) {
+      if (options.queryParameters['offset'] != 0) {
+        started.complete();
+        return pending.future;
+      }
+      return reply(page([100]));
+    };
+    final notifier = c.read(subjectCommentsProvider.notifier);
+    final loading = notifier.loadMore();
+    await started.future;
+
+    notifier.refresh();
+    await c.read(subjectCommentsProvider.future);
+    pending.complete(reply(page([2])));
+    await loading;
+
+    final current = c.read(subjectCommentsProvider).requireValue;
+    expect(current.comments.data.map((comment) => comment.id), [100]);
+    expect(current.nextOffset, 1);
+    expect(Storage.subjectCommentsCache.containsKey('42:20:1'), isFalse);
   });
 
   test('invalidated in-flight page retries without restoring old data',

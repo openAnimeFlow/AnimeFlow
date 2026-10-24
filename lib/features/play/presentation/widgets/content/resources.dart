@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'dart:async';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -5,7 +6,7 @@ import 'package:anime_flow/features/download/presentation/widgets/download_episo
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -14,9 +15,17 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 enum _SourceAction { downloadResources, openPageUrl, copyPageUrl }
 
+@Dependencies([
+  playSession,
+  VideoUiNotifier,
+  VideoSourceNotifier,
+  playExtra,
+  PlayStateNotifier
+])
 class VideoResourcesView extends ConsumerStatefulWidget {
   const VideoResourcesView({super.key});
 
@@ -203,7 +212,19 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       onSelected: (action) {
         switch (action) {
           case _SourceAction.downloadResources:
-            showDownloadEpisodeSheet(context, ref);
+            showDownloadEpisodeSheet(context,
+                subject: ref.read(playExtraProvider).playExtra,
+                watchSource: (ref) {
+              final state = ref.watch(videoSourceProvider);
+              final sources = state.videoResources;
+              final index = state.selectedWebsiteIndex;
+              return DownloadEpisodeSource(
+                source: sources.isEmpty
+                    ? null
+                    : sources[index >= 0 && index < sources.length ? index : 0],
+                lineName: state.lineName,
+              );
+            });
           case _SourceAction.openPageUrl:
             _openSourcePageInBrowser(videoUrl);
           case _SourceAction.copyPageUrl:

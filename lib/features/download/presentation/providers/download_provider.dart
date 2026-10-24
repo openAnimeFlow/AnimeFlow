@@ -1,17 +1,18 @@
 import 'dart:async';
 
+import 'package:anime_flow/features/download/application/download_directory/download_directory_factory.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/app/localization/locale_provider.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/download/application/download_danmaku_service.dart';
-import 'package:anime_flow/features/download/application/download_foreground_service.dart';
+import 'package:anime_flow/features/download/infrastructure/download_foreground_service.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/video_source_resolver_pool.dart';
+import 'package:anime_flow/core/video_source/application/video_source_providers.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
-import 'package:anime_flow/features/play/application/video_source_service.dart';
+import 'package:anime_flow/core/video_source/domain/video_source.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
@@ -122,8 +123,9 @@ IDownloadDanmakuService downloadDanmakuService(Ref ref) {
 
 @Riverpod(keepAlive: true)
 IVideoSourceResolverPool videoSourceResolverPool(Ref ref) {
-  final pool = VideoSourceResolverPool();
-  ref.onDispose(pool.dispose);
+  final pool = VideoSourceResolverPool(
+      providerFactory: ref.watch(videoSourceProviderFactoryProvider));
+  ref.onDispose(() => unawaited(pool.dispose()));
   return pool;
 }
 
@@ -443,21 +445,18 @@ class DownloadController extends _$DownloadController {
     final activeTasks = episodes.where((episode) {
       return _isIncompleteStatus(episode.status);
     }).length;
-    Locale locale;
+    String languageTag;
     try {
-      locale = ref.read(localeProvider);
+      languageTag = ref.read(localeProvider).toLanguageTag();
     } catch (_) {
-      locale = const Locale.fromSubtags(
-        languageCode: 'zh',
-        scriptCode: 'Hans',
-      );
+      languageTag = 'zh-Hans';
     }
     return DownloadForegroundService.sync(
       activeTasks: activeTasks,
       completedTasks: state.completedTasks,
       totalTasks: state.totalTasks,
       speed: state.currentSpeed,
-      locale: locale,
+      languageTag: languageTag,
     );
   }
 

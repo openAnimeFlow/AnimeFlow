@@ -25,7 +25,7 @@ final class EpisodeCommentsProvider extends $FunctionalProvider<
           argument: null,
           retry: null,
           name: r'episodeCommentsProvider',
-          isAutoDispose: false,
+          isAutoDispose: true,
           dependencies: <ProviderOrFamily>[episodesProvider],
           $allTransitiveDependencies: <ProviderOrFamily>[
             EpisodeCommentsProvider.$allTransitiveDependencies0,
@@ -52,4 +52,4 @@ final class EpisodeCommentsProvider extends $FunctionalProvider<
   }
 }
 
-String _$episodeCommentsHash() => r'1ed5a6048e884c260eca3c6eea1ebe7f55731837';
+String _$episodeCommentsHash() => r'251dd5ad273d72552bf887e8a652a857af1719e4';

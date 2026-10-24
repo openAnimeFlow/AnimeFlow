@@ -4,8 +4,8 @@ import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/calendar/presentation/providers/calendar_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -870,11 +870,13 @@ class _CalendarPageState extends State<CalendarPage>
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          AnimeInfoRoute.fromExtra(InfoRouteExtra(
-            id: subject.id,
-            name: displayName,
-            image: subject.images.large,
-          )).push(context);
+          appNavigatorOf(context).openAnimeInfoFromExtra<void>(
+              context,
+              InfoRouteExtra(
+                id: subject.id,
+                name: displayName,
+                image: subject.images.large,
+              ));
         },
         child: Padding(
           padding: const EdgeInsets.all(9),

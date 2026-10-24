@@ -4,19 +4,20 @@ import 'dart:typed_data';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
+import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
-import 'package:anime_flow/features/play/infrastructure/player/player_operation_queue.dart';
+import 'package:anime_flow/core/async/serial_operation_queue.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
-class MediaKitEngine implements PlayerEngine {
+class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
   final bool adBlocker;
   final bool hardwareDecoder;
   late Player _player;
   final ValueNotifier<VideoController?> _videoController = ValueNotifier(null);
-  late final _operations = PlayerOperationQueue(ensureReady: _ensureReady);
+  late final _operations = SerialOperationQueue(ensureReady: _ensureReady);
   bool _opened = false;
   bool _released = true;
   double _volume = 100;

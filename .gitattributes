@@ -1,0 +1,2 @@
+# Bash scripts must retain LF when checked out on Windows.
+tool/ci/*.sh text eol=lf

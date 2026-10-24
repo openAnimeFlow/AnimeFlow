@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -5,8 +6,10 @@ import 'package:anime_flow/features/play/presentation/providers/video_ui_provide
 import 'package:anime_flow/core/utils/vibrate.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 移动端手势监听组件
+@Dependencies([playSession, VideoUiNotifier, PlayStateNotifier])
 class MobileGestureDetector extends ConsumerStatefulWidget {
   final Widget child;
 
@@ -23,8 +26,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   bool _isSpeedBoosting = false;
   late final PlaySession playSession;
 
-  VideoUiNotifier get videoUiNotifier =>
-      ref.read(videoUiProvider.notifier);
+  VideoUiNotifier get videoUiNotifier => ref.read(videoUiProvider.notifier);
 
   void _endTemporaryPlaybackRate() {
     if (!_isSpeedBoosting) return;
@@ -60,15 +62,14 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
       //单击事件
       onTap: () {
         videoUiNotifier.showOrHideControlsUi();
-        videoUiNotifier.hideControlsUi(
-            duration: const Duration(seconds: 3));
+        videoUiNotifier.hideControlsUi(duration: const Duration(seconds: 3));
       },
 
       //双击事件
       onDoubleTap: () {
         if (!playSession.playOrPauseVideo()) return;
-        videoUiNotifier.showTopIndicator(
-            VideoControlsIndicatorType.playStatusIndicator);
+        videoUiNotifier
+            .showTopIndicator(VideoControlsIndicatorType.playStatusIndicator);
       },
 
       //长按开始
@@ -113,7 +114,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
 
       // 水平拖动结束：应用新的播放进度
       onHorizontalDragEnd: (DragEndDetails details) {
-        playSession.finishManualSeek(videoUiNotifier.dragPosition);
+        playSession.finishManualSeek(ref.read(videoUiProvider).dragPosition);
         videoUiNotifier.endHorizontalDrag();
       },
 
@@ -171,13 +172,13 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
         if (_isRightSide) {
           // 垂直拖动结束（右半屏）：应用新的音量
           playSession.endVerticalDrag();
-          videoUiNotifier.showTopIndicator(
-              VideoControlsIndicatorType.volumeIndicator);
+          videoUiNotifier
+              .showTopIndicator(VideoControlsIndicatorType.volumeIndicator);
         } else {
           // 垂直拖动结束（左半屏）：结束亮度调整
           videoUiNotifier.setBrightnessDragging(false);
-          videoUiNotifier.showTopIndicator(
-              VideoControlsIndicatorType.brightnessIndicator);
+          videoUiNotifier
+              .showTopIndicator(VideoControlsIndicatorType.brightnessIndicator);
         }
       },
 

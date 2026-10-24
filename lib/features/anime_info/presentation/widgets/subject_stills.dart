@@ -1,14 +1,16 @@
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/image_preview.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 条目预览图横向列表。
+@Dependencies([SubjectStills, animeInfoArgs])
 class SubjectStillsView extends ConsumerWidget {
   const SubjectStillsView({super.key});
 
@@ -32,9 +34,8 @@ class SubjectStillsView extends ConsumerWidget {
                 if (images.length > 10)
                   IconButton(
                       onPressed: () {
-                        AnimePreviewPageRoute(
-                                images: images, title: subjectName)
-                            .push(context);
+                        appNavigatorOf(context).openAnimePreview<void>(context,
+                            images: images, title: subjectName);
                       },
                       icon: const Icon(
                           Icons.keyboard_double_arrow_right_outlined))
@@ -54,12 +55,13 @@ class SubjectStillsView extends ConsumerWidget {
                     padding: EdgeInsets.only(
                         right: index == imageFilter.length - 1 ? 0 : 8),
                     child: GestureDetector(
-                      onTap: () => ImagePreviewRoute.fromArgs(
-                        ImageViewerRouteArgs(
-                            imageUrls: imageFilter,
-                            initialIndex: index,
-                            heroTag: heroTag),
-                      ).push(context),
+                      onTap: () => appNavigatorOf(context)
+                          .openImagePreview<void>(
+                              context,
+                              ImageViewerRouteArgs(
+                                  imageUrls: imageFilter,
+                                  initialIndex: index,
+                                  heroTag: heroTag)),
                       child: Hero(
                         tag: heroTag,
                         child: AnimationNetworkImage(

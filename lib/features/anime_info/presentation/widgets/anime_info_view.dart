@@ -1,4 +1,5 @@
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/inf_head.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -8,7 +9,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/evaluate_dialog.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/info_app_bar.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/synopsis.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([
+  AnimeInfo,
+  SubjectComments,
+  SubjectStills,
+  SubjectCharacters,
+  SubjectProducers,
+  SubjectRelated,
+  animeInfoArgs,
+])
 class AnimeInfoView extends StatefulWidget {
   const AnimeInfoView(
       {super.key, required this.onPlay, required this.onPlayEpisode});
@@ -168,9 +179,20 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                                   barrierDismissible: false,
                                   builder: (_) => InfoEvaluateDialog(
                                     subjectsInfo: subjectsInfo,
-                                    onSaved: (updated) => ref
-                                        .read(animeInfoProvider.notifier)
-                                        .setAnimeInfo(updated),
+                                    onSaved: (updated) {
+                                      if (!context.mounted) return;
+                                      if (ref.read(animeInfoArgsProvider).id !=
+                                          updated.id) {
+                                        return;
+                                      }
+                                      ref
+                                          .read(animeInfoProvider.notifier)
+                                          .setAnimeInfo(updated);
+                                      ref
+                                          .read(
+                                              subjectCommentsProvider.notifier)
+                                          .refresh();
+                                    },
                                   ),
                                 );
                               },

@@ -34,7 +34,7 @@ final class CommunityWatchingSubjectsProvider extends $AsyncNotifierProvider<
 }
 
 String _$communityWatchingSubjectsHash() =>
-    r'76b7bc50cfbd50a1699ae6e16f63fc2384fdce80';
+    r'ec1767d973616b63da522fabddafe9343c67ed66';
 
 abstract class _$CommunityWatchingSubjects
     extends $AsyncNotifier<List<WatchingSubject>> {
@@ -78,7 +78,7 @@ final class CommunityOnlineCountProvider
 }
 
 String _$communityOnlineCountHash() =>
-    r'6b6b9b2f6f6f4e3b9e4b5d3e4d6f7a8b9c0d1e2f';
+    r'04de583ff5b7f4ba0d3f2a588c64309f69c960fe';
 
 abstract class _$CommunityOnlineCount extends $AsyncNotifier<OnlineCount> {
   FutureOr<OnlineCount> build();

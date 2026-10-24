@@ -1,10 +1,9 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/features/user/data/repository/collection_sync_repository.dart';
-import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/models/flow/collection_conflict_item.dart';
 
 String collectionTypeLabel(AppLocalizations l, int? type) => switch (type) {
@@ -58,8 +57,8 @@ class _CollectionConflictsDialogState
     });
     try {
       final page = await ref
-          .read(collectionSyncRepositoryProvider)
-          .conflicts(widget.taskId, reset ? 0 : _offset, _limit);
+          .read(bgmCollectionSyncProvider.notifier)
+          .loadConflicts(widget.taskId, reset ? 0 : _offset, _limit);
       if (!_valid) return;
       setState(() {
         if (reset) {
@@ -122,8 +121,8 @@ class _CollectionConflictsDialogState
     });
     try {
       await ref
-          .read(collectionSyncRepositoryProvider)
-          .resolve(widget.taskId, body);
+          .read(bgmCollectionSyncProvider.notifier)
+          .resolveConflicts(widget.taskId, body);
       if (!_valid) return;
       setState(() {
         _accepted = true;

@@ -1,0 +1,23 @@
+/// 向 UI 层提供设置页导航目标，不暴露具体路由类。
+enum SettingsDestination {
+  menu,
+  account,
+  logs,
+  general,
+  playback,
+  playerShortcuts,
+  downloadPlugins,
+  danmaku,
+  download,
+  about,
+  author,
+  updates,
+  website,
+  plugins,
+  addPlugins,
+  theme,
+  font,
+  thanks,
+  sponsor,
+  agreement,
+}

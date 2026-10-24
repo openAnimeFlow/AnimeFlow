@@ -12,12 +12,14 @@ import 'captcha_view.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 enum _SourceEpisodeMode { matched, all }
 
 /// 当前正在播放的源：播放地址 + 线路名 + 资源标题。
 typedef _PlayingSource = ({String url, String lineName, String resourceTitle});
 
+@Dependencies([VideoSourceNotifier])
 class VideoSourceDrawers extends ConsumerStatefulWidget {
   final Function(String url)? onVideoUrlSelected;
   final VideoSourceNotifier videoSourceNotifier;
@@ -99,7 +101,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     if (searchQuery.isEmpty) return;
     _disposeSiteSearchControllers();
     final preserveCurrentPlayback =
-        widget.videoSourceNotifier.videoUrl.isNotEmpty;
+        ref.read(videoSourceProvider).videoUrl.isNotEmpty;
     widget.videoSourceNotifier.setSelectedWebsiteIndex(0);
     _followAutoSelectedWebsite = true;
     _selectedWebsiteIndex = 0;
@@ -120,7 +122,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   TextEditingController _siteSearchControllerFor(ResourcesItem resource) {
     return _siteSearchControllers.putIfAbsent(
       resource.websiteName,
-      () => TextEditingController(text: widget.videoSourceNotifier.keyword),
+      () => TextEditingController(text: ref.read(videoSourceProvider).keyword),
     );
   }
 
@@ -148,20 +150,20 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   /// 用户手动切换前跟随播放器（自动选源）的结果，切换后保持本地选择。
   int _resolveSelectedWebsiteIndex(List<ResourcesItem> dataSource) {
     if (dataSource.isEmpty) return 0;
-    final controller = widget.videoSourceNotifier;
-    final matchedIndex = controller.webSiteTitle.isEmpty
+    final source = ref.read(videoSourceProvider);
+    final matchedIndex = source.webSiteTitle.isEmpty
         ? -1
         : dataSource.indexWhere(
-            (resource) => resource.websiteName == controller.webSiteTitle,
+            (resource) => resource.websiteName == source.webSiteTitle,
           );
-    final providerIndex = controller.selectedWebsiteIndex >= dataSource.length
+    final providerIndex = source.selectedWebsiteIndex >= dataSource.length
         ? 0
-        : controller.selectedWebsiteIndex;
+        : source.selectedWebsiteIndex;
     final autoIndex = matchedIndex >= 0 ? matchedIndex : providerIndex;
 
     if (_followAutoSelectedWebsite) {
       _selectedWebsiteIndex = autoIndex;
-      if (controller.webSiteTitle.isNotEmpty) {
+      if (source.webSiteTitle.isNotEmpty) {
         _followAutoSelectedWebsite = false;
       }
       return _selectedWebsiteIndex!;
@@ -450,7 +452,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         child: SizedBox(
           width: 12,
           height: 12,
-          child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary),
+          child: CircularProgressIndicator(
+              strokeWidth: 2, color: colorScheme.primary),
         ),
       );
     }
@@ -471,7 +474,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     }
     return Padding(
       padding: const EdgeInsets.only(left: 4),
-      child: Icon(Icons.check_circle_outline, size: 14, color: colorScheme.primary),
+      child: Icon(Icons.check_circle_outline,
+          size: 14, color: colorScheme.primary),
     );
   }
 
@@ -686,7 +690,9 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
               Icon(
                 isSelected ? Icons.check_rounded : Icons.account_tree_outlined,
                 size: 18,
-                color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                color: isSelected
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -1054,7 +1060,9 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: isSelected ? Border.all(width: 2.5, color: colorScheme.primary) : null,
+        border: isSelected
+            ? Border.all(width: 2.5, color: colorScheme.primary)
+            : null,
       ),
       child: Card.filled(
         margin: EdgeInsets.zero,
@@ -1135,7 +1143,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                         color: colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    Icon(Icons.link, size: 16, color: colorScheme.onSurfaceVariant),
+                    Icon(Icons.link,
+                        size: 16, color: colorScheme.onSurfaceVariant),
                     const Spacer(),
                     Text(l10n.matchLabel),
                     const SizedBox(width: 4),

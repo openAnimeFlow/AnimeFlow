@@ -1,9 +1,10 @@
+import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/app_update/presentation/widgets/version_update_ui.dart';
 import 'package:material_ui/material_ui.dart';
@@ -11,15 +12,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
-class AboutSettingsPage extends ConsumerStatefulWidget {
+@Dependencies([settingsLayout])
+class AboutSettingsPage extends StatefulWidget {
   const AboutSettingsPage({super.key});
 
   @override
-  ConsumerState<AboutSettingsPage> createState() => _AboutSettingsPageState();
+  State<AboutSettingsPage> createState() => _AboutSettingsPageState();
 }
 
-class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
+class _AboutSettingsPageState extends State<AboutSettingsPage> {
   late bool autoUpdate;
 
   @override
@@ -86,7 +89,8 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
               ),
             ),
             SingleChildScrollView(
-              padding: EdgeInsets.only(top: topPadding, bottom: paddingOf.bottom),
+              padding:
+                  EdgeInsets.only(top: topPadding, bottom: paddingOf.bottom),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1500),
@@ -133,7 +137,8 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                             const SizedBox(height: 16),
                             const Divider(),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15),
                               child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -151,23 +156,30 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                                   ]),
                             ),
                             const Divider(),
-                            ListTile(
-                              title: Text(l10n.checkForUpdates),
-                              trailing:
-                                  const Icon(Icons.browser_updated_outlined),
-                              onTap: () async {
-                                final notifier =
-                                    ref.read(appInfoProvider.notifier);
-                                final result = await notifier.checkVersion();
-                                if (!context.mounted) return;
-                                await handleVersionCheckResult(
-                                  context,
-                                  result,
-                                  onStartDownload: notifier.performUpdateDownload,
-                                  onDownloadedPackageAction:
-                                      notifier.openDownloadedPackage,
-                                  onCancelDownload: notifier.cancelUpdateDownload,
-                                  notifyWhenUpToDate: true,
+                            Consumer(
+                              builder: (context, ref, _) {
+                                return ListTile(
+                                  title: Text(l10n.checkForUpdates),
+                                  trailing: const Icon(
+                                      Icons.browser_updated_outlined),
+                                  onTap: () async {
+                                    final notifier =
+                                        ref.read(appInfoProvider.notifier);
+                                    final result =
+                                        await notifier.checkVersion();
+                                    if (!context.mounted) return;
+                                    await handleVersionCheckResult(
+                                      context,
+                                      result,
+                                      onStartDownload:
+                                          notifier.performUpdateDownload,
+                                      onDownloadedPackageAction:
+                                          notifier.openDownloadedPackage,
+                                      onCancelDownload:
+                                          notifier.cancelUpdateDownload,
+                                      notifyWhenUpToDate: true,
+                                    );
+                                  },
                                 );
                               },
                             ),
@@ -175,15 +187,17 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                             ListTile(
                               title: Text(l10n.projectUpdates),
                               trailing: const Icon(Icons.article_outlined),
-                              onTap: () =>
-                                  const SettingUpdatesRoute().push(context),
+                              onTap: () => appNavigatorOf(context)
+                                  .openSettings<void>(context,
+                                      destination: SettingsDestination.updates),
                             ),
                             const Divider(),
                             ListTile(
                               title: Text(l10n.projectWebsite),
                               trailing: const Icon(Icons.public_outlined),
-                              onTap: () =>
-                                  const SettingWebsiteRoute().push(context),
+                              onTap: () => appNavigatorOf(context)
+                                  .openSettings<void>(context,
+                                      destination: SettingsDestination.website),
                             ),
                             const Divider(),
                             ListTile(
@@ -205,15 +219,18 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                               title: Text(l10n.thanks),
                               trailing: const Icon(Icons.chevron_right),
                               onTap: () {
-                                const SettingThanksRoute().push(context);
+                                appNavigatorOf(context).openSettings<void>(
+                                    context,
+                                    destination: SettingsDestination.thanks);
                               },
                             ),
                             const Divider(),
                             ListTile(
                               title: const Text('关于作者'),
                               trailing: const Icon(Icons.chevron_right),
-                              onTap: () =>
-                                  const SettingAuthorRoute().push(context),
+                              onTap: () => appNavigatorOf(context)
+                                  .openSettings<void>(context,
+                                      destination: SettingsDestination.author),
                             ),
                             const Divider(),
                             ListTile(
@@ -222,7 +239,9 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                                 Icons.volunteer_activism_outlined,
                               ),
                               onTap: () {
-                                const SettingSponsorRoute().push(context);
+                                appNavigatorOf(context).openSettings<void>(
+                                    context,
+                                    destination: SettingsDestination.sponsor);
                               },
                             ),
                             const Divider(),
@@ -230,7 +249,9 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                               title: Text(l10n.privacyPolicy),
                               trailing: const Icon(Icons.chevron_right),
                               onTap: () {
-                                const SettingAgreementRoute().push(context);
+                                appNavigatorOf(context).openSettings<void>(
+                                    context,
+                                    destination: SettingsDestination.agreement);
                               },
                             ),
                             const Divider(),

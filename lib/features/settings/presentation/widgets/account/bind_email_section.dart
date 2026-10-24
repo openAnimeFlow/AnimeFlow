@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/auth/presentation/widgets/graphic_captcha.dart';
 import 'package:anime_flow/features/auth/presentation/widgets/send_code_button.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,11 +51,11 @@ class _BindEmailSectionState extends ConsumerState<BindEmailSection> {
     }
 
     try {
-      await FlowApi.sendEmailCodeService(
-        email: email,
-        captchaId: _graphicCaptchaController.captchaId!,
-        captcha: _graphicCaptchaController.text,
-      );
+      await ref.read(accountControllerProvider).sendEmailCode(
+            email: email,
+            captchaId: _graphicCaptchaController.captchaId!,
+            captcha: _graphicCaptchaController.text,
+          );
       if (!mounted) return false;
       NotificationToast.show('验证码已发送，请查收邮件', title: '提示');
       unawaited(_graphicCaptchaController.reload());
@@ -78,11 +78,11 @@ class _BindEmailSectionState extends ConsumerState<BindEmailSection> {
 
     setState(() => _isSubmitting = true);
     try {
-      await FlowApi.bindEmailService(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        emailCaptcha: _emailCodeController.text.trim(),
-      );
+      await ref.read(accountControllerProvider).bindEmail(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            emailCaptcha: _emailCodeController.text.trim(),
+          );
       if (!mounted) return;
       ref.invalidate(currentUserInfoProvider);
       NotificationToast.show('邮箱绑定成功', title: '提示');

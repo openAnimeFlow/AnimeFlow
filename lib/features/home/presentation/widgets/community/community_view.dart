@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/sse/sse_connection_status.dart';
@@ -696,11 +696,8 @@ class _WatchingSubjectCard extends StatelessWidget {
     final imageUrl = subject.images?.common ?? subject.images?.medium ?? '';
     return InkWell(
       borderRadius: BorderRadius.circular(15),
-      onTap: () => AnimeInfoRoute(
-        id: subject.subjectId,
-        name: subject.displayName,
-        image: imageUrl,
-      ).push(context),
+      onTap: () => appNavigatorOf(context).openAnimeInfo<void>(context,
+          id: subject.subjectId, name: subject.displayName, image: imageUrl),
       child: Column(
         children: [
           AspectRatio(

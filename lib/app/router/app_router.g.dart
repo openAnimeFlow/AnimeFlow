@@ -23,6 +23,7 @@ List<RouteBase> get $appRoutes => [
       $userSpaceRoute,
       $animePreviewPageRoute,
       $imageSearchRoute,
+      $wallpaperDetailRoute,
       $imagePreviewRoute,
       $settingsShellRoute,
     ];
@@ -643,6 +644,41 @@ mixin $ImageSearchRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $wallpaperDetailRoute => GoRouteData.$route(
+      path: '/wallpaper',
+      hasOverriddenOnExit: false,
+      factory: $WallpaperDetailRoute._fromState,
+    );
+
+mixin $WallpaperDetailRoute on GoRouteData {
+  static WallpaperDetailRoute _fromState(GoRouterState state) =>
+      WallpaperDetailRoute(
+        $extra: state.extra as WallpaperDetailArgs,
+      );
+
+  WallpaperDetailRoute get _self => this as WallpaperDetailRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+        '/wallpaper',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
 }
 
 RouteBase get $imagePreviewRoute => GoRouteData.$route(

@@ -1,17 +1,18 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:async';
 import 'dart:io';
 
-import 'package:anime_flow/app/router/model/play_route_extra.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 class _GuestToken extends CurrentFlowToken {
   @override
@@ -58,6 +59,7 @@ EpisodesItem _page(List<int> ids, int total) => EpisodesItem(
 
 Future<void> _flush() => Future<void>.delayed(Duration.zero);
 
+@Dependencies([Episodes])
 void main() {
   late Directory directory;
   late ProviderContainer container;

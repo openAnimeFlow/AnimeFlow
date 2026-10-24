@@ -1,18 +1,18 @@
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/widgets/collection_save_notice.dart';
 import 'dart:ui';
 
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
+import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/episodes_drawer.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';
@@ -21,7 +21,9 @@ import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([AnimeInfo, SubjectComments, animeInfoArgs])
 class InfoHeadView extends StatelessWidget {
   final double statusBarHeight;
   final double contentHeight;
@@ -159,12 +161,13 @@ class InfoHeadView extends StatelessWidget {
                                         .select((e) => e.image),
                                   );
                                   return GestureDetector(
-                                    onTap: () => ImagePreviewRoute.fromArgs(
-                                      ImageViewerRouteArgs(
-                                        imageUrls: [image],
-                                        heroTag: image,
-                                      ),
-                                    ).push(context),
+                                    onTap: () => appNavigatorOf(context)
+                                        .openImagePreview<void>(
+                                            context,
+                                            ImageViewerRouteArgs(
+                                              imageUrls: [image],
+                                              heroTag: image,
+                                            )),
                                     child: Hero(
                                       tag: image,
                                       child: AnimationNetworkImage(
@@ -389,7 +392,7 @@ class InfoHeadView extends StatelessWidget {
                 context,
                 l10n.loginToCollect,
                 Icons.login_rounded,
-                () => const UserRoute().go(context),
+                () => appNavigatorOf(context).goToUser(context),
               )
             else
               CollectionButton(
@@ -398,13 +401,21 @@ class InfoHeadView extends StatelessWidget {
                 collectType: collectTypeFromApiType(subjectItem.interest?.type),
                 offset: const Offset(0, 50),
                 onCollectTypeChanged: (type) async {
+                  final session =
+                      ref.read(currentFlowTokenProvider).value?.sessionId;
                   try {
                     final result = await ref
                         .read(animeInfoProvider.notifier)
                         .updateCollectionType(type.value);
-                    if (context.mounted) {
-                      showCollectionSaveNotice(context, result);
+                    if (!context.mounted ||
+                        ref.read(currentFlowTokenProvider).value?.sessionId !=
+                            session ||
+                        ref.read(animeInfoProvider).asData?.value.id !=
+                            subjectItem.id) {
+                      return;
                     }
+                    ref.read(subjectCommentsProvider.notifier).refresh();
+                    showCollectionSaveNotice(context, result);
                   } on AnimeFlowApiException catch (e) {
                     if (context.mounted) {
                       NotificationToast.show(

@@ -3,10 +3,11 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/core/auth/models/captcha_item.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class GraphicCaptchaController {
@@ -32,7 +33,7 @@ class GraphicCaptchaController {
   }
 }
 
-class GraphicCaptchaView extends StatefulWidget {
+class GraphicCaptchaView extends ConsumerStatefulWidget {
   const GraphicCaptchaView({
     super.key,
     required this.controller,
@@ -41,10 +42,10 @@ class GraphicCaptchaView extends StatefulWidget {
   final GraphicCaptchaController controller;
 
   @override
-  State<GraphicCaptchaView> createState() => _GraphicCaptchaViewState();
+  ConsumerState<GraphicCaptchaView> createState() => _GraphicCaptchaViewState();
 }
 
-class _GraphicCaptchaViewState extends State<GraphicCaptchaView> {
+class _GraphicCaptchaViewState extends ConsumerState<GraphicCaptchaView> {
   bool _isLoading = false;
 
   @override
@@ -60,9 +61,9 @@ class _GraphicCaptchaViewState extends State<GraphicCaptchaView> {
     final previousCaptchaId = widget.controller.captcha?.captchaId;
     setState(() => _isLoading = true);
     try {
-      final captcha = await FlowApi.generateCaptchaService(
-        captchaId: previousCaptchaId,
-      );
+      final captcha = await ref.read(accountControllerProvider).generateCaptcha(
+            captchaId: previousCaptchaId,
+          );
       if (!mounted) return;
       setState(() {
         widget.controller.captcha = captcha;

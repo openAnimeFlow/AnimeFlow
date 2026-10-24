@@ -1,0 +1,94 @@
+name: Quality
+
+on:
+  workflow_call:
+    inputs:
+      source_sha:
+        description: Exact source commit shared by checks and builds
+        required: true
+        type: string
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  architecture:
+    name: architecture (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+      - name: Verify source commit
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ inputs.source_sha || github.sha }}
+        run: |
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+          cache: true
+      - name: Install application dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Install isolated architecture dependencies
+        working-directory: tool/architecture_guard
+        run: dart pub get --enforce-lockfile
+      - name: Check architecture formatting
+        run: dart format --output=none --set-exit-if-changed test/architecture tool/architecture_guard
+      - name: Static analysis including Riverpod plugin
+        run: flutter analyze --no-pub --fatal-infos
+      - name: Analyze architecture tool
+        working-directory: tool/architecture_guard
+        run: dart analyze --fatal-infos
+      - name: Install Linux ECH native build tools
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++
+      - name: Architecture rules and positive/negative acceptance tests
+        run: flutter test --no-pub test/architecture --tags architecture
+      - name: Upload complete architecture report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: architecture-report-${{ matrix.os }}
+          path: build/architecture/report.json
+          if-no-files-found: ignore
+
+  unit-tests:
+    name: unit-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+      - name: Verify source commit
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ inputs.source_sha || github.sha }}
+        run: |
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+          cache: true
+      - name: Install locked application dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Install ECH native build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++
+      - name: Business tests
+        run: flutter test --no-pub --exclude-tags architecture

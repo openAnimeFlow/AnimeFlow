@@ -42,7 +42,7 @@ final class DanmakuChineseModeNotifierProvider
 }
 
 String _$danmakuChineseModeNotifierHash() =>
-    r'deb27578aec653da7924968850267d3bf9043d69';
+    r'fbe2df52300427da32e89e731f40cad1ed3dc73b';
 
 abstract class _$DanmakuChineseModeNotifier
     extends $Notifier<DanmakuChineseMode> {

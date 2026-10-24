@@ -1,18 +1,21 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_search_provider.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_search_response.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([playSession, DanmakuStateNotifier, playExtra])
 class DanmakuCard extends ConsumerStatefulWidget {
   const DanmakuCard({super.key});
 
@@ -329,9 +332,9 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                                       errorText = null;
                                     });
                                     try {
-                                      final episodes = await FlowApi
-                                          .getDanDanEpisodesByDanDanBangumiID(
-                                              anime.animeId);
+                                      final episodes = await ref.read(
+                                          danmakuEpisodesProvider(anime.animeId)
+                                              .future);
                                       if (!dialogContext.mounted) return;
                                       dialogContext.pop();
                                       if (!mounted) return;
@@ -375,9 +378,9 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                           danmakuSearchResponse = null;
                         });
                         try {
-                          final response = await FlowApi.searchDanmakuEpisodes(
-                            danmakuFieldController.text,
-                          );
+                          final response = await ref.read(
+                              danmakuSearchProvider(danmakuFieldController.text)
+                                  .future);
                           if (!dialogContext.mounted) return;
                           setDialogState(() {
                             danmakuSearchResponse = response;

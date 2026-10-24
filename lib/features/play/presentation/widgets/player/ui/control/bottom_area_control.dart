@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
@@ -6,7 +7,7 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/fit_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/rate_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/shader_button.dart';
@@ -14,7 +15,7 @@ import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_progress_bar.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_time_display.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/danmaku_text_field.dart';
@@ -23,12 +24,21 @@ import 'package:anime_flow/features/play/presentation/widgets/loading_animation.
 import 'package:anime_flow/features/play/presentation/widgets/episodes_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/play_pause_icon.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 底部区域控件
+@Dependencies([
+  VideoUiNotifier,
+  PlayStateNotifier,
+  playSession,
+  DanmakuStateNotifier,
+  playExtra,
+  Episodes
+])
 class BottomAreaControl extends ConsumerWidget {
   const BottomAreaControl({super.key});
 
@@ -76,6 +86,14 @@ class BottomAreaControl extends ConsumerWidget {
   }
 }
 
+@Dependencies([
+  playSession,
+  VideoUiNotifier,
+  PlayStateNotifier,
+  DanmakuStateNotifier,
+  playExtra,
+  Episodes
+])
 class _BottomControlsContent extends ConsumerWidget {
   const _BottomControlsContent();
 
@@ -458,8 +476,23 @@ class _BottomControlsContent extends ConsumerWidget {
 
                 if (isWideScreen || fullscreen) ...[
                   //倍速按钮
-                  RateButton(
-                    playController: playController,
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final rate = ref.watch(
+                        playStateProvider.select((state) => state.rate),
+                      );
+                      return RateButton(
+                        value: rate,
+                        onChanged: (rate) =>
+                            playController.setPlaybackRate(rate),
+                        onMenuOpen: () =>
+                            videoUiStateController.cancelUiTimer(),
+                        onMenuClose: () =>
+                            videoUiStateController.hideControlsUi(
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
                   ),
                   // 画面填充按钮
                   Consumer(
@@ -487,7 +520,7 @@ class _BottomControlsContent extends ConsumerWidget {
                   duration: const Duration(milliseconds: 500),
                   child: IconButton(
                       onPressed: () {
-                        playController.toggleFullScreen();
+                        videoUiStateController.toggleFullScreen();
                       },
                       padding: const EdgeInsets.all(0),
                       icon: Icon(
@@ -505,6 +538,7 @@ class _BottomControlsContent extends ConsumerWidget {
   }
 }
 
+@Dependencies([PlayStateNotifier])
 class _MiniProgressBarVisibility extends ConsumerWidget {
   const _MiniProgressBarVisibility({required this.visible});
 
@@ -541,6 +575,7 @@ class _MiniProgressBarVisibility extends ConsumerWidget {
   }
 }
 
+@Dependencies([PlayStateNotifier])
 class _MiniProgressBar extends ConsumerWidget {
   const _MiniProgressBar();
 
@@ -561,6 +596,7 @@ class _MiniProgressBar extends ConsumerWidget {
   }
 }
 
+@Dependencies([DanmakuStateNotifier, playSession, VideoUiNotifier])
 class _DanmakuInputField extends ConsumerWidget {
   const _DanmakuInputField();
 
@@ -571,8 +607,8 @@ class _DanmakuInputField extends ConsumerWidget {
     int type,
     Color color,
   ) async {
-    final success =
-        await playController.danmaku.send(text, type: type, color: color);
+    final success = await playController.danmaku
+        .send(text, type: type, color: color.toARGB32());
     if (!context.mounted) return;
     final l10n = AppLocalizations.of(context);
     if (!success) {

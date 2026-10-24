@@ -1,14 +1,16 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/presentation/providers/episode_comments_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episode_comments_item.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/shared/widgets/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([episodeComments])
 class CommentsView extends ConsumerStatefulWidget {
   const CommentsView({super.key});
 
@@ -132,7 +134,8 @@ class _CommentsViewState extends ConsumerState<CommentsView>
               children: [
                 Text(
                   l10n.commentsTitle,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 Text(
@@ -225,8 +228,8 @@ class _CommentsViewState extends ConsumerState<CommentsView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
-            onTap: () =>
-                UserSpaceRoute(name: comment.user.username).push(context),
+            onTap: () => appNavigatorOf(context)
+                .openUserSpace<void>(context, name: comment.user.username),
             child: AnimationNetworkImage(
               borderRadius: BorderRadius.circular(8),
               height: 48,
@@ -242,8 +245,9 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     InkWell(
-                      onTap: () => UserSpaceRoute(name: comment.user.username)
-                          .push(context),
+                      onTap: () => appNavigatorOf(context).openUserSpace<void>(
+                          context,
+                          name: comment.user.username),
                       child: Text(
                         comment.user.nickname,
                         style: const TextStyle(
@@ -254,7 +258,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      FormatTimeUtil.formatDate( comment.createdAt),
+                      FormatTimeUtil.formatDate(comment.createdAt),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -265,6 +269,8 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                 ),
                 const SizedBox(height: 4),
                 BBCodeWidget(
+                  onImageTap: (args) => appNavigatorOf(context)
+                      .openImagePreview<void>(context, args),
                   bbcode: comment.content,
                 ),
                 if (comment.replies.isNotEmpty) ...[
@@ -327,6 +333,8 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                 if (reply.content.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   BBCodeWidget(
+                    onImageTap: (args) => appNavigatorOf(context)
+                        .openImagePreview<void>(context, args),
                     bbcode: reply.content,
                   )
                 ],

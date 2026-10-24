@@ -1,5 +1,5 @@
-import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/image_preview.dart';
 import 'package:material_ui/material_ui.dart';
@@ -43,11 +43,12 @@ class AnimePreviewPage extends StatelessWidget {
                 final image = images[index];
                 final heroTag = ImageViewer.heroTagFor(image, index);
                 return GestureDetector(
-                  onTap: () => ImagePreviewRoute.fromArgs(ImageViewerRouteArgs(
+                  onTap: () => appNavigatorOf(context).openImagePreview<void>(
+                      context,
+                      ImageViewerRouteArgs(
                           imageUrls: images,
                           initialIndex: index,
-                          heroTag: heroTag))
-                      .push(context),
+                          heroTag: heroTag)),
                   child: Hero(
                     tag: heroTag,
                     child: AnimationNetworkImage(

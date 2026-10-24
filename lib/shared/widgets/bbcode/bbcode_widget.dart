@@ -1,5 +1,4 @@
-import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
+import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/image_preview.dart';
 import 'package:flutter/gestures.dart';
@@ -16,10 +15,14 @@ class BBCodeWidget extends StatefulWidget {
   const BBCodeWidget({
     super.key,
     required this.bbcode,
+    this.onImageTap,
     this.textScaler = TextScaler.noScaling,
   });
 
   final String bbcode;
+
+  /// 由使用该组件的功能模块决定图片预览的展示方式。
+  final ValueChanged<ImageViewerRouteArgs>? onImageTap;
   final TextScaler textScaler;
 
   @override
@@ -84,12 +87,12 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 Color? textColor = (!_isVisible && e.masked)
                     ? Colors.transparent
                     : (e.link != null)
-                    ? Colors.blue
-                    : (e.quoted)
-                    ? Theme.of(context).colorScheme.outline
-                    : (e.color != null)
-                    ? _parseColor(e.color!)
-                    : null;
+                        ? Colors.blue
+                        : (e.quoted)
+                            ? Theme.of(context).colorScheme.outline
+                            : (e.color != null)
+                                ? _parseColor(e.color!)
+                                : null;
                 return TextSpan(
                   text: e.text,
                   mouseCursor: (e.link != null || e.masked)
@@ -98,14 +101,14 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                   recognizer: TapGestureRecognizer()
                     ..onTap = (e.link != null || e.masked)
                         ? () {
-                      if ((!e.masked || _isVisible) && e.link != null) {
-                        launchUrl(Uri.parse(e.link!));
-                      } else if (e.masked) {
-                        setState(() {
-                          _isVisible = !_isVisible;
-                        });
-                      }
-                    }
+                            if ((!e.masked || _isVisible) && e.link != null) {
+                              launchUrl(Uri.parse(e.link!));
+                            } else if (e.masked) {
+                              setState(() {
+                                _isVisible = !_isVisible;
+                              });
+                            }
+                          }
                         : null,
                   style: TextStyle(
                     fontWeight: (e.bold) ? FontWeight.bold : null,
@@ -118,26 +121,29 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                     decorationColor: textColor,
                     fontSize: e.size.toDouble(),
                     color: textColor,
-                    backgroundColor:
-                    (!_isVisible && e.masked) ? const Color(0xFF555555) : null,
+                    backgroundColor: (!_isVisible && e.masked)
+                        ? const Color(0xFF555555)
+                        : null,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 );
               } else if (e is BBCodeImg) {
                 final currentIndex = imageIndex++;
                 final heroTag =
-                ImageViewer.heroTagFor(e.imageUrl, currentIndex);
+                    ImageViewer.heroTagFor(e.imageUrl, currentIndex);
                 return WidgetSpan(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 5),
                     child: GestureDetector(
-                      onTap: () => ImagePreviewRoute.fromArgs(
-                        ImageViewerRouteArgs(
-                          imageUrls: imageUrls,
-                          initialIndex: currentIndex,
-                          heroTag: heroTag,
-                        ),
-                      ).push(context),
+                      onTap: widget.onImageTap == null
+                          ? null
+                          : () => widget.onImageTap!(
+                                ImageViewerRouteArgs(
+                                  imageUrls: imageUrls,
+                                  initialIndex: currentIndex,
+                                  heroTag: heroTag,
+                                ),
+                              ),
                       child: Hero(
                         tag: heroTag,
                         child: AnimationNetworkImage(
@@ -162,13 +168,14 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 url = 'https://bangumi.tv/img/smiles/tv/${e.id - 23}.gif';
                 return WidgetSpan(
                   child: AnimationNetworkImage(
-                     url: url,
+                    url: url,
                   ),
                 );
               } else if (e is BBCodeMusume) {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
-                    url: 'https://lain.bgm.tv/img/smiles/musume/musume_${e.id}.gif',
+                    url:
+                        'https://lain.bgm.tv/img/smiles/musume/musume_${e.id}.gif',
                     width: 50,
                     height: 50,
                   ),

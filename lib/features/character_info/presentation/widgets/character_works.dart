@@ -1,13 +1,15 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/character_subjects_item.dart';
 import 'package:anime_flow/features/character_info/presentation/providers/character_info_provider.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/bgm_utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([CharacterWorks])
 class CharacterWorksView extends StatelessWidget {
   const CharacterWorksView({super.key});
 
@@ -90,13 +92,15 @@ class CharacterWorksView extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
-          AnimeInfoRoute.fromExtra(InfoRouteExtra(
-            id: work.subject.id,
-            name: work.subject.nameCN.isEmpty
-                ? work.subject.name
-                : work.subject.nameCN,
-            image: work.subject.images.large,
-          )).push(context);
+          appNavigatorOf(context).openAnimeInfoFromExtra<void>(
+              context,
+              InfoRouteExtra(
+                id: work.subject.id,
+                name: work.subject.nameCN.isEmpty
+                    ? work.subject.name
+                    : work.subject.nameCN,
+                image: work.subject.images.large,
+              ));
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

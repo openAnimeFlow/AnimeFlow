@@ -1,7 +1,6 @@
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -170,7 +169,7 @@ Danmaku _danmaku(String message) {
     message: message,
     time: 1.0,
     type: 1,
-    color: Colors.white,
+    color: 0xffffffff,
     source: 'BiliBili',
   );
 }

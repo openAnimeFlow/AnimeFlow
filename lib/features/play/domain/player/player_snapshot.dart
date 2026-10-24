@@ -1,6 +1,5 @@
-import 'package:material_ui/material_ui.dart';
-
 import 'playback_source.dart';
+import 'video_fit.dart';
 
 class PlayerSnapshot {
   final PlaybackSource? source;
@@ -8,7 +7,7 @@ class PlayerSnapshot {
   final double volume;
   final double rate;
   final bool wasPlaying;
-  final BoxFit fit;
+  final VideoFit fit;
 
   const PlayerSnapshot({
     required this.source,

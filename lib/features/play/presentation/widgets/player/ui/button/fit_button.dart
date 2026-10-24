@@ -1,9 +1,10 @@
+import 'package:anime_flow/features/play/domain/player/video_fit.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 
 class FitButton extends StatelessWidget {
-  final BoxFit value;
-  final ValueChanged<BoxFit> onChanged;
+  final VideoFit value;
+  final ValueChanged<VideoFit> onChanged;
   final VoidCallback? onMenuOpen;
   final VoidCallback? onMenuClose;
 
@@ -80,13 +81,13 @@ class FitButton extends StatelessWidget {
 }
 
 enum _FitOption {
-  contain(BoxFit.contain),
-  cover(BoxFit.cover),
-  fill(BoxFit.fill);
+  contain(VideoFit.contain),
+  cover(VideoFit.cover),
+  fill(VideoFit.fill);
 
   const _FitOption(this.fit);
 
-  final BoxFit fit;
+  final VideoFit fit;
 
   String label(AppLocalizations l10n) => switch (this) {
         _FitOption.contain => l10n.fitAuto,

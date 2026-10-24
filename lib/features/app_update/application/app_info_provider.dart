@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/app_update/application/apply_updates_factory.dart';
 import 'package:anime_flow/features/app_update/application/app_info_state.dart';
 import 'package:anime_flow/features/app_update/application/apply_updates_controller.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';

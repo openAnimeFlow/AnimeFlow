@@ -1,6 +1,6 @@
-import 'package:anime_flow/features/user/application/user_oauth_controller.dart';
-import 'package:anime_flow/features/user/application/user_oauth_state.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/features/auth/application/user_oauth_controller.dart';
+import 'package:anime_flow/features/auth/application/user_oauth_state.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -72,7 +72,7 @@ class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage> {
       );
     } finally {
       if (mounted) {
-        const UserRoute().go(context);
+        ref.read(appNavigatorProvider).goToUser(context);
       }
     }
   }

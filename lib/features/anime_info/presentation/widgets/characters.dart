@@ -2,14 +2,16 @@ import 'dart:math';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
-import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/app/router/model/character_info_extra.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/character_info_extra.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([SubjectCharacters, animeInfoArgs])
 class CharactersView extends StatelessWidget {
   const CharactersView({super.key});
 
@@ -41,8 +43,9 @@ class CharactersView extends StatelessWidget {
                               fontSize: 20, fontWeight: FontWeight.w600),
                         ),
                         InkWell(
-                          onTap: () => CharactersRoute(subjectsId: subjectsId)
-                              .push(context),
+                          onTap: () => appNavigatorOf(context)
+                              .openCharacters<void>(context,
+                                  subjectsId: subjectsId),
                           child: Row(
                             children: [
                               Text(
@@ -90,20 +93,21 @@ class CharactersView extends StatelessWidget {
                                 children: [
                                   // 角色头像
                                   InkWell(
-                                    onTap: () => CharacterInfoRoute(
-                                      id: actor.character.id,
-                                      name: actor.character.nameCN.isEmpty
-                                          ? actor.character.name
-                                          : actor.character.nameCN,
-                                      image: actor.character.images.large,
-                                      $extra: CharacterInfoExtra(
-                                        characterId: actor.character.id,
-                                        characterName: actor.character.name,
-                                        characterImage:
-                                            actor.character.images.large,
-                                        casts: actor.casts,
-                                      ),
-                                    ).push(context),
+                                    onTap: () => appNavigatorOf(context)
+                                        .openCharacterInfo<void>(context,
+                                            id: actor.character.id,
+                                            name: actor.character.nameCN.isEmpty
+                                                ? actor.character.name
+                                                : actor.character.nameCN,
+                                            image: actor.character.images.large,
+                                            extra: CharacterInfoExtra(
+                                              characterId: actor.character.id,
+                                              characterName:
+                                                  actor.character.name,
+                                              characterImage:
+                                                  actor.character.images.large,
+                                              casts: actor.casts,
+                                            )),
                                     child: AspectRatio(
                                       aspectRatio: 1,
                                       child: AnimationNetworkImage(

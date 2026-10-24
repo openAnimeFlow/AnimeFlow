@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/features/play/presentation/extensions/player_kernel_localization.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -9,7 +10,9 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
 
+@Dependencies([playSession, PlayStateNotifier])
 class VideoSettingDialog extends ConsumerStatefulWidget {
   const VideoSettingDialog({super.key});
 
@@ -144,8 +147,10 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                                   return Text(
                                     scheduledStopDuration == 0
                                         ? l10n.scheduledOff
-                                        : FormatTimeUtil.formatDuration(Duration(
-                                            seconds: scheduledStopDuration)),
+                                        : FormatTimeUtil.formatDuration(
+                                            Duration(
+                                                seconds:
+                                                    scheduledStopDuration)),
                                     style: TextStyle(
                                       fontSize: 12,
                                       decoration: TextDecoration.none,
@@ -183,8 +188,9 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                                           .withValues(alpha: 0.3),
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
-                                        color:
-                                            Theme.of(context).colorScheme.primary,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
                                         width: 2,
                                       ),
                                     ),
@@ -250,21 +256,23 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                                           children: [
                                             // 小时选择器
                                             Expanded(
-                                              child:
-                                                  ListWheelScrollView.useDelegate(
+                                              child: ListWheelScrollView
+                                                  .useDelegate(
                                                 controller: _hoursController,
                                                 itemExtent: 40,
                                                 physics:
                                                     const FixedExtentScrollPhysics(),
                                                 onSelectedItemChanged: (index) {
                                                   setState(() {
-                                                    selectedHours = _hours[index];
+                                                    selectedHours =
+                                                        _hours[index];
                                                   });
                                                 },
                                                 childDelegate:
                                                     ListWheelChildBuilderDelegate(
                                                   builder: (context, index) {
-                                                    if (index >= _hours.length) {
+                                                    if (index >=
+                                                        _hours.length) {
                                                       return null;
                                                     }
                                                     final hour = _hours[index];
@@ -279,17 +287,21 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                                                               : 16,
                                                           fontWeight: isSelected
                                                               ? FontWeight.bold
-                                                              : FontWeight.normal,
+                                                              : FontWeight
+                                                                  .normal,
                                                           color: isSelected
-                                                              ? Theme.of(context)
+                                                              ? Theme.of(
+                                                                      context)
                                                                   .colorScheme
                                                                   .primary
-                                                              : Theme.of(context)
+                                                              : Theme.of(
+                                                                      context)
                                                                   .textTheme
                                                                   .bodyLarge
                                                                   ?.color,
                                                           decoration:
-                                                              TextDecoration.none,
+                                                              TextDecoration
+                                                                  .none,
                                                         ),
                                                       ),
                                                     );
@@ -300,8 +312,8 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                                             ),
                                             // 分钟选择器
                                             Expanded(
-                                              child:
-                                                  ListWheelScrollView.useDelegate(
+                                              child: ListWheelScrollView
+                                                  .useDelegate(
                                                 controller: _minutesController,
                                                 itemExtent: 40,
                                                 physics:
@@ -322,7 +334,8 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                                                     final minute =
                                                         _minutes[index];
                                                     final isSelected =
-                                                        selectedMinutes == minute;
+                                                        selectedMinutes ==
+                                                            minute;
                                                     return Center(
                                                       child: Text(
                                                         minute.toString(),
@@ -332,17 +345,21 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                                                               : 16,
                                                           fontWeight: isSelected
                                                               ? FontWeight.bold
-                                                              : FontWeight.normal,
+                                                              : FontWeight
+                                                                  .normal,
                                                           color: isSelected
-                                                              ? Theme.of(context)
+                                                              ? Theme.of(
+                                                                      context)
                                                                   .colorScheme
                                                                   .primary
-                                                              : Theme.of(context)
+                                                              : Theme.of(
+                                                                      context)
                                                                   .textTheme
                                                                   .bodyLarge
                                                                   ?.color,
                                                           decoration:
-                                                              TextDecoration.none,
+                                                              TextDecoration
+                                                                  .none,
                                                         ),
                                                       ),
                                                     );

@@ -1,9 +1,9 @@
-import 'package:anime_flow/app/router/model/play_route_extra.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'episodes_provider.g.dart';
@@ -239,7 +239,7 @@ class Episodes extends _$Episodes {
   }
 
   /// 在线模式下判断下一集是否已到播出日期，离线模式下判断本地是否有下一集。
-  bool get hasNextEpisode {
+  bool hasNextEpisode() {
     final current = _currentData;
     final episodesData = current?.episodes;
     if (current == null || episodesData == null || episodesData.data.isEmpty) {

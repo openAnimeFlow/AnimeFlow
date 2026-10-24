@@ -1,6 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
@@ -71,9 +71,8 @@ class _VoiceActorCard extends StatelessWidget {
       children: [
         if (image.isNotEmpty) ...[
           GestureDetector(
-            onTap: () => ImagePreviewRoute.fromArgs(
-              ImageViewerRouteArgs(imageUrls: [image]),
-            ).push(context),
+            onTap: () => appNavigatorOf(context).openImagePreview<void>(
+                context, ImageViewerRouteArgs(imageUrls: [image])),
             child: AnimationNetworkImage(
               url: image,
               width: 64,
@@ -93,8 +92,7 @@ class _VoiceActorCard extends StatelessWidget {
               Text(name,
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.w600)),
-              if (nameCN.isNotEmpty && nameCN != person.name)
-                Text(person.name),
+              if (nameCN.isNotEmpty && nameCN != person.name) Text(person.name),
               if (person.info.isNotEmpty) Text(person.info),
               if (person.career.isNotEmpty)
                 Text(l10n.voiceActorCareers(careers.join(' / '))),

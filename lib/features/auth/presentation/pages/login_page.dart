@@ -2,11 +2,8 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/features/auth/application/login_service.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
-import 'package:anime_flow/features/user/application/user_oauth_controller.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/network_check_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
@@ -30,8 +27,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _obscurePassword = true;
   bool _isSubmitting = false;
 
-  final _loginService = LoginService();
-
   @override
   void dispose() {
     _accountController.dispose();
@@ -44,15 +39,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     setState(() => _isSubmitting = true);
     try {
-      await _loginService.login(
-        email: _accountController.text.trim(),
-        password: _passwordController.text,
-      );
-      if (!mounted) return;
-      ref.invalidate(currentFlowTokenProvider);
-      ref.invalidate(isLoggedInProvider);
-      ref.invalidate(currentUserInfoProvider);
-      ref.invalidate(userCollectionsProvider);
+      await ref.read(accountControllerProvider).login(
+            email: _accountController.text.trim(),
+            password: _passwordController.text,
+          );
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
       NotificationToast.show(e.message, title: '提示');
@@ -199,7 +189,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () => const ForgotPasswordRoute().push(context),
+              onPressed: () => ref
+                  .read(appNavigatorProvider)
+                  .openForgotPassword<void>(context),
               child: Text(l10n.forgotPassword),
             ),
           ),
@@ -265,7 +257,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
               ),
               TextButton(
-                onPressed: () => const RegisterRoute().push(context),
+                onPressed: () =>
+                    ref.read(appNavigatorProvider).openRegister<void>(context),
                 child: Text(l10n.registerNow),
               ),
             ],

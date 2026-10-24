@@ -1,4 +1,33 @@
 {
+  "wallpaperImageSize": "Image size",
+  "wallpaperBackdrop": "Backdrop",
+  "wallpaperPoster": "Poster",
+  "wallpaperImageCount": "{count} images",
+  "wallpaperDownload": "Download wallpaper",
+  "wallpaperShare": "Share",
+  "wallpaperCopyLink": "Copy link",
+  "wallpaperMore": "More wallpapers",
+  "wallpaperViewAnime": "View anime",
+  "wallpaperPrevious": "Previous image",
+  "wallpaperNext": "Next image",
+  "wallpaperThumbnail": "Image {index}",
+  "wallpaperActionFailed": "Something went wrong. Please try again.",
+  "@wallpaperImageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@wallpaperThumbnail": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  }
+,
+  "wallpapers": "Wallpapers",
   "changePassword": "Change password",
   "oldPassword": "Current password",
   "enterOldPassword": "Please enter your current password",

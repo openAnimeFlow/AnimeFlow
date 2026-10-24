@@ -1,6 +1,8 @@
 import 'dart:async';
 
-import 'package:anime_flow/app/router/model/play_route_extra.dart';
+import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
+import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
@@ -12,9 +14,10 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/player.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/app/router/app_route_observer.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/utils/playback_screen_awake.dart';
+import 'package:anime_flow/features/user/user_api.dart';
+import 'package:anime_flow/shared/navigation/app_route_observer.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
@@ -23,11 +26,35 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/experimental/scope.dart';
+import 'package:anime_flow/features/play/presentation/providers/episode_comments_provider.dart';
 
 import '../widgets/content/comments_view.dart';
 import '../widgets/content/play_content_navigator.dart';
 import '../widgets/content/play_content_safe_area.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
 
+@Dependencies([
+  playSession,
+  PlayStateNotifier,
+  VideoUiNotifier,
+  VideoSourceNotifier,
+  Episodes,
+  playExtra,
+  animeInfoArgs,
+  AnimeInfo,
+  subjectOnlineCount,
+  DanmakuStateNotifier,
+  recommendation,
+  SubjectComments,
+  SubjectStills,
+  SubjectCharacters,
+  SubjectProducers,
+  SubjectRelated,
+  episodeComments
+])
 class PlayPage extends ConsumerStatefulWidget {
   const PlayPage({super.key});
 
@@ -38,6 +65,7 @@ class PlayPage extends ConsumerStatefulWidget {
 class _PlayPageState extends ConsumerState<PlayPage>
     with SingleTickerProviderStateMixin, RouteAware {
   late final PlaySession playSession;
+  late final PlaybackScreenAwake _screenAwake;
   late final VideoSourceNotifier videoSourceController;
   late final AnimationController _contentAnimationController;
   late final Animation<double> _contentSizeFactor;
@@ -55,8 +83,10 @@ class _PlayPageState extends ConsumerState<PlayPage>
   @override
   void initState() {
     super.initState();
-    videoSourceController = ref.read(videoSourceProvider.notifier);
-    playSession = ref.read(playSessionProvider);
+    videoSourceController =
+        ref.listenManual(videoSourceProvider.notifier, (_, __) {}).read();
+    playSession = ref.listenManual(playSessionProvider, (_, __) {}).read();
+    _screenAwake = PlaybackScreenAwake(playSession.playbackCoordinator.events);
     _contentAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
@@ -74,6 +104,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
 
   @override
   void dispose() {
+    unawaited(_screenAwake.dispose());
     PresenceService.instance.clearPlaybackContext();
     if (_subscribedRouteObserver) {
       appRouteObserver.unsubscribe(this);
@@ -318,7 +349,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
           canPop: !isFullscreen,
           onPopInvokedWithResult: (bool didPop, dynamic result) {
             if (!didPop && isFullscreen) {
-              playSession.exitFullScreen();
+              ref.read(videoUiProvider.notifier).exitFullScreen();
             }
           },
           child: content,
@@ -341,6 +372,24 @@ int _compareDownloadEpisodes(DownloadEpisode a, DownloadEpisode b) {
   return a.episodeUrl.compareTo(b.episodeUrl);
 }
 
+@Dependencies([
+  playExtra,
+  animeInfoArgs,
+  AnimeInfo,
+  Episodes,
+  playSession,
+  PlayStateNotifier,
+  VideoUiNotifier,
+  VideoSourceNotifier,
+  DanmakuStateNotifier,
+  recommendation,
+  SubjectComments,
+  SubjectStills,
+  SubjectCharacters,
+  SubjectProducers,
+  SubjectRelated,
+  episodeComments
+])
 class _ContentView extends ConsumerStatefulWidget {
   const _ContentView({super.key});
 
@@ -375,8 +424,8 @@ class _ContentViewState extends ConsumerState<_ContentView>
       NotificationToast.show(l10n.loginBeforeDanmaku, title: l10n.pleaseLogin);
       return;
     }
-    final success =
-        await playSession.danmaku.send(text, type: type, color: color);
+    final success = await playSession.danmaku
+        .send(text, type: type, color: color.toARGB32());
     if (!mounted) return;
     NotificationToast.show(
       success ? l10n.danmakuSent : l10n.danmakuUnsupported,

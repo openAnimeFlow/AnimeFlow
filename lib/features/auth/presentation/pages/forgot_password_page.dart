@@ -2,22 +2,23 @@ import 'dart:async';
 
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/auth/presentation/widgets/graphic_captcha.dart';
 import 'package:anime_flow/features/auth/presentation/widgets/send_code_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class ForgotPasswordPage extends StatefulWidget {
+class ForgotPasswordPage extends ConsumerStatefulWidget {
   const ForgotPasswordPage({super.key});
 
   @override
-  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+  ConsumerState<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
-class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+class _ForgotPasswordPageState extends ConsumerState<ForgotPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -52,11 +53,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     }
 
     try {
-      await FlowApi.sendEmailCodeService(
-        email: email,
-        captchaId: _graphicCaptchaController.captchaId!,
-        captcha: _graphicCaptchaController.text,
-      );
+      await ref.read(accountControllerProvider).sendEmailCode(
+            email: email,
+            captchaId: _graphicCaptchaController.captchaId!,
+            captcha: _graphicCaptchaController.text,
+          );
       if (!mounted) return false;
       NotificationToast.show(l10n.emailCodeSent, title: l10n.tip);
       unawaited(_graphicCaptchaController.reload());
@@ -80,11 +81,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     setState(() => _isSubmitting = true);
     final l10n = AppLocalizations.of(context);
     try {
-      await FlowApi.forgotPasswordService(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        emailCaptcha: _emailCodeController.text.trim(),
-      );
+      await ref.read(accountControllerProvider).resetPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            emailCaptcha: _emailCodeController.text.trim(),
+          );
       if (!mounted) return;
       NotificationToast.show(l10n.passwordResetSuccess, title: l10n.tip);
       context.pop();
@@ -215,7 +216,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ),
                             validator: (value) {
                               final password = value ?? '';
-                              if (password.isEmpty) return l10n.enterNewPassword;
+                              if (password.isEmpty) {
+                                return l10n.enterNewPassword;
+                              }
                               if (password.length < 6 || password.length > 30) {
                                 return l10n.passwordLengthRange;
                               }
@@ -267,8 +270,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   onFieldSubmitted: (_) => _submit(),
                                   decoration: InputDecoration(
                                     labelText: l10n.emailVerificationCode,
-                                    prefixIcon:
-                                        const Icon(Icons.mark_email_read_outlined),
+                                    prefixIcon: const Icon(
+                                        Icons.mark_email_read_outlined),
                                   ),
                                   validator: (value) {
                                     final code = value?.trim() ?? '';

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/model/wallpaper_detail_args.dart';
+import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/core/flow_response.dart';
 import 'package:anime_flow/features/home/presentation/providers/wallpaper_controller.dart';

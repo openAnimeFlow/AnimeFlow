@@ -1,5 +1,6 @@
+import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/webview/browser/browser_webview_controller.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -36,7 +37,7 @@ class _WebsitePageState extends State<WebsitePage> {
     if (context.canPop()) {
       context.pop();
     } else {
-      const SettingAboutRoute().go(context);
+      appNavigatorOf(context).goToSettings(context, SettingsDestination.about);
     }
   }
 

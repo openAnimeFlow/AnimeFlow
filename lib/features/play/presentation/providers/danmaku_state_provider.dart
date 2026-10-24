@@ -1,4 +1,4 @@
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';

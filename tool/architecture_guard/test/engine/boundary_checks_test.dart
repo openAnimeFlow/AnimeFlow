@@ -70,6 +70,23 @@ void main() {
     );
   });
 
+  test('business cannot acquire UI navigation through its provider', () {
+    const source = 'lib/features/auth/application/service.dart';
+    const target = 'lib/shared/navigation/app_navigator_provider.dart';
+    fixture = FixtureProject({
+      source: "import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';",
+      target: '',
+    });
+    final spec = fixtureSpec();
+    final violation = checkBoundaries(
+      collectDependencies(fixture.root, spec),
+      spec,
+    ).single;
+    expect(violation.rule, 'R03');
+    expect(violation.source, source);
+    expect(violation.target, target);
+  });
+
   test('framework UI imports are rejected but foundation and Riverpod remain allowed', () {
     const source = 'lib/features/a/application/service.dart';
     fixture = FixtureProject({
@@ -175,7 +192,82 @@ void main() {
         ),
         Responsibility.business,
       );
-      expect(ArchitectureSpec.rules, {'R03', 'R07'});
+      expect(ArchitectureSpec.rules, {'R03', 'R07', 'R10'});
     },
   );
+
+  test('features and shared widgets cannot import application routes', () {
+    const route = 'lib/app/router/app_router.dart';
+    fixture = FixtureProject({
+      route: '',
+      'lib/features/search/presentation/pages/page.dart':
+          "import '../../../../app/router/app_router.dart';",
+      'lib/shared/widgets/link.dart':
+          "import 'package:anime_flow/app/router/app_router.dart';",
+    });
+    final spec = fixtureSpec();
+    final violations = checkBoundaries(
+      collectDependencies(fixture.root, spec),
+      spec,
+    );
+    expect(violations, hasLength(2));
+    expect(
+      violations.every((v) => v.rule == 'R10' && v.target == route),
+      isTrue,
+    );
+  });
+
+  test('route boundary follows conditional and cyclic re-exports', () {
+    const route = 'lib/app/router/app_router.dart';
+    const source = 'lib/features/search/presentation/pages/page.dart';
+    fixture = FixtureProject({
+      source: "import '../../../../core/facade.dart' show Destination;",
+      'lib/core/facade.dart': "export 'other.dart';",
+      'lib/core/other.dart': "export 'facade.dart';\nexport 'safe.dart' if (dart.library.io) '../app/router/app_router.dart';",
+      'lib/core/safe.dart': '',
+      route: '',
+    });
+    final spec = fixtureSpec();
+    final violation = checkBoundaries(
+      collectDependencies(fixture.root, spec),
+      spec,
+    ).single;
+    expect(violation.rule, 'R10');
+    expect(violation.source, source);
+    expect(violation.target, route);
+  });
+
+  test('navigation contracts cannot import feature implementations', () {
+    const source = 'lib/shared/navigation/app_navigator.dart';
+    const page = 'lib/features/search/presentation/pages/page.dart';
+    fixture = FixtureProject({
+      source: "import '../../features/search/presentation/pages/page.dart';",
+      page: '',
+    });
+    final spec = fixtureSpec();
+    expect(
+      checkBoundaries(
+        collectDependencies(fixture.root, spec),
+        spec,
+      ).single.rule,
+      'R10',
+    );
+  });
+
+  test('app composes pages while pages depend on navigation contracts', () {
+    fixture = FixtureProject({
+      'lib/app/router/app_router.dart':
+          "import '../../features/search/presentation/pages/page.dart';",
+      'lib/app/router/go_app_navigator.dart': "import '../../shared/navigation/app_navigator.dart';\nimport 'app_router.dart';",
+      'lib/features/search/presentation/pages/page.dart':
+          "import '../../../../shared/navigation/app_navigator.dart';",
+      'lib/shared/navigation/app_navigator.dart':
+          "import 'package:flutter/widgets.dart';",
+    });
+    final spec = fixtureSpec();
+    expect(
+      checkBoundaries(collectDependencies(fixture.root, spec), spec),
+      isEmpty,
+    );
+  });
 }

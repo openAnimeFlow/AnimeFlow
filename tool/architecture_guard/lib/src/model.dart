@@ -16,13 +16,22 @@ class ArchitectureSpec {
     this.scopes = const [],
     this.uiLibraries = const {},
     this.generatedGroups = const {},
+    this.forbiddenDependencies = const {},
   });
 
   /// 按顺序匹配，精确例外放在通用目录规则之前；未匹配文件仍参与循环检查。
   final List<SourceScope> scopes;
   final Set<String> uiLibraries;
   final Map<String, Set<String>> generatedGroups;
-  static const rules = {'R03', 'R07'};
+  final Map<String, Set<String>> forbiddenDependencies;
+  static const rules = {'R03', 'R07', 'R10'};
+
+  bool disallowsDependency(String source, String target) =>
+      forbiddenDependencies.entries.any(
+        (entry) =>
+            Glob(entry.key).matches(source) &&
+            entry.value.any((pattern) => Glob(pattern).matches(target)),
+      );
 
   Responsibility roleOf(String path) {
     for (final scope in scopes) {

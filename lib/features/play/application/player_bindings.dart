@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';

@@ -2,19 +2,20 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
-import 'package:anime_flow/app/router/model/wallpaper_detail_args.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
+import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/models/flow/subject_wallpaper.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
-class WallpaperDetailPage extends StatefulWidget {
+class WallpaperDetailPage extends ConsumerStatefulWidget {
   const WallpaperDetailPage(
       {super.key, required this.args, this.onClose, this.onOpenRelated});
 
@@ -23,10 +24,11 @@ class WallpaperDetailPage extends StatefulWidget {
   final ValueChanged<WallpaperDetailArgs>? onOpenRelated;
 
   @override
-  State<WallpaperDetailPage> createState() => _WallpaperDetailPageState();
+  ConsumerState<WallpaperDetailPage> createState() =>
+      _WallpaperDetailPageState();
 }
 
-class _WallpaperDetailPageState extends State<WallpaperDetailPage> {
+class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
   final _sizes = <String, Size>{};
   final _thumbnails = ScrollController();
   double _thumbnailItemExtent = 104;
@@ -157,10 +159,12 @@ class _WallpaperDetailPageState extends State<WallpaperDetailPage> {
     setState(() => _sizes[url] = size);
   }
 
-  void _preview() => ImagePreviewRoute.fromArgs(ImageViewerRouteArgs(
+  void _preview() => ref.read(appNavigatorProvider).openImagePreview<void>(
+      context,
+      ImageViewerRouteArgs(
         imageUrls: _images,
         initialIndex: _index,
-      )).push(context);
+      ));
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +204,8 @@ class _WallpaperDetailPageState extends State<WallpaperDetailPage> {
                     const SizedBox(height: 24),
                     _information(l10n, colors),
                     const SizedBox(height: 24),
-                    Divider(color: colors.outlineVariant.withValues(alpha: 0.5)),
+                    Divider(
+                        color: colors.outlineVariant.withValues(alpha: 0.5)),
                     const SizedBox(height: 16),
                     Text(l10n.wallpaperImageSize,
                         style: Theme.of(context).textTheme.titleSmall),
@@ -216,7 +221,8 @@ class _WallpaperDetailPageState extends State<WallpaperDetailPage> {
                           label: _isBackdrop
                               ? l10n.wallpaperBackdrop
                               : l10n.wallpaperPoster),
-                      _InfoPill(label: l10n.wallpaperImageCount(_images.length)),
+                      _InfoPill(
+                          label: l10n.wallpaperImageCount(_images.length)),
                     ]),
                     const SizedBox(height: 22),
                     _actions(l10n),
@@ -394,11 +400,12 @@ class _WallpaperDetailPageState extends State<WallpaperDetailPage> {
                         .bodyMedium
                         ?.copyWith(color: colors.onSurfaceVariant)),
                 FilledButton(
-                    onPressed: () => AnimeInfoRoute(
+                    onPressed: () => ref
+                        .read(appNavigatorProvider)
+                        .openAnimeInfo<void>(context,
                             id: _subject.subjectId,
                             name: _subject.displayName,
-                            image: _url)
-                        .push(context),
+                            image: _url),
                     child: Text(l10n.wallpaperViewAnime)),
               ]),
           if (_subject.name != _subject.displayName) ...[
@@ -493,7 +500,9 @@ class _WallpaperDetailPageState extends State<WallpaperDetailPage> {
                       if (widget.onOpenRelated != null) {
                         widget.onOpenRelated!(args);
                       } else {
-                        WallpaperDetailRoute($extra: args).push(context);
+                        ref
+                            .read(appNavigatorProvider)
+                            .openWallpaper<void>(context, args);
                       }
                     },
                     child: Column(

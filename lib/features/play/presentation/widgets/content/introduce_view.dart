@@ -5,7 +5,7 @@ import 'package:anime_flow/features/play/presentation/widgets/content/danmaku_ca
 import 'package:anime_flow/features/play/presentation/widgets/content/episodes.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/resources.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';

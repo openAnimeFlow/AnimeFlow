@@ -1,6 +1,6 @@
 import 'model.dart';
 
-/// 业务文件不得导入或重导出 UI；追踪重导出，防止聚合文件绕过检查。
+/// 检查业务/UI 和导航装配边界；追踪重导出，防止聚合文件绕过检查。
 List<ArchitectureViolation> checkBoundaries(
   DependencyGraph graph,
   ArchitectureSpec spec,
@@ -11,7 +11,6 @@ List<ArchitectureViolation> checkBoundaries(
   }
   final violations = <String, ArchitectureViolation>{};
   for (final edge in graph.edges) {
-    if (spec.roleOf(edge.source) != Responsibility.business) continue;
     final targets = <String>{};
     void follow(String target) {
       if (!targets.add(target)) return;
@@ -21,6 +20,20 @@ List<ArchitectureViolation> checkBoundaries(
     }
 
     follow(edge.target);
+    for (final target in targets.where(
+      (target) => spec.disallowsDependency(edge.source, target),
+    )) {
+      final violation = ArchitectureViolation(
+        'R10',
+        edge.source,
+        target,
+        edge.kind,
+        edge.line,
+        '功能/共享代码不能依赖应用路由；导航契约不能依赖应用装配或功能实现。',
+      );
+      violations[violation.key] = violation;
+    }
+    if (spec.roleOf(edge.source) != Responsibility.business) continue;
     for (final target in targets.where(spec.isUi)) {
       final violation = ArchitectureViolation(
         'R03',

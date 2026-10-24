@@ -1,8 +1,9 @@
+import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
 import 'package:anime_flow/features/user/presentation/widgets/user_view.dart';
 import 'package:anime_flow/features/user/application/user_state_provider.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
@@ -172,11 +173,12 @@ class UserPage extends ConsumerWidget {
               onSelected: (action) {
                 switch (action) {
                   case _NoLoginOverflowAction.settings:
-                    const SettingsRoute().push(context);
+                    appNavigatorOf(context).openSettings<void>(context,
+                        destination: SettingsDestination.menu);
                   case _NoLoginOverflowAction.playRecord:
-                    const PlayRecordRoute().push(context);
+                    appNavigatorOf(context).openPlayRecord<void>(context);
                   case _NoLoginOverflowAction.downloads:
-                    const DownloadRoute().push(context);
+                    appNavigatorOf(context).openDownload<void>(context);
                 }
               },
             ),

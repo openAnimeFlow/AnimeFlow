@@ -53,5 +53,6 @@ ArchitectureSpec fixtureSpec({
     scopes: project.scopes,
     uiLibraries: project.uiLibraries,
     generatedGroups: generatedGroups,
+    forbiddenDependencies: project.forbiddenDependencies,
   );
 }

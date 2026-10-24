@@ -1,8 +1,8 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/calendar/calendar_api.dart';
 import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
@@ -148,7 +148,8 @@ class _CalendarViewState extends State<CalendarView> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           InkWell(
-                            onTap: () => const CalendarRoute().push(context),
+                            onTap: () => appNavigatorOf(context)
+                                .openCalendar<void>(context),
                             child: Row(
                               children: [
                                 Text(
@@ -276,13 +277,15 @@ class _CalendarViewState extends State<CalendarView> {
               borderRadius: BorderRadius.circular(10),
               child: InkWell(
                 onTap: () {
-                  AnimeInfoRoute.fromExtra(InfoRouteExtra(
-                    id: itemData.id,
-                    name: itemData.nameCN.isEmpty
-                        ? itemData.name
-                        : itemData.nameCN,
-                    image: itemData.images.large,
-                  )).push(context);
+                  appNavigatorOf(context).openAnimeInfoFromExtra<void>(
+                      context,
+                      InfoRouteExtra(
+                        id: itemData.id,
+                        name: itemData.nameCN.isEmpty
+                            ? itemData.name
+                            : itemData.nameCN,
+                        image: itemData.images.large,
+                      ));
                 },
                 child: Stack(
                   children: [

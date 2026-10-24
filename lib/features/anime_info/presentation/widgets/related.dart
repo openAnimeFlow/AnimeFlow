@@ -1,7 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
@@ -50,14 +50,16 @@ class RelatedView extends StatelessWidget {
                                       : 5),
                               child: InkWell(
                                 onTap: () {
-                                  AnimeInfoRoute.fromExtra(
-                                    InfoRouteExtra(
-                                        id: item.subject.id,
-                                        name: item.subject.nameCN.isEmpty
-                                            ? item.subject.name
-                                            : item.subject.nameCN,
-                                        image: item.subject.images.large),
-                                  ).push(context);
+                                  appNavigatorOf(context)
+                                      .openAnimeInfoFromExtra<void>(
+                                          context,
+                                          InfoRouteExtra(
+                                              id: item.subject.id,
+                                              name: item.subject.nameCN.isEmpty
+                                                  ? item.subject.name
+                                                  : item.subject.nameCN,
+                                              image:
+                                                  item.subject.images.large));
                                 },
                                 child: Column(
                                   children: [

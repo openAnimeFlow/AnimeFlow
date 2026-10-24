@@ -1,6 +1,6 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/characters.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/details.dart';

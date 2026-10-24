@@ -14,7 +14,7 @@ import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/bangumi/interest_item.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

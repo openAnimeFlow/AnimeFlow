@@ -1,7 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
@@ -104,8 +104,8 @@ class InfoCommentView extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
-            onTap: () =>
-                UserSpaceRoute(name: comment.user.username).push(context),
+            onTap: () => appNavigatorOf(context)
+                .openUserSpace<void>(context, name: comment.user.username),
             child: AnimationNetworkImage(
               borderRadius: BorderRadius.circular(10),
               url: comment.user.avatar.medium,
@@ -123,8 +123,9 @@ class InfoCommentView extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     InkWell(
-                      onTap: () => UserSpaceRoute(name: comment.user.username)
-                          .push(context),
+                      onTap: () => appNavigatorOf(context).openUserSpace<void>(
+                          context,
+                          name: comment.user.username),
                       child: Text(
                         comment.user.nickname.isNotEmpty
                             ? comment.user.nickname

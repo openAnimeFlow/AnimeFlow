@@ -1,7 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/character_comments_item.dart';
 import 'package:anime_flow/features/character_info/presentation/providers/character_info_provider.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/bbcode/bbcode_widget.dart';
@@ -82,8 +82,8 @@ class CharacterCommentsView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () =>
-                UserSpaceRoute(name: comment.user.username).push(context),
+            onTap: () => appNavigatorOf(context)
+                .openUserSpace<void>(context, name: comment.user.username),
             child: AnimationNetworkImage(
               borderRadius: BorderRadius.circular(8),
               height: 48,
@@ -98,8 +98,9 @@ class CharacterCommentsView extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 GestureDetector(
-                  onTap: () =>
-                      UserSpaceRoute(name: comment.user.username).push(context),
+                  onTap: () => appNavigatorOf(context).openUserSpace<void>(
+                      context,
+                      name: comment.user.username),
                   child: Text(
                     comment.user.nickname,
                     style: const TextStyle(
@@ -117,6 +118,8 @@ class CharacterCommentsView extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 BBCodeWidget(
+                  onImageTap: (args) => appNavigatorOf(context)
+                      .openImagePreview<void>(context, args),
                   bbcode: comment.content,
                 ),
                 if (comment.replies.isNotEmpty) ...[
@@ -149,8 +152,8 @@ class CharacterCommentsView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
-                  onTap: () =>
-                      UserSpaceRoute(name: reply.user.username).push(context),
+                  onTap: () => appNavigatorOf(context)
+                      .openUserSpace<void>(context, name: reply.user.username),
                   child: AnimationNetworkImage(
                     borderRadius: BorderRadius.circular(8),
                     height: 32,
@@ -165,8 +168,9 @@ class CharacterCommentsView extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       GestureDetector(
-                        onTap: () => UserSpaceRoute(name: reply.user.username)
-                            .push(context),
+                        onTap: () => appNavigatorOf(context)
+                            .openUserSpace<void>(context,
+                                name: reply.user.username),
                         child: Text(
                           reply.user.nickname,
                           style: TextStyle(
@@ -191,6 +195,8 @@ class CharacterCommentsView extends StatelessWidget {
             if (reply.content.isNotEmpty) ...[
               const SizedBox(height: 4),
               BBCodeWidget(
+                onImageTap: (args) => appNavigatorOf(context)
+                    .openImagePreview<void>(context, args),
                 bbcode: reply.content,
               ),
             ],

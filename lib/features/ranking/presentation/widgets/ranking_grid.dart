@@ -1,6 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
@@ -188,10 +188,10 @@ class _FeaturedCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
       ),
       child: InkWell(
-        onTap: () => AnimeInfoRoute.fromExtra(
-          InfoRouteExtra(
-              id: subject.id, name: title, image: subject.images.large),
-        ).push(context),
+        onTap: () => appNavigatorOf(context).openAnimeInfoFromExtra<void>(
+            context,
+            InfoRouteExtra(
+                id: subject.id, name: title, image: subject.images.large)),
         child: SizedBox(
           height: 300,
           child: Stack(
@@ -334,10 +334,10 @@ class _RankingPosterTile extends StatelessWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(15),
-      onTap: () => AnimeInfoRoute.fromExtra(
-        InfoRouteExtra(
-            id: subject.id, name: title, image: subject.images.large),
-      ).push(context),
+      onTap: () => appNavigatorOf(context).openAnimeInfoFromExtra<void>(
+          context,
+          InfoRouteExtra(
+              id: subject.id, name: title, image: subject.images.large)),
       child: SubjectCard(
         image: subject.images.large,
         title: title,
@@ -371,10 +371,10 @@ class _RankingListTile extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () => AnimeInfoRoute.fromExtra(
-          InfoRouteExtra(
-              id: subject.id, name: title, image: subject.images.large),
-        ).push(context),
+        onTap: () => appNavigatorOf(context).openAnimeInfoFromExtra<void>(
+            context,
+            InfoRouteExtra(
+                id: subject.id, name: title, image: subject.images.large)),
         child: SizedBox(
           height: 160,
           child: Row(

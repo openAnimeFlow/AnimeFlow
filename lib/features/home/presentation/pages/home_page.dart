@@ -2,7 +2,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/home/presentation/widgets/anime/anime_view.dart';
 import 'package:anime_flow/features/home/presentation/widgets/community/community_view.dart';
 import 'package:anime_flow/features/home/presentation/widgets/wallpapers/wallpaper_view.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:material_ui/material_ui.dart';
 
 class RecommendPage extends StatefulWidget {
@@ -68,7 +68,7 @@ class _RecommendPageState extends State<RecommendPage>
                       ),
                     ),
                     onTap: () {
-                      const SearchRoute().push(context);
+                      appNavigatorOf(context).openSearch<void>(context);
                     },
                     readOnly: true,
                   ),
@@ -80,12 +80,14 @@ class _RecommendPageState extends State<RecommendPage>
         actions: [
           IconButton(
             tooltip: l10n.downloadsTitle,
-            onPressed: () => const DownloadRoute().push(context),
+            onPressed: () =>
+                appNavigatorOf(context).openDownload<void>(context),
             icon: const Icon(Icons.cloud_download_outlined),
           ),
           IconButton(
             tooltip: l10n.playbackHistory,
-            onPressed: () => const PlayRecordRoute().push(context),
+            onPressed: () =>
+                appNavigatorOf(context).openPlayRecord<void>(context),
             icon: const Icon(Icons.access_time_outlined),
           ),
         ],

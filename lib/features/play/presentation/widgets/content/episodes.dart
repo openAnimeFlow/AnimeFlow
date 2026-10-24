@@ -6,7 +6,7 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/features/play/presentation/widgets/layout_toggle_icon.dart';

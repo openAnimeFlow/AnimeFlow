@@ -27,7 +27,24 @@ ArchitectureSpec projectArchitecture() => ArchitectureSpec(
         Responsibility.ui,
       ),
     SourceScope('lib/shared/widgets/**.dart', Responsibility.ui),
+    SourceScope('lib/shared/navigation/app_navigator.dart', Responsibility.ui),
+    SourceScope(
+      'lib/shared/navigation/app_route_observer.dart',
+      Responsibility.ui,
+    ),
+    SourceScope(
+      'lib/shared/navigation/app_navigator_provider.dart',
+      Responsibility.ui,
+    ),
   ],
+  forbiddenDependencies: {
+    'lib/features/**.dart': {'lib/app/router/**.dart'},
+    'lib/shared/**.dart': {'lib/app/router/**.dart'},
+    'lib/shared/navigation/**.dart': {
+      'lib/app/**.dart',
+      'lib/features/**.dart',
+    },
+  },
   uiLibraries: {
     'dart:ui',
     'dart:ui_web',

@@ -1,5 +1,5 @@
-import 'package:anime_flow/app/router/model/play_route_extra.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';

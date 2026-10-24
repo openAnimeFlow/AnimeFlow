@@ -1,3 +1,4 @@
+import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'collection_sync_pending_banner.dart';
 import 'dart:ui';
@@ -7,7 +8,7 @@ import 'package:anime_flow/shared/models/enums/collection_sort.dart';
 import 'package:anime_flow/features/user/application/user_collection_provider.dart';
 import 'package:anime_flow/features/user/application/user_collection_state.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
@@ -428,11 +429,12 @@ class _UserViewState extends ConsumerState<UserView>
             onSelected: (action) {
               switch (action) {
                 case _LoginOverflowAction.settings:
-                  const SettingsRoute().push(context);
+                  appNavigatorOf(context).openSettings<void>(context,
+                      destination: SettingsDestination.menu);
                 case _LoginOverflowAction.playRecord:
-                  const PlayRecordRoute().push(context);
+                  appNavigatorOf(context).openPlayRecord<void>(context);
                 case _LoginOverflowAction.downloads:
-                  const DownloadRoute().push(context);
+                  appNavigatorOf(context).openDownload<void>(context);
                 case _LoginOverflowAction.logout:
                   showDialog<void>(
                     context: context,

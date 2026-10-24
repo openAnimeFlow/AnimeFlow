@@ -1,5 +1,6 @@
 import 'package:anime_flow/features/auth/auth_api.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/features/settings/presentation/pages/account_settings_page.dart';
@@ -9,14 +10,13 @@ import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
-import 'package:go_router/go_router.dart';
 
 void _exitSettings(BuildContext context) {
   final navigator = Navigator.of(context, rootNavigator: true);
   if (navigator.canPop()) {
     navigator.pop();
   } else {
-    const RecommendRoute().go(context);
+    appNavigatorOf(context).goToRecommend(context);
   }
 }
 
@@ -78,7 +78,11 @@ class SettingsMenuPage extends ConsumerWidget {
               appBar: AppBar(
                   leading: BackButton(onPressed: () => _exitSettings(context)),
                   title: Text(AppLocalizations.of(context).settings)),
-              body: const _SettingsMenu(location: '/settings', wide: false),
+              body: _SettingsMenu(
+                  location: ref
+                      .read(appNavigatorProvider)
+                      .settingsLocation(SettingsDestination.menu),
+                  wide: false),
             );
 }
 
@@ -88,19 +92,20 @@ class _SettingsMenu extends ConsumerWidget {
   final String location;
   final bool wide;
 
-  String get categoryLocation => switch (location) {
-        '/settings' => '/settings/account',
-        '/settings/font' => '/settings/theme',
-        '/settings/addPlugins' ||
-        '/settings/downloadPlugins' =>
-          '/settings/Plugins',
-        '/settings/thanks' ||
-        '/settings/author' ||
-        '/settings/website' ||
-        '/settings/sponsor' ||
-        '/settings/agreement' =>
-          '/settings/about',
-        _ => location,
+  SettingsDestination? _category(SettingsDestination? destination) =>
+      switch (destination) {
+        SettingsDestination.menu => SettingsDestination.account,
+        SettingsDestination.font => SettingsDestination.theme,
+        SettingsDestination.addPlugins ||
+        SettingsDestination.downloadPlugins =>
+          SettingsDestination.plugins,
+        SettingsDestination.thanks ||
+        SettingsDestination.author ||
+        SettingsDestination.website ||
+        SettingsDestination.sponsor ||
+        SettingsDestination.agreement =>
+          SettingsDestination.about,
+        _ => destination,
       };
 
   List<_SettingsCategory> _categories(BuildContext context, String? avatar) {
@@ -113,7 +118,7 @@ class _SettingsMenu extends ConsumerWidget {
             title: l10n.accountSettings,
             icon: Icons.account_circle_outlined,
             avatar: avatar,
-            route: const SettingAccountRoute(),
+            destination: SettingsDestination.account,
           ),
         ],
       ),
@@ -123,12 +128,12 @@ class _SettingsMenu extends ConsumerWidget {
           _SettingsMenuItem(
             title: l10n.generalSettingsTitle,
             icon: Icons.settings_outlined,
-            route: const SettingGeneralRoute(),
+            destination: SettingsDestination.general,
           ),
           _SettingsMenuItem(
             title: l10n.themeStyle,
             icon: Icons.color_lens_outlined,
-            route: const SettingThemeRoute(),
+            destination: SettingsDestination.theme,
           ),
         ],
       ),
@@ -138,12 +143,12 @@ class _SettingsMenu extends ConsumerWidget {
           _SettingsMenuItem(
             title: l10n.sourceManagement,
             icon: Icons.smart_display_outlined,
-            route: const SettingPluginsRoute(),
+            destination: SettingsDestination.plugins,
           ),
           _SettingsMenuItem(
             title: l10n.downloadSettings,
             icon: Icons.cloud_download_outlined,
-            route: const SettingDownloadRoute(),
+            destination: SettingsDestination.download,
           ),
         ],
       ),
@@ -153,18 +158,18 @@ class _SettingsMenu extends ConsumerWidget {
           _SettingsMenuItem(
             title: l10n.playbackSettings,
             icon: Icons.play_circle_outline,
-            route: const SettingPlaybackRoute(),
+            destination: SettingsDestination.playback,
           ),
           if (SystemUtil.isDesktop)
             _SettingsMenuItem(
               title: l10n.playerShortcuts,
               icon: Icons.keyboard_outlined,
-              route: const SettingPlayerShortcutsRoute(),
+              destination: SettingsDestination.playerShortcuts,
             ),
           _SettingsMenuItem(
             title: l10n.danmakuSettings,
             icon: Icons.subtitles_outlined,
-            route: const SettingDanmakuRoute(),
+            destination: SettingsDestination.danmaku,
           ),
         ],
       ),
@@ -174,12 +179,12 @@ class _SettingsMenu extends ConsumerWidget {
           _SettingsMenuItem(
             title: l10n.errorLogs,
             icon: Icons.receipt_long_outlined,
-            route: const SettingLogsRoute(),
+            destination: SettingsDestination.logs,
           ),
           _SettingsMenuItem(
             title: l10n.about,
             icon: Icons.info_outline,
-            route: const SettingAboutRoute(),
+            destination: SettingsDestination.about,
           ),
         ],
       )
@@ -195,6 +200,9 @@ class _SettingsMenu extends ConsumerWidget {
         ? userInfo!.avatar
         : null;
     final categories = _categories(context, avatar);
+    final navigation = ref.read(appNavigatorProvider);
+    final currentDestination =
+        navigation.settingsDestinationForLocation(location);
     final menu = ListView(
       padding: EdgeInsets.only(
         left: wide ? 15 : 0,
@@ -215,7 +223,8 @@ class _SettingsMenu extends ConsumerWidget {
           for (final item in category.items)
             ListTile(
               shape: wide ? const StadiumBorder() : null,
-              selected: wide && categoryLocation == item.route.location,
+              selected:
+                  wide && _category(currentDestination) == item.destination,
               selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
               leading: item.avatar != null
                   ? DecoratedBox(
@@ -239,12 +248,13 @@ class _SettingsMenu extends ConsumerWidget {
               title: Text(item.title),
               trailing: wide ? null : const Icon(Icons.chevron_right),
               onTap: () {
-                if (wide && location != const SettingsRoute().location) {
-                  if (location != item.route.location) {
-                    item.route.replace(context);
+                if (wide && currentDestination != SettingsDestination.menu) {
+                  if (currentDestination != item.destination) {
+                    navigation.replaceSettings(context, item.destination);
                   }
                 } else {
-                  item.route.push(context);
+                  navigation.openSettings<void>(context,
+                      destination: item.destination);
                 }
               },
             ),
@@ -289,11 +299,11 @@ class _SettingsMenuItem {
   const _SettingsMenuItem(
       {required this.title,
       required this.icon,
-      required this.route,
+      required this.destination,
       this.avatar});
 
   final String title;
   final IconData icon;
-  final GoRouteData route;
+  final SettingsDestination destination;
   final String? avatar;
 }

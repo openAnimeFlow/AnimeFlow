@@ -1,3 +1,4 @@
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/user_info_item.dart';
 import 'package:anime_flow/features/user_space/presentation/providers/user_space_provider.dart';
@@ -69,7 +70,10 @@ class IntroView extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  BBCodeWidget(bbcode: userInfo.bio!),
+                  BBCodeWidget(
+                      onImageTap: (args) => appNavigatorOf(context)
+                          .openImagePreview<void>(context, args),
+                      bbcode: userInfo.bio!),
                   const SizedBox(height: 24),
                 ],
                 if (hasLocation) ...[

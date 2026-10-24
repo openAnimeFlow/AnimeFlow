@@ -1,7 +1,7 @@
 import 'package:anime_flow/features/characters/data/repositories/character_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/characters/presentation/providers/characters_args_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'characters_provider.g.dart';

@@ -128,7 +128,7 @@ final class SubjectCommentsProvider
   SubjectComments create() => SubjectComments();
 }
 
-String _$subjectCommentsHash() => r'4aec1f1b9acc96f80cb93879d91c8f44ef32e554';
+String _$subjectCommentsHash() => r'8f088ac01170663a21ddebce5915306bb6f8bd42';
 
 abstract class _$SubjectComments
     extends $AsyncNotifier<SubjectCommentsViewState> {

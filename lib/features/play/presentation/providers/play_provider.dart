@@ -11,7 +11,7 @@ import 'package:anime_flow/features/play/application/system_volume_synchronizer.
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';

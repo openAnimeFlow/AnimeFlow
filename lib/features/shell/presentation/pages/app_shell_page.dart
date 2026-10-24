@@ -1,8 +1,9 @@
+import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/tab_item.dart';
 import 'package:anime_flow/features/user/user_api.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
@@ -161,7 +162,7 @@ class AppShellPage extends StatelessWidget {
                       heroTag: 'main_search',
                       elevation: 0,
                       onPressed: () {
-                        const SearchRoute().push(context);
+                        appNavigatorOf(context).openSearch<void>(context);
                       },
                       child: const Icon(Icons.search),
                     ),
@@ -178,7 +179,9 @@ class AppShellPage extends StatelessWidget {
                           icon: const Icon(Icons.settings_outlined),
                           iconSize: 28,
                           tooltip: l10n.settings,
-                          onPressed: () => const SettingsRoute().push(context),
+                          onPressed: () => appNavigatorOf(context)
+                              .openSettings<void>(context,
+                                  destination: SettingsDestination.menu),
                         ),
                       ],
                     ),

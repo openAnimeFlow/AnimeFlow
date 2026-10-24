@@ -1,6 +1,6 @@
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -19,13 +19,14 @@ class SearchOmittedContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
             onTap: () {
-              AnimeInfoRoute.fromExtra(InfoRouteExtra(
+              appNavigatorOf(context).openAnimeInfoFromExtra<void>(
+                  context,
+                  InfoRouteExtra(
                       id: searchData.id,
                       name: searchData.nameCN.isEmpty
                           ? searchData.name
                           : searchData.nameCN,
-                      image: searchData.images.large))
-                  .push(context);
+                      image: searchData.images.large));
             },
             child: SubjectCard(
               image: searchData.images.large,

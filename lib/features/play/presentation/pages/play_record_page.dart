@@ -1,7 +1,7 @@
 import 'package:anime_flow/features/play/presentation/providers/play_history_provider.dart';
-import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/model/play_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/utils.dart';
@@ -209,11 +209,13 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
                     final playHistory = playHistoryList[index];
                     return InkWell(
                       borderRadius: BorderRadius.circular(8),
-                      onTap: () => AnimeInfoRoute.fromExtra(InfoRouteExtra(
-                              id: playHistory.subjectId,
-                              name: playHistory.subjectName,
-                              image: playHistory.cover))
-                          .push(context),
+                      onTap: () => appNavigatorOf(context)
+                          .openAnimeInfoFromExtra<void>(
+                              context,
+                              InfoRouteExtra(
+                                  id: playHistory.subjectId,
+                                  name: playHistory.subjectName,
+                                  image: playHistory.cover)),
                       child: Row(
                         children: [
                           AspectRatio(
@@ -300,7 +302,9 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
                                           style: ElevatedButton.styleFrom(
                                               elevation: 0),
                                           onPressed: () async {
-                                            await PlayRoute.fromExtra(
+                                            await appNavigatorOf(context)
+                                                .openPlay<void>(
+                                                    context,
                                                     PlayRouteExtra(
                                                         playExtra: PlayExtra(
                                                           subjectId: playHistory
@@ -315,8 +319,7 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
                                                         ),
                                                         continueEpisodeId:
                                                             playHistory
-                                                                .episodeId))
-                                                .push(context);
+                                                                .episodeId));
                                           },
                                           child: Text(
                                             l10n.playEpisode(

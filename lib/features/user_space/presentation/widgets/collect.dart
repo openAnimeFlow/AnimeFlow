@@ -1,8 +1,8 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/features/user_space/presentation/providers/space_collections_provider.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/features/user_space/presentation/providers/user_space_provider.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/layout_util.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:material_ui/material_ui.dart';
@@ -230,7 +230,9 @@ class _CollectViewState extends ConsumerState<CollectView>
                                   id: collection.id,
                                   name: collection.nameCN ?? collection.name,
                                   image: collection.images.large);
-                              AnimeInfoRoute.fromExtra(subject).push(context);
+                              appNavigatorOf(context)
+                                  .openAnimeInfoFromExtra<void>(
+                                      context, subject);
                             },
                             child: SubjectCard(
                               image: collection.images.large,

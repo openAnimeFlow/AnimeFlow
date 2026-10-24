@@ -1,6 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/app/router/model/play_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/download/presentation/widgets/download_danmaku_icon.dart';
@@ -439,25 +439,25 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
     final completedEpisodes = record.episodes.values
         .where((item) => item.status == DownloadStatus.completed)
         .toList();
-    PlayRoute.fromExtra(
-      PlayRouteExtra(
-        playExtra: PlayExtra(
-          subjectId: record.subjectId,
-          subjectName: record.subjectName,
-          subjectCover: record.subjectCover,
-          subjectAliases: const [],
-        ),
-        continueEpisodeId:
-            episode.bangumiEpisodeId > 0 ? episode.bangumiEpisodeId : null,
-        isOfflineMode: true,
-        offlineMediaPath: localMediaPath,
-        offlineDanmakuPath: episode.localDanmakuPath.trim().isEmpty
-            ? null
-            : episode.localDanmakuPath,
-        offlineEpisodeUrl: episode.episodeUrl,
-        offlineEpisodes: completedEpisodes,
-      ),
-    ).push(context);
+    appNavigatorOf(context).openPlay<void>(
+        context,
+        PlayRouteExtra(
+          playExtra: PlayExtra(
+            subjectId: record.subjectId,
+            subjectName: record.subjectName,
+            subjectCover: record.subjectCover,
+            subjectAliases: const [],
+          ),
+          continueEpisodeId:
+              episode.bangumiEpisodeId > 0 ? episode.bangumiEpisodeId : null,
+          isOfflineMode: true,
+          offlineMediaPath: localMediaPath,
+          offlineDanmakuPath: episode.localDanmakuPath.trim().isEmpty
+              ? null
+              : episode.localDanmakuPath,
+          offlineEpisodeUrl: episode.episodeUrl,
+          offlineEpisodes: completedEpisodes,
+        ));
   }
 
   String _episodeTitle(AppLocalizations l10n, DownloadEpisode episode) {

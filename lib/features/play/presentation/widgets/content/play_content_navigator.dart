@@ -1,6 +1,7 @@
 import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/anime_info_view.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -19,6 +20,7 @@ import 'package:anime_flow/features/play/presentation/providers/recommendation_p
 /// 管理播放器内的简介与详情导航，其他条目和角色通过应用路由打开。
 @Dependencies([
   playExtra,
+  animeInfoArgs,
   AnimeInfo,
   Episodes,
   playSession,
@@ -32,7 +34,6 @@ import 'package:anime_flow/features/play/presentation/providers/recommendation_p
   SubjectCharacters,
   SubjectProducers,
   SubjectRelated,
-  animeInfoArgs
 ])
 class PlayContentNavigator extends ConsumerStatefulWidget {
   const PlayContentNavigator({super.key, required this.isActive});

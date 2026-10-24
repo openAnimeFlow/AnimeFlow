@@ -1,5 +1,5 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
@@ -16,8 +16,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
-@Dependencies([VideoSourceNotifier, playExtra])
-Future<void> showDownloadEpisodeSheet(BuildContext context, WidgetRef ref) {
+@Dependencies([VideoSourceNotifier])
+Future<void> showDownloadEpisodeSheet(BuildContext context,
+    {required PlayExtra subject}) {
   final container = ProviderScope.containerOf(context);
   return showModalBottomSheet<void>(
     context: context,
@@ -38,6 +39,7 @@ Future<void> showDownloadEpisodeSheet(BuildContext context, WidgetRef ref) {
           builder: (context, scrollController) {
             return DownloadEpisodeSheet(
               scrollController: scrollController,
+              subject: subject,
             );
           },
         ),
@@ -46,14 +48,16 @@ Future<void> showDownloadEpisodeSheet(BuildContext context, WidgetRef ref) {
   );
 }
 
-@Dependencies([VideoSourceNotifier, playExtra])
+@Dependencies([VideoSourceNotifier])
 class DownloadEpisodeSheet extends ConsumerStatefulWidget {
   const DownloadEpisodeSheet({
     super.key,
     required this.scrollController,
+    required this.subject,
   });
 
   final ScrollController scrollController;
+  final PlayExtra subject;
 
   @override
   ConsumerState<DownloadEpisodeSheet> createState() =>
@@ -79,7 +83,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     final l10n = AppLocalizations.of(context);
     final videoSourceState = ref.watch(videoSourceProvider);
     final downloadState = ref.watch(downloadControllerProvider);
-    final subjectId = ref.watch(playExtraProvider).playExtra.subjectId;
+    final subjectId = widget.subject.subjectId;
     final subjectEpisodes =
         ref.watch(subjectEpisodesProvider(subjectId)).asData?.value;
     final source = _selectedSource(videoSourceState);
@@ -397,7 +401,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     EpisodesItem? episodes,
     DownloadState downloadState,
   ) {
-    final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
+    final subjectId = widget.subject.subjectId;
     final bangumiEpisodes = _episodesBySort(episodes);
     final lines = source.episodeResources.where((item) {
       if (state.lineName.trim().isEmpty) {
@@ -501,7 +505,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     try {
       final recordKey = DownloadRecord.buildKey(
         sourceName: sourceName,
-        subjectId: ref.read(playExtraProvider).playExtra.subjectId,
+        subjectId: widget.subject.subjectId,
       );
       await ref
           .read(downloadControllerProvider.notifier)
@@ -567,7 +571,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
       return;
     }
 
-    final extra = ref.read(playExtraProvider).playExtra;
+    final extra = widget.subject;
     final params = selected.map((candidate) {
       final bangumiEpisode = candidate.bangumiEpisode;
       final title = candidate.episodeTitle;

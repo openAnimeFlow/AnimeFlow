@@ -1,5 +1,5 @@
 import 'package:anime_flow/features/auth/auth_api.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/inf_head.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -189,7 +189,8 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                                           .read(animeInfoProvider.notifier)
                                           .setAnimeInfo(updated);
                                       ref
-                                          .read(subjectCommentsProvider.notifier)
+                                          .read(
+                                              subjectCommentsProvider.notifier)
                                           .refresh();
                                     },
                                   ),

@@ -1,8 +1,8 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_history_provider.dart';
-import 'package:anime_flow/app/router/model/play_route_extra.dart';
+import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
@@ -90,7 +90,8 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
                 ),
                 if (playHistory.length > 6)
                   TextButton(
-                    onPressed: () => const PlayRecordRoute().push(context),
+                    onPressed: () =>
+                        appNavigatorOf(context).openPlayRecord<void>(context),
                     child: Row(
                       children: [
                         Text(
@@ -137,8 +138,9 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(8),
                                 onTap: () {
-                                  AnimeInfoRoute.fromExtra(subjectBasicData)
-                                      .push(context);
+                                  appNavigatorOf(context)
+                                      .openAnimeInfoFromExtra<void>(
+                                          context, subjectBasicData);
                                 },
                                 child: Stack(
                                   children: [
@@ -219,20 +221,22 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
                                             ),
                                             InkWell(
                                               onTap: () {
-                                                PlayRoute.fromExtra(
-                                                  PlayRouteExtra(
-                                                      playExtra: PlayExtra(
-                                                          subjectId:
-                                                              history.subjectId,
-                                                          subjectName: history
-                                                              .subjectName,
-                                                          subjectCover:
-                                                              history.cover,
-                                                          subjectAliases:
-                                                              history.alias),
-                                                      continueEpisodeId:
-                                                          history.episodeId),
-                                                ).push(context);
+                                                appNavigatorOf(context).openPlay<
+                                                        void>(
+                                                    context,
+                                                    PlayRouteExtra(
+                                                        playExtra: PlayExtra(
+                                                            subjectId:
+                                                                history
+                                                                    .subjectId,
+                                                            subjectName: history
+                                                                .subjectName,
+                                                            subjectCover:
+                                                                history.cover,
+                                                            subjectAliases:
+                                                                history.alias),
+                                                        continueEpisodeId:
+                                                            history.episodeId));
                                               },
                                               child: const Icon(
                                                 Icons.play_circle,

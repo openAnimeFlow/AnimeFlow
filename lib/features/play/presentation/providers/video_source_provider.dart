@@ -17,7 +17,7 @@ import 'package:anime_flow/core/video_source/application/video_source_providers.
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

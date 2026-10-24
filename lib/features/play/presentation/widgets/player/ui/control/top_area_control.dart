@@ -11,7 +11,7 @@ import 'package:anime_flow/features/play/presentation/providers/video_source_pro
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/video_setting_dialog.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';

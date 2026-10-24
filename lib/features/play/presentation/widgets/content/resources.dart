@@ -6,7 +6,7 @@ import 'package:anime_flow/features/download/presentation/widgets/download_episo
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -212,7 +212,8 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       onSelected: (action) {
         switch (action) {
           case _SourceAction.downloadResources:
-            showDownloadEpisodeSheet(context, ref);
+            showDownloadEpisodeSheet(context,
+                subject: ref.read(playExtraProvider).playExtra);
           case _SourceAction.openPageUrl:
             _openSourcePageInBrowser(videoUrl);
           case _SourceAction.copyPageUrl:

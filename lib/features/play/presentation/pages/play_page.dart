@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:anime_flow/features/play/application/player_bindings.dart';
-import 'package:anime_flow/app/router/model/play_route_extra.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
+import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
@@ -15,8 +16,8 @@ import 'package:anime_flow/features/play/presentation/providers/video_ui_provide
 import 'package:anime_flow/features/play/presentation/widgets/player/player.dart';
 import 'package:anime_flow/features/play/presentation/utils/playback_screen_awake.dart';
 import 'package:anime_flow/features/user/user_api.dart';
-import 'package:anime_flow/app/router/app_route_observer.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/shared/navigation/app_route_observer.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
@@ -42,6 +43,7 @@ import 'package:anime_flow/features/play/presentation/providers/recommendation_p
   VideoSourceNotifier,
   Episodes,
   playExtra,
+  animeInfoArgs,
   AnimeInfo,
   subjectOnlineCount,
   DanmakuStateNotifier,
@@ -51,7 +53,6 @@ import 'package:anime_flow/features/play/presentation/providers/recommendation_p
   SubjectCharacters,
   SubjectProducers,
   SubjectRelated,
-  animeInfoArgs,
   episodeComments
 ])
 class PlayPage extends ConsumerStatefulWidget {
@@ -373,6 +374,7 @@ int _compareDownloadEpisodes(DownloadEpisode a, DownloadEpisode b) {
 
 @Dependencies([
   playExtra,
+  animeInfoArgs,
   AnimeInfo,
   Episodes,
   playSession,
@@ -386,7 +388,6 @@ int _compareDownloadEpisodes(DownloadEpisode a, DownloadEpisode b) {
   SubjectCharacters,
   SubjectProducers,
   SubjectRelated,
-  animeInfoArgs,
   episodeComments
 ])
 class _ContentView extends ConsumerStatefulWidget {

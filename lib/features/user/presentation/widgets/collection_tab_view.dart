@@ -4,8 +4,8 @@ import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/user/application/user_collection_provider.dart';
 import 'package:anime_flow/features/user/application/user_collection_state.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -456,11 +456,13 @@ class _CollectionItemCardState extends State<_CollectionItemCard> {
     return InkWell(
       borderRadius: const BorderRadius.all(Radius.circular(12)),
       onTap: () {
-        AnimeInfoRoute.fromExtra(InfoRouteExtra(
-          id: collection.id,
-          name: displayName,
-          image: collection.images.large,
-        )).push(context);
+        appNavigatorOf(context).openAnimeInfoFromExtra<void>(
+            context,
+            InfoRouteExtra(
+              id: collection.id,
+              name: displayName,
+              image: collection.images.large,
+            ));
       },
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

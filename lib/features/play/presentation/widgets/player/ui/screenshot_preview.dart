@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:material_ui/material_ui.dart';
@@ -65,9 +65,8 @@ class _ScreenshotThumbnail extends ConsumerWidget {
 
   void _openPreview(BuildContext context, WidgetRef ref) {
     ref.read(videoUiProvider.notifier).hideScreenshotPreview();
-    ImagePreviewRoute.fromArgs(
-      ImageViewerRouteArgs.bytes(bytes),
-    ).push(context);
+    appNavigatorOf(context)
+        .openImagePreview<void>(context, ImageViewerRouteArgs.bytes(bytes));
   }
 
   @override

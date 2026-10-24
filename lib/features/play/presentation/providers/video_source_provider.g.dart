@@ -24,8 +24,8 @@ final class VideoSourceNotifierProvider
           dependencies: <ProviderOrFamily>[
             episodesProvider,
             playExtraProvider,
-            playStateProvider,
-            playSessionProvider
+            playSessionProvider,
+            playStateProvider
           ],
           $allTransitiveDependencies: <ProviderOrFamily>{
             VideoSourceNotifierProvider.$allTransitiveDependencies0,
@@ -40,8 +40,9 @@ final class VideoSourceNotifierProvider
   static final $allTransitiveDependencies0 = episodesProvider;
   static final $allTransitiveDependencies1 =
       EpisodesProvider.$allTransitiveDependencies0;
-  static final $allTransitiveDependencies2 = playStateProvider;
-  static final $allTransitiveDependencies3 = playSessionProvider;
+  static final $allTransitiveDependencies2 = playSessionProvider;
+  static final $allTransitiveDependencies3 =
+      PlaySessionProvider.$allTransitiveDependencies1;
   static final $allTransitiveDependencies4 =
       PlaySessionProvider.$allTransitiveDependencies2;
   static final $allTransitiveDependencies5 =
@@ -64,7 +65,7 @@ final class VideoSourceNotifierProvider
 }
 
 String _$videoSourceNotifierHash() =>
-    r'751fe060e0561a480cf905783d04a3382dbc9b42';
+    r'981055c7e22f3344a27ee0e31de969b61aaf6ca2';
 
 abstract class _$VideoSourceNotifier extends $Notifier<VideoSourceState> {
   VideoSourceState build();

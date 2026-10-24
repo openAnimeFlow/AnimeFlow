@@ -1,6 +1,6 @@
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
@@ -26,12 +26,15 @@ class SearchDetailsContentView extends StatelessWidget {
       height: itemHeight,
       child: InkWell(
         onTap: () {
-          AnimeInfoRoute.fromExtra(InfoRouteExtra(
-            id: searchData.id,
-            name:
-                searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
-            image: searchData.images.large,
-          )).push(context);
+          appNavigatorOf(context).openAnimeInfoFromExtra<void>(
+              context,
+              InfoRouteExtra(
+                id: searchData.id,
+                name: searchData.nameCN.isEmpty
+                    ? searchData.name
+                    : searchData.nameCN,
+                image: searchData.images.large,
+              ));
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:anime_flow/app/router/model/play_route_extra.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';

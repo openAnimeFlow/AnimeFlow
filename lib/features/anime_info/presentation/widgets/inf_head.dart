@@ -2,17 +2,17 @@ import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/widgets/collection_save_notice.dart';
 import 'dart:ui';
 
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
+import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/episodes_drawer.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';
@@ -161,12 +161,13 @@ class InfoHeadView extends StatelessWidget {
                                         .select((e) => e.image),
                                   );
                                   return GestureDetector(
-                                    onTap: () => ImagePreviewRoute.fromArgs(
-                                      ImageViewerRouteArgs(
-                                        imageUrls: [image],
-                                        heroTag: image,
-                                      ),
-                                    ).push(context),
+                                    onTap: () => appNavigatorOf(context)
+                                        .openImagePreview<void>(
+                                            context,
+                                            ImageViewerRouteArgs(
+                                              imageUrls: [image],
+                                              heroTag: image,
+                                            )),
                                     child: Hero(
                                       tag: image,
                                       child: AnimationNetworkImage(
@@ -391,7 +392,7 @@ class InfoHeadView extends StatelessWidget {
                 context,
                 l10n.loginToCollect,
                 Icons.login_rounded,
-                () => const UserRoute().go(context),
+                () => appNavigatorOf(context).goToUser(context),
               )
             else
               CollectionButton(

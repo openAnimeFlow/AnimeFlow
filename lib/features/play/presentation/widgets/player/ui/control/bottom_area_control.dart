@@ -24,7 +24,7 @@ import 'package:anime_flow/features/play/presentation/widgets/loading_animation.
 import 'package:anime_flow/features/play/presentation/widgets/episodes_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/play_pause_icon.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';

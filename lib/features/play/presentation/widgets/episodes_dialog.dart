@@ -5,7 +5,7 @@ import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/episode_load_more_error.dart';
-import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

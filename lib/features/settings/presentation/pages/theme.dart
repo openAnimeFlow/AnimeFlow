@@ -1,8 +1,9 @@
+import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'dart:ui';
 
 import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/theme_preview.dart';
 import 'package:material_ui/material_ui.dart';
@@ -203,7 +204,9 @@ class _ThemePageState extends State<ThemePage> {
                 const SizedBox(height: 10),
                 InkWell(
                   borderRadius: BorderRadius.circular(10),
-                  onTap: () => const SettingFontRoute().push(context),
+                  onTap: () => appNavigatorOf(context).openSettings<void>(
+                      context,
+                      destination: SettingsDestination.font),
                   child: Row(
                     spacing: 10,
                     children: [

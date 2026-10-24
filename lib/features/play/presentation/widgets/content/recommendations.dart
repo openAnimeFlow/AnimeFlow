@@ -2,8 +2,8 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
-import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,13 +84,13 @@ class _RecommendationTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => AnimeInfoRoute.fromExtra(
-          InfoRouteExtra(
-            id: subject.id,
-            name: title,
-            image: subject.images.large,
-          ),
-        ).push(context),
+        onTap: () => appNavigatorOf(context).openAnimeInfoFromExtra<void>(
+            context,
+            InfoRouteExtra(
+              id: subject.id,
+              name: title,
+              image: subject.images.large,
+            )),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -1,9 +1,10 @@
+import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/app_update/presentation/widgets/version_update_ui.dart';
 import 'package:material_ui/material_ui.dart';
@@ -186,15 +187,17 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                             ListTile(
                               title: Text(l10n.projectUpdates),
                               trailing: const Icon(Icons.article_outlined),
-                              onTap: () =>
-                                  const SettingUpdatesRoute().push(context),
+                              onTap: () => appNavigatorOf(context)
+                                  .openSettings<void>(context,
+                                      destination: SettingsDestination.updates),
                             ),
                             const Divider(),
                             ListTile(
                               title: Text(l10n.projectWebsite),
                               trailing: const Icon(Icons.public_outlined),
-                              onTap: () =>
-                                  const SettingWebsiteRoute().push(context),
+                              onTap: () => appNavigatorOf(context)
+                                  .openSettings<void>(context,
+                                      destination: SettingsDestination.website),
                             ),
                             const Divider(),
                             ListTile(
@@ -216,15 +219,18 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                               title: Text(l10n.thanks),
                               trailing: const Icon(Icons.chevron_right),
                               onTap: () {
-                                const SettingThanksRoute().push(context);
+                                appNavigatorOf(context).openSettings<void>(
+                                    context,
+                                    destination: SettingsDestination.thanks);
                               },
                             ),
                             const Divider(),
                             ListTile(
                               title: const Text('关于作者'),
                               trailing: const Icon(Icons.chevron_right),
-                              onTap: () =>
-                                  const SettingAuthorRoute().push(context),
+                              onTap: () => appNavigatorOf(context)
+                                  .openSettings<void>(context,
+                                      destination: SettingsDestination.author),
                             ),
                             const Divider(),
                             ListTile(
@@ -233,7 +239,9 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                 Icons.volunteer_activism_outlined,
                               ),
                               onTap: () {
-                                const SettingSponsorRoute().push(context);
+                                appNavigatorOf(context).openSettings<void>(
+                                    context,
+                                    destination: SettingsDestination.sponsor);
                               },
                             ),
                             const Divider(),
@@ -241,7 +249,9 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                               title: Text(l10n.privacyPolicy),
                               trailing: const Icon(Icons.chevron_right),
                               onTap: () {
-                                const SettingAgreementRoute().push(context);
+                                appNavigatorOf(context).openSettings<void>(
+                                    context,
+                                    destination: SettingsDestination.agreement);
                               },
                             ),
                             const Divider(),

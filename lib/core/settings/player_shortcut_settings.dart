@@ -1,4 +1,4 @@
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/input/player_shortcut_bindings.dart';
 import 'package:anime_flow/shared/models/player/player_shortcut_action.dart';

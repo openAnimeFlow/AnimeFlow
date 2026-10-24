@@ -1,4 +1,4 @@
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/hive_registrar.g.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
@@ -12,6 +12,7 @@ class Storage {
   static late final Box<PlayHistory> playHistory;
   static late final Box<SearchHistory> searchHistory;
   static late final Box<DownloadRecord> downloads;
+
   static late final Box<String> animeInfoCache;
   static late final Box<String> characterDataCache;
   static late final Box<String> subjectMetadataCache;
@@ -19,6 +20,7 @@ class Storage {
   static late final Box<String> subjectEpisodesCache;
   static late final Box<String> popularAnimeCache;
   static late final Box<String> calendarCache;
+  static late final Box<String> userDataCache;
 
   static Future<void> init() async {
     Hive.registerAdapters();
@@ -44,6 +46,8 @@ class Storage {
         await _openBoxWithFallback<String>(StorageKey.popularAnimeCacheKey);
     calendarCache =
         await _openBoxWithFallback<String>(StorageKey.calendarCacheKey);
+    userDataCache =
+        await _openBoxWithFallback<String>(StorageKey.userDataCacheKey);
   }
 
   static Future<Box<CrawlConfigItem>> _openCrawlConfigs() async {

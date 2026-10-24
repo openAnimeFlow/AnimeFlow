@@ -321,6 +321,34 @@ void main() {
     expect(detail.header('cookie'), contains('sid=abc123'));
   });
 
+  for (final mode in ['apiGet', 'apiPost', 'xpath']) {
+    test('$mode 搜索保留关键词中的空格、制表符、全角空格和换行', () async {
+      const keyword = ' \tJOJO的奇妙冒险\u3000 石之海\r\n';
+      final config = mode == 'xpath' ? _xpathRule(site) : _apiRule(site);
+      if (mode == 'apiPost') {
+        config.searchApiConfig.request
+          ..method = 'POST'
+          ..query = {}
+          ..bodyType = ApiBodyType.json
+          ..body = {'search_term': '{keyword}'};
+      }
+
+      await RuleEngine().search(
+        keyword: keyword,
+        config: config,
+      );
+
+      final request = site.requests.single;
+      if (mode == 'apiPost') {
+        expect(request.method, 'POST');
+        expect(request.jsonBody['search_term'], keyword);
+      } else {
+        expect(request.method, 'GET');
+        expect(request.query['wd'], keyword);
+      }
+    });
+  }
+
   test('分隔符格式章节响应端到端解析', () async {
     final site0 = site;
     final config = _apiRule(

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/network/api/github_api.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/models/font_item.dart';

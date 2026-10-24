@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/ech_image_route.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/shared/models/enums/collection_sort.dart';

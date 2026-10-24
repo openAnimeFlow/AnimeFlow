@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';

@@ -3,7 +3,7 @@ import 'dart:math' as math;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/features/ranking/presentation/widgets/ranking_filter_bar.dart';

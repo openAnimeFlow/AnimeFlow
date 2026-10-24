@@ -2,7 +2,7 @@ import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'dart:async';
 import 'dart:io';
 
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/user/application/user_collection_provider.dart';
@@ -16,6 +16,7 @@ import 'package:anime_flow/shared/models/enums/collection_sort.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_ce/hive.dart';
 
 UserCollectionData _item(int type) => UserCollectionData.fromJson({
@@ -44,8 +45,10 @@ class _UserInfo extends CurrentUserInfo {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late Directory settingsDirectory;
   setUpAll(() async {
+    FlutterSecureStorage.setMockInitialValues({});
     settingsDirectory =
         await Directory.systemTemp.createTemp('collection_sort_test_');
     Hive.init(settingsDirectory.path);
@@ -312,6 +315,7 @@ void main() {
   test('cancellation restarts an in-flight page to avoid stale results',
       () async {
     final oldPage = Completer<UserCollectionsItem>();
+    final started = Completer<void>();
     var requests = 0;
     final container = ProviderContainer(overrides: [
       userCollectionsProvider.overrideWith(_Collections.new),
@@ -319,6 +323,7 @@ void main() {
       collectionPageLoaderProvider.overrideWithValue(
         ({required type, required offset, required sort, keyword}) {
           requests++;
+          if (requests == 1) started.complete();
           return requests == 1
               ? oldPage.future
               : Future.value(UserCollectionsItem(data: [], total: 0));
@@ -328,6 +333,7 @@ void main() {
     addTearDown(container.dispose);
     final notifier = container.read(userCollectionsProvider.notifier);
     final originalLoad = notifier.loadInitial(2);
+    await started.future;
 
     await notifier.updateCollectionType(_item(1), 0);
     await Future<void>.delayed(Duration.zero);
@@ -387,16 +393,23 @@ void main() {
     test('reset ignores old request (failure: $failOldRequest)', () async {
       final oldPage = Completer<UserCollectionsItem>();
       final newPage = Completer<UserCollectionsItem>();
+      final started = Completer<void>();
       var requests = 0;
       final container = ProviderContainer(overrides: [
         collectionPageLoaderProvider.overrideWithValue(
-          ({required type, required offset, required sort, keyword}) =>
-              requests++ == 0 ? oldPage.future : newPage.future,
+          ({required type, required offset, required sort, keyword}) {
+            if (requests++ == 0) {
+              started.complete();
+              return oldPage.future;
+            }
+            return newPage.future;
+          },
         ),
       ]);
       addTearDown(container.dispose);
       final notifier = container.read(userCollectionsProvider.notifier);
       final oldRequest = notifier.loadInitial(1);
+      await started.future;
       notifier.reset();
       final newRequest = notifier.loadInitial(1);
       if (failOldRequest) {

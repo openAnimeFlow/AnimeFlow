@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/rule_api_level.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';

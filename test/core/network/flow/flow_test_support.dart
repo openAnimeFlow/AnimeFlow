@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_probe.dart';

@@ -33,7 +33,7 @@ final class PluginCatalogProvider
   PluginCatalog create() => PluginCatalog();
 }
 
-String _$pluginCatalogHash() => r'acb8f2d0b1b01a342bf754b10a7b6a0b8e578b78';
+String _$pluginCatalogHash() => r'b4d448a19f434cf5704d6b958cf93add57f1c154';
 
 abstract class _$PluginCatalog extends $AsyncNotifier<List<PluginCatalogItem>> {
   FutureOr<List<PluginCatalogItem>> build();

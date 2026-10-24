@@ -8,6 +8,7 @@ class StorageKey {
       playPositionKey = 'play_position_key',
       playHistoryKey = 'play_history_key',
       downloadsKey = 'downloads_key',
+      searchHistoryKey = 'search_history_key',
       animeInfoCacheKey = 'anime_info_cache_v1',
       characterDataCacheKey = 'character_data_cache_v1',
       subjectMetadataCacheKey = 'subject_metadata_cache_v1',
@@ -15,8 +16,9 @@ class StorageKey {
       subjectEpisodesCacheKey = 'subject_episodes_cache_v1',
       popularAnimeCacheKey = 'popular_anime_cache_v1',
       calendarCacheKey = 'calendar_cache_v1',
-      autoUpdateKey = 'auto_update_key',
-      searchHistoryKey = 'search_history_key';
+      userDataCacheKey = 'user_data_cache_v1',
+      currentUserProfileKey = 'current_user_profile_v1',
+      autoUpdateKey = 'auto_update_key';
 }
 
 class DanmakuKey {

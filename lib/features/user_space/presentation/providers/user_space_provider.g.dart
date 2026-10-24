@@ -49,7 +49,7 @@ final class UserSpaceProvider
   }
 }
 
-String _$userSpaceHash() => r'16ea06f0979ca0d54a00b6f733ca3cbd6e11aa38';
+String _$userSpaceHash() => r'4ba3fb0e3117469df8863665ab5c65d1c027a41a';
 
 final class UserSpaceFamily extends $Family
     with
@@ -139,7 +139,7 @@ final class UserSpaceStatisticsProvider
 }
 
 String _$userSpaceStatisticsHash() =>
-    r'7a970cb4c7da6ab00254f062af65dcf3082e4f6b';
+    r'ea035873cfce7047fa2b16becd4ab2630ceb5f2a';
 
 final class UserSpaceStatisticsFamily extends $Family
     with

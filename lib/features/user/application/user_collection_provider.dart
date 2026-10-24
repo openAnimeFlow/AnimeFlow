@@ -210,20 +210,6 @@ class UserCollections extends _$UserCollections {
 
   bool isTypeBusy(int type) => state.tabState(type).isBusy;
 
-  Future<UserCollectionsItem> _fetchPage({
-    required int type,
-    required int offset,
-    required CollectionSort sort,
-    String? keyword,
-  }) {
-    return ref.read(collectionPageLoaderProvider)(
-      type: type,
-      offset: offset,
-      keyword: keyword,
-      sort: sort,
-    );
-  }
-
   Future<bool> _load(
     int type, {
     bool loadMore = false,
@@ -291,7 +277,7 @@ class UserCollections extends _$UserCollections {
     var refreshFailedWithCache = false;
     try {
       final offset = loadMore && !refresh ? tab.offset : 0;
-      final page = await _fetchPage(
+      final page = await ref.read(collectionPageLoaderProvider)(
         type: type,
         offset: offset,
         keyword: keyword,

@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_install_message.dart';

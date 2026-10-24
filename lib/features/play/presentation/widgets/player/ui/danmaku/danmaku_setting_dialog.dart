@@ -1,6 +1,6 @@
 import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';

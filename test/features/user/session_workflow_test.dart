@@ -112,12 +112,14 @@ void main() {
     directory = await Directory.systemTemp.createTemp('session_workflow_');
     Hive.init(directory.path);
     Storage.setting = await Hive.openBox<dynamic>('session_settings');
+    Storage.userDataCache = await Hive.openBox<String>('session_user_cache');
   });
   tearDownAll(() async {
     await Hive.close();
     await directory.delete(recursive: true);
   });
   setUp(() async {
+    await Storage.userDataCache.clear();
     FlutterSecureStorage.setMockInitialValues({});
     await FlowTokenStorage.instance.saveToken(token('first'));
     api = ApiAdapter();
@@ -246,6 +248,7 @@ void main() {
     await container.read(bgmCollectionSyncProvider.notifier).refreshStatus();
     expect(container.read(userCollectionsProvider).tabs, isEmpty);
     await container.read(currentUserInfoProvider.future);
+    await pumpEventQueue();
     expect(api.profileReads, reads + 1);
     await container.read(userCollectionsProvider.notifier).loadInitial(1);
     final pages = container.read(userCollectionsProvider);

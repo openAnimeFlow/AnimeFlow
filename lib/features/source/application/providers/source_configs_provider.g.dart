@@ -33,7 +33,7 @@ final class SourceConfigsProvider
   SourceConfigs create() => SourceConfigs();
 }
 
-String _$sourceConfigsHash() => r'022c740073c03caa424152040ea4c158b381b892';
+String _$sourceConfigsHash() => r'6a76bbaf286ca0f26a987bfa70c52431da663c83';
 
 abstract class _$SourceConfigs extends $AsyncNotifier<List<CrawlConfigItem>> {
   FutureOr<List<CrawlConfigItem>> build();

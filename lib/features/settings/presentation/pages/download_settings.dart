@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/download/application/download_directory/download_directory_factory.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/logger/logger.dart';

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/features/download/application/download_directory/download_directory_factory.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/app/localization/locale_provider.dart';

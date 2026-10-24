@@ -1,3 +1,4 @@
+import 'package:anime_flow/core/settings/danmaku_font_provider.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';

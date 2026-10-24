@@ -213,7 +213,18 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
         switch (action) {
           case _SourceAction.downloadResources:
             showDownloadEpisodeSheet(context,
-                subject: ref.read(playExtraProvider).playExtra);
+                subject: ref.read(playExtraProvider).playExtra,
+                watchSource: (ref) {
+              final state = ref.watch(videoSourceProvider);
+              final sources = state.videoResources;
+              final index = state.selectedWebsiteIndex;
+              return DownloadEpisodeSource(
+                source: sources.isEmpty
+                    ? null
+                    : sources[index >= 0 && index < sources.length ? index : 0],
+                lineName: state.lineName,
+              );
+            });
           case _SourceAction.openPageUrl:
             _openSourcePageInBrowser(videoUrl);
           case _SourceAction.copyPageUrl:

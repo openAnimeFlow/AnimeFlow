@@ -5,7 +5,6 @@ import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/download/presentation/widgets/download_danmaku_icon.dart';
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
@@ -14,11 +13,22 @@ import 'package:anime_flow/shared/models/player/play/video/episode_resources_ite
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
 
-@Dependencies([VideoSourceNotifier])
+/// 下载面板所需的源与线路，由调用方从自己的状态中提供。
+class DownloadEpisodeSource {
+  const DownloadEpisodeSource({required this.source, required this.lineName});
+
+  final ResourcesItem? source;
+  final String lineName;
+}
+
+/// 在面板的构建阶段订阅数据，保留源与线路变化时的实时更新。
+typedef WatchDownloadEpisodeSource = DownloadEpisodeSource Function(
+    WidgetRef ref);
+
 Future<void> showDownloadEpisodeSheet(BuildContext context,
-    {required PlayExtra subject}) {
+    {required PlayExtra subject,
+    required WatchDownloadEpisodeSource watchSource}) {
   final container = ProviderScope.containerOf(context);
   return showModalBottomSheet<void>(
     context: context,
@@ -40,6 +50,7 @@ Future<void> showDownloadEpisodeSheet(BuildContext context,
             return DownloadEpisodeSheet(
               scrollController: scrollController,
               subject: subject,
+              watchSource: watchSource,
             );
           },
         ),
@@ -48,16 +59,17 @@ Future<void> showDownloadEpisodeSheet(BuildContext context,
   );
 }
 
-@Dependencies([VideoSourceNotifier])
 class DownloadEpisodeSheet extends ConsumerStatefulWidget {
   const DownloadEpisodeSheet({
     super.key,
     required this.scrollController,
     required this.subject,
+    required this.watchSource,
   });
 
   final ScrollController scrollController;
   final PlayExtra subject;
+  final WatchDownloadEpisodeSource watchSource;
 
   @override
   ConsumerState<DownloadEpisodeSheet> createState() =>
@@ -81,17 +93,17 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final videoSourceState = ref.watch(videoSourceProvider);
+    final selection = widget.watchSource(ref);
     final downloadState = ref.watch(downloadControllerProvider);
     final subjectId = widget.subject.subjectId;
     final subjectEpisodes =
         ref.watch(subjectEpisodesProvider(subjectId)).asData?.value;
-    final source = _selectedSource(videoSourceState);
+    final source = selection.source;
     final candidates = source == null
         ? <_DownloadCandidate>[]
         : _buildCandidates(
             source,
-            videoSourceState,
+            selection.lineName,
             subjectEpisodes?.episodes,
             downloadState,
           );
@@ -144,7 +156,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
             const SizedBox(height: 8),
             if (source != null)
               Text(
-                '${source.websiteName} - ${videoSourceState.lineName}',
+                '${source.websiteName} - ${selection.lineName}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -384,30 +396,19 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     }
   }
 
-  ResourcesItem? _selectedSource(VideoSourceState state) {
-    if (state.videoResources.isEmpty) {
-      return null;
-    }
-    if (state.selectedWebsiteIndex >= 0 &&
-        state.selectedWebsiteIndex < state.videoResources.length) {
-      return state.videoResources[state.selectedWebsiteIndex];
-    }
-    return state.videoResources.first;
-  }
-
   List<_DownloadCandidate> _buildCandidates(
     ResourcesItem source,
-    VideoSourceState state,
+    String lineName,
     EpisodesItem? episodes,
     DownloadState downloadState,
   ) {
     final subjectId = widget.subject.subjectId;
     final bangumiEpisodes = _episodesBySort(episodes);
     final lines = source.episodeResources.where((item) {
-      if (state.lineName.trim().isEmpty) {
+      if (lineName.trim().isEmpty) {
         return true;
       }
-      return item.lineNames == state.lineName;
+      return item.lineNames == lineName;
     }).toList();
     final selectedLines = lines.isEmpty ? source.episodeResources : lines;
 

@@ -68,5 +68,10 @@ ArchitectureSpec projectArchitecture() => ArchitectureSpec(
       'lib/app/localization/app_localizations_en.dart',
       'lib/app/localization/app_localizations_zh.dart',
     },
+    // ANTLR 固定生成的解析器与监听器相互引用；只折叠这两个文件，仍检查对外依赖。
+    'bbcode_antlr': {
+      'lib/shared/widgets/bbcode/generated/BBCodeParser.dart',
+      'lib/shared/widgets/bbcode/generated/BBCodeListener.dart',
+    },
   },
 );

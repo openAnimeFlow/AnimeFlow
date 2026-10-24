@@ -3,6 +3,7 @@
 library;
 
 import 'package:test/test.dart';
+import 'package:anime_flow_architecture_guard/architecture_spec.dart';
 
 import 'package:anime_flow_architecture_guard/src/cycle_checks.dart';
 import 'package:anime_flow_architecture_guard/src/dependency_graph.dart';
@@ -102,6 +103,36 @@ void main() {
     ).single;
     expect(violation.source, 'lib/custom/value.dart');
     expect(violation.target, violation.source);
+  });
+
+  test('BBCode 生成分组只折叠内部循环，仍拒绝与手写代码形成的环', () {
+    const parser = 'lib/shared/widgets/bbcode/generated/BBCodeParser.dart';
+    const listener = 'lib/shared/widgets/bbcode/generated/BBCodeListener.dart';
+    const handwritten = 'lib/shared/widgets/bbcode/bbcode_base_listener.dart';
+    final group = projectArchitecture().generatedGroups['bbcode_antlr']!;
+    expect(group, {parser, listener});
+    fixture = FixtureProject({
+      parser: "import 'BBCodeListener.dart';",
+      listener: "import 'BBCodeParser.dart';",
+      handwritten: "import 'generated/BBCodeParser.dart';",
+    });
+    final spec = fixtureSpec(generatedGroups: {'bbcode_antlr': group});
+    expect(checkCycles(collectDependencies(fixture.root, spec), spec), isEmpty);
+    fixture.write(
+      parser,
+      "import 'BBCodeListener.dart';\nimport '../bbcode_base_listener.dart';",
+    );
+    final violations = checkCycles(
+      collectDependencies(fixture.root, spec),
+      spec,
+    );
+    expect(violations, hasLength(2));
+    expect(
+      violations.every(
+        (v) => v.source == handwritten || v.target == handwritten,
+      ),
+      isTrue,
+    );
   });
 
   test('conditional exports participate in cycles on every platform', () {

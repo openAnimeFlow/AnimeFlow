@@ -1,9 +1,9 @@
+import 'package:anime_flow/features/download/application/download_directory/download_directory_factory.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:path/path.dart' as p;
 
-import 'download_directory_platform.dart';
 import 'impl/macos_download_directory_platform.dart';
 
 /// Run before rendering download lists or handing local paths to the player.

@@ -322,7 +322,8 @@ void main() {
   });
 
   for (final mode in ['apiGet', 'apiPost', 'xpath']) {
-    test('$mode 搜索发送前删除关键词中的空格、全角空格和换行', () async {
+    test('$mode 搜索保留关键词中的空格、制表符、全角空格和换行', () async {
+      const keyword = ' \tJOJO的奇妙冒险\u3000 石之海\r\n';
       final config = mode == 'xpath' ? _xpathRule(site) : _apiRule(site);
       if (mode == 'apiPost') {
         config.searchApiConfig.request
@@ -333,17 +334,17 @@ void main() {
       }
 
       await RuleEngine().search(
-        keyword: ' \tJOJO的奇妙冒险\u3000 石之海\r\n',
+        keyword: keyword,
         config: config,
       );
 
       final request = site.requests.single;
       if (mode == 'apiPost') {
         expect(request.method, 'POST');
-        expect(request.jsonBody['search_term'], 'JOJO的奇妙冒险石之海');
+        expect(request.jsonBody['search_term'], keyword);
       } else {
         expect(request.method, 'GET');
-        expect(request.query['wd'], 'JOJO的奇妙冒险石之海');
+        expect(request.query['wd'], keyword);
       }
     });
   }

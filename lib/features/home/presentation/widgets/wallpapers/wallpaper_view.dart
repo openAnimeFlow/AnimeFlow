@@ -7,6 +7,7 @@ import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/core/flow_response.dart';
 import 'package:anime_flow/features/home/presentation/providers/wallpaper_controller.dart';
 import 'package:anime_flow/features/home/presentation/widgets/wallpapers/justified_layout.dart';
+import 'package:anime_flow/features/home/presentation/widgets/wallpapers/justified_grid.dart';
 import 'package:anime_flow/features/home/presentation/widgets/wallpapers/wallpaper_browser.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
@@ -208,7 +209,15 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
   Timer? _ratioUpdateTimer;
   ScrollPosition? _scrollPosition;
   Widget? _cachedSliver;
+  SliverChildBuilderDelegate? _posterDelegate;
   double _pixelRatio = 1;
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    _cachedSliver = null;
+    _posterDelegate = null;
+  }
 
   @override
   void didChangeDependencies() {
@@ -219,7 +228,11 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
       _scrollPosition = position;
       position?.isScrollingNotifier.addListener(_onScrollChanged);
     }
-    _pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    if (_pixelRatio != pixelRatio) {
+      _pixelRatio = pixelRatio;
+      _posterDelegate = null;
+    }
     _cachedSliver = null;
   }
 
@@ -230,6 +243,7 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
       final urls = widget.items.map((item) => item.url).toSet();
       _aspectRatios.removeWhere((url, _) => !urls.contains(url));
       _pendingRatios.removeWhere((url, _) => !urls.contains(url));
+      _posterDelegate = null;
       _cachedSliver = null;
     }
     if (oldWidget.availableWidth != widget.availableWidth) {
@@ -296,14 +310,6 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
     final targetHeight = availableWidth < 600 ? 180.0 : 220.0;
     final isCompact = availableWidth < 600;
     final items = widget.items;
-    // 同一窗口下使用固定的解码尺寸档位，避免行宽微调产生多份缓存。
-    int decodeWidth(WallpaperPoster poster) {
-      final logicalWidth = isCompact
-          ? availableWidth * (poster.isBackdrop ? 0.75 : 0.5)
-          : targetHeight * poster.placeholderAspectRatio;
-      return ((logicalWidth * _pixelRatio / 128).ceil() * 128).clamp(128, 1536);
-    }
-
     final rows = justifyImageRows(
       items
           .map((poster) =>
@@ -317,59 +323,65 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
       maxItemsPerRow: isCompact ? 2 : null,
     );
 
-    return SliverList.builder(
-      itemCount: rows.length,
-      itemBuilder: (context, index) => Padding(
-        key: ValueKey(items[rows[index].startIndex].subject.subjectId),
-        padding: const EdgeInsets.only(bottom: spacing),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var i = 0; i < rows[index].widths.length; i++) ...[
-              if (i > 0) const SizedBox(width: spacing),
-              SizedBox(
-                width: rows[index].widths[i],
-                child: _PosterCard(
-                  key: ValueKey(
-                      items[rows[index].startIndex + i].subject.subjectId),
-                  poster: items[rows[index].startIndex + i],
-                  onOpen: (args) {
-                    final open = widget.onOpen;
-                    if (open != null) {
-                      open(args);
-                    } else {
-                      context.push<void>('/wallpaper', extra: args);
-                    }
-                  },
-                  imageWidth: rows[index].widths[i],
-                  imageHeight: rows[index].imageHeight,
-                  memCacheWidth: decodeWidth(items[rows[index].startIndex + i]),
-                  onImageSize: (size) =>
-                      _onImageSize(items[rows[index].startIndex + i], size),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
+    return SliverGrid(
+      gridDelegate: JustifiedGridDelegate(JustifiedGridLayout(
+        rows,
+        availableWidth: availableWidth,
+        spacing: spacing,
+        reverseCrossAxis: Directionality.of(context) == TextDirection.rtl,
+      )),
+      // 宽度/图片比例变化仅更新布局，复用 builder，避免重建图片子树。
+      delegate: _posterDelegate ??= _buildPosterDelegate(),
+    );
+  }
+
+  SliverChildBuilderDelegate _buildPosterDelegate() {
+    final items = widget.items;
+    final indices = {
+      for (var i = 0; i < items.length; i++) items[i].subject.subjectId: i,
+    };
+    final pixelRatio = _pixelRatio;
+    return SliverChildBuilderDelegate(
+      (context, index) {
+        final poster = items[index];
+        // 覆盖窄屏两列的常用尺寸；拖动窗口及跨越 600 断点不切换缓存键。
+        final logicalWidth = poster.isBackdrop ? 450.0 : 300.0;
+        final decodeWidth =
+            ((logicalWidth * pixelRatio / 128).ceil() * 128).clamp(128, 1536);
+        return Padding(
+          key: ValueKey(poster.subject.subjectId),
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _PosterCard(
+            poster: poster,
+            onOpen: (args) {
+              final open = widget.onOpen;
+              if (open != null) {
+                open(args);
+              } else {
+                context.push<void>('/wallpaper', extra: args);
+              }
+            },
+            memCacheWidth: decodeWidth,
+            onImageSize: (size) => _onImageSize(poster, size),
+          ),
+        );
+      },
+      childCount: items.length,
+      findChildIndexCallback: (key) =>
+          key is ValueKey<int> ? indices[key.value] : null,
     );
   }
 }
 
 class _PosterCard extends StatelessWidget {
   const _PosterCard(
-      {super.key,
-      required this.poster,
+      {required this.poster,
       required this.onOpen,
-      required this.imageWidth,
-      required this.imageHeight,
       required this.memCacheWidth,
       required this.onImageSize});
 
   final WallpaperPoster poster;
   final ValueChanged<WallpaperDetailArgs> onOpen;
-  final double imageWidth;
-  final double imageHeight;
   final int memCacheWidth;
   final ValueChanged<Size> onImageSize;
 
@@ -384,16 +396,13 @@ class _PosterCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: Stack(
+          fit: StackFit.expand,
           children: [
             AnimationNetworkImage(
               url: poster.url,
-              width: imageWidth,
-              height: imageHeight,
               memCacheWidth: memCacheWidth,
               fadeInDuration: const Duration(milliseconds: 150),
               fadeOutDuration: const Duration(milliseconds: 100),
-              placeholderWidth: imageWidth,
-              placeholderHeight: imageHeight,
               onImageSize: onImageSize,
               // 解码后行高、列宽按原图比例重算；重排前也不裁剪。
               fit: BoxFit.contain,

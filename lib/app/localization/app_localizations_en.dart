@@ -945,10 +945,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerShortcutPlayPause => 'Play / pause';
 
   @override
-  String get playerShortcutSeekBackward => 'Seek backward 10 seconds';
+  String get playerShortcutSeekBackward => 'Seek backward';
 
   @override
-  String get playerShortcutSeekForward => 'Seek forward 10 seconds';
+  String get playerShortcutSeekForward => 'Seek forward';
+
+  @override
+  String playerShortcutSeekSeconds(int seconds) {
+    return '$seconds seconds per step';
+  }
+
+  @override
+  String playerShortcutSeekSecondsRange(int min, int max) {
+    return 'Enter a whole number from $min to $max seconds';
+  }
 
   @override
   String get playerShortcutVolumeUp => 'Increase volume';

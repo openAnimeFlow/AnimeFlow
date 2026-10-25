@@ -1817,14 +1817,26 @@ abstract class AppLocalizations {
   /// No description provided for @playerShortcutSeekBackward.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'快退 10 秒'**
+  /// **'快退'**
   String get playerShortcutSeekBackward;
 
   /// No description provided for @playerShortcutSeekForward.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'快进 10 秒'**
+  /// **'快进'**
   String get playerShortcutSeekForward;
+
+  /// No description provided for @playerShortcutSeekSeconds.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'每次 {seconds} 秒'**
+  String playerShortcutSeekSeconds(int seconds);
+
+  /// No description provided for @playerShortcutSeekSecondsRange.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入 {min}～{max} 秒的整数'**
+  String playerShortcutSeekSecondsRange(int min, int max);
 
   /// No description provided for @playerShortcutVolumeUp.
   ///

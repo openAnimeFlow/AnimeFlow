@@ -1,6 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/core/settings/player_shortcut_settings.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/gestures.dart';
@@ -97,6 +98,34 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
     action.saveBindings(_keys[action]!);
   }
 
+  Future<void> _editSeekSeconds(PlayerShortcutAction action) async {
+    setState(() => _capturing = null);
+    final backward = action == PlayerShortcutAction.seekBackward;
+    final l10n = AppLocalizations.of(context);
+    final seconds = await showDialog<int>(
+      context: context,
+      builder: (_) => _SeekDurationDialog(
+        title: backward
+            ? l10n.playerShortcutSeekBackward
+            : l10n.playerShortcutSeekForward,
+        initialSeconds: backward
+            ? AppSettings.shortcutSeekBackwardSeconds
+            : AppSettings.shortcutSeekForwardSeconds,
+      ),
+    );
+    if (seconds == null || !mounted) return;
+    try {
+      if (backward) {
+        await AppSettings.setShortcutSeekBackwardSeconds(seconds);
+      } else {
+        await AppSettings.setShortcutSeekForwardSeconds(seconds);
+      }
+      if (mounted) setState(() {});
+    } catch (_) {
+      if (mounted) NotificationToast.show(l10n.saveFailed, title: l10n.error);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -151,6 +180,20 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
                         capturing: _capturing == action,
                         captureLabel: l10n.playerShortcutPressKey,
                         title: titles[action]!,
+                        durationEditor: switch (action) {
+                          PlayerShortcutAction.seekBackward ||
+                          PlayerShortcutAction.seekForward =>
+                            ActionChip(
+                              key: ValueKey('seek-seconds-${action.name}'),
+                              label: Text(l10n.playerShortcutSeekSeconds(
+                                action == PlayerShortcutAction.seekBackward
+                                    ? AppSettings.shortcutSeekBackwardSeconds
+                                    : AppSettings.shortcutSeekForwardSeconds,
+                              )),
+                              onPressed: () => _editSeekSeconds(action),
+                            ),
+                          _ => null,
+                        },
                         onDelete: (key) => setState(() {
                           _keys[action]!.remove(key);
                           action.saveBindings(_keys[action]!);
@@ -182,7 +225,8 @@ class _ShortcutTile extends StatelessWidget {
       required this.captureLabel,
       required this.title,
       required this.onTap,
-      required this.onDelete});
+      required this.onDelete,
+      this.durationEditor});
 
   final List<PlayerShortcutBinding> keys;
   final String Function(PlayerShortcutBinding) keyLabel;
@@ -191,6 +235,7 @@ class _ShortcutTile extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
   final ValueChanged<PlayerShortcutBinding> onDelete;
+  final Widget? durationEditor;
 
   @override
   Widget build(BuildContext context) => ListTile(
@@ -205,7 +250,86 @@ class _ShortcutTile extends StatelessWidget {
                   onDeleted: keys.length > 1 ? () => onDelete(key) : null),
             ActionChip(
                 label: Text(capturing ? captureLabel : '+'), onPressed: onTap),
+            if (durationEditor != null) durationEditor!,
           ],
         ),
       );
+}
+
+class _SeekDurationDialog extends StatefulWidget {
+  const _SeekDurationDialog(
+      {required this.title, required this.initialSeconds});
+
+  final String title;
+  final int initialSeconds;
+
+  @override
+  State<_SeekDurationDialog> createState() => _SeekDurationDialogState();
+}
+
+class _SeekDurationDialogState extends State<_SeekDurationDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialSeconds.toString());
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_formKey.currentState!.validate()) {
+      Navigator.of(context).pop(int.parse(_controller.text));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(widget.title),
+      content: Form(
+        key: _formKey,
+        child: TextFormField(
+          controller: _controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.done,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          decoration: InputDecoration(
+            suffixText: l10n.seconds,
+            helperMaxLines: 2,
+            errorMaxLines: 2,
+            helperText: l10n.playerShortcutSeekSecondsRange(
+                AppSettings.minShortcutSeekSeconds,
+                AppSettings.maxShortcutSeekSeconds),
+          ),
+          validator: (text) {
+            final seconds = int.tryParse(text ?? '');
+            if (seconds == null ||
+                seconds < AppSettings.minShortcutSeekSeconds ||
+                seconds > AppSettings.maxShortcutSeekSeconds) {
+              return l10n.playerShortcutSeekSecondsRange(
+                  AppSettings.minShortcutSeekSeconds,
+                  AppSettings.maxShortcutSeekSeconds);
+            }
+            return null;
+          },
+          onFieldSubmitted: (_) => _submit(),
+        ),
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel)),
+        TextButton(onPressed: _submit, child: Text(l10n.confirm)),
+      ],
+    );
+  }
 }

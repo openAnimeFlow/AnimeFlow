@@ -58,6 +58,8 @@ class PlayerShortcutKey {
   static const String playPause = 'player_shortcut_play_pause',
       seekBackward = 'player_shortcut_seek_backward',
       seekForward = 'player_shortcut_seek_forward',
+      seekBackwardSeconds = 'player_shortcut_seek_backward_seconds',
+      seekForwardSeconds = 'player_shortcut_seek_forward_seconds',
       volumeUp = 'player_shortcut_volume_up',
       volumeDown = 'player_shortcut_volume_down',
       enterFullscreen = 'player_shortcut_enter_fullscreen',

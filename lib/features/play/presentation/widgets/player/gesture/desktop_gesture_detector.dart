@@ -86,7 +86,7 @@ class _DesktopGestureDetectorState
       return KeyEventResult.handled;
     }
 
-    // 未达到长按阈值，按普通快捷键处理一次，例如快进 10 秒。
+    // 未达到长按阈值，按普通快捷键处理一次。
     return _handleShortcut(pressed);
   }
 
@@ -113,25 +113,27 @@ class _DesktopGestureDetectorState
           .showTopIndicator(VideoControlsIndicatorType.playStatusIndicator);
       return KeyEventResult.handled;
     }
-    // 快退 10 秒
+    // 每次操作读取最新时长。
     if (shortcut[PlayerShortcutAction.seekBackward]!.contains(pressed)) {
       final playState = ref.read(playStateProvider);
       final currentPosition = playState.position;
       final duration = playState.duration;
-      final newPositionMs =
-          (currentPosition - const Duration(seconds: 10)).inMilliseconds;
+      final newPositionMs = (currentPosition -
+              Duration(seconds: AppSettings.shortcutSeekBackwardSeconds))
+          .inMilliseconds;
       final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
       playSession.seekTo(Duration(milliseconds: clampedMs));
       videoUiNotifier.restartControlsAutoHideTimer();
       return KeyEventResult.handled;
     }
-    // 快进 10 秒
+    // 快进
     if (shortcut[PlayerShortcutAction.seekForward]!.contains(pressed)) {
       final playState = ref.read(playStateProvider);
       final currentPosition = playState.position;
       final duration = playState.duration;
-      final newPositionMs =
-          (currentPosition + const Duration(seconds: 10)).inMilliseconds;
+      final newPositionMs = (currentPosition +
+              Duration(seconds: AppSettings.shortcutSeekForwardSeconds))
+          .inMilliseconds;
       final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
       playSession.seekTo(Duration(milliseconds: clampedMs));
       videoUiNotifier.restartControlsAutoHideTimer();

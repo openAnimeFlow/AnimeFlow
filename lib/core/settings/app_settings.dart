@@ -360,6 +360,37 @@ abstract final class AppSettings {
   static Future<void> setFastForwardSpeed(double value) =>
       setSetting(PlaybackKey.fastForwardSpeed, value);
 
+  static const defaultShortcutSeekSeconds = 10;
+  static const minShortcutSeekSeconds = 1;
+  static const maxShortcutSeekSeconds = 120;
+
+  static int get shortcutSeekBackwardSeconds =>
+      _readShortcutSeekSeconds(PlayerShortcutKey.seekBackwardSeconds);
+
+  static int get shortcutSeekForwardSeconds =>
+      _readShortcutSeekSeconds(PlayerShortcutKey.seekForwardSeconds);
+
+  static Future<void> setShortcutSeekBackwardSeconds(int value) =>
+      _setShortcutSeekSeconds(PlayerShortcutKey.seekBackwardSeconds, value);
+
+  static Future<void> setShortcutSeekForwardSeconds(int value) =>
+      _setShortcutSeekSeconds(PlayerShortcutKey.seekForwardSeconds, value);
+
+  static int _readShortcutSeekSeconds(String key) {
+    final value = getSetting<Object?>(key);
+    return value is int &&
+            value >= minShortcutSeekSeconds &&
+            value <= maxShortcutSeekSeconds
+        ? value
+        : defaultShortcutSeekSeconds;
+  }
+
+  static Future<void> _setShortcutSeekSeconds(String key, int value) {
+    RangeError.checkValueInInterval(
+        value, minShortcutSeekSeconds, maxShortcutSeekSeconds, 'seconds');
+    return setSetting(key, value);
+  }
+
   static bool get adBlocker => _readBool(
         PlaybackKey.adBlocker,
         defaultAdBlocker,

@@ -928,10 +928,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerShortcutPlayPause => '播放 / 暂停';
 
   @override
-  String get playerShortcutSeekBackward => '快退 10 秒';
+  String get playerShortcutSeekBackward => '快退';
 
   @override
-  String get playerShortcutSeekForward => '快进 10 秒';
+  String get playerShortcutSeekForward => '快进';
+
+  @override
+  String playerShortcutSeekSeconds(int seconds) {
+    return '每次 $seconds 秒';
+  }
+
+  @override
+  String playerShortcutSeekSecondsRange(int min, int max) {
+    return '请输入 $min～$max 秒的整数';
+  }
 
   @override
   String get playerShortcutVolumeUp => '增加音量';
@@ -3419,10 +3429,20 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get playerShortcutPlayPause => '播放 / 暂停';
 
   @override
-  String get playerShortcutSeekBackward => '快退 10 秒';
+  String get playerShortcutSeekBackward => '快退';
 
   @override
-  String get playerShortcutSeekForward => '快进 10 秒';
+  String get playerShortcutSeekForward => '快进';
+
+  @override
+  String playerShortcutSeekSeconds(int seconds) {
+    return '每次 $seconds 秒';
+  }
+
+  @override
+  String playerShortcutSeekSecondsRange(int min, int max) {
+    return '请输入 $min～$max 秒的整数';
+  }
 
   @override
   String get playerShortcutVolumeUp => '增加音量';
@@ -5909,10 +5929,20 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get playerShortcutPlayPause => '播放 / 暫停';
 
   @override
-  String get playerShortcutSeekBackward => '快退 10 秒';
+  String get playerShortcutSeekBackward => '快退';
 
   @override
-  String get playerShortcutSeekForward => '快進 10 秒';
+  String get playerShortcutSeekForward => '快進';
+
+  @override
+  String playerShortcutSeekSeconds(int seconds) {
+    return '每次 $seconds 秒';
+  }
+
+  @override
+  String playerShortcutSeekSecondsRange(int min, int max) {
+    return '請輸入 $min～$max 秒的整數';
+  }
 
   @override
   String get playerShortcutVolumeUp => '增加音量';
@@ -8400,10 +8430,20 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get playerShortcutPlayPause => '播放 / 暫停';
 
   @override
-  String get playerShortcutSeekBackward => '快退 10 秒';
+  String get playerShortcutSeekBackward => '快退';
 
   @override
-  String get playerShortcutSeekForward => '快進 10 秒';
+  String get playerShortcutSeekForward => '快進';
+
+  @override
+  String playerShortcutSeekSeconds(int seconds) {
+    return '每次 $seconds 秒';
+  }
+
+  @override
+  String playerShortcutSeekSecondsRange(int min, int max) {
+    return '請輸入 $min～$max 秒的整數';
+  }
 
   @override
   String get playerShortcutVolumeUp => '增加音量';

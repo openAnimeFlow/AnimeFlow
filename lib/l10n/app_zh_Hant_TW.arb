@@ -313,8 +313,16 @@
   "playerShortcuts": "播放器快捷鍵",
   "playerShortcutsDescription": "在播放頁面使用以下鍵盤快捷鍵控制播放器。",
   "playerShortcutPlayPause": "播放 / 暫停",
-  "playerShortcutSeekBackward": "快退 10 秒",
-  "playerShortcutSeekForward": "快進 10 秒",
+  "playerShortcutSeekBackward": "快退",
+  "playerShortcutSeekForward": "快進",
+  "playerShortcutSeekSeconds": "每次 {seconds} 秒",
+  "@playerShortcutSeekSeconds": {
+    "placeholders": { "seconds": { "type": "int" } }
+  },
+  "playerShortcutSeekSecondsRange": "請輸入 {min}～{max} 秒的整數",
+  "@playerShortcutSeekSecondsRange": {
+    "placeholders": { "min": { "type": "int" }, "max": { "type": "int" } }
+  },
   "playerShortcutVolumeUp": "增加音量",
   "playerShortcutVolumeDown": "減少音量",
   "playerShortcutPressKey": "請按下按鍵",

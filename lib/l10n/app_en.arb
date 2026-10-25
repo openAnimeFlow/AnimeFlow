@@ -313,8 +313,16 @@
   "playerShortcuts": "Player shortcuts",
   "playerShortcutsDescription": "Use these keyboard shortcuts to control the player on the playback page.",
   "playerShortcutPlayPause": "Play / pause",
-  "playerShortcutSeekBackward": "Seek backward 10 seconds",
-  "playerShortcutSeekForward": "Seek forward 10 seconds",
+  "playerShortcutSeekBackward": "Seek backward",
+  "playerShortcutSeekForward": "Seek forward",
+  "playerShortcutSeekSeconds": "{seconds} seconds per step",
+  "@playerShortcutSeekSeconds": {
+    "placeholders": { "seconds": { "type": "int" } }
+  },
+  "playerShortcutSeekSecondsRange": "Enter a whole number from {min} to {max} seconds",
+  "@playerShortcutSeekSecondsRange": {
+    "placeholders": { "min": { "type": "int" }, "max": { "type": "int" } }
+  },
   "playerShortcutVolumeUp": "Increase volume",
   "playerShortcutVolumeDown": "Decrease volume",
   "playerShortcutPressKey": "Press a key",

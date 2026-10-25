@@ -1,21 +1,30 @@
 import 'dart:async';
+import 'package:anime_flow/core/async/serial_operation_queue.dart';
 import 'package:anime_flow/core/webview/video/video_webview_controller.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:webview_windows/webview_windows.dart';
 
 class VideoWebviewWindowsImpl
     extends VideoWebviewController<WebviewController> {
+  // webview_windows counts instances only after run() completes. Retiring the
+  // last ready parser while another is being created destroys their shared
+  // WebViewHost, leaving the native creation callback with a dangling pointer.
+  // Share the lifecycle queue across playback and download parser instances;
+  // page loading remains independent so cancellation can still return promptly.
+  static final _lifecycle = SerialOperationQueue(ensureReady: () {});
+
   final List<StreamSubscription> subscriptions = [];
 
   HeadlessWebview? headlessWebview;
 
   @override
-  Future<void> init() async {
-    headlessWebview ??= HeadlessWebview();
-    await headlessWebview!.run();
-    await headlessWebview!.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
-    initEventController.add(true);
-  }
+  Future<void> init() => _lifecycle.run(() async {
+        headlessWebview ??= HeadlessWebview();
+        await headlessWebview!.run();
+        await headlessWebview!
+            .setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
+        initEventController.add(true);
+      });
 
   @override
   Future<void> loadUrl(String url, bool useLegacyParser,
@@ -67,18 +76,18 @@ class VideoWebviewWindowsImpl
   }
 
   @override
-  Future<void> dispose() async {
-    for (var s in subscriptions) {
-      try {
-        s.cancel();
-      } catch (_) {}
-    }
-    subscriptions.clear();
-    await headlessWebview?.dispose();
-    headlessWebview = null;
-    webviewController = null;
-    disposeEventControllers();
-  }
+  Future<void> dispose() => _lifecycle.run(() async {
+        for (var s in subscriptions) {
+          try {
+            s.cancel();
+          } catch (_) {}
+        }
+        subscriptions.clear();
+        await headlessWebview?.dispose();
+        headlessWebview = null;
+        webviewController = null;
+        disposeEventControllers();
+      });
 
   // The webview_windows package does not have a method to unload the current page.
   // The loadUrl method opens a new tab, which can lead to memory leaks.

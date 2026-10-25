@@ -26,6 +26,8 @@ class WallpaperPoster {
 
 /// Poster choices belong to loaded data, so rebuilding tiles never rerolls them.
 class WallpaperController extends ChangeNotifier {
+  static const _pageSize = 20;
+
   WallpaperController({WallpaperPageLoader? loader, Random? random})
       : _loader = loader ?? FlowApi.getSubjectWallpapersService,
         _random = random ?? Random();
@@ -72,7 +74,7 @@ class WallpaperController extends ChangeNotifier {
       final result = await _loader(
         sort: sort,
         page: _nextPage,
-        pageSize: 20,
+        pageSize: _pageSize,
         cancelToken: cancelToken,
       );
       if (generation != _generation) return;
@@ -88,7 +90,8 @@ class WallpaperController extends ChangeNotifier {
         _itemsSnapshot = null;
       }
       _nextPage = result.page + 1;
-      hasMore = result.page < result.totalPages;
+      hasMore =
+          result.data.isNotEmpty && result.page * _pageSize < result.total;
     } catch (e) {
       if (generation != _generation) return;
       error = e;

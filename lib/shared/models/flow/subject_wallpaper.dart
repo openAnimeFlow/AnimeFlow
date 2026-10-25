@@ -2,12 +2,12 @@ class SubjectWallpaperPage {
   const SubjectWallpaperPage({
     required this.data,
     required this.page,
-    required this.totalPages,
+    required this.total,
   });
 
   final List<SubjectWallpaper> data;
   final int page;
-  final int totalPages;
+  final int total;
 
   factory SubjectWallpaperPage.fromJson(Map<String, dynamic> json) =>
       SubjectWallpaperPage(
@@ -16,7 +16,7 @@ class SubjectWallpaperPage {
                 SubjectWallpaper.fromJson(Map<String, dynamic>.from(item)))
             .toList(growable: false),
         page: json['page'] as int,
-        totalPages: json['totalPages'] as int,
+        total: json['total'] as int,
       );
 }
 

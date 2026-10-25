@@ -333,7 +333,6 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
                   key: ValueKey(
                       items[rows[index].startIndex + i].subject.subjectId),
                   poster: items[rows[index].startIndex + i],
-                  relatedItems: items,
                   onOpen: (args) {
                     final open = widget.onOpen;
                     if (open != null) {
@@ -361,7 +360,6 @@ class _PosterCard extends StatelessWidget {
   const _PosterCard(
       {super.key,
       required this.poster,
-      required this.relatedItems,
       required this.onOpen,
       required this.imageWidth,
       required this.imageHeight,
@@ -369,7 +367,6 @@ class _PosterCard extends StatelessWidget {
       required this.onImageSize});
 
   final WallpaperPoster poster;
-  final List<WallpaperPoster> relatedItems;
   final ValueChanged<WallpaperDetailArgs> onOpen;
   final double imageWidth;
   final double imageHeight;
@@ -383,7 +380,6 @@ class _PosterCard extends StatelessWidget {
       onTap: () => onOpen(WallpaperDetailArgs(
         subject: poster.subject,
         initialUrl: poster.url,
-        related: relatedItems.map((item) => item.subject).toList(),
       )),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),

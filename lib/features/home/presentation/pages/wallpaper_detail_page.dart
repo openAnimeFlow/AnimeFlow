@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/features/home/presentation/providers/wallpaper_recommendations_provider.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
@@ -226,19 +227,7 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
                     ]),
                     const SizedBox(height: 22),
                     _actions(l10n),
-                    if (_related.isNotEmpty) ...[
-                      const SizedBox(height: 28),
-                      Divider(
-                          color: colors.outlineVariant.withValues(alpha: 0.5)),
-                      const SizedBox(height: 16),
-                      Text(l10n.wallpaperMore,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 14),
-                      _relatedWallpapers(),
-                    ],
+                    _recommendations(l10n, colors),
                   ],
                 ),
               ),
@@ -465,17 +454,46 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
         ]);
       });
 
-  List<SubjectWallpaper> get _related {
-    final seen = <int>{_subject.subjectId};
-    return widget.args.related
-        .where((subject) =>
-            subject.coverImages.isNotEmpty && seen.add(subject.subjectId))
-        .take(6)
-        .toList();
+  Widget _recommendations(AppLocalizations l10n, ColorScheme colors) {
+    final provider = wallpaperRecommendationsProvider(_subject.subjectId);
+    final recommendations = ref.watch(provider);
+    if (recommendations.asData?.value.isEmpty ?? false) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 28),
+        Divider(color: colors.outlineVariant.withValues(alpha: 0.5)),
+        const SizedBox(height: 16),
+        Text(l10n.wallpaperMore,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 14),
+        recommendations.when(
+          skipLoadingOnRefresh: false,
+          data: _relatedWallpapers,
+          loading: () => const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (_, __) => Column(children: [
+            Text(l10n.loadFailed),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => ref.invalidate(provider),
+              child: Text(l10n.retry),
+            ),
+          ]),
+        ),
+      ],
+    );
   }
 
-  Widget _relatedWallpapers() => LayoutBuilder(builder: (context, constraints) {
-        final subjects = _related;
+  Widget _relatedWallpapers(List<SubjectWallpaper> subjects) =>
+      LayoutBuilder(builder: (context, constraints) {
         final width =
             math.max(130.0, math.min(220.0, (constraints.maxWidth - 24) / 3));
         return SizedBox(
@@ -495,7 +513,6 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
                       final args = WallpaperDetailArgs(
                         subject: subject,
                         initialUrl: url,
-                        related: [_subject, ...widget.args.related],
                       );
                       if (widget.onOpenRelated != null) {
                         widget.onOpenRelated!(args);

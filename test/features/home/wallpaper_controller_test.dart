@@ -14,8 +14,9 @@ SubjectWallpaper subject(int id, [List<String>? posters]) => SubjectWallpaper(
     );
 
 SubjectWallpaperPage page(List<SubjectWallpaper> subjects,
-        {int page = 1, int totalPages = 1}) =>
-    SubjectWallpaperPage(data: subjects, page: page, totalPages: totalPages);
+        {int page = 1, int? total}) =>
+    SubjectWallpaperPage(
+        data: subjects, page: page, total: total ?? subjects.length);
 
 void main() {
   test('uses source-specific placeholder ratios', () {
@@ -39,7 +40,7 @@ void main() {
       () {
     final response = SubjectWallpaperPage.fromJson({
       'page': 1,
-      'totalPages': 2,
+      'total': 21,
       'data': [
         {
           'subjectId': 1,
@@ -51,7 +52,7 @@ void main() {
         {'subjectId': 2, 'name': 'Original', 'nameCn': '中文', 'posters': []},
       ],
     });
-    expect(response.totalPages, 2);
+    expect(response.total, 21);
     expect(response.data.first.posters, ['https://example.com/poster.jpg']);
     expect(response.data.first.backdrops, ['https://example.com/backdrop.jpg']);
     expect(response.data.first.coverImages, [
@@ -63,7 +64,7 @@ void main() {
     expect(response.data.last.displayName, '中文');
   });
 
-  test('selects one stable poster per subject and respects server page count',
+  test('selects one stable poster per subject and respects server total',
       () async {
     final requests = <int>[];
     final controller = WallpaperController(
@@ -81,7 +82,7 @@ void main() {
               ? [subject(1), subject(2, [])]
               : [subject(1), subject(3)],
           page: page,
-          totalPages: 2,
+          total: 21,
         );
       },
     );
@@ -112,7 +113,7 @@ void main() {
           SubjectWallpaperPage(
         data: page == 1 ? [subject(1, [])] : [subject(2)],
         page: page,
-        totalPages: 2,
+        total: 21,
       ),
     );
     addTearDown(controller.dispose);
@@ -140,7 +141,7 @@ void main() {
           backdrops: ['backdrop'],
         ),
         subject(2, []),
-      ], page: 1, totalPages: 1),
+      ], page: 1, total: 2),
     );
     addTearDown(controller.dispose);
     await controller.refresh();
@@ -164,7 +165,7 @@ void main() {
               required page,
               required pageSize,
               cancelToken}) async =>
-          SubjectWallpaperPage(data: [mixed], page: page, totalPages: 1),
+          SubjectWallpaperPage(data: [mixed], page: page, total: 1),
     );
     addTearDown(controller.dispose);
     final choices = <String>{};
@@ -184,7 +185,7 @@ void main() {
         expect(sort, SortType.rank);
         expect(page, 1);
         return Future.value(
-            SubjectWallpaperPage(data: [subject(2)], page: 1, totalPages: 1));
+            SubjectWallpaperPage(data: [subject(2)], page: 1, total: 1));
       },
     );
     addTearDown(controller.dispose);
@@ -212,7 +213,7 @@ void main() {
           throw StateError('offline');
         }
         return SubjectWallpaperPage(
-            data: [subject(page)], page: page, totalPages: 2);
+            data: [subject(page)], page: page, total: 21);
       },
     );
     addTearDown(controller.dispose);

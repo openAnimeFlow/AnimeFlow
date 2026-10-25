@@ -492,6 +492,24 @@ class FlowApi {
         Map<String, dynamic>.from(response.data));
   }
 
+  /// 壁纸详情页的更多壁纸，固定获取第一页的 10 个番剧。
+  static Future<SubjectWallpaperPage> getRecommendedWallpapersService(
+    int subjectId, {
+    CancelToken? cancelToken,
+  }) async {
+    final response = await _client.get(
+      '${AnimeFlowApi.subjectWallpapers}/recommend',
+      queryParameters: {
+        'subjectId': subjectId,
+        'page': 1,
+        'pageSize': 10,
+      },
+      cancelToken: cancelToken,
+    );
+    return SubjectWallpaperPage.fromJson(
+        Map<String, dynamic>.from(response.data));
+  }
+
   /// 获取条目预览图
   static Future<List<String>> getSubjectStillsService(int subjectId,
       {CancelToken? cancelToken}) async {

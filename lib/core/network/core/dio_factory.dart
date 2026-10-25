@@ -59,8 +59,8 @@ class DioFactory {
       if (!options.headers.containsKey('user-agent')) {
         options.headers['user-agent'] = await (deviceUserAgent ??=
             Utils.getCurrentUserAgent().catchError((Object error) {
-          LiggLogger().w('读取设备 User-Agent 失败，使用随机 UA (${error.runtimeType})');
-          return Utils.getRandomUA();
+          LiggLogger().w('生成或校验设备 User-Agent 失败，使用基础 AnimeFlow UA (${error.runtimeType})');
+          return 'AnimeFlow/unknown';
         }));
       }
       handler.next(options);

@@ -62,6 +62,7 @@ class Utils {
           .replaceAll('(', r'\(')
           .replaceAll(')', r'\)')
           .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+          .replaceAll(RegExp(r'[^\x20-\x7E]', unicode: true), '?')
           .trim();
     }
 
@@ -104,7 +105,12 @@ class Utils {
     final locale = escapeUserAgentComment(
       Platform.localeName.replaceAll('_', '-'),
     );
-    return 'AnimeFlow/${packageInfo.version} ($platform; $locale)';
+    final userAgent = 'AnimeFlow/${packageInfo.version} ($platform; $locale)';
+    if (RegExp(r'[^\x20-\x7E]').hasMatch(userAgent)) {
+      throw const FormatException(
+          'Device User-Agent contains invalid characters');
+    }
+    return userAgent;
   }
 
   static bool? _isDocumentStartScriptSupported;

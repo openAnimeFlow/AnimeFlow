@@ -835,6 +835,7 @@
   "cacheUsageTitle": "Total cache size",
   "imageCacheLabel": "Images",
   "animeInfoCacheLabel": "Subject details",
+  "userDataCacheLabel": "User data",
   "cacheSelectAll": "Select all",
   "cacheDeselectAll": "Deselect all",
   "cacheSelectedSize": "Selected cache",

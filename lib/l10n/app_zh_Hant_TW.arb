@@ -835,6 +835,7 @@
   "cacheUsageTitle": "快取總大小",
   "imageCacheLabel": "圖片",
   "animeInfoCacheLabel": "條目詳情",
+  "userDataCacheLabel": "使用者資料",
   "cacheSelectAll": "全選",
   "cacheDeselectAll": "取消全選",
   "cacheSelectedSize": "已選快取",

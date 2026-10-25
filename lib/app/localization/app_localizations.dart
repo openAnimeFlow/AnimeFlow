@@ -4689,6 +4689,12 @@ abstract class AppLocalizations {
   /// **'条目详情'**
   String get animeInfoCacheLabel;
 
+  /// No description provided for @userDataCacheLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'用户数据'**
+  String get userDataCacheLabel;
+
   /// No description provided for @cacheSelectAll.
   ///
   /// In zh_Hans, this message translates to:

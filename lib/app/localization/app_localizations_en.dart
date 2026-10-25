@@ -2550,6 +2550,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get animeInfoCacheLabel => 'Subject details';
 
   @override
+  String get userDataCacheLabel => 'User data';
+
+  @override
   String get cacheSelectAll => 'Select all';
 
   @override

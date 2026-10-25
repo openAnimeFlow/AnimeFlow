@@ -2468,6 +2468,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get animeInfoCacheLabel => '条目详情';
 
   @override
+  String get userDataCacheLabel => '用户数据';
+
+  @override
   String get cacheSelectAll => '全选';
 
   @override
@@ -4953,6 +4956,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get animeInfoCacheLabel => '条目详情';
+
+  @override
+  String get userDataCacheLabel => '用户数据';
 
   @override
   String get cacheSelectAll => '全选';
@@ -7443,6 +7449,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get animeInfoCacheLabel => '條目詳情';
 
   @override
+  String get userDataCacheLabel => '用戶資料';
+
+  @override
   String get cacheSelectAll => '全選';
 
   @override
@@ -9930,6 +9939,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get animeInfoCacheLabel => '條目詳情';
+
+  @override
+  String get userDataCacheLabel => '使用者資料';
 
   @override
   String get cacheSelectAll => '全選';

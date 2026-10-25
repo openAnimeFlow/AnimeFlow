@@ -16,6 +16,7 @@ const _colors = [
   Color(0xFFE2689A),
   Color(0xFF27B6B1),
   Color(0xFFB89552),
+  Color(0xFF7885CB),
 ];
 
 String cacheCategoryLabel(CacheCategory category, AppLocalizations l10n) =>
@@ -29,6 +30,7 @@ String cacheCategoryLabel(CacheCategory category, AppLocalizations l10n) =>
       CacheCategory.popularAnime => l10n.popularAnimeTitle,
       CacheCategory.calendar => l10n.todayBroadcast,
       CacheCategory.subjectEpisodes => l10n.episodeList,
+      CacheCategory.userData => l10n.userDataCacheLabel,
     };
 
 /// 图表按已选缓存重新分配扇区，选择变化时平滑收缩或扩展。

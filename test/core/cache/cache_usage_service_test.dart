@@ -22,6 +22,7 @@ void main() {
     Storage.popularAnimeCache = await Hive.openBox<String>('popular');
     Storage.calendarCache = await Hive.openBox<String>('calendar');
     Storage.subjectEpisodesCache = await Hive.openBox<String>('episodes');
+    Storage.userDataCache = await Hive.openBox<String>('user_data');
     boxes = {
       CacheCategory.animeInfo: Storage.animeInfoCache,
       CacheCategory.characters: Storage.characterDataCache,
@@ -30,6 +31,7 @@ void main() {
       CacheCategory.popularAnime: Storage.popularAnimeCache,
       CacheCategory.calendar: Storage.calendarCache,
       CacheCategory.subjectEpisodes: Storage.subjectEpisodesCache,
+      CacheCategory.userData: Storage.userDataCache,
     };
   });
   tearDownAll(() async {
@@ -92,22 +94,26 @@ void main() {
   test(
       'clears only selected categories and preserves settings and other caches',
       () async {
-    for (final box in boxes.values) {
-      await box.put('data', 'cached data');
-    }
     final settings = await Hive.openBox<String>('settings');
     await settings.put('keep', 'settings');
-    final selected = {
-      CacheCategory.characters,
-      CacheCategory.calendar,
-      CacheCategory.subjectEpisodes,
-    };
-    await service.clearData(selected);
-    for (final entry in boxes.entries) {
-      expect(entry.value.isEmpty, selected.contains(entry.key));
-      expect(entry.value.isOpen, isTrue);
+    for (final selected in <Set<CacheCategory>>[
+      {
+        CacheCategory.characters,
+        CacheCategory.calendar,
+        CacheCategory.subjectEpisodes,
+      },
+      {CacheCategory.userData},
+    ]) {
+      for (final box in boxes.values) {
+        await box.put('data', 'cached data');
+      }
+      await service.clearData(selected);
+      for (final entry in boxes.entries) {
+        expect(entry.value.isEmpty, selected.contains(entry.key));
+        expect(entry.value.isOpen, isTrue);
+      }
+      expect(settings.get('keep'), 'settings');
     }
-    expect(settings.get('keep'), 'settings');
   });
 
   test('responses started before clearing cannot repopulate selected caches',

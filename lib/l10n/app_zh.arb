@@ -835,6 +835,7 @@
   "cacheUsageTitle": "缓存总大小",
   "imageCacheLabel": "图片",
   "animeInfoCacheLabel": "条目详情",
+  "userDataCacheLabel": "用户数据",
   "cacheSelectAll": "全选",
   "cacheDeselectAll": "取消全选",
   "cacheSelectedSize": "已选缓存",

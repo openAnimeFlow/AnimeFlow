@@ -138,7 +138,7 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
             SimpleDialogOption(
               onPressed: () => Navigator.of(context).pop(step),
               child: Row(children: [
-                Expanded(child: Text('${step}×')),
+                Expanded(child: Text('$step×')),
                 if (step == AppSettings.shortcutSpeedStep)
                   const Icon(Icons.check),
               ]),

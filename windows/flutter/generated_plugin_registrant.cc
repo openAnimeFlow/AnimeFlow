@@ -13,7 +13,6 @@
 #include <flutter_volume_controller/flutter_volume_controller_plugin_c_api.h>
 #include <fvp/fvp_plugin_c_api.h>
 #include <gal/gal_plugin_c_api.h>
-#include <media_kit_libs_windows_video/media_kit_libs_windows_video_plugin_c_api.h>
 #include <media_kit_video/media_kit_video_plugin_c_api.h>
 #include <screen_retriever_windows/screen_retriever_windows_plugin_c_api.h>
 #include <share_plus/share_plus_windows_plugin_c_api.h>
@@ -36,8 +35,6 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FvpPluginCApi"));
   GalPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("GalPluginCApi"));
-  MediaKitLibsWindowsVideoPluginCApiRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("MediaKitLibsWindowsVideoPluginCApi"));
   MediaKitVideoPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("MediaKitVideoPluginCApi"));
   ScreenRetrieverWindowsPluginCApiRegisterWithRegistrar(

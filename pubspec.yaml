@@ -20,7 +20,7 @@ version: 2.6.4
 
 environment:
   sdk: ">=3.3.4 <4.0.0"
-  flutter: 3.47.6
+  flutter: 3.47.7
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -52,18 +52,13 @@ dependencies:
   media_kit: # 提供跨平台音视频播放与播放控制能力。
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
+      ref: 83b7ca63772856e1ea0158916177e136f7b7b0be
       path: ./media_kit
   media_kit_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
+      ref: 83b7ca63772856e1ea0158916177e136f7b7b0be
       path: ./media_kit_video
-  media_kit_libs_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/universal/media_kit_libs_video
   fvp: ^0.39.1 # 基于 libmdk 的跨平台视频播放插件。
   canvas_danmaku: 0.3.3 # 使用 Flutter Canvas 绘制和管理弹幕。
   screen_brightness_platform_interface: ^2.1.0 # 定义屏幕亮度插件的跨平台接口契约。
@@ -96,7 +91,7 @@ dependencies:
   crypto: ^3.0.6 # 提供常用密码学哈希、摘要和 HMAC 算法。
   uuid: ^4.5.1 # 生成标准格式的 UUID 标识符。
   flutter_cache_manager: ^3.4.1 # 下载、缓存和管理网络文件。
-  ech_http: ^0.2.1 # 提供支持加密客户端问候（ECH）的 HTTP 客户端。
+  ech_http: ^0.2.3 # 提供支持加密客户端问候（ECH）的 HTTP 客户端。
   http: ^1.6.0 # 提供用于发送 HTTP 请求的客户端及流式响应接口。
   html: ^0.15.6 # 将 HTML 文本解析为可遍历和操作的文档树。
   xpath_selector: ^3.0.2 # 使用 XPath 表达式查询 XML 或 HTML 文档节点。
@@ -141,31 +136,6 @@ dependencies:
 
 dependency_overrides:
   wakelock_plus: 1.8.0
-  media_kit_libs_linux:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/linux/media_kit_libs_linux
-  media_kit_libs_ios_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/ios/media_kit_libs_ios_video
-  media_kit_libs_android_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/android/media_kit_libs_android_video
-  media_kit_libs_windows_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/windows/media_kit_libs_windows_video
-  media_kit_libs_macos_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
-      path: ./libs/macos/media_kit_libs_macos_video
 
 # logo图标生成生成命令:dart run flutter_launcher_icons
 flutter_launcher_icons:

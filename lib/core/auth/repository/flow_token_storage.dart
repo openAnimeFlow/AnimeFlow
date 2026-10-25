@@ -12,7 +12,9 @@ class FlowTokenStorage implements TokenRepository<FlowToken> {
 
   static const _tokenKey = 'flow_auth_token';
 
-  static const FlutterSecureStorage _storage = FlutterSecureStorage();
+  static const FlutterSecureStorage _storage = FlutterSecureStorage(
+    mOptions: MacOsOptions(usesDataProtectionKeychain: false),
+  );
 
   @override
   Future<FlowToken?> getToken() async {

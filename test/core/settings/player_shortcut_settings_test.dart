@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:anime_flow/core/settings/player_shortcut_settings.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -51,5 +53,37 @@ void main() {
     final restored = action.readBindings();
     expect(restored.first.key, LogicalKeyboardKey.keyB);
     expect(restored.last.wheelDelta, -5);
+  });
+
+  test('speed shortcuts have distinct defaults and persist custom bindings',
+      () async {
+    expect(PlayerShortcutAction.speedUp.readBindings().single.key,
+        LogicalKeyboardKey.bracketRight);
+    expect(PlayerShortcutAction.speedDown.readBindings().single.key,
+        LogicalKeyboardKey.bracketLeft);
+    expect(PlayerShortcutAction.resetSpeed.readBindings().single.key,
+        LogicalKeyboardKey.backslash);
+    await PlayerShortcutAction.speedUp.saveBindings([
+      const PlayerShortcutBinding.keyboard(LogicalKeyboardKey.keyB),
+    ]);
+    expect(PlayerShortcutAction.speedUp.readBindings().single.key,
+        LogicalKeyboardKey.keyB);
+    expect(PlayerShortcutAction.seekForward.readBindings().single.key,
+        LogicalKeyboardKey.arrowRight);
+  });
+
+  test('speed step persists and rejects corrupt or unsupported settings',
+      () async {
+    expect(AppSettings.shortcutSpeedStep, 0.25);
+    for (final step in AppSettings.shortcutSpeedSteps) {
+      await AppSettings.setShortcutSpeedStep(step);
+      expect(AppSettings.shortcutSpeedStep, step);
+      expect(Storage.setting.get(PlayerShortcutKey.speedStep), step);
+    }
+    for (final invalid in [0, -1, 5, double.nan, double.infinity, '0.25']) {
+      await Storage.setting.put(PlayerShortcutKey.speedStep, invalid);
+      expect(AppSettings.shortcutSpeedStep, 0.25);
+    }
+    expect(() => AppSettings.setShortcutSpeedStep(0), throwsArgumentError);
   });
 }

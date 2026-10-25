@@ -1832,6 +1832,36 @@ abstract class AppLocalizations {
   /// **'每次 {seconds} 秒'**
   String playerShortcutSeekSeconds(int seconds);
 
+  /// No description provided for @playerShortcutSpeedUp.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'提高播放倍速'**
+  String get playerShortcutSpeedUp;
+
+  /// No description provided for @playerShortcutSpeedDown.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'降低播放倍速'**
+  String get playerShortcutSpeedDown;
+
+  /// No description provided for @playerShortcutResetSpeed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'恢复 1× 播放'**
+  String get playerShortcutResetSpeed;
+
+  /// No description provided for @playerShortcutSpeedStep.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'倍速调整幅度'**
+  String get playerShortcutSpeedStep;
+
+  /// No description provided for @playerShortcutSpeedStepValue.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'每次 {step}×'**
+  String playerShortcutSpeedStepValue(String step);
+
   /// No description provided for @playerShortcutSeekSecondsRange.
   ///
   /// In zh_Hans, this message translates to:

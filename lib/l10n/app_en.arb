@@ -316,6 +316,14 @@
   "playerShortcutSeekBackward": "Seek backward",
   "playerShortcutSeekForward": "Seek forward",
   "playerShortcutSeekSeconds": "{seconds} seconds per step",
+  "playerShortcutSpeedUp": "Increase playback speed",
+  "playerShortcutSpeedDown": "Decrease playback speed",
+  "playerShortcutResetSpeed": "Reset to 1× speed",
+  "playerShortcutSpeedStep": "Playback speed step",
+  "playerShortcutSpeedStepValue": "{step}× per step",
+  "@playerShortcutSpeedStepValue": {
+    "placeholders": { "step": { "type": "String" } }
+  },
   "@playerShortcutSeekSeconds": {
     "placeholders": { "seconds": { "type": "int" } }
   },

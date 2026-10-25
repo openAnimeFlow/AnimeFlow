@@ -126,6 +126,35 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
     }
   }
 
+  Future<void> _editSpeedStep() async {
+    setState(() => _capturing = null);
+    final l10n = AppLocalizations.of(context);
+    final step = await showDialog<double>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(l10n.playerShortcutSpeedStep),
+        children: [
+          for (final step in AppSettings.shortcutSpeedSteps)
+            SimpleDialogOption(
+              onPressed: () => Navigator.of(context).pop(step),
+              child: Row(children: [
+                Expanded(child: Text('${step}×')),
+                if (step == AppSettings.shortcutSpeedStep)
+                  const Icon(Icons.check),
+              ]),
+            ),
+        ],
+      ),
+    );
+    if (step == null || !mounted) return;
+    try {
+      await AppSettings.setShortcutSpeedStep(step);
+      if (mounted) setState(() {});
+    } catch (_) {
+      if (mounted) NotificationToast.show(l10n.saveFailed, title: l10n.error);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -136,6 +165,9 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
       PlayerShortcutAction.seekForward: l10n.playerShortcutSeekForward,
       PlayerShortcutAction.volumeUp: l10n.playerShortcutVolumeUp,
       PlayerShortcutAction.volumeDown: l10n.playerShortcutVolumeDown,
+      PlayerShortcutAction.speedUp: l10n.playerShortcutSpeedUp,
+      PlayerShortcutAction.speedDown: l10n.playerShortcutSpeedDown,
+      PlayerShortcutAction.resetSpeed: l10n.playerShortcutResetSpeed,
       PlayerShortcutAction.enterFullscreen: l10n.playerShortcutEnterFullscreen,
       PlayerShortcutAction.exitFullscreen: l10n.exitFullscreen,
       PlayerShortcutAction.screenshot: l10n.playerShortcutScreenshot,
@@ -180,7 +212,7 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
                         capturing: _capturing == action,
                         captureLabel: l10n.playerShortcutPressKey,
                         title: titles[action]!,
-                        durationEditor: switch (action) {
+                        valueEditor: switch (action) {
                           PlayerShortcutAction.seekBackward ||
                           PlayerShortcutAction.seekForward =>
                             ActionChip(
@@ -191,6 +223,14 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
                                     : AppSettings.shortcutSeekForwardSeconds,
                               )),
                               onPressed: () => _editSeekSeconds(action),
+                            ),
+                          PlayerShortcutAction.speedUp ||
+                          PlayerShortcutAction.speedDown =>
+                            ActionChip(
+                              key: ValueKey('speed-step-${action.name}'),
+                              label: Text(l10n.playerShortcutSpeedStepValue(
+                                  AppSettings.shortcutSpeedStep.toString())),
+                              onPressed: _editSpeedStep,
                             ),
                           _ => null,
                         },
@@ -226,7 +266,7 @@ class _ShortcutTile extends StatelessWidget {
       required this.title,
       required this.onTap,
       required this.onDelete,
-      this.durationEditor});
+      this.valueEditor});
 
   final List<PlayerShortcutBinding> keys;
   final String Function(PlayerShortcutBinding) keyLabel;
@@ -235,7 +275,7 @@ class _ShortcutTile extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
   final ValueChanged<PlayerShortcutBinding> onDelete;
-  final Widget? durationEditor;
+  final Widget? valueEditor;
 
   @override
   Widget build(BuildContext context) => ListTile(
@@ -250,7 +290,7 @@ class _ShortcutTile extends StatelessWidget {
                   onDeleted: keys.length > 1 ? () => onDelete(key) : null),
             ActionChip(
                 label: Text(capturing ? captureLabel : '+'), onPressed: onTap),
-            if (durationEditor != null) durationEditor!,
+            if (valueEditor != null) valueEditor!,
           ],
         ),
       );

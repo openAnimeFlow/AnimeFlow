@@ -316,6 +316,14 @@
   "playerShortcutSeekBackward": "快退",
   "playerShortcutSeekForward": "快进",
   "playerShortcutSeekSeconds": "每次 {seconds} 秒",
+  "playerShortcutSpeedUp": "提高播放倍速",
+  "playerShortcutSpeedDown": "降低播放倍速",
+  "playerShortcutResetSpeed": "恢复 1× 播放",
+  "playerShortcutSpeedStep": "倍速调整幅度",
+  "playerShortcutSpeedStepValue": "每次 {step}×",
+  "@playerShortcutSpeedStepValue": {
+    "placeholders": { "step": { "type": "String" } }
+  },
   "@playerShortcutSeekSeconds": {
     "placeholders": { "seconds": { "type": "int" } }
   },

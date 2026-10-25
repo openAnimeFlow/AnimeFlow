@@ -723,6 +723,15 @@ class PlaySession {
     unawaited(playbackCoordinator.setRate(speed));
   }
 
+  /// 用户选择的常驻倍速，不包含长按时的临时倍速。
+  double get basePlaybackRate => _speedBeforeBoost ?? _readPlayState().rate;
+
+  /// 按步长调整常驻倍速；长按期间修改松开后恢复的速度。
+  void adjustPlaybackRate(double delta) {
+    final speed = ((basePlaybackRate + delta) * 100).round() / 100;
+    setPlaybackRate(speed.clamp(0.5, 4.0).toDouble());
+  }
+
   /// 设置播放倍数
   void setPlaybackRate(double speed, {bool temporary = false}) {
     if (temporary) {

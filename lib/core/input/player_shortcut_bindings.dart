@@ -32,6 +32,16 @@ extension PlayerShortcutDefaults on PlayerShortcutAction {
         PlayerShortcutAction.enterFullscreen => [
             const PlayerShortcutBinding.keyboard(LogicalKeyboardKey.keyF)
           ],
+        PlayerShortcutAction.speedUp => [
+            const PlayerShortcutBinding.keyboard(
+                LogicalKeyboardKey.bracketRight)
+          ],
+        PlayerShortcutAction.speedDown => [
+            const PlayerShortcutBinding.keyboard(LogicalKeyboardKey.bracketLeft)
+          ],
+        PlayerShortcutAction.resetSpeed => [
+            const PlayerShortcutBinding.keyboard(LogicalKeyboardKey.backslash)
+          ],
         PlayerShortcutAction.exitFullscreen => [
             const PlayerShortcutBinding.keyboard(LogicalKeyboardKey.escape)
           ],

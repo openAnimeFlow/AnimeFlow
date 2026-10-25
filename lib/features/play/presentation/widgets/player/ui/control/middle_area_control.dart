@@ -221,7 +221,7 @@ class _TopIndicator extends ConsumerWidget {
                 final rate =
                     ref.watch(playStateProvider.select((state) => state.rate));
                 return Text(
-                  '${rate.toStringAsFixed(1)}x',
+                  '${rate.toStringAsFixed(2).replaceFirst(RegExp(r'0$'), '')}x',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,

@@ -939,6 +939,23 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get playerShortcutSpeedUp => '提高播放倍速';
+
+  @override
+  String get playerShortcutSpeedDown => '降低播放倍速';
+
+  @override
+  String get playerShortcutResetSpeed => '恢复 1× 播放';
+
+  @override
+  String get playerShortcutSpeedStep => '倍速调整幅度';
+
+  @override
+  String playerShortcutSpeedStepValue(String step) {
+    return '每次 $step×';
+  }
+
+  @override
   String playerShortcutSeekSecondsRange(int min, int max) {
     return '请输入 $min～$max 秒的整数';
   }
@@ -3437,6 +3454,23 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   @override
   String playerShortcutSeekSeconds(int seconds) {
     return '每次 $seconds 秒';
+  }
+
+  @override
+  String get playerShortcutSpeedUp => '提高播放倍速';
+
+  @override
+  String get playerShortcutSpeedDown => '降低播放倍速';
+
+  @override
+  String get playerShortcutResetSpeed => '恢复 1× 播放';
+
+  @override
+  String get playerShortcutSpeedStep => '倍速调整幅度';
+
+  @override
+  String playerShortcutSpeedStepValue(String step) {
+    return '每次 $step×';
   }
 
   @override
@@ -5940,6 +5974,23 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   }
 
   @override
+  String get playerShortcutSpeedUp => '提高播放倍速';
+
+  @override
+  String get playerShortcutSpeedDown => '降低播放倍速';
+
+  @override
+  String get playerShortcutResetSpeed => '恢復 1× 播放';
+
+  @override
+  String get playerShortcutSpeedStep => '倍速調整幅度';
+
+  @override
+  String playerShortcutSpeedStepValue(String step) {
+    return '每次 $step×';
+  }
+
+  @override
   String playerShortcutSeekSecondsRange(int min, int max) {
     return '請輸入 $min～$max 秒的整數';
   }
@@ -8438,6 +8489,23 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   @override
   String playerShortcutSeekSeconds(int seconds) {
     return '每次 $seconds 秒';
+  }
+
+  @override
+  String get playerShortcutSpeedUp => '提高播放倍速';
+
+  @override
+  String get playerShortcutSpeedDown => '降低播放倍速';
+
+  @override
+  String get playerShortcutResetSpeed => '恢復 1× 播放';
+
+  @override
+  String get playerShortcutSpeedStep => '倍速調整幅度';
+
+  @override
+  String playerShortcutSpeedStepValue(String step) {
+    return '每次 $step×';
   }
 
   @override

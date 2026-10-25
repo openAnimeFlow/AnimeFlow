@@ -361,6 +361,24 @@ abstract final class AppSettings {
       setSetting(PlaybackKey.fastForwardSpeed, value);
 
   static const defaultShortcutSeekSeconds = 10;
+  static const defaultShortcutSpeedStep = 0.25;
+  static const shortcutSpeedSteps = [0.1, 0.25, 0.5, 1.0];
+
+  static double get shortcutSpeedStep {
+    final value = getSetting<Object?>(PlayerShortcutKey.speedStep);
+    return value is num && shortcutSpeedSteps.contains(value.toDouble())
+        ? value.toDouble()
+        : defaultShortcutSpeedStep;
+  }
+
+  static Future<void> setShortcutSpeedStep(double value) {
+    if (!shortcutSpeedSteps.contains(value)) {
+      throw ArgumentError.value(
+          value, 'step', 'Unsupported playback speed step');
+    }
+    return setSetting(PlayerShortcutKey.speedStep, value);
+  }
+
   static const minShortcutSeekSeconds = 1;
   static const maxShortcutSeekSeconds = 120;
 

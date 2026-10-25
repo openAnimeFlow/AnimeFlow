@@ -27,6 +27,39 @@ void main() {
   setUpAll(() => Storage.setting = _Settings());
   setUp(() => (Storage.setting as _Settings).stored.clear());
 
+  test(
+      'speed adjustments accumulate, clamp and restore correctly after temporary boost',
+      () async {
+    final state = _State();
+    final session = _Session(_Factory(), state: state);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+
+    session.adjustPlaybackRate(0.25);
+    expect(state._value.rate, 1.25);
+    session.setPlaybackRate(3, temporary: true);
+    session.adjustPlaybackRate(0.25);
+    session.adjustPlaybackRate(0.25);
+    expect(state._value.rate, 3);
+    expect(session.basePlaybackRate, 1.75);
+    session.endTemporaryPlaybackRate();
+    expect(state._value.rate, 1.75);
+
+    session.adjustPlaybackRate(10);
+    expect(state._value.rate, 4);
+    session.adjustPlaybackRate(-10);
+    expect(state._value.rate, 0.5);
+    for (var i = 0; i < 5; i++) {
+      session.adjustPlaybackRate(0.1);
+    }
+    expect(state._value.rate, 1);
+
+    session.setPlaybackRate(3, temporary: true);
+    session.setPlaybackRate(1);
+    session.endTemporaryPlaybackRate();
+    expect(state._value.rate, 1);
+  });
+
   test('iOS opens local playback without a native storage channel', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     addTearDown(() => debugDefaultTargetPlatformOverride = null);
@@ -440,6 +473,11 @@ class _Settings implements Box<dynamic> {
 
 class _State implements PlayStateNotifier {
   PlayState _value = const PlayState(playing: true);
+  @override
+  void setRate(double rate) {
+    _value = _value.copyWith(rate: rate);
+  }
+
   @override
   void setKernel(PlayerKernel kernel) {
     _value = _value.copyWith(kernel: kernel);

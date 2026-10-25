@@ -14,6 +14,9 @@ extension PlayerShortcutActionDetails on PlayerShortcutAction {
         PlayerShortcutAction.seekForward => PlayerShortcutKey.seekForward,
         PlayerShortcutAction.volumeUp => PlayerShortcutKey.volumeUp,
         PlayerShortcutAction.volumeDown => PlayerShortcutKey.volumeDown,
+        PlayerShortcutAction.speedUp => PlayerShortcutKey.speedUp,
+        PlayerShortcutAction.speedDown => PlayerShortcutKey.speedDown,
+        PlayerShortcutAction.resetSpeed => PlayerShortcutKey.resetSpeed,
         PlayerShortcutAction.enterFullscreen =>
           PlayerShortcutKey.enterFullscreen,
         PlayerShortcutAction.exitFullscreen => PlayerShortcutKey.exitFullscreen,

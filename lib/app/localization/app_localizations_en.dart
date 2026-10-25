@@ -956,6 +956,23 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get playerShortcutSpeedUp => 'Increase playback speed';
+
+  @override
+  String get playerShortcutSpeedDown => 'Decrease playback speed';
+
+  @override
+  String get playerShortcutResetSpeed => 'Reset to 1× speed';
+
+  @override
+  String get playerShortcutSpeedStep => 'Playback speed step';
+
+  @override
+  String playerShortcutSpeedStepValue(String step) {
+    return '$step× per step';
+  }
+
+  @override
   String playerShortcutSeekSecondsRange(int min, int max) {
     return 'Enter a whole number from $min to $max seconds';
   }

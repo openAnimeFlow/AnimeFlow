@@ -153,6 +153,23 @@ class _DesktopGestureDetectorState
       playSession.adjustVolumeByWheel(-5.0); // 每次减少5%
       return KeyEventResult.handled;
     }
+    final speedUp = shortcut[PlayerShortcutAction.speedUp]!.contains(pressed);
+    final speedDown =
+        shortcut[PlayerShortcutAction.speedDown]!.contains(pressed);
+    final resetSpeed =
+        shortcut[PlayerShortcutAction.resetSpeed]!.contains(pressed);
+    if (speedUp || speedDown || resetSpeed) {
+      if (resetSpeed) {
+        playSession.setPlaybackRate(1.0);
+      } else {
+        playSession.adjustPlaybackRate(
+            AppSettings.shortcutSpeedStep * (speedUp ? 1 : -1));
+      }
+      videoUiNotifier
+          .showTopIndicator(VideoControlsIndicatorType.speedIndicator);
+      videoUiNotifier.restartControlsAutoHideTimer();
+      return KeyEventResult.handled;
+    }
     if (shortcut[PlayerShortcutAction.enterFullscreen]!.contains(pressed)) {
       ref.read(videoUiProvider.notifier).toggleFullScreen();
       return KeyEventResult.handled;

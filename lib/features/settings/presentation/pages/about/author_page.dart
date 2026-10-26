@@ -45,7 +45,7 @@ class AuthorPage extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 760),
+              constraints: const BoxConstraints(maxWidth: 1500),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

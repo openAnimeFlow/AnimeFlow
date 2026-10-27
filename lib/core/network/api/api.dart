@@ -5,6 +5,7 @@ import 'package:anime_flow/core/crawler/html_crawler.dart';
 import 'package:anime_flow/core/crawler/item/bgm_user_statistics_item.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/client.dart';
+import 'package:anime_flow/core/network/image/image_cache_manager.dart';
 import 'package:anime_flow/shared/models/image_search_item.dart';
 import 'package:anime_flow/core/exception/storage_exception.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -93,7 +94,7 @@ class Api {
     });
   }
 
-  /// 下载图片，成功时返回提示文案。
+  /// 复用原图缓存及其 ECH 路由下载图片，成功时返回提示文案。
   static Future<String> downloadImage(String url, String name) async {
     final String time = DateTime.now().millisecondsSinceEpoch.toString();
     if (SystemUtil.isMobile) {
@@ -108,18 +109,17 @@ class Api {
           throw const StoragePermissionDeniedException();
         }
       }
-      final tempDir = await getTemporaryDirectory();
-      final filePath = '${tempDir.path}/$time.jpg';
-      await _client.download(url, filePath);
-      final bytes = await File(filePath).readAsBytes();
+      final image = await AnimeImageCacheManager.instance.getSingleFile(url);
+      final bytes = await image.readAsBytes();
       await Gal.putImageBytes(bytes, name: '${name}_$time');
-      await File(filePath).delete();
       return '图片已保存到相册';
     } else {
       //桌面端(保持到下载目录)
       final dir = await getDownloadsDirectory();
-      final filePath = '${dir?.path}/${name}_$time.jpg';
-      await _client.download(url, filePath);
+      if (dir == null) throw const FileSystemException('无法获取下载目录');
+      final filePath = '${dir.path}/${name}_$time.jpg';
+      final image = await AnimeImageCacheManager.instance.getSingleFile(url);
+      await image.copy(filePath);
       LiggLogger().i('图片已保存到:$filePath');
       return '图片已保存到:$filePath';
     }

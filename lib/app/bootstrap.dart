@@ -3,7 +3,8 @@ import 'dart:io';
 
 import 'package:anime_flow/app/app.dart';
 import 'composition/video_source_bindings.dart';
-import 'composition/navigation_bindings.dart';
+import 'package:anime_flow/app/router/go_app_navigator.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/features/download/infrastructure/download_foreground_service.dart';
@@ -64,7 +65,7 @@ Future<void> bootstrap() async {
   final container = ProviderContainer(overrides: [
     ...videoSourceOverrides,
     ...playerOverrides,
-    ...navigationOverrides,
+    overrideAppNavigator(const GoAppNavigator()),
   ]);
   container.read(appInfoProvider);
   unawaited(container.read(shadersDirectoryProvider.future));

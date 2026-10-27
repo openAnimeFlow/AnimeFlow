@@ -4,20 +4,19 @@ import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/features/home/presentation/pages/wallpaper_detail_page.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 保持列表挂载，宽屏原位查看详情，窄屏使用完整详情路由。
-class WallpaperBrowser extends ConsumerStatefulWidget {
+class WallpaperBrowser extends StatefulWidget {
   const WallpaperBrowser({super.key, required this.listBuilder});
 
   final Widget Function(BuildContext, ValueChanged<WallpaperDetailArgs>)
       listBuilder;
 
   @override
-  ConsumerState<WallpaperBrowser> createState() => _WallpaperBrowserState();
+  State<WallpaperBrowser> createState() => _WallpaperBrowserState();
 }
 
-class _WallpaperBrowserState extends ConsumerState<WallpaperBrowser> {
+class _WallpaperBrowserState extends State<WallpaperBrowser> {
   WallpaperDetailArgs? _selected;
   bool _wide = false;
   bool _handoffScheduled = false;
@@ -27,7 +26,7 @@ class _WallpaperBrowserState extends ConsumerState<WallpaperBrowser> {
       setState(() => _selected = args);
     } else {
       unawaited(
-          ref.read(appNavigatorProvider).openWallpaper<void>(context, args));
+          appNavigatorOf(context).openWallpaper<void>(context, args));
     }
   }
 

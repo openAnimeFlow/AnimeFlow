@@ -79,8 +79,7 @@ class SettingsMenuPage extends ConsumerWidget {
                   leading: BackButton(onPressed: () => _exitSettings(context)),
                   title: Text(AppLocalizations.of(context).settings)),
               body: _SettingsMenu(
-                  location: ref
-                      .read(appNavigatorProvider)
+                  location: appNavigatorOf(context)
                       .settingsLocation(SettingsDestination.menu),
                   wide: false),
             );
@@ -200,7 +199,7 @@ class _SettingsMenu extends ConsumerWidget {
         ? userInfo!.avatar
         : null;
     final categories = _categories(context, avatar);
-    final navigation = ref.read(appNavigatorProvider);
+    final navigation = appNavigatorOf(context);
     final currentDestination =
         navigation.settingsDestinationForLocation(location);
     final menu = ListView(

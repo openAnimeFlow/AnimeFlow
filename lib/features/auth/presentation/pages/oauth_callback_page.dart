@@ -72,7 +72,7 @@ class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage> {
       );
     } finally {
       if (mounted) {
-        ref.read(appNavigatorProvider).goToUser(context);
+        appNavigatorOf(context).goToUser(context);
       }
     }
   }

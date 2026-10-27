@@ -1,4 +1,5 @@
-import 'package:anime_flow/app/composition/navigation_bindings.dart';
+import 'package:anime_flow/app/router/go_app_navigator.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/localization/app_localizations_delegates.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
@@ -48,7 +49,7 @@ void main() {
     addTearDown(router.dispose);
     await tester.pumpWidget(ProviderScope(
         overrides: [
-          ...navigationOverrides,
+          overrideAppNavigator(const GoAppNavigator()),
           currentUserInfoProvider.overrideWith(_GuestUser.new),
           isLoggedInProvider.overrideWith((ref) async => false),
         ],

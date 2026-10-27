@@ -1,6 +1,5 @@
-import 'package:anime_flow/app/composition/navigation_bindings.dart';
+import 'package:anime_flow/app/router/go_app_navigator.dart';
 import 'package:anime_flow/shared/models/flow/subject_wallpaper.dart';
-import 'package:anime_flow/shared/navigation/app_navigator.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
@@ -57,7 +56,7 @@ void main() {
 
   Future<void> pumpApp(WidgetTester tester) async {
     await tester.pumpWidget(ProviderScope(
-      overrides: navigationOverrides,
+      overrides: [overrideAppNavigator(const GoAppNavigator())],
       child: MaterialApp.router(routerConfig: router),
     ));
     await tester.pumpAndSettle();
@@ -66,15 +65,11 @@ void main() {
   BuildContext pageContext(WidgetTester tester, String path) =>
       tester.element(find.byKey(ValueKey(path)));
 
-  AppNavigator navigatorAt(BuildContext context) =>
-      ProviderScope.containerOf(context, listen: false)
-          .read(appNavigatorProvider);
-
   testWidgets('auth pushes preserve the previous page and typed results',
       (tester) async {
     await pumpApp(tester);
     final context = pageContext(tester, '/login');
-    final navigation = navigatorAt(context);
+    final navigation = appNavigatorOf(context);
 
     final registration = navigation.openRegister<String>(context);
     await tester.pumpAndSettle();
@@ -99,7 +94,7 @@ void main() {
       (tester) async {
     await pumpApp(tester);
     final context = pageContext(tester, '/login');
-    final navigation = navigatorAt(context);
+    final navigation = appNavigatorOf(context);
     navigation.openRegister<void>(context);
     await tester.pumpAndSettle();
 
@@ -117,7 +112,7 @@ void main() {
     final context = pageContext(tester, '/login');
     const name = '动画 & special?';
     const image = 'https://example.com/cover.jpg?size=large&index=1';
-    final result = navigatorAt(context).openAnimeInfo<void>(
+    final result = appNavigatorOf(context).openAnimeInfo<void>(
       context,
       id: 42,
       name: name,
@@ -138,7 +133,7 @@ void main() {
       (tester) async {
     await pumpApp(tester);
     final context = pageContext(tester, '/login');
-    final navigation = navigatorAt(context);
+    final navigation = appNavigatorOf(context);
     final wallpaper = WallpaperDetailArgs(
       subject: SubjectWallpaper.fromJson({'subjectId': 42}),
       initialUrl: 'https://example.com/wallpaper.jpg',
@@ -182,7 +177,7 @@ void main() {
       offlineDanmakuPath: 'C:/downloads/episode.xml',
       offlineEpisodeUrl: 'offline://episode',
     );
-    final playback = navigatorAt(context).openPlay<bool>(context, args);
+    final playback = appNavigatorOf(context).openPlay<bool>(context, args);
     await tester.pumpAndSettle();
     expect(states['/play']!.extra, same(args));
     expect(states['/play']!.uri.queryParameters, {
@@ -202,7 +197,7 @@ void main() {
     final context = pageContext(tester, '/login');
     const extra = CharacterInfoExtra(
         characterId: 7, characterName: 'Original', characterImage: 'image');
-    final detail = navigatorAt(context).openCharacterInfo<void>(
+    final detail = appNavigatorOf(context).openCharacterInfo<void>(
       context,
       id: 7,
       name: '译名',
@@ -220,7 +215,7 @@ void main() {
   testWidgets('image search returns its selected keyword', (tester) async {
     await pumpApp(tester);
     final context = pageContext(tester, '/login');
-    final keyword = navigatorAt(context).openImageSearch(context);
+    final keyword = appNavigatorOf(context).openImageSearch(context);
     await tester.pumpAndSettle();
     router.pop('selected anime');
     await tester.pumpAndSettle();
@@ -231,7 +226,7 @@ void main() {
       (tester) async {
     await pumpApp(tester);
     final context = pageContext(tester, '/login');
-    final navigation = navigatorAt(context);
+    final navigation = appNavigatorOf(context);
     navigation.openSettings<void>(context);
     await tester.pumpAndSettle();
     navigation.openSettings<void>(pageContext(tester, '/settings'),
@@ -255,7 +250,7 @@ void main() {
       (tester) async {
     await pumpApp(tester);
     final context = pageContext(tester, '/login');
-    final navigation = navigatorAt(context);
+    final navigation = appNavigatorOf(context);
     final editor =
         navigation.openPluginEditor<void>(context, editPluginKey: '来源 & 1');
     await tester.pumpAndSettle();

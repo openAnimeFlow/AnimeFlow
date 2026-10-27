@@ -7,6 +7,9 @@ class SubjectCard extends StatelessWidget {
   final String title;
   final int? rating;
 
+  /// 列表封面的解码宽度。
+  final int? memCacheWidth;
+
   /// 封面共享元素动画的 Hero tag。
   ///
   /// 同一路由子树内必须唯一（例如同一张图片在同一页面出现多次会冲突）。
@@ -21,6 +24,7 @@ class SubjectCard extends StatelessWidget {
     required this.title,
     this.heroTag,
     this.rating,
+    this.memCacheWidth,
     this.isCoverAnimation = true,
     this.borderRadius = const BorderRadius.all(Radius.circular(15.0)),
   });
@@ -45,6 +49,7 @@ class SubjectCard extends StatelessWidget {
     final Widget cover = AnimationNetworkImage(
       borderRadius: borderRadius,
       url: image,
+      memCacheWidth: memCacheWidth,
       fit: BoxFit.cover,
     );
     // 仅当提供了 tag 时才使用 Hero。Hero 要求同一路由子树内 tag 唯一，

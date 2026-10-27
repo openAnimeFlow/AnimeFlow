@@ -9,7 +9,24 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PopularAnimeView extends ConsumerWidget {
-  const PopularAnimeView({super.key});
+  const PopularAnimeView({super.key, required this.contentWidth});
+
+  final double contentWidth;
+
+  SliverGridDelegateWithFixedCrossAxisCount get _gridDelegate {
+    final compact = contentWidth < 600;
+    final spacing = compact ? 10.0 : 15.0;
+    final minCardWidth = compact ? 120.0 : 200.0;
+    final crossAxisCount = ((contentWidth + spacing) / (minCardWidth + spacing))
+        .floor()
+        .clamp(3, 7);
+    return SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: crossAxisCount,
+      crossAxisSpacing: spacing,
+      mainAxisSpacing: spacing,
+      childAspectRatio: 0.7,
+    );
+  }
 
   /// 首屏加载时的骨架卡片数量。
   static const int _initialSkeletonCount = 6;
@@ -18,13 +35,21 @@ class PopularAnimeView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final hotAsync = ref.watch(animeHotProvider);
+    final grid = _gridDelegate;
+    final cardWidth =
+        (contentWidth - grid.crossAxisSpacing * (grid.crossAxisCount - 1)) /
+            grid.crossAxisCount;
+    final coverCacheWidth = (cardWidth * MediaQuery.devicePixelRatioOf(context))
+        .ceil()
+        .clamp(1, 4096);
 
     return hotAsync.when(
       loading: () => SliverMainAxisGroup(
         slivers: [
           _buildTitleSliver(l10n),
-          _buildGrid(
-            SliverChildBuilderDelegate(
+          SliverGrid(
+            gridDelegate: _gridDelegate,
+            delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) => const Center(
                 child: CardSkeleton(),
               ),
@@ -44,8 +69,9 @@ class PopularAnimeView extends ConsumerWidget {
           if (hotState.isRefreshing)
             const SliverToBoxAdapter(child: LinearProgressIndicator()),
           if (hotState.hasUpdate) _buildUpdateSliver(context, ref, l10n),
-          _buildGrid(
-            SliverChildBuilderDelegate(
+          SliverGrid(
+            gridDelegate: _gridDelegate,
+            delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 if (index < hotState.items.length) {
                   final subject = hotState.items[index].subject;
@@ -61,6 +87,7 @@ class PopularAnimeView extends ConsumerWidget {
                               image: subject.images.large,
                             )),
                     child: SubjectCard(
+                      memCacheWidth: coverCacheWidth,
                       image: subject.images.large,
                       title: subject.nameCN.isEmpty
                           ? subject.name
@@ -118,31 +145,6 @@ class PopularAnimeView extends ConsumerWidget {
             ),
         ],
       ),
-    );
-  }
-
-  Widget _buildGrid(SliverChildDelegate delegate) {
-    return SliverLayoutBuilder(
-      builder: (context, constraints) {
-        final gridWidth = constraints.crossAxisExtent;
-        final compact = gridWidth < 600;
-        final spacing = compact ? 10.0 : 15.0;
-        final minCardWidth = compact ? 120.0 : 200.0;
-        final crossAxisCount =
-            ((gridWidth + spacing) / (minCardWidth + spacing))
-                .floor()
-                .clamp(3, 7);
-
-        return SliverGrid(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: spacing,
-            mainAxisSpacing: spacing,
-            childAspectRatio: 0.7,
-          ),
-          delegate: delegate,
-        );
-      },
     );
   }
 

@@ -19,7 +19,7 @@ class AnimeView extends ConsumerStatefulWidget {
 class _AnimePageState extends ConsumerState<AnimeView>
     with AutomaticKeepAliveClientMixin {
   final _scrollController = ScrollController();
-  bool _showBackToTopButton = false;
+  final _showBackToTopButton = ValueNotifier(false);
 
   @override
   void initState() {
@@ -28,24 +28,23 @@ class _AnimePageState extends ConsumerState<AnimeView>
   }
 
   void _scrollListener() {
-    if (_scrollController.position.pixels > 0) {
+    final position = _scrollController.position;
+    if (position.pixels > 0) {
       ref.read(animeHotProvider.notifier).markScrolled();
     }
-    final hotState = ref.read(animeHotProvider).asData?.value;
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
-        hotState != null &&
-        !hotState.isLoading &&
-        hotState.hasMore) {
-      ref.read(animeHotProvider.notifier).loadMore();
+    if (position.extentAfter <= 200) {
+      final hotState = ref.read(animeHotProvider).asData?.value;
+      if (hotState != null &&
+          !hotState.isLoading &&
+          !hotState.isRefreshing &&
+          !hotState.hasUpdate &&
+          hotState.errorMessage == null &&
+          hotState.hasMore) {
+        ref.read(animeHotProvider.notifier).loadMore();
+      }
     }
 
-    final shouldShow = _scrollController.position.pixels > 300;
-    if (shouldShow != _showBackToTopButton && mounted) {
-      setState(() {
-        _showBackToTopButton = shouldShow;
-      });
-    }
+    _showBackToTopButton.value = position.pixels > 300;
   }
 
   void scrollToTop() {
@@ -59,6 +58,7 @@ class _AnimePageState extends ConsumerState<AnimeView>
   void dispose() {
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
+    _showBackToTopButton.dispose();
     super.dispose();
   }
 
@@ -69,43 +69,48 @@ class _AnimePageState extends ConsumerState<AnimeView>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Scaffold(
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          SliverLayoutBuilder(
-            builder: (context, constraints) {
-              final horizontalPadding = math.max(
-                10.0,
-                (constraints.crossAxisExtent - LayoutConstant.maxWidth) / 2 +
-                    10,
-              );
-              return SliverPadding(
+    return ValueListenableBuilder<bool>(
+      valueListenable: _showBackToTopButton,
+      builder: (context, visible, child) => Scaffold(
+        body: child,
+        floatingActionButton: visible
+            ? FloatingActionButton(
+                onPressed: scrollToTop,
+                child: const Icon(Icons.arrow_upward_rounded),
+              )
+            : null,
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final horizontalPadding = math.max(
+            10.0,
+            (constraints.maxWidth - LayoutConstant.maxWidth) / 2 + 10,
+          );
+          final contentWidth =
+              math.max(0.0, constraints.maxWidth - horizontalPadding * 2);
+          return CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                sliver: const SliverMainAxisGroup(
+                sliver: SliverMainAxisGroup(
                   slivers: [
-                    CalendarView(),
-                    SliverToBoxAdapter(
+                    const CalendarView(),
+                    const SliverToBoxAdapter(
                       child: SizedBox(height: 15),
                     ),
-                    PlayRecordView(),
-                    SliverToBoxAdapter(
+                    const PlayRecordView(),
+                    const SliverToBoxAdapter(
                       child: SizedBox(height: 15),
                     ),
-                    PopularAnimeView(),
+                    PopularAnimeView(contentWidth: contentWidth),
                   ],
                 ),
-              );
-            },
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
-      floatingActionButton: _showBackToTopButton
-          ? FloatingActionButton(
-              onPressed: scrollToTop,
-              child: const Icon(Icons.arrow_upward_rounded),
-            )
-          : null,
     );
   }
 }

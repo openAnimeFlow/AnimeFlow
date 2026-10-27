@@ -230,35 +230,38 @@ class InfoSynopsisView extends StatelessWidget {
       borderRadius: BorderRadius.circular(8.0),
     );
 
-    return SliverToBoxAdapter(
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: LayoutConstant.maxWidth,
-          ),
-          child: Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 30,
-                  width: 80,
-                  decoration: boxDecoration,
-                ),
-                ...List.generate(6, (index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Container(
-                      height: 20,
-                      width: index == 5 ? 240 : double.infinity,
-                      decoration: boxDecoration,
-                    ),
-                  );
-                }),
-              ],
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      sliver: SliverToBoxAdapter(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: LayoutConstant.maxWidth,
+            ),
+            child: Shimmer.fromColors(
+              baseColor: baseColor,
+              highlightColor: highlightColor,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 30,
+                    width: 80,
+                    decoration: boxDecoration,
+                  ),
+                  ...List.generate(6, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Container(
+                        height: 20,
+                        width: index == 5 ? 240 : double.infinity,
+                        decoration: boxDecoration,
+                      ),
+                    );
+                  }),
+                ],
+              ),
             ),
           ),
         ),

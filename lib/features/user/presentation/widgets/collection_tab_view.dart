@@ -178,6 +178,10 @@ class _CollectionTabView extends ConsumerWidget {
     final collectionsItem = tabState.data;
     _scheduleLoadMoreIfNeeded(context, ref, tabState, collectionsItem);
 
+    // NestedScrollView 折叠头部时会改变列表高度，网格仅依赖宽度和像素密度。
+    Widget? scrollView;
+    double? previousWidth;
+    double? previousPixelRatio;
     return Builder(
       builder: (BuildContext context) {
         final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
@@ -204,9 +208,26 @@ class _CollectionTabView extends ConsumerWidget {
             },
             child: LayoutBuilder(
               builder: (context, constraints) {
+                final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+                if (scrollView != null &&
+                    previousWidth == constraints.maxWidth &&
+                    previousPixelRatio == pixelRatio) {
+                  return scrollView!;
+                }
+                previousWidth = constraints.maxWidth;
+                previousPixelRatio = pixelRatio;
                 final horizontalPadding =
                     _calculateHorizontalPadding(constraints.maxWidth);
-                return CustomScrollView(
+                final availableWidth =
+                    constraints.maxWidth - horizontalPadding * 2;
+                final crossAxisCount =
+                    (availableWidth / 320.0).floor().clamp(1, 4);
+                final cardWidth = (availableWidth - 12 * (crossAxisCount - 1)) /
+                    crossAxisCount;
+                final coverCacheWidth = (cardWidth / 2.5 * (2 / 3) * pixelRatio)
+                    .ceil()
+                    .clamp(1, 4096);
+                return scrollView = CustomScrollView(
                   key: PageStorageKey<int>(type),
                   scrollBehavior: const ScrollBehavior().copyWith(
                     scrollbars: false,
@@ -273,40 +294,32 @@ class _CollectionTabView extends ConsumerWidget {
                           horizontal: horizontalPadding,
                           vertical: 10,
                         ),
-                        sliver: SliverLayoutBuilder(
-                          builder: (context, constraints) {
-                            final availableWidth = constraints.crossAxisExtent -
-                                horizontalPadding * 2;
-                            return SliverGrid(
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: (availableWidth / 320.0)
-                                    .floor()
-                                    .clamp(1, 4),
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
-                                childAspectRatio: 2.5,
-                              ),
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) {
-                                  final collection =
-                                      collectionsItem.data[index];
-                                  return _CollectionItemCard(
-                                    key: ValueKey(collection.id),
-                                    collection: collection,
-                                    onCollectTypeChanged: (newType) =>
-                                        _onCollectTypeChanged(
-                                      context,
-                                      ref,
-                                      collection,
-                                      newType,
-                                    ),
-                                  );
-                                },
-                                childCount: collectionsItem.data.length,
-                              ),
-                            );
-                          },
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 2.5,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final collection = collectionsItem.data[index];
+                              return _CollectionItemCard(
+                                key: ValueKey(collection.id),
+                                collection: collection,
+                                coverCacheWidth: coverCacheWidth,
+                                onCollectTypeChanged: (newType) =>
+                                    _onCollectTypeChanged(
+                                  context,
+                                  ref,
+                                  collection,
+                                  newType,
+                                ),
+                              );
+                            },
+                            childCount: collectionsItem.data.length,
+                          ),
                         ),
                       ),
                       SliverPadding(
@@ -390,11 +403,13 @@ class _CollectionFooter extends StatelessWidget {
 /// 条目卡片。
 class _CollectionItemCard extends StatefulWidget {
   final UserCollectionData collection;
+  final int coverCacheWidth;
   final Future<void> Function(CollectType type) onCollectTypeChanged;
 
   const _CollectionItemCard({
     super.key,
     required this.collection,
+    required this.coverCacheWidth,
     required this.onCollectTypeChanged,
   });
 
@@ -472,6 +487,7 @@ class _CollectionItemCardState extends State<_CollectionItemCard> {
             child: AnimationNetworkImage(
               borderRadius: const BorderRadius.all(Radius.circular(12)),
               url: collection.images.large,
+              memCacheWidth: widget.coverCacheWidth,
               fit: BoxFit.cover,
             ),
           ),

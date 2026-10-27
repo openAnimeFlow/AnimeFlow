@@ -35,7 +35,7 @@ class UserView extends ConsumerStatefulWidget {
 class _UserViewState extends ConsumerState<UserView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool isPinned = false;
+  final _isPinned = ValueNotifier(false);
   bool isHideUserInfo = true;
 
   final Map<int, GlobalKey<RefreshIndicatorState>> _refreshIndicatorKeys = {
@@ -137,6 +137,7 @@ class _UserViewState extends ConsumerState<UserView>
   void dispose() {
     _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
+    _isPinned.dispose();
     super.dispose();
   }
 
@@ -185,18 +186,72 @@ class _UserViewState extends ConsumerState<UserView>
     double contentHeight,
   ) {
     final statusBarHeight = MediaQuery.paddingOf(context).top;
+    final header = ValueListenableBuilder<bool>(
+      valueListenable: _isPinned,
+      builder: (context, isPinned, child) => SliverAppBar(
+        automaticallyImplyLeading: false,
+        titleSpacing: 0,
+        title: _buildAppBarTitle(context, isPinned),
+        pinned: true,
+        floating: false,
+        snap: false,
+        elevation: isPinned ? 4.0 : 0.0,
+        forceElevated: isPinned,
+        expandedHeight: contentHeight +
+            statusBarHeight +
+            kToolbarHeight +
+            kTextTabBarHeight,
+        flexibleSpace: child,
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          dividerHeight: 0,
+          tabs: tabs.map((String name) {
+            final parts = name.split('\n');
+            return Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      parts[0],
+                      style: const TextStyle(fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    parts.length > 1 ? parts[1] : '0',
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+          labelColor: Theme.of(context).colorScheme.primary,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: Theme.of(context).colorScheme.primary,
+        ),
+      ),
+      child: FlexibleSpaceBar(
+        collapseMode: CollapseMode.pin,
+        background: Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: RepaintBoundary(child: _buildHeaderContent()),
+        ),
+      ),
+    );
     return Scaffold(
       bottomNavigationBar: const CollectionSyncPendingBanner(),
       body: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
           if (notification.depth == 0 &&
+              notification.metrics.axis == Axis.vertical &&
               notification is ScrollUpdateNotification) {
-            final bool isPinned = notification.metrics.pixels >= contentHeight;
-            if (this.isPinned != isPinned) {
-              setState(() {
-                this.isPinned = isPinned;
-              });
-            }
+            _isPinned.value = notification.metrics.pixels >= contentHeight;
           }
           return false;
         },
@@ -207,60 +262,7 @@ class _UserViewState extends ConsumerState<UserView>
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
                   context,
                 ),
-                sliver: SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  titleSpacing: 0,
-                  title: _buildAppBarTitle(context),
-                  pinned: true,
-                  floating: false,
-                  snap: false,
-                  elevation: isPinned ? 4.0 : 0.0,
-                  forceElevated: isPinned,
-                  expandedHeight: contentHeight +
-                      statusBarHeight +
-                      kToolbarHeight +
-                      kTextTabBarHeight,
-                  flexibleSpace: FlexibleSpaceBar(
-                    collapseMode: CollapseMode.pin,
-                    background: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: _buildHeaderContent(),
-                    ),
-                  ),
-                  bottom: TabBar(
-                    controller: _tabController,
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    dividerHeight: 0,
-                    tabs: tabs.map((String name) {
-                      final parts = name.split('\n');
-                      return Tab(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                parts[0],
-                                style: const TextStyle(fontSize: 12),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              parts.length > 1 ? parts[1] : '0',
-                              style: const TextStyle(fontSize: 11),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    labelColor: Theme.of(context).colorScheme.primary,
-                    unselectedLabelColor: Colors.grey,
-                    indicatorColor: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
+                sliver: header,
               ),
             ];
           },
@@ -313,7 +315,7 @@ class _UserViewState extends ConsumerState<UserView>
     );
   }
 
-  Widget _buildAppBarTitle(BuildContext context) {
+  Widget _buildAppBarTitle(BuildContext context, bool isPinned) {
     final user = widget.user;
     final currentType = _currentType;
     final l10n = AppLocalizations.of(context);
@@ -336,7 +338,12 @@ class _UserViewState extends ConsumerState<UserView>
                       borderRadius: BorderRadius.circular(5),
                       child: user.avatar != null && user.avatar!.isNotEmpty
                           ? AnimationNetworkImage(
-                              width: 30, height: 30, url: user.avatar!)
+                              width: 30,
+                              height: 30,
+                              memCacheWidth:
+                                  (30 * MediaQuery.devicePixelRatioOf(context))
+                                      .ceil(),
+                              url: user.avatar!)
                           : const Icon(Icons.person, size: 30),
                     ),
                     const SizedBox(width: 5),
@@ -488,6 +495,7 @@ class _UserViewState extends ConsumerState<UserView>
                 child: LayoutBuilder(
                   builder: (context, boxConstraints) {
                     return ImageFiltered(
+                      enabled: blurSigma > 0,
                       imageFilter: ImageFilter.blur(
                           sigmaX: blurSigma, sigmaY: blurSigma),
                       child: ShaderMask(
@@ -501,6 +509,10 @@ class _UserViewState extends ConsumerState<UserView>
                         },
                         child: AnimationNetworkImage(
                           url: backgroundUrl,
+                          memCacheWidth: (boxConstraints.maxWidth *
+                                  MediaQuery.devicePixelRatioOf(context))
+                              .ceil()
+                              .clamp(1, 4096),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -522,6 +534,8 @@ class _UserViewState extends ConsumerState<UserView>
                     fit: BoxFit.cover,
                     width: 100,
                     height: 100,
+                    memCacheWidth:
+                        (100 * MediaQuery.devicePixelRatioOf(context)).ceil(),
                   )
                 else
                   const Icon(Icons.person, size: 96),

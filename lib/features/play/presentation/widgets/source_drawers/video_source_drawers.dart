@@ -1,3 +1,5 @@
+import 'package:anime_flow/features/play/application/episode_source_matcher.dart';
+import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
@@ -19,7 +21,7 @@ enum _SourceEpisodeMode { matched, all }
 /// 当前正在播放的源：播放地址 + 线路名 + 资源标题。
 typedef _PlayingSource = ({String url, String lineName, String resourceTitle});
 
-@Dependencies([VideoSourceNotifier])
+@Dependencies([Episodes, VideoSourceNotifier])
 class VideoSourceDrawers extends ConsumerStatefulWidget {
   final Function(String url)? onVideoUrlSelected;
   final VideoSourceNotifier videoSourceNotifier;
@@ -284,11 +286,14 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         Expanded(
           child: Consumer(
             builder: (context, ref, child) {
+              final currentEpisodeIndex = ref.watch(
+                episodesProvider
+                    .select((state) => state.asData?.value.episodeIndex ?? 0),
+              );
               final sourceState = ref.watch(
                 videoSourceProvider.select(
                   (state) => (
                     videoResources: state.videoResources,
-                    currentEpisodeIndex: state.currentEpisodeIndex,
                     selectedWebsiteIndex: state.selectedWebsiteIndex,
                     webSiteTitle: state.webSiteTitle,
                     videoUrl: state.videoUrl,
@@ -314,7 +319,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                     child: _buildVideoSource(
                       dataSource: sourceState.videoResources,
                       selectedIndex: selectedIndex,
-                      currentEpisodeIndex: sourceState.currentEpisodeIndex,
+                      currentEpisodeIndex: currentEpisodeIndex,
                       playing: (
                         url: sourceState.videoUrl,
                         lineName: sourceState.lineName,
@@ -555,13 +560,14 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
     // 预过滤：只保留有匹配当前剧集的资源项
     final matchedResources = filteredEpisodeResources
-        .where(
-            (item) => item.episodes.any((ep) => ep.episodeSort == episodeIndex))
+        .where((item) =>
+            EpisodeSourceMatcher.findEpisode(item.episodes, episodeIndex) !=
+            null)
         .toList();
 
     final excludedEpisodesCount = filteredEpisodeResources
-        .expand((item) =>
-            item.episodes.where((ep) => ep.episodeSort != episodeIndex))
+        .expand((item) => item.episodes.where(
+            (ep) => !EpisodeSourceMatcher.matchesEpisode(ep, episodeIndex)))
         .length;
 
     return Material(
@@ -1015,7 +1021,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   /// 资源项中对应集数的剧集（调用方已按集数过滤，取首个匹配项即可）。
   Episode _episodeOf(EpisodeResourcesItem item, int episodeIndex) {
-    return item.episodes.firstWhere((ep) => ep.episodeSort == episodeIndex);
+    return EpisodeSourceMatcher.findEpisode(item.episodes, episodeIndex)!;
   }
 
   /// 计算当前播放源在候选列表中的下标。
@@ -1030,7 +1036,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     var fallbackIndex = -1;
     for (var index = 0; index < length; index++) {
       final episode = episodeAt(index);
-      if (episodeSort != null && episode.episodeSort != episodeSort) {
+      if (episodeSort != null &&
+          !EpisodeSourceMatcher.matchesEpisode(episode, episodeSort)) {
         continue;
       }
       if (!_isSameSourceUrl(baseUrl, episode, playing)) {

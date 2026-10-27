@@ -1,5 +1,4 @@
 import 'package:anime_flow/features/play/application/player_bindings.dart';
-import 'dart:async';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/core/crawler/captcha_page_url.dart';
 import 'package:anime_flow/core/crawler/rule_engine.dart';
@@ -8,6 +7,9 @@ import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/utils/utils.dart' show resolveSourceUrl;
 import 'package:anime_flow/features/play/application/search_result_rank_service.dart';
 import 'package:anime_flow/features/play/application/chapter_collection_service.dart';
+import 'package:anime_flow/features/play/application/episode_source_matcher.dart';
+import 'package:anime_flow/features/play/domain/selected_video_source.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_source_state.dart';
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -21,83 +23,9 @@ import 'package:anime_flow/features/play/presentation/providers/play_args_provid
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+export 'video_source_state.dart';
+
 part 'video_source_provider.g.dart';
-
-class VideoSourceState {
-  const VideoSourceState({
-    this.currentEpisodeIndex = 0,
-    this.videoResources = const [],
-    this.webSiteTitle = '',
-    this.webSiteIcon = '',
-    this.resourceTitle = '',
-    this.lineName = '',
-    this.videoUrl = '',
-    this.keyword = '',
-    this.isSearchCompleted = false,
-    this.selectedWebsiteIndex = 0,
-    this.userManuallySelected = false,
-    this.manualEpisodeSources = const {},
-  });
-
-  final int currentEpisodeIndex;
-  final List<ResourcesItem> videoResources;
-  final String webSiteTitle;
-  final String webSiteIcon;
-  final String resourceTitle;
-  final String lineName;
-  final String videoUrl;
-  final String keyword;
-  final bool isSearchCompleted;
-  final int selectedWebsiteIndex;
-  final bool userManuallySelected;
-  final Map<int, ManualEpisodeSource> manualEpisodeSources;
-
-  VideoSourceState copyWith({
-    int? currentEpisodeIndex,
-    List<ResourcesItem>? videoResources,
-    String? webSiteTitle,
-    String? webSiteIcon,
-    String? resourceTitle,
-    String? lineName,
-    String? videoUrl,
-    String? keyword,
-    bool? isSearchCompleted,
-    int? selectedWebsiteIndex,
-    bool? userManuallySelected,
-    Map<int, ManualEpisodeSource>? manualEpisodeSources,
-  }) {
-    return VideoSourceState(
-      currentEpisodeIndex: currentEpisodeIndex ?? this.currentEpisodeIndex,
-      videoResources: videoResources ?? this.videoResources,
-      webSiteTitle: webSiteTitle ?? this.webSiteTitle,
-      webSiteIcon: webSiteIcon ?? this.webSiteIcon,
-      resourceTitle: resourceTitle ?? this.resourceTitle,
-      lineName: lineName ?? this.lineName,
-      videoUrl: videoUrl ?? this.videoUrl,
-      keyword: keyword ?? this.keyword,
-      isSearchCompleted: isSearchCompleted ?? this.isSearchCompleted,
-      selectedWebsiteIndex: selectedWebsiteIndex ?? this.selectedWebsiteIndex,
-      userManuallySelected: userManuallySelected ?? this.userManuallySelected,
-      manualEpisodeSources: manualEpisodeSources ?? this.manualEpisodeSources,
-    );
-  }
-}
-
-class ManualEpisodeSource {
-  const ManualEpisodeSource({
-    required this.websiteName,
-    required this.websiteIcon,
-    required this.resourceTitle,
-    required this.lineName,
-    required this.videoUrl,
-  });
-
-  final String websiteName;
-  final String websiteIcon;
-  final String resourceTitle;
-  final String lineName;
-  final String videoUrl;
-}
 
 @Riverpod(dependencies: [Episodes, playExtra, playSession, PlayStateNotifier])
 class VideoSourceNotifier extends _$VideoSourceNotifier {
@@ -126,24 +54,11 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
 
   @override
   VideoSourceState build() {
-    ref.onDispose(() {
-      unawaited(_dispose());
-    });
-    final currentEpisodeIndex =
-        ref.read(episodesProvider).asData?.value.episodeIndex ?? 0;
-    ref.listen<AsyncValue<EpisodesData>>(
-      episodesProvider,
-      (previous, next) {
-        final nextEpisodeIndex = next.asData?.value.episodeIndex ?? 0;
-        if (state.currentEpisodeIndex != nextEpisodeIndex) {
-          state = state.copyWith(currentEpisodeIndex: nextEpisodeIndex);
-        }
-      },
-    );
-    return VideoSourceState(currentEpisodeIndex: currentEpisodeIndex);
+    ref.onDispose(_dispose);
+    return const VideoSourceState();
   }
 
-  Future<void> _dispose() async {
+  void _dispose() {
     _resolution?.cancel();
     _resolution = null;
     _searchSessionId++;
@@ -179,11 +94,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
           preserveCurrentPlayback ? state.userManuallySelected : false,
       isSearchCompleted: false,
       selectedWebsiteIndex: 0,
-      webSiteTitle: preserveCurrentPlayback ? state.webSiteTitle : '',
-      webSiteIcon: preserveCurrentPlayback ? state.webSiteIcon : '',
-      resourceTitle: preserveCurrentPlayback ? state.resourceTitle : '',
-      lineName: preserveCurrentPlayback ? state.lineName : '',
-      videoUrl: preserveCurrentPlayback ? state.videoUrl : '',
+      selectedSource: preserveCurrentPlayback ? state.selectedSource : null,
     );
 
     final eligibleConfigs = <CrawlConfigItem>[];
@@ -469,10 +380,6 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
   }
 
-  void updateSearchCompleted(bool isSearchCompleted) {
-    state = state.copyWith(isSearchCompleted: isSearchCompleted);
-  }
-
   Future<List<CrawlConfigItem>> _loadSources() {
     return ref.read(sourceRepositoryProvider).getSources();
   }
@@ -548,22 +455,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     state = state.copyWith(videoResources: updatedResources);
   }
 
-  void setWebSite({
-    required String title,
-    required String iconUrl,
-    String resourceTitle = '',
-    String lineName = '',
-    required String videoUrl,
-    bool isManual = false,
-  }) {
-    state = state.copyWith(
-      webSiteTitle: title,
-      webSiteIcon: iconUrl,
-      resourceTitle: resourceTitle,
-      lineName: lineName,
-      videoUrl: videoUrl,
-      userManuallySelected: isManual ? true : state.userManuallySelected,
-    );
+  void _selectSource(SelectedVideoSource? source) {
+    state = state.copyWith(selectedSource: source);
   }
 
   void bindManualSourceForCurrentEpisode({
@@ -573,38 +466,20 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     required String lineName,
     required String videoUrl,
   }) {
-    final episodeId = _currentEpisodeId;
-    if (episodeId <= 0) {
-      setWebSite(
-        title: websiteName,
-        iconUrl: websiteIcon,
-        resourceTitle: resourceTitle,
-        lineName: lineName,
-        videoUrl: videoUrl,
-        isManual: true,
-      );
-      return;
-    }
-
-    final nextManualSources = {
-      ...state.manualEpisodeSources,
-      episodeId: ManualEpisodeSource(
-        websiteName: websiteName,
-        websiteIcon: websiteIcon,
-        resourceTitle: resourceTitle,
-        lineName: lineName,
-        videoUrl: videoUrl,
-      ),
-    };
-
-    state = state.copyWith(manualEpisodeSources: nextManualSources);
-    setWebSite(
-      title: websiteName,
-      iconUrl: websiteIcon,
+    final source = SelectedVideoSource(
+      websiteName: websiteName,
+      websiteIcon: websiteIcon,
       resourceTitle: resourceTitle,
       lineName: lineName,
       videoUrl: videoUrl,
-      isManual: true,
+    );
+    final episodeId = _currentEpisodeId;
+    state = state.copyWith(
+      selectedSource: source,
+      userManuallySelected: true,
+      manualEpisodeSources: episodeId > 0
+          ? {...state.manualEpisodeSources, episodeId: source}
+          : state.manualEpisodeSources,
     );
   }
 
@@ -620,10 +495,13 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
   }
 
+  int get _currentEpisodeIndex =>
+      ref.read(episodesProvider).asData?.value.episodeIndex ?? 0;
+
   int get _currentEpisodeId =>
       ref.read(episodesProvider).asData?.value.episodeId ?? 0;
 
-  ManualEpisodeSource? _manualSourceForCurrentEpisode() {
+  SelectedVideoSource? _manualSourceForCurrentEpisode() {
     final episodeId = _currentEpisodeId;
     if (episodeId <= 0) {
       return null;
@@ -638,70 +516,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       return false;
     }
 
-    setWebSite(
-      title: manualSource.websiteName,
-      iconUrl: manualSource.websiteIcon,
-      resourceTitle: manualSource.resourceTitle,
-      lineName: manualSource.lineName,
-      videoUrl: manualSource.videoUrl,
-    );
+    _selectSource(manualSource);
     return loadVideoPage(manualSource.videoUrl);
-  }
-
-  List<_AutoLoadCandidate> _buildAutoLoadCandidates(
-    List<ResourcesItem> resources, {
-    String? preferredWebsiteName,
-  }) {
-    final candidates = <_AutoLoadCandidate>[];
-
-    for (var websiteIndex = 0;
-        websiteIndex < resources.length;
-        websiteIndex++) {
-      final resource = resources[websiteIndex];
-      for (final resourceItem in resource.episodeResources) {
-        final episode = _firstEpisodeWhere(
-          resourceItem.episodes,
-          (ep) => ep.episodeSort == state.currentEpisodeIndex,
-        );
-        if (episode == null) {
-          continue;
-        }
-
-        candidates.add(
-          _AutoLoadCandidate(
-            websiteIndex: websiteIndex,
-            resource: resource,
-            resourceItem: resourceItem,
-            episode: episode,
-          ),
-        );
-      }
-    }
-
-    candidates.sort((a, b) {
-      if (preferredWebsiteName != null && preferredWebsiteName.isNotEmpty) {
-        final aPreferred = a.resource.websiteName == preferredWebsiteName;
-        final bPreferred = b.resource.websiteName == preferredWebsiteName;
-        if (aPreferred != bPreferred) {
-          return aPreferred ? -1 : 1;
-        }
-      }
-      final matchRatioCompare =
-          b.resourceItem.matchRatio.compareTo(a.resourceItem.matchRatio);
-      if (matchRatioCompare != 0) {
-        return matchRatioCompare;
-      }
-      return a.websiteIndex.compareTo(b.websiteIndex);
-    });
-
-    return candidates;
-  }
-
-  void autoSelectFirstResource(
-    List<ResourcesItem> resources, {
-    bool force = false,
-  }) {
-    autoSelectAvailableResource(force: force, preferCurrentWebsite: true);
   }
 
   void autoSelectAvailableResource({
@@ -739,7 +555,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   void _resetAutoSelectionAttempts() {
     _autoSelectEpoch++;
     _isAutoSelecting = false;
-    _autoSelectEpisodeIndex = state.currentEpisodeIndex;
+    _autoSelectEpisodeIndex = _currentEpisodeIndex;
     _preferredAutoSelectWebsiteName = null;
     _attemptedAutoLoadUrls.clear();
   }
@@ -749,21 +565,15 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         state.webSiteTitle.isNotEmpty ? state.webSiteTitle : null;
     _resetAutoSelectionAttempts();
     _preferredAutoSelectWebsiteName = preferredWebsiteName;
-    state = state.copyWith(
-      webSiteTitle: '',
-      webSiteIcon: '',
-      resourceTitle: '',
-      lineName: '',
-      videoUrl: '',
-    );
+    _selectSource(null);
   }
 
   void _syncAutoSelectionEpisode() {
-    if (_autoSelectEpisodeIndex == state.currentEpisodeIndex) {
+    if (_autoSelectEpisodeIndex == _currentEpisodeIndex) {
       return;
     }
     _autoSelectEpoch++;
-    _autoSelectEpisodeIndex = state.currentEpisodeIndex;
+    _autoSelectEpisodeIndex = _currentEpisodeIndex;
     _attemptedAutoLoadUrls.clear();
   }
 
@@ -795,8 +605,9 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
           return;
         }
 
-        final candidates = _buildAutoLoadCandidates(
+        final candidates = EpisodeSourceMatcher.buildCandidates(
           state.videoResources,
+          episodeIndex: _currentEpisodeIndex,
           preferredWebsiteName: preferredWebsiteName,
         ).where((candidate) {
           final url = resolveSourceUrl(
@@ -813,13 +624,15 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
             candidate.resource.baseUrl, candidate.episode.like);
         _attemptedAutoLoadUrls.add(candidateUrl);
 
-        state = state.copyWith(selectedWebsiteIndex: candidate.websiteIndex);
-        setWebSite(
-          title: candidate.resource.websiteName,
-          iconUrl: candidate.resource.websiteIcon,
-          resourceTitle: candidate.resourceItem.subjectsTitle,
-          lineName: candidate.resourceItem.lineNames,
-          videoUrl: candidateUrl,
+        state = state.copyWith(
+          selectedWebsiteIndex: candidate.websiteIndex,
+          selectedSource: SelectedVideoSource(
+            websiteName: candidate.resource.websiteName,
+            websiteIcon: candidate.resource.websiteIcon,
+            resourceTitle: candidate.resourceItem.subjectsTitle,
+            lineName: candidate.resourceItem.lineNames,
+            videoUrl: candidateUrl,
+          ),
         );
 
         final loaded = await loadVideoPage(
@@ -835,13 +648,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         if (epoch != _autoSelectEpoch || state.userManuallySelected) {
           return;
         }
-        setWebSite(
-          title: '',
-          iconUrl: '',
-          resourceTitle: '',
-          lineName: '',
-          videoUrl: '',
-        );
+        _selectSource(null);
       }
     } finally {
       if (epoch == _autoSelectEpoch) {
@@ -966,28 +773,4 @@ CrawlConfigItem? _firstConfigWhere(
     if (test(config)) return config;
   }
   return null;
-}
-
-Episode? _firstEpisodeWhere(
-  List<Episode> episodes,
-  bool Function(Episode episode) test,
-) {
-  for (final episode in episodes) {
-    if (test(episode)) return episode;
-  }
-  return null;
-}
-
-class _AutoLoadCandidate {
-  const _AutoLoadCandidate({
-    required this.websiteIndex,
-    required this.resource,
-    required this.resourceItem,
-    required this.episode,
-  });
-
-  final int websiteIndex;
-  final ResourcesItem resource;
-  final EpisodeResourcesItem resourceItem;
-  final Episode episode;
 }

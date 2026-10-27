@@ -199,7 +199,7 @@ class Ranking extends _$Ranking {
       return;
     }
 
-    state = AsyncData(current.copyWith(isLoadingMore: true));
+    state = AsyncData(current.copyWith(isLoadingMore: true, clearError: true));
 
     try {
       final page = current.currentPage + 1;

@@ -20,7 +20,7 @@ class RankingPage extends StatefulWidget {
 
 class _RankingPageState extends State<RankingPage> {
   final scrollController = ScrollController();
-  bool showBackToTop = false;
+  final _showBackToTop = ValueNotifier(false);
   bool isDetailsContent = true;
 
   @override
@@ -40,12 +40,7 @@ class _RankingPageState extends State<RankingPage> {
   }
 
   void scrollListener() {
-    final shouldShow = scrollController.offset >= 300;
-    if (shouldShow != showBackToTop) {
-      setState(() {
-        showBackToTop = shouldShow;
-      });
-    }
+    _showBackToTop.value = scrollController.offset >= 300;
   }
 
   void scrollToTop() {
@@ -60,6 +55,7 @@ class _RankingPageState extends State<RankingPage> {
   void dispose() {
     scrollController.removeListener(scrollListener);
     scrollController.dispose();
+    _showBackToTop.dispose();
     super.dispose();
   }
 
@@ -74,11 +70,24 @@ class _RankingPageState extends State<RankingPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.rankingTitle),
+    return ValueListenableBuilder<bool>(
+      valueListenable: _showBackToTop,
+      builder: (context, visible, child) => Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.rankingTitle),
+        ),
+        body: child,
+        floatingActionButton: visible
+            ? FloatingActionButton(
+                onPressed: scrollToTop,
+                child: Icon(
+                  Icons.arrow_upward,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              )
+            : null,
       ),
-      body: LayoutBuilder(
+      child: LayoutBuilder(
         builder: (context, constraints) {
           final horizontalPadding = _horizontalPadding(constraints.maxWidth);
           final contentWidth = constraints.maxWidth - horizontalPadding * 2;
@@ -103,6 +112,7 @@ class _RankingPageState extends State<RankingPage> {
                             state.items.isNotEmpty &&
                             !state.isReloading &&
                             !state.isLoadingMore &&
+                            state.errorMessage == null &&
                             state.hasMore) {
                           ref.read(rankingProvider.notifier).loadMore();
                         }
@@ -192,15 +202,6 @@ class _RankingPageState extends State<RankingPage> {
           );
         },
       ),
-      floatingActionButton: showBackToTop
-          ? FloatingActionButton(
-              onPressed: scrollToTop,
-              child: Icon(
-                Icons.arrow_upward,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            )
-          : null,
     );
   }
 }

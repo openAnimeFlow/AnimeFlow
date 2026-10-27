@@ -26,17 +26,21 @@ class RankingGrid extends ConsumerWidget {
     final rankingAsync = ref.watch(rankingProvider);
 
     if (rankingAsync.isLoading && !rankingAsync.hasValue) {
-      return const SizedBox(
-        height: 320,
-        child: Center(child: CircularProgressIndicator()),
+      return const SliverToBoxAdapter(
+        child: SizedBox(
+          height: 320,
+          child: Center(child: CircularProgressIndicator()),
+        ),
       );
     }
 
     final rankingState = rankingAsync.requireValue;
     if (rankingState.items.isEmpty) {
-      return SizedBox(
-        height: 320,
-        child: Center(child: Text(l10n.noData)),
+      return SliverToBoxAdapter(
+        child: SizedBox(
+          height: 320,
+          child: Center(child: Text(l10n.noData)),
+        ),
       );
     }
 
@@ -50,6 +54,12 @@ class RankingGrid extends ConsumerWidget {
             ? 2
             : 1;
     final posterColumnCount = (contentWidth / 200).floor().clamp(3, 7);
+    final posterWidth =
+        (contentWidth - 10 * (posterColumnCount - 1)) / posterColumnCount;
+    final posterCacheWidth =
+        (posterWidth * MediaQuery.devicePixelRatioOf(context))
+            .ceil()
+            .clamp(1, 4096);
 
     return SliverMainAxisGroup(
       slivers: [
@@ -88,19 +98,39 @@ class RankingGrid extends ConsumerWidget {
                 : _RankingPosterTile(
                     subject: items[index + 3],
                     rank: index + 4,
+                    memCacheWidth: posterCacheWidth,
                   ),
           ),
-        SliverToBoxAdapter(
-          child: showProgress
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 18),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              : Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
-                  child: Center(child: Text(l10n.rankingEnd)),
+        if (showProgress)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 18),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          )
+        else if (rankingState.errorMessage != null && rankingState.hasMore)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              child: Center(
+                child: TextButton.icon(
+                  onPressed: () =>
+                      ref.read(rankingProvider.notifier).loadMore(),
+                  icon: const Icon(Icons.refresh),
+                  label: Text(l10n.retry),
                 ),
-        ),
+              ),
+            ),
+          )
+        else if (!rankingState.hasMore)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+              child: Center(child: Text(l10n.rankingEnd)),
+            ),
+          )
+        else
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
     );
   }
@@ -197,8 +227,16 @@ class _FeaturedCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              AnimationNetworkImage(
-                  url: subject.images.large, fit: BoxFit.cover),
+              LayoutBuilder(
+                builder: (context, constraints) => AnimationNetworkImage(
+                  url: subject.images.large,
+                  fit: BoxFit.cover,
+                  memCacheWidth: (constraints.maxWidth *
+                          MediaQuery.devicePixelRatioOf(context))
+                      .ceil()
+                      .clamp(1, 4096),
+                ),
+              ),
               DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -323,10 +361,15 @@ class _RankingSectionHeader extends StatelessWidget {
 }
 
 class _RankingPosterTile extends StatelessWidget {
-  const _RankingPosterTile({required this.subject, required this.rank});
+  const _RankingPosterTile({
+    required this.subject,
+    required this.rank,
+    required this.memCacheWidth,
+  });
 
   final Subject subject;
   final int rank;
+  final int memCacheWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -340,6 +383,7 @@ class _RankingPosterTile extends StatelessWidget {
               id: subject.id, name: title, image: subject.images.large)),
       child: SubjectCard(
         image: subject.images.large,
+        memCacheWidth: memCacheWidth,
         title: title,
         rating: rank,
       ),
@@ -385,6 +429,8 @@ class _RankingListTile extends StatelessWidget {
                 child: AnimationNetworkImage(
                   borderRadius: BorderRadius.circular(15),
                   url: subject.images.small,
+                  memCacheWidth:
+                      (100 * MediaQuery.devicePixelRatioOf(context)).ceil(),
                   fit: BoxFit.cover,
                 ),
               ),

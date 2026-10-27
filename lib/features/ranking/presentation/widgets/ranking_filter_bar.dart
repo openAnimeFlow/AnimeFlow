@@ -10,13 +10,18 @@ class RankingFilterBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final rankingState = ref.watch(rankingProvider).asData?.value;
+    final (selectedSort, selectedYear, selectedMonth) =
+        ref.watch(rankingProvider.select((value) {
+      final state = value.asData?.value;
+      return (
+        state?.selectedSort ?? SortType.rank,
+        state?.selectedYear,
+        state?.selectedMonth,
+      );
+    }));
     final years = ref.watch(rankingYearsProvider);
     final months = ref.watch(rankingMonthsProvider);
     final notifier = ref.read(rankingProvider.notifier);
-    final selectedSort = rankingState?.selectedSort ?? SortType.rank;
-    final selectedYear = rankingState?.selectedYear;
-    final selectedMonth = rankingState?.selectedMonth;
 
     return Wrap(
       alignment: WrapAlignment.start,

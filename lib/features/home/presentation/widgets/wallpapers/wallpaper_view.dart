@@ -25,7 +25,8 @@ class _WallpaperViewState extends State<WallpaperView>
     with AutomaticKeepAliveClientMixin {
   final _controller = WallpaperController();
   final _scrollController = ScrollController();
-  bool _showBackToTopButton = false;
+  final _backToTopVisible = ValueNotifier(false);
+  bool _scrollCheckScheduled = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -34,18 +35,25 @@ class _WallpaperViewState extends State<WallpaperView>
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
+    _controller.addListener(_scheduleScrollCheck);
     unawaited(_controller.refresh());
   }
 
   void _scrollListener() {
     if (!_scrollController.hasClients) return;
     _loadNearBottom();
-    final shouldShow = _scrollController.position.pixels > 300;
-    if (shouldShow != _showBackToTopButton && mounted) {
-      setState(() {
-        _showBackToTopButton = shouldShow;
-      });
-    }
+    _backToTopVisible.value = _scrollController.position.pixels > 300;
+  }
+
+  void _scheduleScrollCheck() {
+    if (_scrollCheckScheduled || _controller.isLoading) return;
+    _scrollCheckScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollCheckScheduled = false;
+      if (mounted) _scrollListener();
+    });
+    // 尺寸通知可能在帧结束时到达，确保检查不会一直等到下一次用户操作。
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   Future<void> _scrollToTop() async {
@@ -73,7 +81,9 @@ class _WallpaperViewState extends State<WallpaperView>
   void dispose() {
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
+    _controller.removeListener(_scheduleScrollCheck);
     _controller.dispose();
+    _backToTopVisible.dispose();
     super.dispose();
   }
 
@@ -82,14 +92,22 @@ class _WallpaperViewState extends State<WallpaperView>
     super.build(context);
     final l10n = AppLocalizations.of(context);
     return WallpaperBrowser(
-      listBuilder: (context, onOpen) => Scaffold(
-        body: AnimatedBuilder(
+      listBuilder: (context, onOpen) => ValueListenableBuilder<bool>(
+        valueListenable: _backToTopVisible,
+        builder: (context, visible, child) => Scaffold(
+          body: child,
+          floatingActionButton: visible
+              ? FloatingActionButton(
+                  heroTag: null,
+                  tooltip: l10n.backToTop,
+                  onPressed: _scrollToTop,
+                  child: const Icon(Icons.arrow_upward_rounded),
+                )
+              : null,
+        ),
+        child: AnimatedBuilder(
           animation: _controller,
           builder: (context, _) {
-            // Also continue through pages with no cover images and fill large viewports.
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) _scrollListener();
-            });
             final items = _controller.items;
             final sorts = {
               SortType.trends: l10n.sortTrends,
@@ -101,87 +119,89 @@ class _WallpaperViewState extends State<WallpaperView>
             return LayoutBuilder(builder: (context, constraints) {
               final padding = math.max(
                   12.0, (constraints.maxWidth - LayoutConstant.maxWidth) / 2);
-              return RefreshIndicator(
-                onRefresh: _refresh,
-                child: CustomScrollView(
-                  key: const PageStorageKey('wallpapers'),
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: padding, vertical: 12),
-                      sliver: SliverMainAxisGroup(slivers: [
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                for (final entry in sorts.entries)
-                                  ChoiceChip(
-                                    label: Text(entry.value),
-                                    selected: _controller.sort == entry.key,
-                                    onSelected: (selected) {
-                                      if (selected) {
-                                        unawaited(_refresh(sort: entry.key));
-                                      }
-                                    },
-                                  ),
-                              ],
+              return NotificationListener<ScrollMetricsNotification>(
+                onNotification: (notification) {
+                  // 图片比例重排和窗口缩放后也要补满视口，多个通知合并检查。
+                  if (notification.depth == 0 &&
+                      notification.metrics.axis == Axis.vertical) {
+                    _scheduleScrollCheck();
+                  }
+                  return false;
+                },
+                child: RefreshIndicator(
+                  onRefresh: _refresh,
+                  child: CustomScrollView(
+                    key: const PageStorageKey('wallpapers'),
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    slivers: [
+                      SliverPadding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: padding, vertical: 12),
+                        sliver: SliverMainAxisGroup(slivers: [
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  for (final entry in sorts.entries)
+                                    ChoiceChip(
+                                      label: Text(entry.value),
+                                      selected: _controller.sort == entry.key,
+                                      onSelected: (selected) {
+                                        if (selected) {
+                                          unawaited(_refresh(sort: entry.key));
+                                        }
+                                      },
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        WallpaperFlow(
-                          items: items,
-                          onOpen: onOpen,
-                          availableWidth: constraints.maxWidth - padding * 2,
-                        ),
-                      ]),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Center(
-                          child: _controller.isLoading
-                              ? const CircularProgressIndicator()
-                              : _controller.error != null
-                                  ? Column(
-                                      children: [
-                                        Text(resolveAnimeFlowErrorMessage(
-                                          _controller.error!,
-                                          fallback: l10n.collectionLoadFailed,
-                                        )),
-                                        const SizedBox(height: 8),
-                                        TextButton(
-                                          onPressed: _controller.loadMore,
-                                          child: Text(l10n.retry),
-                                        ),
-                                      ],
-                                    )
-                                  : _controller.hasMore
-                                      ? const SizedBox.shrink()
-                                      : Text(items.isEmpty
-                                          ? l10n.noData
-                                          : l10n.rankingEnd),
+                          WallpaperFlow(
+                            items: items,
+                            onOpen: onOpen,
+                            availableWidth: constraints.maxWidth - padding * 2,
+                          ),
+                        ]),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Center(
+                            child: _controller.isLoading
+                                ? const CircularProgressIndicator()
+                                : _controller.error != null
+                                    ? Column(
+                                        children: [
+                                          Text(resolveAnimeFlowErrorMessage(
+                                            _controller.error!,
+                                            fallback: l10n.collectionLoadFailed,
+                                          )),
+                                          const SizedBox(height: 8),
+                                          TextButton(
+                                            onPressed: _controller.loadMore,
+                                            child: Text(l10n.retry),
+                                          ),
+                                        ],
+                                      )
+                                    : _controller.hasMore
+                                        ? const SizedBox.shrink()
+                                        : Text(items.isEmpty
+                                            ? l10n.noData
+                                            : l10n.rankingEnd),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             });
           },
         ),
-        floatingActionButton: _showBackToTopButton
-            ? FloatingActionButton(
-                heroTag: null,
-                tooltip: l10n.backToTop,
-                onPressed: _scrollToTop,
-                child: const Icon(Icons.arrow_upward_rounded),
-              )
-            : null,
       ),
     );
   }

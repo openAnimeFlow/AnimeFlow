@@ -79,6 +79,7 @@ class _RankingPageState extends State<RankingPage> {
         body: child,
         floatingActionButton: visible
             ? FloatingActionButton(
+                heroTag: null,
                 onPressed: scrollToTop,
                 child: Icon(
                   Icons.arrow_upward,

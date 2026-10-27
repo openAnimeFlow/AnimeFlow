@@ -75,6 +75,8 @@ class _AnimePageState extends ConsumerState<AnimeView>
         body: child,
         floatingActionButton: visible
             ? FloatingActionButton(
+                // Shell 保留的其他分支也有 FAB，本地操作不参与跨路由 Hero。
+                heroTag: null,
                 onPressed: scrollToTop,
                 child: const Icon(Icons.arrow_upward_rounded),
               )

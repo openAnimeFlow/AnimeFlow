@@ -285,6 +285,7 @@ class _UserViewState extends ConsumerState<UserView>
           if ((keyword == null || keyword.isEmpty) &&
               sort == CollectionSort.defaultSort) {
             return FloatingActionButton(
+              heroTag: null,
               tooltip: l10n.filterCollection,
               onPressed: _showCollectionFilterDialog,
               child: const Icon(Icons.tune),
@@ -292,6 +293,7 @@ class _UserViewState extends ConsumerState<UserView>
           }
 
           return FloatingActionButton.extended(
+            heroTag: null,
             tooltip: l10n.filterCollection,
             onPressed: _showCollectionFilterDialog,
             icon: const Icon(Icons.tune),

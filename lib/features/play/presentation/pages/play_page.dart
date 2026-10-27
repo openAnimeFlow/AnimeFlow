@@ -31,7 +31,6 @@ import 'package:anime_flow/features/play/presentation/providers/episode_comments
 
 import '../widgets/content/comments_view.dart';
 import '../widgets/content/play_content_navigator.dart';
-import '../widgets/content/play_content_safe_area.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
@@ -375,20 +374,20 @@ int _compareDownloadEpisodes(DownloadEpisode a, DownloadEpisode b) {
 @Dependencies([
   playExtra,
   animeInfoArgs,
+  playSession,
+  episodeComments,
+  recommendation,
   AnimeInfo,
   Episodes,
-  playSession,
   PlayStateNotifier,
   VideoUiNotifier,
   VideoSourceNotifier,
   DanmakuStateNotifier,
-  recommendation,
   SubjectComments,
   SubjectStills,
   SubjectCharacters,
   SubjectProducers,
   SubjectRelated,
-  episodeComments
 ])
 class _ContentView extends ConsumerStatefulWidget {
   const _ContentView({super.key});
@@ -435,78 +434,80 @@ class _ContentViewState extends ConsumerState<_ContentView>
 
   @override
   Widget build(BuildContext context) {
-    final isFullscreen =
-        ref.watch(playStateProvider.select((state) => state.isFullscreen));
-    final isWideScreen =
-        ref.watch(playStateProvider.select((state) => state.isWideScreen));
-    final isContentExpanded =
-        ref.watch(playStateProvider.select((state) => state.isContentExpanded));
+    final (isFullscreen, isWideScreen, isContentExpanded) = ref.watch(
+        playStateProvider.select((state) =>
+            (state.isFullscreen, state.isWideScreen, state.isContentExpanded)));
     final isContentVisible =
         !isFullscreen && (!isWideScreen || isContentExpanded);
-    return PlayContentSafeArea(
-      isWideScreen: isWideScreen,
-      child: PreferredSize(
-        preferredSize: const Size.fromHeight(100),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TabBar(
-                  dividerHeight: 0,
-                  controller: tabController,
-                  tabAlignment: TabAlignment.start,
-                  isScrollable: true,
-                  tabs: [
-                    Tab(text: AppLocalizations.of(context).introduction),
-                    Tab(text: AppLocalizations.of(context).commentsTitle),
-                  ],
-                ),
-                isWideScreen
-                    ? const Spacer()
-                    : Consumer(
-                        builder: (context, ref, _) {
-                          final danmakuOn = ref.watch(
-                            danmakuStateProvider
-                                .select((state) => state.enabled),
-                          );
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: DanmakuTextField(
-                              inputVisible: danmakuOn,
-                              onFocusChange: (hasFocus) {
-                                if (hasFocus) {
-                                  playSession.stopPlaying();
-                                  videoUiStateController.cancelUiTimer();
-                                } else {
-                                  playSession.startPlaying();
-                                  videoUiStateController.hideControlsUi();
-                                }
-                              },
-                              onSend: onSendDanmaku,
-                              onClose: playSession.danmaku.toggleEnabled,
-                            ),
-                          );
-                        },
-                      )
-              ],
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: AnimatedBuilder(
-                animation: tabController,
-                builder: (context, _) => TabBarView(
-                  controller: tabController,
-                  children: [
-                    PlayContentNavigator(
-                      isActive: tabController.index == 0 && isContentVisible,
-                    ),
-                    const CommentsView(),
-                  ],
+    return MediaQuery.removePadding(
+      context: context,
+      removeLeft: isWideScreen,
+      child: SafeArea(
+        left: !isWideScreen,
+        bottom: false,
+        child: PreferredSize(
+          preferredSize: const Size.fromHeight(100),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TabBar(
+                    dividerHeight: 0,
+                    controller: tabController,
+                    tabAlignment: TabAlignment.start,
+                    isScrollable: true,
+                    tabs: [
+                      Tab(text: AppLocalizations.of(context).introduction),
+                      Tab(text: AppLocalizations.of(context).commentsTitle),
+                    ],
+                  ),
+                  isWideScreen
+                      ? const Spacer()
+                      : Consumer(
+                          builder: (context, ref, _) {
+                            final danmakuOn = ref.watch(
+                              danmakuStateProvider
+                                  .select((state) => state.enabled),
+                            );
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: DanmakuTextField(
+                                inputVisible: danmakuOn,
+                                onFocusChange: (hasFocus) {
+                                  if (hasFocus) {
+                                    playSession.stopPlaying();
+                                    videoUiStateController.cancelUiTimer();
+                                  } else {
+                                    playSession.startPlaying();
+                                    videoUiStateController.hideControlsUi();
+                                  }
+                                },
+                                onSend: onSendDanmaku,
+                                onClose: playSession.danmaku.toggleEnabled,
+                              ),
+                            );
+                          },
+                        )
+                ],
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: AnimatedBuilder(
+                  animation: tabController,
+                  builder: (context, _) => TabBarView(
+                    controller: tabController,
+                    children: [
+                      PlayContentNavigator(
+                        isActive: tabController.index == 0 && isContentVisible,
+                      ),
+                      const CommentsView(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

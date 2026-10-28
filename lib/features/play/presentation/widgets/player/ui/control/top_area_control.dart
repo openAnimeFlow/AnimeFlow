@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/player_settings_sheet.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/player_more_button.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
@@ -201,57 +203,68 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                         ),
                         const SizedBox(width: 5),
                         if (SystemUtil.isDesktop || fullscreen)
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Consumer(builder: (context, ref, child) {
-                                final subjectName = ref.watch(playExtraProvider
-                                    .select((e) => e.playExtra.subjectName));
-                                return Text(
-                                  subjectName,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                );
-                              }),
-                              Consumer(
-                                builder: (context, ref, child) {
-                                  final episodeTitle = ref.watch(
-                                      episodesProvider.select((state) =>
-                                          state.asData?.value.episodeTitle ??
-                                          ''));
-                                  final episodeSort = ref.watch(
-                                      episodesProvider.select((state) =>
-                                          state.asData?.value.episodeSort ??
-                                          0));
-                                  if (episodeTitle.isEmpty) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return Row(
-                                    children: [
-                                      Text(
-                                        episodeSort.toString().padLeft(2, '0'),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        episodeTitle,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 15,
-                                        ),
-                                      )
-                                    ],
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Consumer(builder: (context, ref, child) {
+                                  final subjectName = ref.watch(
+                                      playExtraProvider.select(
+                                          (e) => e.playExtra.subjectName));
+                                  return Text(
+                                    subjectName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   );
-                                },
-                              )
-                            ],
+                                }),
+                                Consumer(
+                                  builder: (context, ref, child) {
+                                    final episodeTitle = ref.watch(
+                                        episodesProvider.select((state) =>
+                                            state.asData?.value.episodeTitle ??
+                                            ''));
+                                    final episodeSort = ref.watch(
+                                        episodesProvider.select((state) =>
+                                            state.asData?.value.episodeSort ??
+                                            0));
+                                    if (episodeTitle.isEmpty) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Row(
+                                      children: [
+                                        Text(
+                                          episodeSort
+                                              .toString()
+                                              .padLeft(2, '0'),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            episodeTitle,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    );
+                                  },
+                                )
+                              ],
+                            ),
                           )
                       ],
                     ),
@@ -270,10 +283,9 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                               isWideScreen &&
                               !isContentExpanded);
                       // 只在进度跨过零时更新跳过按钮的可见性。
-                      final showSkip = (isWideScreen || fullscreen) &&
-                          ref.watch(playStateProvider.select(
-                            (state) => state.position > Duration.zero,
-                          ));
+                      final showSkip = ref.watch(playStateProvider.select(
+                        (state) => (state.position > Duration.zero),
+                      ));
                       final isLoggedIn = showContentActions &&
                           ref.watch(isLoggedInProvider.select(
                             (state) => state.value ?? false,
@@ -308,15 +320,18 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                               ),
                               onCollectTypeChanged: _updateCollectionType,
                             ),
-                          if (showContentActions)
+                          if (!isWideScreen) const PlayerMoreButton(),
+                          if (showContentActions && isWideScreen)
                             IconButton(
                               tooltip: l10n.settings,
                               onPressed: () {
-                                _showRightSlideDialog(
-                                  barrierDismissible: true,
+                                showPlayerSettingsSheet(
                                   context: context,
-                                  barrierLabel: 'VideoSetting',
+                                  label: l10n.videoSettingsTitle,
                                   child: const VideoSettingDialog(),
+                                  onOpen: videoUiStateController.cancelUiTimer,
+                                  onClose: videoUiStateController
+                                      .restartControlsAutoHideTimer,
                                 );
                               },
                               icon: const Icon(

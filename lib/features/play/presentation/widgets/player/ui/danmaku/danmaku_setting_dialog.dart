@@ -1,3 +1,5 @@
+import 'package:anime_flow/core/constants/assets_path_constants.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/player_settings_sheet.dart';
 import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/storage_key.dart';
@@ -13,7 +15,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 弹幕设置弹窗
-@Dependencies([playSession])
+@Dependencies([playSession, PlayStateNotifier])
 class DanmakuSettingDialog extends ConsumerStatefulWidget {
   const DanmakuSettingDialog({super.key});
 
@@ -67,7 +69,6 @@ class _DanmakuOptionSliderState extends State<_DanmakuOptionSlider> {
             min: widget.min,
             max: widget.max,
             divisions: widget.divisions,
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
             label: label,
             onChanged: (value) {
               setState(() => _value = value);
@@ -100,7 +101,6 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
     final hideTop = danmakuController.option.hideTop;
     final hideBottom = danmakuController.option.hideBottom;
     final danmakuChineseMode = ref.watch(danmakuChineseModeProvider);
-    final paddingOf = MediaQuery.paddingOf(context);
     final fixedValues = [0.1, 0.25, 0.5, 0.75, 1.0];
     int currentIndex = 0;
     for (int i = 0; i < fixedValues.length; i++) {
@@ -109,38 +109,36 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
         break;
       }
     }
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      padding: EdgeInsets.only(
-          left: 15, right: 15, top: paddingOf.top, bottom: paddingOf.bottom),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: const BorderRadius.horizontal(left: Radius.circular(15)),
-      ),
+    return PlayerSettingsSheet(
       child: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.danmakuSettings,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).textTheme.titleLarge?.color,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.danmakuSettings,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close),
-              ),
-            ],
+                IconButton(
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
           ),
           Flexible(
             child: SingleChildScrollView(
+              primary: true,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,7 +219,9 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                       ),
                     ),
                   ),
-                  Row(
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 12,
                     children: [
                       Column(
                         children: [
@@ -264,7 +264,6 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                           Text(l10n.scrollingDanmaku)
                         ],
                       ),
-                      const SizedBox(width: 16),
                       Column(
                         children: [
                           InkWell(
@@ -306,7 +305,6 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                           Text(l10n.topDanmaku)
                         ],
                       ),
-                      const SizedBox(width: 16),
                       Column(
                         children: [
                           InkWell(
@@ -341,7 +339,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                               child: RotatedBox(
                                 quarterTurns: 2,
                                 child: SvgPicture.asset(
-                                  'assets/icons/danmaku_top.svg',
+                                  AssetsPathConstants.danmakuTop,
                                   colorFilter: const ColorFilter.mode(
                                       Colors.white, BlendMode.srcIn),
                                 ),
@@ -485,7 +483,6 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                           DanmakuKey.danmakuArea, fixedValues[index]);
                     },
                   ),
-                  SizedBox(height: MediaQuery.of(context).padding.bottom),
                 ],
               ),
             ),

@@ -1,6 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 
 class ShaderButton extends StatelessWidget {
+  static const labels = ['关闭', '效率档', '质量档'];
+
   final int value;
   final ValueChanged<int> onChanged;
   final VoidCallback? onMenuOpen;
@@ -16,8 +18,6 @@ class ShaderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labels = ['关闭', '效率档', '质量档'];
-
     return MenuAnchor(
       onOpen: onMenuOpen,
       onClose: onMenuClose,

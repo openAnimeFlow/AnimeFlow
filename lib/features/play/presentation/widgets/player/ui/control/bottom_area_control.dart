@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/player_settings_sheet.dart';
 import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
@@ -202,44 +203,13 @@ class _BottomControlsContent extends ConsumerWidget {
                 IconButton(
                   tooltip: l10n.danmakuSettings,
                   onPressed: () {
-                    final container = ProviderScope.containerOf(context);
-                    showGeneralDialog<void>(
+                    showPlayerSettingsSheet(
                       context: context,
-                      barrierDismissible: true,
-                      barrierLabel: l10n.danmakuSettings,
-                      barrierColor: Colors.black54,
-                      transitionDuration: const Duration(milliseconds: 220),
-                      pageBuilder: (context, animation, secondaryAnimation) {
-                        return Material(
-                          type: MaterialType.transparency,
-                          child: UncontrolledProviderScope(
-                            container: container,
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: SizedBox(
-                                width: (MediaQuery.sizeOf(context).width * 0.75)
-                                    .clamp(300.0, 360.0)
-                                    .toDouble(),
-                                height: MediaQuery.sizeOf(context).height,
-                                child: const DanmakuSettingDialog(),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      transitionBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(1, 0),
-                            end: Offset.zero,
-                          ).animate(CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          )),
-                          child: child,
-                        );
-                      },
+                      label: l10n.danmakuSettings,
+                      child: const DanmakuSettingDialog(),
+                      onOpen: videoUiStateController.cancelUiTimer,
+                      onClose:
+                          videoUiStateController.restartControlsAutoHideTimer,
                     );
                   },
                   icon: SvgPicture.asset(

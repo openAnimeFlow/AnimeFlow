@@ -13,6 +13,7 @@ class AssetsPathConstants {
       /// 加载动画
       loadingJson = 'assets/animation/AudioWav.json',
 
+      danmakuTop = 'assets/icons/danmaku_top.svg',
       /// 弹幕图标
       danmakuIcon = 'assets/icons/danmaku_setting.svg',
 

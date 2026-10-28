@@ -15,7 +15,7 @@ class RateButton extends StatelessWidget {
     this.onMenuClose,
   });
 
-  static const List<double> _speeds = [
+  static const List<double> speeds = [
     0.5,
     0.75,
     1.0,
@@ -34,7 +34,7 @@ class RateButton extends StatelessWidget {
     return MenuAnchor(
       onOpen: onMenuOpen,
       onClose: onMenuClose,
-      menuChildren: _speeds.map((speed) {
+      menuChildren: speeds.map((speed) {
         final isSelected = value == speed;
         return MenuItemButton(
           onPressed: () => onChanged(speed),

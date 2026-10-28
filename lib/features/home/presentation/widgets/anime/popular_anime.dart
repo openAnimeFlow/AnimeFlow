@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
@@ -8,12 +10,70 @@ import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PopularAnimeView extends ConsumerWidget {
+class PopularAnimeView extends ConsumerStatefulWidget {
   const PopularAnimeView({super.key, required this.contentWidth});
 
   final double contentWidth;
 
+  @override
+  ConsumerState<PopularAnimeView> createState() => _PopularAnimeViewState();
+}
+
+class _PopularAnimeViewState extends ConsumerState<PopularAnimeView> {
+  Timer? _resizeDebounce;
+  double? _pixelRatio;
+  late int _coverCacheWidth;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
+    final firstBuild = _pixelRatio == null;
+    if (_pixelRatio == pixelRatio) return;
+    _pixelRatio = pixelRatio;
+    if (firstBuild) {
+      _coverCacheWidth = _calculateCoverCacheWidth();
+    } else {
+      _scheduleCoverResize();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant PopularAnimeView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.contentWidth != widget.contentWidth) {
+      _scheduleCoverResize();
+    }
+  }
+
+  void _scheduleCoverResize() {
+    _resizeDebounce?.cancel();
+    // 布局立即响应窗口变化，仅在尺寸稳定后计算并更新图片解码宽度。
+    _resizeDebounce = Timer(const Duration(milliseconds: 200), () {
+      if (!mounted) return;
+      final width = _calculateCoverCacheWidth();
+      if (width != _coverCacheWidth) {
+        setState(() => _coverCacheWidth = width);
+      }
+    });
+  }
+
+  int _calculateCoverCacheWidth() {
+    final grid = _gridDelegate;
+    final cardWidth = (widget.contentWidth -
+            grid.crossAxisSpacing * (grid.crossAxisCount - 1)) /
+        grid.crossAxisCount;
+    return (cardWidth * _pixelRatio!).ceil().clamp(1, 4096);
+  }
+
+  @override
+  void dispose() {
+    _resizeDebounce?.cancel();
+    super.dispose();
+  }
+
   SliverGridDelegateWithFixedCrossAxisCount get _gridDelegate {
+    final contentWidth = widget.contentWidth;
     final compact = contentWidth < 600;
     final spacing = compact ? 10.0 : 15.0;
     final minCardWidth = compact ? 120.0 : 200.0;
@@ -32,16 +92,9 @@ class PopularAnimeView extends ConsumerWidget {
   static const int _initialSkeletonCount = 6;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final hotAsync = ref.watch(animeHotProvider);
-    final grid = _gridDelegate;
-    final cardWidth =
-        (contentWidth - grid.crossAxisSpacing * (grid.crossAxisCount - 1)) /
-            grid.crossAxisCount;
-    final coverCacheWidth = (cardWidth * MediaQuery.devicePixelRatioOf(context))
-        .ceil()
-        .clamp(1, 4096);
 
     return hotAsync.when(
       loading: () => SliverMainAxisGroup(
@@ -87,7 +140,8 @@ class PopularAnimeView extends ConsumerWidget {
                               image: subject.images.large,
                             )),
                     child: SubjectCard(
-                      memCacheWidth: coverCacheWidth,
+                      memCacheWidth: _coverCacheWidth,
+                      gaplessResize: true,
                       image: subject.images.large,
                       title: subject.nameCN.isEmpty
                           ? subject.name

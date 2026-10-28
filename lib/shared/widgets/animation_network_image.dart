@@ -17,6 +17,9 @@ class AnimationNetworkImage extends StatelessWidget {
 
   /// 可选的内存解码宽度（物理像素），用于列表缩略图，保留图片比例。
   final int? memCacheWidth;
+
+  /// 仅在同一 URL 的解码尺寸改变时保留旧图，切换 URL 时重新加载。
+  final bool gaplessResize;
   final Duration fadeInDuration;
   final Duration fadeOutDuration;
   final FilterQuality filterQuality;
@@ -35,6 +38,7 @@ class AnimationNetworkImage extends StatelessWidget {
     this.placeholderWidth,
     this.placeholderHeight,
     this.memCacheWidth,
+    this.gaplessResize = false,
     this.borderRadius = BorderRadius.zero,
     this.fadeInDuration = const Duration(milliseconds: 500),
     this.fadeOutDuration = const Duration(milliseconds: 300),
@@ -49,7 +53,9 @@ class AnimationNetworkImage extends StatelessWidget {
     return ClipRRect(
       borderRadius: borderRadius,
       child: CachedNetworkImage(
+        key: gaplessResize ? ValueKey(url) : null,
         imageUrl: url,
+        useOldImageOnUrlChange: gaplessResize,
         fit: fit,
         width: width,
         height: height,

@@ -1,7 +1,7 @@
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
-import 'package:anime_flow/features/user/presentation/widgets/user_view.dart';
+import 'package:anime_flow/features/user/presentation/widgets/user_center_view.dart';
 import 'package:anime_flow/features/user/application/user_state_provider.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
@@ -58,7 +58,7 @@ class UserPage extends ConsumerWidget {
               ? Scaffold(
                   body: Center(child: Text(l10n.noUserProfile)),
                 )
-              : UserView(user: userInfo),
+              : UserCenterView(user: userInfo),
           loading: () => const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           ),

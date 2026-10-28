@@ -4,6 +4,7 @@ import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,10 +57,6 @@ class RankingGrid extends ConsumerWidget {
     final posterColumnCount = (contentWidth / 200).floor().clamp(3, 7);
     final posterWidth =
         (contentWidth - 10 * (posterColumnCount - 1)) / posterColumnCount;
-    final posterCacheWidth =
-        (posterWidth * MediaQuery.devicePixelRatioOf(context))
-            .ceil()
-            .clamp(1, 4096);
 
     return SliverMainAxisGroup(
       slivers: [
@@ -98,7 +95,7 @@ class RankingGrid extends ConsumerWidget {
                 : _RankingPosterTile(
                     subject: items[index + 3],
                     rank: index + 4,
-                    memCacheWidth: posterCacheWidth,
+                    coverWidth: posterWidth,
                   ),
           ),
         if (showProgress)
@@ -228,13 +225,14 @@ class _FeaturedCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               LayoutBuilder(
-                builder: (context, constraints) => AnimationNetworkImage(
-                  url: subject.images.large,
-                  fit: BoxFit.cover,
-                  memCacheWidth: (constraints.maxWidth *
-                          MediaQuery.devicePixelRatioOf(context))
-                      .ceil()
-                      .clamp(1, 4096),
+                builder: (context, constraints) => DebouncedImageWidth(
+                  width: constraints.maxWidth,
+                  builder: (context, cacheWidth) => AnimationNetworkImage(
+                    url: subject.images.large,
+                    fit: BoxFit.cover,
+                    memCacheWidth: cacheWidth,
+                    gaplessResize: true,
+                  ),
                 ),
               ),
               DecoratedBox(
@@ -364,12 +362,12 @@ class _RankingPosterTile extends StatelessWidget {
   const _RankingPosterTile({
     required this.subject,
     required this.rank,
-    required this.memCacheWidth,
+    required this.coverWidth,
   });
 
   final Subject subject;
   final int rank;
-  final int memCacheWidth;
+  final double coverWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -381,11 +379,15 @@ class _RankingPosterTile extends StatelessWidget {
           context,
           InfoRouteExtra(
               id: subject.id, name: title, image: subject.images.large)),
-      child: SubjectCard(
-        image: subject.images.large,
-        memCacheWidth: memCacheWidth,
-        title: title,
-        rating: rank,
+      child: DebouncedImageWidth(
+        width: coverWidth,
+        builder: (context, cacheWidth) => SubjectCard(
+          image: subject.images.large,
+          memCacheWidth: cacheWidth,
+          gaplessResize: true,
+          title: title,
+          rating: rank,
+        ),
       ),
     );
   }
@@ -426,12 +428,15 @@ class _RankingListTile extends StatelessWidget {
             children: [
               SizedBox(
                 width: 100,
-                child: AnimationNetworkImage(
-                  borderRadius: BorderRadius.circular(15),
-                  url: subject.images.small,
-                  memCacheWidth:
-                      (100 * MediaQuery.devicePixelRatioOf(context)).ceil(),
-                  fit: BoxFit.cover,
+                child: DebouncedImageWidth(
+                  width: 100,
+                  builder: (context, cacheWidth) => AnimationNetworkImage(
+                    borderRadius: BorderRadius.circular(15),
+                    url: subject.images.small,
+                    memCacheWidth: cacheWidth,
+                    gaplessResize: true,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               Expanded(

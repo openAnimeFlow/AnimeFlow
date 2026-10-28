@@ -7,6 +7,7 @@ import 'package:anime_flow/features/user/application/user_collection_state.dart'
 import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
@@ -18,12 +19,12 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
-class CollectionTabView extends ConsumerWidget {
+class UserCollectionTabs extends ConsumerWidget {
   final TabController tabController;
   final List<String> tabs;
   final Map<int, GlobalKey<RefreshIndicatorState>> refreshIndicatorKeys;
 
-  const CollectionTabView({
+  const UserCollectionTabs({
     super.key,
     required this.tabController,
     required this.tabs,
@@ -36,7 +37,7 @@ class CollectionTabView extends ConsumerWidget {
       controller: tabController,
       children: List.generate(tabs.length, (tabIndex) {
         final type = tabIndex + 1;
-        return _CollectionTabView(
+        return _UserCollectionTab(
           type: type,
           refreshIndicatorKey: refreshIndicatorKeys[type]!,
         );
@@ -45,11 +46,11 @@ class CollectionTabView extends ConsumerWidget {
   }
 }
 
-class _CollectionTabView extends ConsumerWidget {
+class _UserCollectionTab extends ConsumerWidget {
   final int type;
   final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
 
-  const _CollectionTabView({
+  const _UserCollectionTab({
     required this.type,
     required this.refreshIndicatorKey,
   });
@@ -224,9 +225,7 @@ class _CollectionTabView extends ConsumerWidget {
                     (availableWidth / 320.0).floor().clamp(1, 4);
                 final cardWidth = (availableWidth - 12 * (crossAxisCount - 1)) /
                     crossAxisCount;
-                final coverCacheWidth = (cardWidth / 2.5 * (2 / 3) * pixelRatio)
-                    .ceil()
-                    .clamp(1, 4096);
+                final coverWidth = cardWidth / 2.5 * (2 / 3);
                 return scrollView = CustomScrollView(
                   key: PageStorageKey<int>(type),
                   scrollBehavior: const ScrollBehavior().copyWith(
@@ -308,7 +307,7 @@ class _CollectionTabView extends ConsumerWidget {
                               return _CollectionItemCard(
                                 key: ValueKey(collection.id),
                                 collection: collection,
-                                coverCacheWidth: coverCacheWidth,
+                                coverWidth: coverWidth,
                                 onCollectTypeChanged: (newType) =>
                                     _onCollectTypeChanged(
                                   context,
@@ -403,13 +402,13 @@ class _CollectionFooter extends StatelessWidget {
 /// 条目卡片。
 class _CollectionItemCard extends StatefulWidget {
   final UserCollectionData collection;
-  final int coverCacheWidth;
+  final double coverWidth;
   final Future<void> Function(CollectType type) onCollectTypeChanged;
 
   const _CollectionItemCard({
     super.key,
     required this.collection,
-    required this.coverCacheWidth,
+    required this.coverWidth,
     required this.onCollectTypeChanged,
   });
 
@@ -484,11 +483,15 @@ class _CollectionItemCardState extends State<_CollectionItemCard> {
         children: [
           AspectRatio(
             aspectRatio: 2 / 3,
-            child: AnimationNetworkImage(
-              borderRadius: const BorderRadius.all(Radius.circular(12)),
-              url: collection.images.large,
-              memCacheWidth: widget.coverCacheWidth,
-              fit: BoxFit.cover,
+            child: DebouncedImageWidth(
+              width: widget.coverWidth,
+              builder: (context, cacheWidth) => AnimationNetworkImage(
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                url: collection.images.large,
+                memCacheWidth: cacheWidth,
+                gaplessResize: true,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           Expanded(

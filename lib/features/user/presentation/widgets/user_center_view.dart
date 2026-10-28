@@ -13,26 +13,27 @@ import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'collection_filter_dialog.dart';
-import 'collection_tab_view.dart';
+import 'user_collection_tabs.dart';
 
 enum _LoginOverflowAction { settings, playRecord, downloads, logout }
 
-class UserView extends ConsumerStatefulWidget {
+class UserCenterView extends ConsumerStatefulWidget {
   final FlowUsers user;
 
-  const UserView({super.key, required this.user});
+  const UserCenterView({super.key, required this.user});
 
   @override
-  ConsumerState<UserView> createState() => _UserViewState();
+  ConsumerState<UserCenterView> createState() => _UserViewState();
 }
 
-class _UserViewState extends ConsumerState<UserView>
+class _UserViewState extends ConsumerState<UserCenterView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _isPinned = ValueNotifier(false);
@@ -94,7 +95,7 @@ class _UserViewState extends ConsumerState<UserView>
   }
 
   @override
-  void didUpdateWidget(covariant UserView oldWidget) {
+  void didUpdateWidget(covariant UserCenterView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.user.id == widget.user.id) {
       return;
@@ -266,7 +267,7 @@ class _UserViewState extends ConsumerState<UserView>
               ),
             ];
           },
-          body: CollectionTabView(
+          body: UserCollectionTabs(
             tabController: _tabController,
             tabs: tabs,
             refreshIndicatorKeys: _refreshIndicatorKeys,
@@ -337,13 +338,17 @@ class _UserViewState extends ConsumerState<UserView>
                     ClipRRect(
                       borderRadius: BorderRadius.circular(5),
                       child: user.avatar != null && user.avatar!.isNotEmpty
-                          ? AnimationNetworkImage(
+                          ? DebouncedImageWidth(
                               width: 30,
-                              height: 30,
-                              memCacheWidth:
-                                  (30 * MediaQuery.devicePixelRatioOf(context))
-                                      .ceil(),
-                              url: user.avatar!)
+                              builder: (context, cacheWidth) =>
+                                  AnimationNetworkImage(
+                                width: 30,
+                                height: 30,
+                                memCacheWidth: cacheWidth,
+                                gaplessResize: true,
+                                url: user.avatar!,
+                              ),
+                            )
                           : const Icon(Icons.person, size: 30),
                     ),
                     const SizedBox(width: 5),
@@ -507,13 +512,15 @@ class _UserViewState extends ConsumerState<UserView>
                             stops: [0.9, 1],
                           ).createShader(bounds);
                         },
-                        child: AnimationNetworkImage(
-                          url: backgroundUrl,
-                          memCacheWidth: (boxConstraints.maxWidth *
-                                  MediaQuery.devicePixelRatioOf(context))
-                              .ceil()
-                              .clamp(1, 4096),
-                          fit: BoxFit.cover,
+                        child: DebouncedImageWidth(
+                          width: boxConstraints.maxWidth,
+                          builder: (context, cacheWidth) =>
+                              AnimationNetworkImage(
+                            url: backgroundUrl,
+                            memCacheWidth: cacheWidth,
+                            gaplessResize: true,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     );
@@ -528,14 +535,17 @@ class _UserViewState extends ConsumerState<UserView>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (hasAvatar)
-                  AnimationNetworkImage(
-                    borderRadius: BorderRadius.circular(100),
-                    url: user.avatar!,
-                    fit: BoxFit.cover,
+                  DebouncedImageWidth(
                     width: 100,
-                    height: 100,
-                    memCacheWidth:
-                        (100 * MediaQuery.devicePixelRatioOf(context)).ceil(),
+                    builder: (context, cacheWidth) => AnimationNetworkImage(
+                      borderRadius: BorderRadius.circular(100),
+                      url: user.avatar!,
+                      fit: BoxFit.cover,
+                      width: 100,
+                      height: 100,
+                      memCacheWidth: cacheWidth,
+                      gaplessResize: true,
+                    ),
                   )
                 else
                   const Icon(Icons.person, size: 96),

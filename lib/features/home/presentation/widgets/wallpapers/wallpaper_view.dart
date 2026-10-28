@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/core/flow_response.dart';
@@ -11,7 +12,6 @@ import 'package:anime_flow/features/home/presentation/widgets/wallpapers/justifi
 import 'package:anime_flow/features/home/presentation/widgets/wallpapers/wallpaper_browser.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 class WallpaperView extends StatefulWidget {
@@ -378,7 +378,8 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
               if (open != null) {
                 open(args);
               } else {
-                context.push<void>('/wallpaper', extra: args);
+                unawaited(
+                    appNavigatorOf(context).openWallpaper<void>(context, args));
               }
             },
             memCacheWidth: decodeWidth,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
@@ -96,6 +97,8 @@ class _WallpaperViewState extends State<WallpaperView>
         valueListenable: _backToTopVisible,
         builder: (context, visible, child) => Scaffold(
           body: child,
+          floatingActionButtonLocation:
+              OcclusionAwareFabLocation(BottomOcclusionScope.of(context)),
           floatingActionButton: visible
               ? FloatingActionButton(
                   heroTag: null,
@@ -130,7 +133,7 @@ class _WallpaperViewState extends State<WallpaperView>
                 },
                 child: RefreshIndicator(
                   onRefresh: _refresh,
-                  child: CustomScrollView(
+                  child: OcclusionAwareCustomScrollView(
                     key: const PageStorageKey('wallpapers'),
                     controller: _scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),

@@ -18,6 +18,7 @@ class PageSettingsPage extends ConsumerStatefulWidget {
 class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
   late StartupPage _startupPage;
   late CollectType _collectionType;
+  late bool _glassNavigationBar;
   bool _saving = false;
   bool _isMenuOpen = false;
   bool _isCollectionMenuOpen = false;
@@ -27,6 +28,23 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
     super.initState();
     _startupPage = AppSettings.startupPage;
     _collectionType = AppSettings.defaultCollectionType;
+    _glassNavigationBar = AppSettings.glassNavigationBar;
+  }
+
+  Future<void> _setGlassNavigationBar(bool value) async {
+    if (_saving) return;
+    setState(() => _saving = true);
+    try {
+      await AppSettings.setGlassNavigationBar(value);
+      if (mounted) setState(() => _glassNavigationBar = value);
+    } catch (_) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        NotificationToast.show(l10n.saveFailed, title: l10n.error);
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   Future<void> _selectCollection(CollectType type) async {
@@ -91,6 +109,12 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
           padding: EdgeInsets.fromLTRB(
               16, 16, 16, 16 + MediaQuery.paddingOf(context).bottom),
           children: [
+            SwitchListTile(
+              title: Text(l10n.glassNavigationBar),
+              subtitle: Text(l10n.glassNavigationBarDescription),
+              value: _glassNavigationBar,
+              onChanged: _saving ? null : _setGlassNavigationBar,
+            ),
             ListTile(
               title: Text(l10n.startupPage),
               subtitle: Text(l10n.startupPageDescription),

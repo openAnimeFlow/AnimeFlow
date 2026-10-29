@@ -103,6 +103,18 @@ abstract class AppLocalizations {
         languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant')
   ];
 
+  /// No description provided for @glassNavigationBar.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'磨砂玻璃底部导航栏'**
+  String get glassNavigationBar;
+
+  /// No description provided for @glassNavigationBarDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'在窄屏设备上使用悬浮的磨砂玻璃导航栏。'**
+  String get glassNavigationBarDescription;
+
   /// No description provided for @defaultCollectionCategory.
   ///
   /// In zh_Hans, this message translates to:

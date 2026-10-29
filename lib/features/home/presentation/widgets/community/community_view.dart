@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
@@ -163,7 +164,7 @@ class _CommunityContent extends StatelessWidget {
         final textScaler = MediaQuery.textScalerOf(context);
         final viewerLabelHeight = textScaler.scale(13) * 1.4;
         final footerHeight = viewerLabelHeight + (compact ? 8 : 12);
-        return CustomScrollView(
+        return OcclusionAwareCustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverPadding(

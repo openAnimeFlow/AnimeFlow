@@ -15,6 +15,7 @@ import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
 import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -284,6 +285,8 @@ class _UserViewState extends ConsumerState<UserCenterView>
           ),
         ),
       ),
+      floatingActionButtonLocation:
+          OcclusionAwareFabLocation(BottomOcclusionScope.of(context)),
       floatingActionButton: Consumer(
         builder: (context, ref, _) {
           final (keyword, sort) = ref.watch(

@@ -1,5 +1,6 @@
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/shared/widgets/collection_save_notice.dart';
+import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/user/application/user_collection_provider.dart';
@@ -226,7 +227,7 @@ class _UserCollectionTab extends ConsumerWidget {
                 final cardWidth = (availableWidth - 12 * (crossAxisCount - 1)) /
                     crossAxisCount;
                 final coverWidth = cardWidth / 2.5 * (2 / 3);
-                return scrollView = CustomScrollView(
+                return scrollView = OcclusionAwareCustomScrollView(
                   key: PageStorageKey<int>(type),
                   scrollBehavior: const ScrollBehavior().copyWith(
                     scrollbars: false,

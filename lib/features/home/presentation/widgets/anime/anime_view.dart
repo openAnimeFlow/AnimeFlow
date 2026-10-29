@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
@@ -73,6 +74,8 @@ class _AnimePageState extends ConsumerState<AnimeView>
       valueListenable: _showBackToTopButton,
       builder: (context, visible, child) => Scaffold(
         body: child,
+        floatingActionButtonLocation:
+            OcclusionAwareFabLocation(BottomOcclusionScope.of(context)),
         floatingActionButton: visible
             ? FloatingActionButton(
                 // Shell 保留的其他分支也有 FAB，本地操作不参与跨路由 Hero。
@@ -90,7 +93,7 @@ class _AnimePageState extends ConsumerState<AnimeView>
           );
           final contentWidth =
               math.max(0.0, constraints.maxWidth - horizontalPadding * 2);
-          return CustomScrollView(
+          return OcclusionAwareCustomScrollView(
             controller: _scrollController,
             slivers: [
               SliverPadding(

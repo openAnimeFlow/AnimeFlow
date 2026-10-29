@@ -9,10 +9,10 @@ class AnimationNetworkImage extends StatelessWidget {
   final double? width;
   final double? height;
 
-  /// 加载占位的宽度，默认使用图片宽度，未设置图片宽度时使用 50。
+  /// 加载占位的宽度。
   final double? placeholderWidth;
 
-  /// 加载占位的高度，默认使用图片高度，未设置图片高度时使用 50。
+  /// 加载占位的高度。
   final double? placeholderHeight;
 
   /// 可选的内存解码宽度（物理像素），用于列表缩略图，保留图片比例。
@@ -88,8 +88,8 @@ class AnimationNetworkImage extends StatelessWidget {
               },
         placeholder: (context, url) {
           return _ShimmerLoading(
-            width: placeholderWidth ?? width ?? 50,
-            height: placeholderHeight ?? height ?? 50,
+            width: placeholderWidth ?? 0,
+            height: placeholderHeight ?? 0,
           );
         },
         errorWidget: (context, error, stackTrace) {

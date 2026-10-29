@@ -1,6 +1,6 @@
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AnimationNetworkImage extends StatelessWidget {
   final String url;
@@ -171,68 +171,31 @@ class _ImageSizeReporterState extends State<_ImageSizeReporter> {
 }
 
 /// Shimmer 渐变加载动画组件
-class _ShimmerLoading extends StatefulWidget {
+class _ShimmerLoading extends StatelessWidget {
   const _ShimmerLoading({required this.width, required this.height});
 
   final double width;
   final double height;
 
   @override
-  State<_ShimmerLoading> createState() => _ShimmerLoadingState();
-}
-
-class _ShimmerLoadingState extends State<_ShimmerLoading>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..repeat(); // 循环播放动画
-
-    _animation = Tween<double>(begin: -1.0, end: 2.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final isDark = SystemUtil.isDarkTheme(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = colorScheme.brightness == Brightness.dark;
+    final baseColor = colorScheme.surfaceContainerHighest;
+    final highlightColor = Color.lerp(
+      baseColor,
+      isDark ? colorScheme.onSurface : colorScheme.surface,
+      isDark ? 0.08 : 0.65,
+    )!;
 
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return SizedBox(
-          width: widget.width,
-          height: widget.height,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                stops: [
-                  _animation.value - 0.3,
-                  _animation.value,
-                  _animation.value + 0.3,
-                ].map((stop) => stop.clamp(0.0, 1.0)).toList(),
-                colors: isDark
-                    ? [Colors.grey[850]!, Colors.grey[700]!, Colors.grey[850]!]
-                    : [Colors.grey[300]!, Colors.grey[100]!, Colors.grey[300]!],
-              ),
-            ),
-          ),
-        );
-      },
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Shimmer.fromColors(
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+        child: ColoredBox(color: baseColor),
+      ),
     );
   }
 }

@@ -5,10 +5,8 @@ import 'package:anime_flow/features/settings/presentation/providers/setting_prov
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:share_plus/share_plus.dart';
 
-@Dependencies([settingsLayout])
 class ErrorLogsPage extends StatefulWidget {
   const ErrorLogsPage({super.key});
 

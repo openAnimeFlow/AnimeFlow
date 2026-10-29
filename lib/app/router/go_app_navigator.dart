@@ -7,15 +7,12 @@ import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/widgets.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
-import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 
 import 'app_router.dart';
 
 /// 将导航请求转换为生成的类型安全路由调用。
 ///
 /// 使用调用方的上下文，保持嵌套导航器的现有行为。
-@Dependencies([settingsLayout])
 class GoAppNavigator implements AppNavigator {
   const GoAppNavigator();
 

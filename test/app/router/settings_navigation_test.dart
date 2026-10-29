@@ -4,14 +4,12 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/localization/app_localizations_delegates.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/settings/presentation/pages/settings_page.dart';
-import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
 
 class _GuestUser extends CurrentUserInfo {
   @override
@@ -19,9 +17,7 @@ class _GuestUser extends CurrentUserInfo {
 }
 
 // 设置页外壳在运行时提供布局作用域，测试中的路由回调沿用该作用域。
-@Dependencies([settingsLayout])
 void main() {
-  @Dependencies([settingsLayout])
   Future<GoRouter> pumpSettings(
       WidgetTester tester, double width, String location) async {
     await tester.binding.setSurfaceSize(Size(width, 900));

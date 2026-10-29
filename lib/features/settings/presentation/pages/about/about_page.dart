@@ -12,9 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
 
-@Dependencies([settingsLayout])
 class AboutSettingsPage extends StatefulWidget {
   const AboutSettingsPage({super.key});
 

@@ -38,7 +38,6 @@ import 'package:anime_flow/features/settings/presentation/pages/plugins/add_plug
 import 'package:anime_flow/features/settings/presentation/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/plugins.dart';
 import 'package:anime_flow/features/settings/presentation/pages/theme.dart';
-import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/features/user_space/presentation/pages/user_space_page.dart';
 import 'package:anime_flow/shared/widgets/image_preview.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
@@ -52,7 +51,6 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
 
 import 'package:anime_flow/shared/navigation/args/character_info_extra.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
@@ -415,7 +413,6 @@ class ImagePreviewRoute extends GoRouteData with $ImagePreviewRoute {
   }
 }
 
-@Dependencies([settingsLayout])
 @TypedShellRoute<SettingsShellRoute>(
   routes: [
     TypedGoRoute<SettingsRoute>(path: '/settings', routes: [
@@ -449,8 +446,7 @@ class SettingsShellRoute extends ShellRouteData {
       SettingsPage(location: state.uri.path, child: navigator);
 }
 
-// 设置页外壳负责覆盖布局 Provider，子路由声明其页面所需的作用域依赖。
-@Dependencies([settingsLayout])
+// 设置页外壳负责覆盖子页面使用的布局 Provider。
 class SettingsRoute extends GoRouteData with $SettingsRoute {
   const SettingsRoute();
 
@@ -459,7 +455,6 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
       const SettingsMenuPage();
 }
 
-@Dependencies([settingsLayout])
 class SettingAccountRoute extends GoRouteData with $SettingAccountRoute {
   const SettingAccountRoute();
 
@@ -468,7 +463,6 @@ class SettingAccountRoute extends GoRouteData with $SettingAccountRoute {
       const AccountSettingsPage();
 }
 
-@Dependencies([settingsLayout])
 class SettingLogsRoute extends GoRouteData with $SettingLogsRoute {
   const SettingLogsRoute();
 
@@ -477,7 +471,6 @@ class SettingLogsRoute extends GoRouteData with $SettingLogsRoute {
       const ErrorLogsPage();
 }
 
-@Dependencies([settingsLayout])
 class SettingGeneralRoute extends GoRouteData with $SettingGeneralRoute {
   const SettingGeneralRoute();
 
@@ -486,7 +479,6 @@ class SettingGeneralRoute extends GoRouteData with $SettingGeneralRoute {
       const GeneralSettingsPage();
 }
 
-@Dependencies([settingsLayout])
 class SettingPlaybackRoute extends GoRouteData with $SettingPlaybackRoute {
   const SettingPlaybackRoute();
 
@@ -495,7 +487,6 @@ class SettingPlaybackRoute extends GoRouteData with $SettingPlaybackRoute {
       const PlaybackSettingsPage();
 }
 
-@Dependencies([settingsLayout])
 class SettingPlayerShortcutsRoute extends GoRouteData
     with $SettingPlayerShortcutsRoute {
   const SettingPlayerShortcutsRoute();
@@ -514,7 +505,6 @@ class SettingDownloadPluginsRoute extends GoRouteData
       const DownloadPluginsPage();
 }
 
-@Dependencies([settingsLayout])
 class SettingDanmakuRoute extends GoRouteData with $SettingDanmakuRoute {
   const SettingDanmakuRoute();
 
@@ -523,7 +513,6 @@ class SettingDanmakuRoute extends GoRouteData with $SettingDanmakuRoute {
       const DanmakuSettingPage();
 }
 
-@Dependencies([settingsLayout])
 class SettingDownloadRoute extends GoRouteData with $SettingDownloadRoute {
   const SettingDownloadRoute();
 
@@ -532,7 +521,6 @@ class SettingDownloadRoute extends GoRouteData with $SettingDownloadRoute {
       const DownloadSettingsPage();
 }
 
-@Dependencies([settingsLayout])
 class SettingAboutRoute extends GoRouteData with $SettingAboutRoute {
   const SettingAboutRoute();
 
@@ -564,7 +552,6 @@ class SettingUpdatesRoute extends GoRouteData with $SettingUpdatesRoute {
       const UpdatesPage();
 }
 
-@Dependencies([settingsLayout])
 class SettingPluginsRoute extends GoRouteData with $SettingPluginsRoute {
   const SettingPluginsRoute();
 
@@ -583,7 +570,6 @@ class SettingAddPluginsRoute extends GoRouteData with $SettingAddPluginsRoute {
       AddPluginsPage(editPluginKey: editPluginKey);
 }
 
-@Dependencies([settingsLayout])
 class SettingThemeRoute extends GoRouteData with $SettingThemeRoute {
   const SettingThemeRoute();
 

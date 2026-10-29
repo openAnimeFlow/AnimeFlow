@@ -5,10 +5,8 @@ import 'package:anime_flow/features/settings/presentation/providers/setting_prov
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
-@Dependencies([settingsLayout])
 class PlaybackSettingsPage extends StatefulWidget {
   const PlaybackSettingsPage({super.key});
 

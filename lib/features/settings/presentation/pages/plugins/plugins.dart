@@ -15,10 +15,8 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
-@Dependencies([settingsLayout])
 class PluginsPage extends ConsumerStatefulWidget {
   const PluginsPage({super.key});
 

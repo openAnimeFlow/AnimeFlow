@@ -1,7 +1,7 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'setting_provider.g.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Scoped by the settings shell, including direct child-route navigation.
-@Riverpod(dependencies: [])
-bool settingsLayout(Ref ref) => false;
+final settingsLayoutProvider = Provider.autoDispose<bool>(
+  (ref) => false,
+  dependencies: const [],
+);

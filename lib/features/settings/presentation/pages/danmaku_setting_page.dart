@@ -9,10 +9,8 @@ import 'package:anime_flow/shared/models/font_item.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
-@Dependencies([settingsLayout])
 class DanmakuSettingPage extends ConsumerStatefulWidget {
   const DanmakuSettingPage({super.key});
 

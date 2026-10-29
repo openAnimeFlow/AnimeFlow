@@ -21,11 +21,15 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
 
   final bool hardwareDecoder;
 
-  // FVP defaults to a 4-second decoded-data buffer. On longer videos that is
+  // FVP defaults to a 4-second undecoded packet buffer. On longer videos that is
   // only a few pixels on the progress bar, so keep a visible, practical
   // buffer for on-demand playback.
   static const int _bufferRangeMinMilliseconds = 1000;
   static const int _bufferRangeMaxMilliseconds = 60 * 1000;
+
+  // 与待解码队列分开：保留已读取的数据包，供向后跳转复用。
+  // 这是可缓存区间的数量，不是秒数；MDK 按 LRU 淘汰旧区间。
+  static const int _demuxCacheRanges = 8;
 
   late fvp.Player _player;
   final ValueNotifier<int?> _textureId = ValueNotifier<int?>(null);
@@ -70,6 +74,7 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
 
   void _createPlayer() {
     _player = fvp.Player();
+    _player.setProperty('demux.buffer.ranges', '$_demuxCacheRanges');
     // Follow FVP 0.38.1's platform priorities with software fallback.
     _player.videoDecoders = [
       if (hardwareDecoder) ..._preferredDecoders(),
@@ -113,6 +118,12 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
           // avoids missing short-lived buffer updates between polling ticks.
           _emitBufferedPosition();
           _emitBufferingState();
+          return;
+        }
+
+        if (event.category == 'cache.ranges') {
+          // error 字段在这里是缓存区间数量，不是播放错误。
+          _emitBufferedPosition();
           return;
         }
 
@@ -370,9 +381,7 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
     final position = _player.position;
     _emit(PlayerPositionChanged(Duration(milliseconds: position)));
 
-    // FVP's buffered() value is the amount of media buffered after the
-    // current position. The shared playback state stores the absolute end
-    // position used by the progress bar, so convert it before emitting.
+    // 同时考虑待解码队列和可回退缓存，报告当前位置之后连续可用的末端。
     _emitBufferedPosition(position: position);
     _emitBufferingState();
 
@@ -410,11 +419,20 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
     if (!_hasMedia || _disposed) return;
     final currentPosition = position ?? _player.position;
     final bufferLength = _player.buffered();
-    if (bufferLength < 0) return;
+    final ranges = _player.bufferedTimeRanges()
+      ..sort((a, b) => a.start.compareTo(b.start));
+    if (bufferLength < 0 && ranges.isEmpty) return;
 
-    _emit(PlayerBufferedChanged(
-      Duration(milliseconds: currentPosition + bufferLength),
-    ));
+    var bufferedEnd = Duration(
+      milliseconds: currentPosition + (bufferLength > 0 ? bufferLength : 0),
+    );
+    for (final range in ranges) {
+      // 不能用所有区间的最大终点：跳转形成的空隙仍然需要下载。
+      if (range.start > bufferedEnd) break;
+      if (range.end > bufferedEnd) bufferedEnd = range.end;
+    }
+
+    _emit(PlayerBufferedChanged(bufferedEnd));
   }
 
   Future<void> _enqueue(Future<void> Function() operation) =>

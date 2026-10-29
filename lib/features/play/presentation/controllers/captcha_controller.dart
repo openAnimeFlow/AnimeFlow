@@ -5,7 +5,7 @@ import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/core/webview/captcha/captcha_webview_controller.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 
-/// 验证码解决 Provider
+/// 验证码解决 Controller
 ///
 /// 支持两种独立的验证流程：
 ///
@@ -24,7 +24,7 @@ import 'package:anime_flow/core/logger/logger.dart';
 ///   3. 检测到按钮后自动模拟点击
 ///   4. 按钮消失时，获取页面 Cookie 并保存到 [CookieManager]
 ///   5. 通过 [onVerified] 回调通知 UI 发起重新检索
-class CaptchaProvider {
+class CaptchaController {
   CaptchaWebviewController? _controller;
 
   final StreamController<String?> _captchaImageStreamController =

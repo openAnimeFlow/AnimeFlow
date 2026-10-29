@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
 import 'package:anime_flow/core/crawler/captcha_page_url.dart';
-import 'package:anime_flow/features/play/presentation/providers/captcha_provider.dart';
+import 'package:anime_flow/features/play/presentation/controllers/captcha_controller.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
@@ -30,7 +30,7 @@ class CaptchaView extends StatefulWidget {
 }
 
 class _CaptchaViewState extends State<CaptchaView> {
-  CaptchaProvider? _provider;
+  CaptchaController? _provider;
   Timer? _verifyTimer;
   StreamSubscription? _imageSub;
   final _codeController = TextEditingController();
@@ -65,7 +65,7 @@ class _CaptchaViewState extends State<CaptchaView> {
     final keyword = widget.subjectName;
 
     _disposeSession();
-    _provider = CaptchaProvider();
+    _provider = CaptchaController();
     final name = widget.resource.websiteName;
     // API 规则没有搜索页，验证页地址来自规则的 captchaPageUrl
     // （见 CrawlConfigItem.captchaPageTemplate）。

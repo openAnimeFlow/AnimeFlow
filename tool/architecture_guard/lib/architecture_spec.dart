@@ -7,7 +7,7 @@ ArchitectureSpec projectArchitecture() => ArchitectureSpec(
     for (final path in [
       'lib/features/play/presentation/providers/video_ui_provider.dart',
       'lib/features/play/presentation/providers/player_cache_speed_provider.dart',
-      'lib/features/play/presentation/providers/captcha_provider.dart',
+      'lib/features/play/presentation/providers/captcha_controller.dart',
       'lib/features/settings/presentation/providers/setting_provider.dart',
     ])
       SourceScope(path, Responsibility.ui),

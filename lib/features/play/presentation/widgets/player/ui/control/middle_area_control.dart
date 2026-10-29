@@ -79,16 +79,13 @@ class _CenterIndicator extends ConsumerWidget {
               strokeWidth: 5,
             ),
             const SizedBox(height: 8),
-            Row(mainAxisSize: MainAxisSize.min, children: [
+            Row(mainAxisSize: MainAxisSize.min, spacing: 5, children: [
               Consumer(builder: (context, ref, child) {
                 final speed = ref.watch(playerCacheSpeedProvider);
                 // 重建或切换内核时不展示上一次采样的值。
                 final value = speed.isLoading ? null : speed.asData?.value;
                 if (value == null) return const SizedBox.shrink();
-                return Padding(
-                  padding: const EdgeInsets.only(right: 5),
-                  child: Text(Utils.formatBytesPerSec(value), style: textStyle),
-                );
+                return Text(Utils.formatBytesPerSec(value), style: textStyle);
               }),
               Text(AppLocalizations.of(context).buffering, style: textStyle),
             ]),

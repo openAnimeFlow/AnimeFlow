@@ -175,6 +175,23 @@ class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
         _shaders = shaderList;
       });
 
+  @override
+  Future<double?> readCacheSpeed() async {
+    if (_disposed || _released || !_opened) return null;
+    final player = _player;
+    try {
+      final nativePlayer = player.platform as NativePlayer;
+      // mpv 已按约一秒窗口计算 B/s，无需再次除以采样间隔。
+      final raw = await nativePlayer.getProperty('cache-speed');
+      if (_disposed || _released || !identical(player, _player)) return null;
+      final speed = double.tryParse(raw);
+      return speed != null && speed.isFinite && speed >= 0 ? speed : null;
+    } catch (_) {
+      // 输入不支持该属性，或读取期间播放器已释放。
+      return null;
+    }
+  }
+
   Future<void> _applyShaders(String shaderList) async {
     _ensureReady();
     final nativePlayer = _player.platform as NativePlayer;

@@ -6,6 +6,7 @@ ArchitectureSpec projectArchitecture() => ArchitectureSpec(
     // 这些 Provider 管理展示状态，允许引用 UI。
     for (final path in [
       'lib/features/play/presentation/providers/video_ui_provider.dart',
+      'lib/features/play/presentation/providers/player_cache_speed_provider.dart',
       'lib/features/play/presentation/providers/captcha_provider.dart',
       'lib/features/settings/presentation/providers/setting_provider.dart',
     ])

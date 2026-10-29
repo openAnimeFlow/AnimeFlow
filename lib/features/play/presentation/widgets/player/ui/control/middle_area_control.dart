@@ -1,6 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
-import 'package:anime_flow/core/network_speed/network_speed_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/player_cache_speed_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -81,14 +81,15 @@ class _CenterIndicator extends ConsumerWidget {
             const SizedBox(height: 8),
             Row(mainAxisSize: MainAxisSize.min, children: [
               Consumer(builder: (context, ref, child) {
-                final speed =
-                    ref.watch(networkSpeedStreamProvider(2000)).asData?.value;
-                return Text(
-                  ' ${Utils.formatBytesPerSec(speed?.download ?? 0)}',
-                  style: textStyle,
+                final speed = ref.watch(playerCacheSpeedProvider);
+                // 重建或切换内核时不展示上一次采样的值。
+                final value = speed.isLoading ? null : speed.asData?.value;
+                if (value == null) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(right: 5),
+                  child: Text(Utils.formatBytesPerSec(value), style: textStyle),
                 );
               }),
-              const SizedBox(width: 5),
               Text(AppLocalizations.of(context).buffering, style: textStyle),
             ]),
           ],

@@ -350,6 +350,9 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
   }
 
   @override
+  Future<double?> readCacheSpeed() async => null;
+
+  @override
   Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;

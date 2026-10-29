@@ -24,6 +24,10 @@ abstract interface class PlayerEngine {
   Future<void> setRate(double rate);
   Future<Uint8List?> screenshot();
   Future<void> setShaders(String shaderList);
+
+  /// 当前媒体输入速度（B/s）；内核不支持或数据不可用时返回 null。
+  Future<double?> readCacheSpeed();
+
   Future<void> dispose();
 }
 

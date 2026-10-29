@@ -570,6 +570,9 @@ class _FakePlayerEngine implements PlayerEngine {
   Future<void> setShaders(String shaderList) async {}
 
   @override
+  Future<double?> readCacheSpeed() async => null;
+
+  @override
   Future<void> dispose() async {
     disposeCount++;
     try {

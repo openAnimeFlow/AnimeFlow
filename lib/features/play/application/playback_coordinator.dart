@@ -81,6 +81,14 @@ class PlaybackCoordinator {
   Future<void> setShaders(String shaderList) =>
       _run(() => _activeEngine.setShaders(shaderList));
 
+  /// 只在 UI 需要时读取，不向播放操作队列添加周期性任务。
+  Future<double?> readCacheSpeed() async {
+    final engine = _engine;
+    if (_disposed || engine == null) return null;
+    final speed = await engine.readCacheSpeed();
+    return !_disposed && identical(engine, _engine) ? speed : null;
+  }
+
   Future<T?> _run<T>(Future<T> Function() command) async {
     try {
       return await _operations.run(command);

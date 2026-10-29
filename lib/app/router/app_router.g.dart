@@ -739,6 +739,11 @@ RouteBase get $settingsShellRoute => ShellRouteData.$route(
               factory: $SettingGeneralRoute._fromState,
             ),
             GoRouteData.$route(
+              path: 'page',
+              hasOverriddenOnExit: false,
+              factory: $SettingPageRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'playback',
               hasOverriddenOnExit: false,
               factory: $SettingPlaybackRoute._fromState,
@@ -903,6 +908,29 @@ mixin $SettingGeneralRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
         '/settings/general',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SettingPageRoute on GoRouteData {
+  static SettingPageRoute _fromState(GoRouterState state) =>
+      const SettingPageRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/settings/page',
       );
 
   @override

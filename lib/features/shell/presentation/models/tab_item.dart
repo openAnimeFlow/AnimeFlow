@@ -1,12 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 
-enum TabType {
-  home,
-  ranking,
-  cart,
-  profile
-}
-
 class TabItem {
   final String title;
   final IconData icon;

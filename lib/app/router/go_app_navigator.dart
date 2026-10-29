@@ -144,6 +144,7 @@ class GoAppNavigator implements AppNavigator {
         SettingsDestination.account => const SettingAccountRoute(),
         SettingsDestination.logs => const SettingLogsRoute(),
         SettingsDestination.general => const SettingGeneralRoute(),
+        SettingsDestination.page => const SettingPageRoute(),
         SettingsDestination.playback => const SettingPlaybackRoute(),
         SettingsDestination.playerShortcuts =>
           const SettingPlayerShortcutsRoute(),

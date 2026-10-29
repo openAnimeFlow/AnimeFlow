@@ -1,8 +1,9 @@
+import 'dart:ui';
+import 'dart:async';
+
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'collection_sync_pending_banner.dart';
-import 'dart:ui';
-
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/shared/models/enums/collection_sort.dart';
 import 'package:anime_flow/features/user/application/user_collection_provider.dart';
@@ -12,6 +13,7 @@ import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
@@ -36,6 +38,7 @@ class UserCenterView extends ConsumerStatefulWidget {
 class _UserViewState extends ConsumerState<UserCenterView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late final StreamSubscription<CollectType> _collectionSettingSubscription;
   final _isPinned = ValueNotifier(false);
   bool isHideUserInfo = true;
 
@@ -114,13 +117,19 @@ class _UserViewState extends ConsumerState<UserCenterView>
   @override
   void initState() {
     super.initState();
-    // TODO 暂时默认为再看tab索引，后续从设置中获取
     _tabController = TabController(
       length: userCollectionTypeLabels.length,
       vsync: this,
-      initialIndex: 2,
+      initialIndex: AppSettings.defaultCollectionType.value - 1,
     );
     _tabController.addListener(_onTabChanged);
+    _collectionSettingSubscription =
+        AppSettings.watchDefaultCollectionType().listen((type) {
+      final index = type.value - 1;
+      if (mounted && _tabController.index != index) {
+        _tabController.index = index;
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(userCollectionsProvider.notifier).loadInitial(_currentType);
@@ -136,6 +145,7 @@ class _UserViewState extends ConsumerState<UserCenterView>
 
   @override
   void dispose() {
+    _collectionSettingSubscription.cancel();
     _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     _isPinned.dispose();

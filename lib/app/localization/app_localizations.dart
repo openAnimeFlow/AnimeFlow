@@ -103,6 +103,36 @@ abstract class AppLocalizations {
         languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant')
   ];
 
+  /// No description provided for @defaultCollectionCategory.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'默认收藏分类'**
+  String get defaultCollectionCategory;
+
+  /// No description provided for @defaultCollectionCategoryDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'选择打开我的收藏时展示的分类。'**
+  String get defaultCollectionCategoryDescription;
+
+  /// No description provided for @pageSettings.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'页面设置'**
+  String get pageSettings;
+
+  /// No description provided for @startupPage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'启动默认页面'**
+  String get startupPage;
+
+  /// No description provided for @startupPageDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'选择应用启动时默认展示的页面，下次启动时生效。'**
+  String get startupPageDescription;
+
   /// No description provided for @wallpaperImageSize.
   ///
   /// In zh_Hans, this message translates to:

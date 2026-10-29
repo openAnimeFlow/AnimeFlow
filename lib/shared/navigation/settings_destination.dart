@@ -4,6 +4,7 @@ enum SettingsDestination {
   account,
   logs,
   general,
+  page,
   playback,
   playerShortcuts,
   downloadPlugins,

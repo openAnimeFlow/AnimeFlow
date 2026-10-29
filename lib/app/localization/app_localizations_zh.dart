@@ -9,6 +9,21 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get defaultCollectionCategory => '默认收藏分类';
+
+  @override
+  String get defaultCollectionCategoryDescription => '选择打开我的收藏时展示的分类。';
+
+  @override
+  String get pageSettings => '页面设置';
+
+  @override
+  String get startupPage => '启动默认页面';
+
+  @override
+  String get startupPageDescription => '选择应用启动时默认展示的页面，下次启动时生效。';
+
+  @override
   String get wallpaperImageSize => '圖片尺寸';
 
   @override
@@ -2525,6 +2540,21 @@ class AppLocalizationsZh extends AppLocalizations {
 /// The translations for Chinese, using the Han script (`zh_Hans`).
 class AppLocalizationsZhHans extends AppLocalizationsZh {
   AppLocalizationsZhHans() : super('zh_Hans');
+
+  @override
+  String get defaultCollectionCategory => '默认收藏分类';
+
+  @override
+  String get defaultCollectionCategoryDescription => '选择打开我的收藏时展示的分类。';
+
+  @override
+  String get pageSettings => '页面设置';
+
+  @override
+  String get startupPage => '启动默认页面';
+
+  @override
+  String get startupPageDescription => '选择应用启动时默认展示的页面，下次启动时生效。';
 
   @override
   String get wallpaperImageSize => '图片尺寸';
@@ -5044,6 +5074,21 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   AppLocalizationsZhHantHk() : super('zh_Hant_HK');
 
   @override
+  String get defaultCollectionCategory => '預設收藏分類';
+
+  @override
+  String get defaultCollectionCategoryDescription => '選擇開啟我的收藏時顯示的分類。';
+
+  @override
+  String get pageSettings => '頁面設定';
+
+  @override
+  String get startupPage => '啟動預設頁面';
+
+  @override
+  String get startupPageDescription => '選擇應用程式啟動時預設顯示的頁面，下次啟動時生效。';
+
+  @override
   String get wallpaperImageSize => '圖片尺寸';
 
   @override
@@ -7560,6 +7605,21 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
 class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   AppLocalizationsZhHantTw() : super('zh_Hant_TW');
+
+  @override
+  String get defaultCollectionCategory => '預設收藏分類';
+
+  @override
+  String get defaultCollectionCategoryDescription => '選擇開啟我的收藏時顯示的分類。';
+
+  @override
+  String get pageSettings => '頁面設定';
+
+  @override
+  String get startupPage => '啟動預設頁面';
+
+  @override
+  String get startupPageDescription => '選擇應用程式啟動時預設顯示的頁面，下次啟動時生效。';
 
   @override
   String get wallpaperImageSize => '圖片尺寸';

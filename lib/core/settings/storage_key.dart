@@ -90,6 +90,8 @@ class SettingKey {
       themeMode = 'theme_mode',
       seedColor = 'theme_seed_color',
       locale = 'app_locale',
+      startupPage = 'app_startup_page',
+      defaultCollectionType = 'default_collection_type',
       rankingDetailsLayout = 'ranking_details_layout',
       collectionSort = 'collection_sort',
       calendarTagFilter = 'calendar_tag_filter',

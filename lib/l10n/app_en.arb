@@ -1,4 +1,9 @@
 {
+  "defaultCollectionCategory": "Default collection category",
+  "defaultCollectionCategoryDescription": "Choose the category shown on your collection page.",
+  "pageSettings": "Page settings",
+  "startupPage": "Startup page",
+  "startupPageDescription": "Choose the page shown when the app starts. Changes take effect next time you start the app.",
   "wallpaperImageSize": "Image size",
   "wallpaperBackdrop": "Backdrop",
   "wallpaperPoster": "Poster",

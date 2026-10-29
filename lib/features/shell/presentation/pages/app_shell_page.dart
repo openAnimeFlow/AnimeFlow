@@ -1,7 +1,7 @@
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/shared/models/tab_item.dart';
+import 'package:anime_flow/features/shell/presentation/models/tab_item.dart';
 import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/system_util.dart';

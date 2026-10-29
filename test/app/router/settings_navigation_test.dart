@@ -34,7 +34,7 @@ void main() {
                     // 替换子页面，避免启动其中的账号和网络服务。
                     width > 600 ? const SizedBox() : const SettingsMenuPage(),
                 routes: [
-                  for (final path in ['general', 'playback', 'font'])
+                  for (final path in ['general', 'playback', 'font', 'page'])
                     GoRoute(
                         path: path,
                         builder: (context, state) =>
@@ -95,6 +95,29 @@ void main() {
     final tile = tester.widget<ListTile>(find.ancestor(
         of: find.text(l10n(tester).themeStyle),
         matching: find.byType(ListTile)));
+    expect(tile.selected, isTrue);
+  });
+
+  testWidgets('page settings opens from the narrow menu and returns',
+      (tester) async {
+    final router = await pumpSettings(tester, 500, '/settings');
+    await tester.tap(find.text(l10n(tester).pageSettings));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('page')), findsOneWidget);
+    expect(router.canPop(), isTrue);
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.text(l10n(tester).pageSettings), findsOneWidget);
+  });
+
+  testWidgets('page settings is selected in the wide menu', (tester) async {
+    await pumpSettings(tester, 1000, '/settings/general');
+    final label = l10n(tester).pageSettings;
+    await tester.tap(find.text(label));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('page')), findsOneWidget);
+    final tile = tester.widget<ListTile>(
+        find.ancestor(of: find.text(label), matching: find.byType(ListTile)));
     expect(tile.selected, isTrue);
   });
 }

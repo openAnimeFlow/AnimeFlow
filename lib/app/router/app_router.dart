@@ -1,3 +1,6 @@
+import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/core/settings/startup_page.dart';
+import 'package:anime_flow/features/settings/presentation/pages/page_settings_page.dart';
 import 'package:anime_flow/features/anime_info/presentation/pages/anime_info_page.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_preview/presentation/pages/anime_preview.dart';
@@ -419,6 +422,7 @@ class ImagePreviewRoute extends GoRouteData with $ImagePreviewRoute {
       TypedGoRoute<SettingAccountRoute>(path: 'account'),
       TypedGoRoute<SettingLogsRoute>(path: 'logs'),
       TypedGoRoute<SettingGeneralRoute>(path: 'general'),
+      TypedGoRoute<SettingPageRoute>(path: 'page'),
       TypedGoRoute<SettingPlaybackRoute>(path: 'playback'),
       TypedGoRoute<SettingPlayerShortcutsRoute>(path: 'playerShortcuts'),
       TypedGoRoute<SettingDownloadPluginsRoute>(path: 'downloadPlugins'),
@@ -477,6 +481,14 @@ class SettingGeneralRoute extends GoRouteData with $SettingGeneralRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const GeneralSettingsPage();
+}
+
+class SettingPageRoute extends GoRouteData with $SettingPageRoute {
+  const SettingPageRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const PageSettingsPage();
 }
 
 class SettingPlaybackRoute extends GoRouteData with $SettingPlaybackRoute {
@@ -614,7 +626,11 @@ class SettingAgreementRoute extends GoRouteData with $SettingAgreementRoute {
 final GoRouter appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
   observers: [BotToastNavigatorObserver(), appRouteObserver],
-  initialLocation: const RecommendRoute().location,
+  initialLocation: switch (AppSettings.startupPage) {
+    StartupPage.recommend => const RecommendRoute().location,
+    StartupPage.ranking => const RankingRoute().location,
+    StartupPage.user => const UserRoute().location,
+  },
   redirect: (context, state) {
     final uri = state.uri;
     if (isOAuthAppCallbackUri(uri)) {

@@ -9,6 +9,23 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get defaultCollectionCategory => 'Default collection category';
+
+  @override
+  String get defaultCollectionCategoryDescription =>
+      'Choose the category shown on your collection page.';
+
+  @override
+  String get pageSettings => 'Page settings';
+
+  @override
+  String get startupPage => 'Startup page';
+
+  @override
+  String get startupPageDescription =>
+      'Choose the page shown when the app starts. Changes take effect next time you start the app.';
+
+  @override
   String get wallpaperImageSize => 'Image size';
 
   @override

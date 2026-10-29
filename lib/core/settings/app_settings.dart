@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:anime_flow/core/settings/startup_page.dart';
 import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/ech_image_route.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/shared/models/enums/collection_sort.dart';
+import 'package:anime_flow/shared/models/enums/collect_type.dart';
 
 /// 应用持久化配置的统一访问入口。
 abstract final class AppSettings {
@@ -16,6 +18,32 @@ abstract final class AppSettings {
       Storage.setting.put(key, value);
 
   static Future<void> deleteSetting(String key) => Storage.setting.delete(key);
+
+  static StartupPage get startupPage {
+    final saved = getSetting<String>(SettingKey.startupPage);
+    return StartupPage.values.firstWhere(
+      (page) => page.name == saved,
+      orElse: () => StartupPage.recommend,
+    );
+  }
+
+  static Future<void> setStartupPage(StartupPage page) =>
+      setSetting(SettingKey.startupPage, page.name);
+
+  static CollectType get defaultCollectionType {
+    final saved = getSetting<int>(SettingKey.defaultCollectionType);
+    final type = CollectType.fromValue(saved ?? 0);
+    return type.isCollected ? type : CollectType.watching;
+  }
+
+  static Future<void> setDefaultCollectionType(CollectType type) {
+    if (!type.isCollected) throw ArgumentError.value(type, 'type');
+    return setSetting(SettingKey.defaultCollectionType, type.value);
+  }
+
+  static Stream<CollectType> watchDefaultCollectionType() => Storage.setting
+      .watch(key: SettingKey.defaultCollectionType)
+      .map((_) => defaultCollectionType);
 
   /// 每种收藏类型分别保存排序；旧版本用户保持默认排序。
   static CollectionSort getCollectionSort(int type) {

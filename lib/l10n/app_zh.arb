@@ -1,4 +1,9 @@
 {
+  "defaultCollectionCategory": "默认收藏分类",
+  "defaultCollectionCategoryDescription": "选择打开我的收藏时展示的分类。",
+  "pageSettings": "页面设置",
+  "startupPage": "启动默认页面",
+  "startupPageDescription": "选择应用启动时默认展示的页面，下次启动时生效。",
   "wallpaperImageSize": "圖片尺寸",
   "wallpaperBackdrop": "橫向劇照",
   "wallpaperPoster": "直向海報",

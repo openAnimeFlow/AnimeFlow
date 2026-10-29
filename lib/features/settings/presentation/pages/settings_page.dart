@@ -132,6 +132,11 @@ class _SettingsMenu extends ConsumerWidget {
             icon: Icons.color_lens_outlined,
             destination: SettingsDestination.theme,
           ),
+          _SettingsMenuItem(
+            title: l10n.pageSettings,
+            icon: Icons.web_outlined,
+            destination: SettingsDestination.page,
+          ),
         ],
       ),
       _SettingsCategory(

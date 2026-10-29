@@ -35,8 +35,8 @@ class AppShellPage extends StatelessWidget {
         return _buildScaffold(context, isDesktop: true, glassBar: false);
       } else {
         return StreamBuilder<bool>(
-          stream: AppSettings.watchGlassNavigationBar(),
-          initialData: AppSettings.glassNavigationBar,
+          stream: AppSettings.watchGlassNavigationStyle(),
+          initialData: AppSettings.glassNavigationStyle,
           builder: (context, snapshot) => _buildScaffold(context,
               isDesktop: false, glassBar: snapshot.data ?? false),
         );
@@ -77,9 +77,40 @@ class AppShellPage extends StatelessWidget {
                 color: Theme.of(context).scaffoldBackgroundColor,
                 child: Builder(builder: (context) {
                   // extendBody 提供的底部 padding 包含悬浮导航栏的实际高度。
+                  final bottomInset = MediaQuery.paddingOf(context).bottom;
                   return BottomOcclusionScope(
-                    height: glassBar ? MediaQuery.paddingOf(context).bottom : 0,
-                    child: navigationShell,
+                    height: glassBar ? bottomInset : 0,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(child: navigationShell),
+                        if (glassBar &&
+                            MediaQuery.viewInsetsOf(context).bottom == 0)
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            height: bottomInset + 48,
+                            child: IgnorePointer(
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      colorScheme.surface.withValues(alpha: 0),
+                                      colorScheme.surface
+                                          .withValues(alpha: 0.4),
+                                      colorScheme.surface
+                                          .withValues(alpha: 0.9),
+                                    ],
+                                    stops: const [0, 0.6, 1],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   );
                 }),
               ),

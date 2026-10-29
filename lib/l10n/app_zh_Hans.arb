@@ -1,6 +1,6 @@
 {
-  "glassNavigationBar": "磨砂玻璃底部导航栏",
-  "glassNavigationBarDescription": "在窄屏设备上使用悬浮的磨砂玻璃导航栏。",
+  "glassNavigationStyle": "磨砂玻璃导航风格",
+  "glassNavigationStyleDescription": "推荐页标签栏和底部导航栏使用磨砂玻璃胶囊风格。",
   "defaultCollectionCategory": "默认收藏分类",
   "defaultCollectionCategoryDescription": "选择打开我的收藏时展示的分类。",
   "pageSettings": "页面设置",

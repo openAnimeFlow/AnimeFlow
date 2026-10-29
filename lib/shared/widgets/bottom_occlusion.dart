@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
+import 'package:anime_flow/shared/widgets/top_occlusion.dart';
 
 /// 页面底部被悬浮组件覆盖的高度，包含覆盖区域内的设备安全区。
 class BottomOcclusionScope extends InheritedWidget {
@@ -39,6 +40,10 @@ class OcclusionAwareCustomScrollView extends CustomScrollView {
 
   @override
   List<Widget> buildSlivers(BuildContext context) => [
+        if (TopOcclusionScope.of(context) > 0)
+          SliverToBoxAdapter(
+            child: SizedBox(height: TopOcclusionScope.of(context)),
+          ),
         ...super.buildSlivers(context),
         SliverToBoxAdapter(
           child: SizedBox(height: BottomOcclusionScope.of(context)),

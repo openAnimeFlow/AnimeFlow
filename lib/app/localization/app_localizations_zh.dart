@@ -9,10 +9,10 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get glassNavigationBar => '磨砂玻璃底部导航栏';
+  String get glassNavigationStyle => '磨砂玻璃导航风格';
 
   @override
-  String get glassNavigationBarDescription => '在窄屏设备上使用悬浮的磨砂玻璃导航栏。';
+  String get glassNavigationStyleDescription => '推荐页标签栏和底部导航栏使用磨砂玻璃胶囊风格。';
 
   @override
   String get defaultCollectionCategory => '默认收藏分类';
@@ -2548,10 +2548,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   AppLocalizationsZhHans() : super('zh_Hans');
 
   @override
-  String get glassNavigationBar => '磨砂玻璃底部导航栏';
+  String get glassNavigationStyle => '磨砂玻璃导航风格';
 
   @override
-  String get glassNavigationBarDescription => '在窄屏设备上使用悬浮的磨砂玻璃导航栏。';
+  String get glassNavigationStyleDescription => '推荐页标签栏和底部导航栏使用磨砂玻璃胶囊风格。';
 
   @override
   String get defaultCollectionCategory => '默认收藏分类';
@@ -5086,10 +5086,10 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   AppLocalizationsZhHantHk() : super('zh_Hant_HK');
 
   @override
-  String get glassNavigationBar => '毛玻璃底部導覽列';
+  String get glassNavigationStyle => '毛玻璃導覽風格';
 
   @override
-  String get glassNavigationBarDescription => '在窄螢幕裝置上使用浮動的毛玻璃導覽列。';
+  String get glassNavigationStyleDescription => '推薦頁分頁列與底部導覽列使用毛玻璃膠囊風格。';
 
   @override
   String get defaultCollectionCategory => '預設收藏分類';
@@ -7625,10 +7625,10 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   AppLocalizationsZhHantTw() : super('zh_Hant_TW');
 
   @override
-  String get glassNavigationBar => '毛玻璃底部導覽列';
+  String get glassNavigationStyle => '毛玻璃導覽風格';
 
   @override
-  String get glassNavigationBarDescription => '在窄螢幕裝置上使用浮動的毛玻璃導覽列。';
+  String get glassNavigationStyleDescription => '推薦頁分頁列與底部導覽列使用毛玻璃膠囊風格。';
 
   @override
   String get defaultCollectionCategory => '預設收藏分類';

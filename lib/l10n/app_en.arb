@@ -1,6 +1,6 @@
 {
-  "glassNavigationBar": "Glass bottom navigation",
-  "glassNavigationBarDescription": "Use a floating glass navigation bar on narrow screens.",
+  "glassNavigationStyle": "Glass navigation style",
+  "glassNavigationStyleDescription": "Use glass capsules for the recommendation tabs and bottom navigation.",
   "defaultCollectionCategory": "Default collection category",
   "defaultCollectionCategoryDescription": "Choose the category shown on your collection page.",
   "pageSettings": "Page settings",

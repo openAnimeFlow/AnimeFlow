@@ -91,7 +91,7 @@ class SettingKey {
       seedColor = 'theme_seed_color',
       locale = 'app_locale',
       startupPage = 'app_startup_page',
-      glassNavigationBar = 'glass_navigation_bar',
+      glassNavigationStyle = 'glass_navigation_bar',
       defaultCollectionType = 'default_collection_type',
       rankingDetailsLayout = 'ranking_details_layout',
       collectionSort = 'collection_sort',

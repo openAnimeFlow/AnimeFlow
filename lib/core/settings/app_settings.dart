@@ -30,16 +30,16 @@ abstract final class AppSettings {
   static Future<void> setStartupPage(StartupPage page) =>
       setSetting(SettingKey.startupPage, page.name);
 
-  static bool get glassNavigationBar =>
-      getSetting<bool>(SettingKey.glassNavigationBar, defaultValue: false) ??
+  static bool get glassNavigationStyle =>
+      getSetting<bool>(SettingKey.glassNavigationStyle, defaultValue: false) ??
       false;
 
-  static Future<void> setGlassNavigationBar(bool value) =>
-      setSetting(SettingKey.glassNavigationBar, value);
+  static Future<void> setGlassNavigationStyle(bool value) =>
+      setSetting(SettingKey.glassNavigationStyle, value);
 
-  static Stream<bool> watchGlassNavigationBar() => Storage.setting
-      .watch(key: SettingKey.glassNavigationBar)
-      .map((_) => glassNavigationBar);
+  static Stream<bool> watchGlassNavigationStyle() => Storage.setting
+      .watch(key: SettingKey.glassNavigationStyle)
+      .map((_) => glassNavigationStyle);
 
   static CollectType get defaultCollectionType {
     final saved = getSetting<int>(SettingKey.defaultCollectionType);

@@ -18,7 +18,7 @@ class PageSettingsPage extends ConsumerStatefulWidget {
 class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
   late StartupPage _startupPage;
   late CollectType _collectionType;
-  late bool _glassNavigationBar;
+  late bool _glassNavigationStyle;
   bool _saving = false;
   bool _isMenuOpen = false;
   bool _isCollectionMenuOpen = false;
@@ -28,15 +28,15 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
     super.initState();
     _startupPage = AppSettings.startupPage;
     _collectionType = AppSettings.defaultCollectionType;
-    _glassNavigationBar = AppSettings.glassNavigationBar;
+    _glassNavigationStyle = AppSettings.glassNavigationStyle;
   }
 
-  Future<void> _setGlassNavigationBar(bool value) async {
+  Future<void> _setGlassNavigationStyle(bool value) async {
     if (_saving) return;
     setState(() => _saving = true);
     try {
-      await AppSettings.setGlassNavigationBar(value);
-      if (mounted) setState(() => _glassNavigationBar = value);
+      await AppSettings.setGlassNavigationStyle(value);
+      if (mounted) setState(() => _glassNavigationStyle = value);
     } catch (_) {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
@@ -110,10 +110,10 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
               16, 16, 16, 16 + MediaQuery.paddingOf(context).bottom),
           children: [
             SwitchListTile(
-              title: Text(l10n.glassNavigationBar),
-              subtitle: Text(l10n.glassNavigationBarDescription),
-              value: _glassNavigationBar,
-              onChanged: _saving ? null : _setGlassNavigationBar,
+              title: Text(l10n.glassNavigationStyle),
+              subtitle: Text(l10n.glassNavigationStyleDescription),
+              value: _glassNavigationStyle,
+              onChanged: _saving ? null : _setGlassNavigationStyle,
             ),
             ListTile(
               title: Text(l10n.startupPage),
@@ -124,13 +124,14 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
                   items: StartupPage.values,
                   selectedItem: _startupPage,
                   tooltip: l10n.startupPage,
+                  buttonBorderRadius: BorderRadius.circular(8),
                   onOpenedChanged: (isOpen) =>
                       setState(() => _isMenuOpen = isOpen),
                   buttonBuilder: (context, selectedItem) => Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(label(selectedItem!),
-                          style: TextStyle(color: primary)),
+                          style: TextStyle(color: primary,fontSize: 15)),
                       AnimatedRotation(
                         turns: _isMenuOpen ? 0.5 : 0,
                         duration: const Duration(milliseconds: 180),
@@ -164,6 +165,7 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
                   items: CollectType.values
                       .where((type) => type.isCollected)
                       .toList(),
+                  buttonBorderRadius: BorderRadius.circular(8),
                   selectedItem: _collectionType,
                   tooltip: l10n.defaultCollectionCategory,
                   onOpenedChanged: (isOpen) =>
@@ -172,7 +174,7 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(collectionLabel(selectedItem!),
-                          style: TextStyle(color: primary)),
+                          style: TextStyle(color: primary,fontSize: 15)),
                       AnimatedRotation(
                         turns: _isCollectionMenuOpen ? 0.5 : 0,
                         duration: const Duration(milliseconds: 180),

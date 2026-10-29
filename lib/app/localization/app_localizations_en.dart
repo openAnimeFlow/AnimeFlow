@@ -9,11 +9,11 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get glassNavigationBar => 'Glass bottom navigation';
+  String get glassNavigationStyle => 'Glass navigation style';
 
   @override
-  String get glassNavigationBarDescription =>
-      'Use a floating glass navigation bar on narrow screens.';
+  String get glassNavigationStyleDescription =>
+      'Use glass capsules for the recommendation tabs and bottom navigation.';
 
   @override
   String get defaultCollectionCategory => 'Default collection category';

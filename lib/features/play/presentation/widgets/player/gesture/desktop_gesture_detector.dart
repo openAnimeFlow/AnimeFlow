@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/features/play/application/play_session.dart';
 import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';

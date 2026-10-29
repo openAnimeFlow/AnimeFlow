@@ -1,9 +1,9 @@
+import 'package:anime_flow/features/play/application/play_session.dart';
 import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_search_provider.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_search_response.dart';

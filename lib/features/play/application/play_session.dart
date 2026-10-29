@@ -1,0 +1,726 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:anime_flow/core/constants/constants.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/features/play/application/danmaku_session.dart';
+import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
+import 'package:anime_flow/features/play/application/play_history_service.dart';
+import 'package:anime_flow/features/play/application/system_volume_synchronizer.dart';
+import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
+import 'package:anime_flow/features/shaders/shaders_controller.dart';
+import 'package:anime_flow/core/presence/presence_service.dart';
+import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
+import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/core/utils/vibrate.dart';
+import 'package:anime_flow/features/play/domain/player/player_event.dart';
+import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
+import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
+import 'package:anime_flow/features/play/domain/player/playback_source.dart';
+import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
+import 'package:anime_flow/features/play/domain/player/player_engine.dart';
+import 'package:anime_flow/features/play/domain/player/video_fit.dart';
+import 'package:anime_flow/features/play/application/playback_coordinator.dart';
+import 'package:anime_flow/features/play/application/play_request.dart';
+import 'package:anime_flow/features/play/application/play_state.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+
+/// 协调播放、切集、内核切换和播放会话的生命周期。
+class PlaySession {
+  PlaySession({
+    required this.shadersDirectory,
+    required PlayStateNotifier playStateActions,
+    required PlayState Function() readPlayState,
+    required Episodes episodesActions,
+    required this.danmaku,
+    required this.engineFactory,
+    required void Function({
+      required int subjectId,
+      required int episodeId,
+      required bool watched,
+    }) setEpisodeWatched,
+  })  : _playStateActions = playStateActions,
+        _readPlayState = readPlayState,
+        _episodesActions = episodesActions,
+        _setEpisodeWatched = setEpisodeWatched;
+
+  final PlayerEngineFactory engineFactory;
+  late final PlaybackCoordinator playbackCoordinator;
+  late final PlaybackProgressManager playbackProgressManager;
+  final PlayStateNotifier _playStateActions;
+  final PlayState Function() _readPlayState;
+  final Episodes _episodesActions;
+  final DanmakuSession danmaku;
+  final void Function({
+    required int subjectId,
+    required int episodeId,
+    required bool watched,
+  }) _setEpisodeWatched;
+
+  /// 着色器所在目录（由 [shadersDirectoryProvider] 在启动时准备）
+  final Directory shadersDirectory;
+
+  /// 视频地址
+  String? videoUrl;
+
+  /// 番剧id
+  int subjectId = 0;
+
+  String? subjectCover;
+
+  List<String> alias = [];
+
+  String? subjectName;
+
+  /// 当前集数索引
+  int episode = 0;
+
+  /// 当前 Bangumi 剧集 sort
+  int episodeSort = 0;
+
+  ///剧集id
+  int episodeId = 0;
+
+  bool isLocalPlayback = false;
+
+  String? localDanmakuPath;
+
+  /// 当前播放会话使用的统一播放源，用于重新加载和播放器内核切换时恢复上下文。
+  PlaybackSource? _currentSource;
+
+  /// 记录原始倍速
+  double? _speedBeforeBoost;
+  bool _isSpeedBoosting = false;
+
+  /// 垂直拖动相关
+  double _dragStartVolume = 100.0;
+
+  late final SystemVolumeSynchronizer systemVolumeSynchronizer;
+
+  /// 定时停止播放的计时器
+  Timer? _stopTimer;
+
+  /// 手动跳转落点的判定容差。
+  static const Duration _seekSettleTolerance = Duration(milliseconds: 500);
+
+  /// 手动跳转等待落点的超时时间。
+  static const Duration _seekSettleTimeout = Duration(seconds: 3);
+
+  /// 手动跳转目标与片尾之间保留的最小间隔。
+  static const Duration _seekEndGuard = Duration(seconds: 1);
+
+  /// 手动跳转目标，非空表示正在等待播放器回报新位置。
+  Duration? _pendingSeekPosition;
+  Timer? _pendingSeekTimer;
+
+  /// 拖动进度条前的播放状态，空表示当前没有进行中的拖动。
+  bool? _resumeAfterManualSeek;
+
+  bool _isPlayerBuffering = false;
+  StreamSubscription<PlayerEvent>? _playerSubscription;
+  bool _isDisposed = false;
+  Future<void> _playbackChanges = Future<void>.value();
+
+  // Keep episode metadata, source opening and kernel snapshots in the same
+  // order. Danmaku loading stays outside this queue so it cannot block playback.
+  Future<T> _serializePlaybackChange<T>(Future<T> Function() change) {
+    final result = _playbackChanges.then((_) => change());
+    _playbackChanges =
+        result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return result;
+  }
+
+  static const Duration _bufferingPositionTolerance =
+      Duration(milliseconds: 500);
+
+  void init() {
+    final adBlocker = AppSettings.adBlocker;
+    final preferredKernel = _readPreferredPlayerKernel();
+    playbackCoordinator = PlaybackCoordinator(
+      engineFactory: engineFactory,
+      adBlocker: adBlocker,
+      hardwareDecoder: AppSettings.hardwareDecoder,
+      reportError: (message, error, stackTrace) =>
+          LiggLogger().e(message, error: error, stackTrace: stackTrace),
+    );
+    scheduleMicrotask(() {
+      if (!_isDisposed) {
+        _playStateActions.setKernel(preferredKernel);
+      }
+    });
+    playbackProgressManager = PlaybackProgressManager(
+      onEpisodeWatched: ({
+        required subjectId,
+        required episodeId,
+        required watched,
+      }) {
+        _setEpisodeWatched(
+          subjectId: subjectId,
+          episodeId: episodeId,
+          watched: watched,
+        );
+      },
+    );
+    systemVolumeSynchronizer = SystemVolumeSynchronizer(
+      onSystemVolumeChanged: (volume) => _updateVolume(
+        volume,
+        syncSystemVolume: false,
+      ),
+    );
+    unawaited(playbackCoordinator.initialize(
+      kernel: preferredKernel,
+    ));
+    _playerSubscription = playbackCoordinator.events.listen(_handlePlayerEvent);
+    unawaited(systemVolumeSynchronizer.initialize());
+  }
+
+  /// 在保持播放上下文的前提下切换播放器内核。
+  Future<bool> switchKernel(PlayerKernel target) =>
+      _serializePlaybackChange(() => _switchKernel(target));
+
+  Future<bool> setHardwareDecoder(bool enabled) =>
+      _serializePlaybackChange(() async {
+        if (_isDisposed) return false;
+        final previous = AppSettings.hardwareDecoder;
+        if (previous == enabled) return true;
+        await AppSettings.setHardwareDecoder(enabled);
+        var applied = false;
+        try {
+          applied = await _switchKernel(playbackCoordinator.kernel,
+              force: true, hardwareDecoder: enabled);
+          return applied;
+        } finally {
+          if (!_isDisposed) _playStateActions.setSwitchingKernel(false);
+          if (!applied) {
+            await AppSettings.setHardwareDecoder(previous);
+          }
+        }
+      });
+
+  Future<bool> _switchKernel(PlayerKernel target,
+      {bool force = false, bool? hardwareDecoder}) async {
+    if (_isDisposed || _readPlayState().switchingKernel) {
+      return false;
+    }
+    if (!force && playbackCoordinator.kernel == target) return true;
+
+    final source = _currentSource;
+
+    final state = _readPlayState();
+    final snapshot = PlayerSnapshot(
+      source: source,
+      position: state.position,
+      // 系统音量已控制输出响度，重建时不能再叠加到播放器内部音量。
+      volume: SystemUtil.supportsSystemVolumeSync ? 100.0 : state.volume,
+      rate: state.rate,
+      wasPlaying: state.playing,
+      fit: state.videoFit,
+    );
+    _playStateActions.setSwitchingKernel(true);
+    final shaderList = switch (state.superResolutionType) {
+      2 => mpvAnime4KShadersLite,
+      3 => mpvAnime4KShaders,
+      _ => const <String>[],
+    };
+    final switched = await playbackCoordinator.switchKernel(target, snapshot,
+        force: force,
+        hardwareDecoder: hardwareDecoder,
+        shaders: force && shaderList.isNotEmpty
+            ? Utils.buildShadersAbsolutePath(shadersDirectory.path, shaderList)
+            : null);
+    if (_isDisposed) return false;
+    if (switched) {
+      _playStateActions.setKernel(target);
+      unawaited(
+        AppSettings.setPreferredPlayerKernel(target.name),
+      );
+    } else {
+      LiggLogger().e('切换播放器内核失败: $target');
+    }
+    _playStateActions.setSwitchingKernel(false);
+    return switched;
+  }
+
+  PlayerKernel _readPreferredPlayerKernel() {
+    final value = AppSettings.preferredPlayerKernelName;
+    return PlayerKernel.values.firstWhere(
+      (kernel) => kernel.name == value,
+      orElse: () => PlayerKernel.mediaKit,
+    );
+  }
+
+  void _handlePlayerEvent(PlayerEvent event) {
+    if (event is PlayerPlayingChanged) {
+      playbackProgressManager.saveAfterPlaybackChange();
+      _playStateActions.setPlaying(event.playing);
+      if (event.playing) {
+        _playStateActions.setPlaybackPhase(PlaybackPhase.playing);
+      } else if (_readPlayState().phase == PlaybackPhase.playing ||
+          _readPlayState().phase == PlaybackPhase.buffering) {
+        _playStateActions.setPlaybackPhase(PlaybackPhase.paused);
+      }
+      danmaku.onPlaybackChanged(event.playing);
+    } else if (event is PlayerVolumeChanged) {
+      if (!SystemUtil.supportsSystemVolumeSync) {
+        _playStateActions.setVolume(event.volume);
+      }
+    } else if (event is PlayerBufferedChanged) {
+      _playStateActions.setBuffered(event.buffered);
+      _updateEffectiveBufferingState(buffered: event.buffered);
+    } else if (event is PlayerBufferingChanged) {
+      _isPlayerBuffering = event.buffering;
+      if (event.buffering &&
+          _readPlayState().phase != PlaybackPhase.resolving) {
+        _playStateActions.setPlaybackPhase(PlaybackPhase.buffering);
+      } else if (!event.buffering &&
+          _readPlayState().phase == PlaybackPhase.buffering) {
+        _playStateActions.setPlaybackPhase(
+          _readPlayState().playing
+              ? PlaybackPhase.playing
+              : PlaybackPhase.paused,
+        );
+      }
+      _updateEffectiveBufferingState(playerBuffering: event.buffering);
+    } else if (event is PlayerRateChanged) {
+      _playStateActions.setRate(event.rate);
+    } else if (event is PlayerPositionChanged) {
+      // 只接受已落点的位置回报。
+      if (_isStaleSeekPosition(event.position)) return;
+      _playStateActions.setPosition(event.position);
+      _updateEffectiveBufferingState(position: event.position);
+    } else if (event is PlayerDurationChanged) {
+      _playStateActions.setDuration(event.duration);
+    } else if (event is PlayerCompleted) {
+      // 落点确认前的完成事件不作处理。
+      if (_pendingSeekPosition != null) return;
+      _playStateActions.setPlaybackPhase(PlaybackPhase.completed);
+      if (subjectId > 0) {
+        _autoSwitchToNextEpisode();
+        unawaited(PlayHistoryService.clearPosition(subjectId));
+      }
+    } else if (event is PlayerError) {
+      LiggLogger().e('播放器错误: ${event.error}', error: event.stackTrace);
+    }
+  }
+
+  void _autoSwitchToNextEpisode() {
+    try {
+      if (_episodesActions.hasNextEpisode()) {
+        _episodesActions.switchToNextEpisode();
+      }
+    } catch (e) {
+      LiggLogger().e('自动切换到下一集失败: $e');
+    }
+  }
+
+  /// 选中集与当前播放集不一致时清空弹幕数据与画布（切换集过程中）
+  void clearDanmakuIfEpisodeMismatch(int selectedIndex) {
+    if (selectedIndex != episode) {
+      try {
+        danmaku.clear();
+        danmaku.beginPlaybackChange();
+      } catch (_) {}
+    }
+  }
+
+  void dispose() {
+    _isDisposed = true;
+    _clearPendingSeek();
+    danmaku.dispose();
+    unawaited(playbackProgressManager.save());
+    systemVolumeSynchronizer.dispose();
+    _stopTimer?.cancel();
+    unawaited(_playerSubscription?.cancel());
+    _playerSubscription = null;
+    unawaited(playbackCoordinator.dispose());
+  }
+
+  void pauseForRouteCover() {
+    cancelScheduledStop();
+    unawaited(playbackCoordinator.pause());
+  }
+
+  int _playRequestId = 0;
+  bool _isCurrentPlayRequest(int requestId) =>
+      !_isDisposed && requestId == _playRequestId;
+
+  Future<void> stopCurrentMedia() async {
+    _playRequestId++;
+    _clearPendingSeek();
+    _resumeAfterManualSeek = null;
+    danmaku.beginPlaybackChange();
+    await _serializePlaybackChange(() async {
+      if (_isDisposed) return;
+      cancelScheduledStop();
+      _currentSource = null;
+      await playbackCoordinator.stop();
+      if (_isDisposed) return;
+      danmaku.clearCanvas();
+    });
+  }
+
+  /// 初始化播放状态
+  Future<void> initPlayState(PlayRequest state) async {
+    if (_isDisposed) return;
+    _playStateActions.setPlaybackPhase(
+      PlaybackPhase.opening,
+      message: '资源解析成功，准备播放',
+    );
+    danmaku.beginPlaybackChange();
+    final requestId = ++_playRequestId;
+    int? automaticDanmakuRequestId;
+    await _serializePlaybackChange(() async {
+      if (!_isCurrentPlayRequest(requestId)) return;
+      cancelScheduledStop();
+      _currentSource = null;
+      await playbackCoordinator.stop();
+      if (!_isCurrentPlayRequest(requestId)) return;
+      danmaku.clear();
+      automaticDanmakuRequestId = danmaku.requestId;
+      videoUrl = state.videoUrl;
+      subjectId = state.subjectId;
+      episode = state.episodeIndex;
+      episodeSort = state.episodeSort;
+      episodeId = state.episodeId;
+      subjectName = state.subjectName;
+      subjectCover = state.subjectCover;
+      alias = state.alias;
+      isLocalPlayback = state.isLocalPlayback;
+      localDanmakuPath = state.localDanmakuPath;
+      danmaku.setPlaybackContext(
+        subjectId: subjectId,
+        episodeId: episodeId,
+        isLocalPlayback: isLocalPlayback,
+      );
+      playbackProgressManager.setPlaybackContext(
+        subjectId: subjectId,
+        episodeId: episodeId,
+        episodeSort: episodeSort,
+        subjectName: subjectName,
+        subjectCover: subjectCover,
+        alias: alias,
+        isLocalPlayback: isLocalPlayback,
+      );
+      if (state.videoUrl.isEmpty) return;
+      _currentSource = state.isLocalPlayback
+          ? PlaybackSource.localFile(state.videoUrl)
+          : PlaybackSource(uri: Uri.parse(state.videoUrl));
+      await playbackCoordinator.open(
+        _currentSource!,
+        startPosition: Duration(seconds: state.offset),
+        autoPlay: false,
+      );
+      if (!_isCurrentPlayRequest(requestId)) return;
+      await playbackCoordinator.play();
+    });
+    if (!_isCurrentPlayRequest(requestId)) return;
+    if (state.videoUrl.isEmpty) return;
+    await danmaku.loadEpisode(
+      subjectId: state.subjectId,
+      episodeId: state.episodeId,
+      isLocalPlayback: state.isLocalPlayback,
+      localPath: localDanmakuPath,
+      expectedRequestId: automaticDanmakuRequestId!,
+      isPlaybackCurrent: () => _isCurrentPlayRequest(requestId),
+    );
+  }
+
+  void handlePlayStateChanged(PlayState state, {required bool isLoggedIn}) {
+    playbackProgressManager.updatePlaybackState(
+      position: state.position,
+      duration: state.duration,
+      playing: state.playing,
+      isLoggedIn: isLoggedIn,
+    );
+    if (subjectId > 0 && episodeId > 0) {
+      PresenceService.instance.setPlaybackContext(
+        subjectId: subjectId,
+        episodeId: episodeId,
+        watching: state.playing || state.buffering,
+        positionSeconds: state.position.inSeconds,
+      );
+    }
+  }
+
+  void _updateEffectiveBufferingState({
+    Duration? position,
+    Duration? buffered,
+    bool? playerBuffering,
+  }) {
+    final playState = _readPlayState();
+    final currentPosition = position ?? playState.position;
+    final currentBuffered = buffered ?? playState.buffered;
+    final isBuffering = (playerBuffering ?? _isPlayerBuffering) ||
+        _isPositionPastBuffered(currentPosition, currentBuffered);
+
+    _playStateActions.setBuffering(isBuffering);
+  }
+
+  bool _isPositionPastBuffered(Duration position, Duration buffered) {
+    if (position <= Duration.zero) return false;
+    if (buffered <= Duration.zero) return false;
+
+    return position - buffered > _bufferingPositionTolerance;
+  }
+
+  /// 更新剧集观看状态
+  Future<void> updateEpisodeWatched(int episodeId,
+      {bool watched = true}) async {
+    if (_isDisposed || subjectId <= 0) return;
+    await _episodesActions.updateEpisodeWatched(episodeId, watched: watched);
+  }
+
+  void updateIsWideScreen(bool value) {
+    _playStateActions.setIsWideScreen(value);
+  }
+
+  // 切换内容区域展开状态
+  void toggleContentExpanded() {
+    _playStateActions.toggleContentExpanded();
+  }
+
+  void switchToNextEpisode() => _episodesActions.switchToNextEpisode();
+
+  /// 切换视频画面填充模式
+  void toggleVideoFit(VideoFit fits) {
+    _playStateActions.setVideoFit(fits);
+  }
+
+  ///暂停/播放
+  bool playOrPauseVideo() {
+    if (_isStartupInProgress) return false;
+    if (_readPlayState().playing) {
+      unawaited(playbackCoordinator.pause());
+    } else {
+      unawaited(playbackCoordinator.play());
+    }
+    return true;
+  }
+
+  /// 启动流程（解析、打开）进行中：此时播放器还没有可操作的媒体。
+  bool get _isStartupInProgress => _readPlayState().phase.keepsStartupIndicator;
+
+  void _applyPlaybackRate(double speed) {
+    _playStateActions.setRate(speed);
+    unawaited(playbackCoordinator.setRate(speed));
+  }
+
+  /// 用户选择的常驻倍速，不包含长按时的临时倍速。
+  double get basePlaybackRate => _speedBeforeBoost ?? _readPlayState().rate;
+
+  /// 按步长调整常驻倍速；长按期间修改松开后恢复的速度。
+  void adjustPlaybackRate(double delta) {
+    final speed = ((basePlaybackRate + delta) * 100).round() / 100;
+    setPlaybackRate(speed.clamp(0.5, 4.0).toDouble());
+  }
+
+  /// 设置播放倍数
+  void setPlaybackRate(double speed, {bool temporary = false}) {
+    if (temporary) {
+      if (!_isSpeedBoosting) {
+        _speedBeforeBoost = _readPlayState().rate;
+        _isSpeedBoosting = true;
+      }
+
+      _applyPlaybackRate(speed);
+      return;
+    }
+
+    if (_isSpeedBoosting) {
+      _speedBeforeBoost = speed;
+      return;
+    }
+
+    _applyPlaybackRate(speed);
+  }
+
+  /// 开始手动拖动进度：暂停播放并记住拖动前的播放状态。
+  bool beginManualSeek() {
+    if (_isStartupInProgress) return false;
+    _resumeAfterManualSeek = _readPlayState().playing;
+    unawaited(playbackCoordinator.pause());
+    return true;
+  }
+
+  /// 结束手动拖动进度：跳转到目标并按拖动前的状态恢复播放。
+  void finishManualSeek(Duration position) {
+    if (_isStartupInProgress) return;
+    seekTo(position);
+    _restorePlaybackAfterManualSeek();
+  }
+
+  /// 取消手动拖动进度：不跳转，只按拖动前的状态恢复播放。
+  void cancelManualSeek() => _restorePlaybackAfterManualSeek();
+
+  void _restorePlaybackAfterManualSeek() {
+    final shouldResume = _resumeAfterManualSeek ?? false;
+    _resumeAfterManualSeek = null;
+    if (shouldResume) unawaited(startPlaying());
+  }
+
+  /// 跳转到指定位置
+  void seekTo(Duration pos) {
+    if (_isStartupInProgress) return;
+    danmaku.onSeek();
+    final target = _clampSeekTarget(pos);
+    // 落点确认前先以目标位置更新播放状态。
+    _playStateActions.setPosition(target);
+    if (_readPlayState().duration > Duration.zero) {
+      _awaitSeekSettle(target);
+    }
+    unawaited(playbackCoordinator.seek(target));
+    _updateEffectiveBufferingState(position: target);
+    playbackProgressManager.saveAfterSeek(target);
+  }
+
+  /// 把跳转目标收敛到片尾之前。
+  Duration _clampSeekTarget(Duration position) {
+    if (position < Duration.zero) return Duration.zero;
+    final duration = _readPlayState().duration;
+    if (duration <= Duration.zero) return position;
+    final guard = duration > const Duration(seconds: 20)
+        ? _seekEndGuard
+        : Duration(milliseconds: duration.inMilliseconds ~/ 20);
+    final maxPosition = duration - guard;
+    return position > maxPosition ? maxPosition : position;
+  }
+
+  /// 记录跳转目标并启动落点等待超时。
+  void _awaitSeekSettle(Duration target) {
+    _pendingSeekPosition = target;
+    _pendingSeekTimer?.cancel();
+    _pendingSeekTimer = Timer(_seekSettleTimeout, _clearPendingSeek);
+  }
+
+  /// 返回 true 表示该位置回报早于手动跳转落点。
+  bool _isStaleSeekPosition(Duration position) {
+    final target = _pendingSeekPosition;
+    if (target == null) return false;
+    if ((position - target).abs() > _seekSettleTolerance) return true;
+    _clearPendingSeek();
+    return false;
+  }
+
+  /// 结束手动跳转的落点等待。
+  void _clearPendingSeek() {
+    _pendingSeekTimer?.cancel();
+    _pendingSeekTimer = null;
+    _pendingSeekPosition = null;
+  }
+
+  /// 结束临时播放倍速
+  void endTemporaryPlaybackRate() {
+    if (!_isSpeedBoosting || _speedBeforeBoost == null) return;
+
+    final speed = _speedBeforeBoost!;
+    _isSpeedBoosting = false;
+    _speedBeforeBoost = null;
+    _applyPlaybackRate(speed);
+  }
+
+  void _updateVolume(
+    double newVolume, {
+    bool syncSystemVolume = true,
+  }) {
+    final clampedVolume = newVolume.clamp(0.0, 100.0);
+    _playStateActions.setVolume(clampedVolume);
+    unawaited(playbackCoordinator.setVolume(
+      SystemUtil.supportsSystemVolumeSync ? 100.0 : clampedVolume,
+    ));
+    if (syncSystemVolume) {
+      systemVolumeSynchronizer.scheduleSync(clampedVolume / 100);
+    }
+  }
+
+  void startVerticalDrag() {
+    _dragStartVolume = _readPlayState().volume;
+    _playStateActions.setIsVerticalDragging(true);
+  }
+
+  void adjustVolumeByWheel(double delta) {
+    final newVolume = _readPlayState().volume + delta;
+    _updateVolume(newVolume);
+  }
+
+  void updateVerticalDrag(double dragDistance, double screenHeight) {
+    final volumeChange = -(dragDistance / screenHeight) * 100;
+    final newVolume = _dragStartVolume + volumeChange;
+    final volume = _readPlayState().volume;
+    if (newVolume >= 100 && volume < 100) {
+      vibrateHeavy();
+    } else if (newVolume <= 0 && volume > 0) {
+      vibrateHeavy();
+    }
+    _updateVolume(newVolume);
+  }
+
+  void endVerticalDrag() {
+    _playStateActions.setIsVerticalDragging(false);
+  }
+
+  /// 开始播放
+  Future<void> startPlaying() async {
+    if (_isStartupInProgress) return;
+    try {
+      await playbackCoordinator.play();
+    } catch (_) {
+      return;
+    }
+  }
+
+  ///停止播放
+  /// [duration] 可选参数，如果提供则会在指定时间后停止播放
+  Future<void> stopPlaying({Duration? duration}) async {
+    _stopTimer?.cancel();
+    if (duration != null && duration > Duration.zero) {
+      final totalSeconds = duration.inSeconds;
+      _playStateActions.setScheduledStopDuration(totalSeconds);
+
+      _stopTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        final scheduledStopDuration = _readPlayState().scheduledStopDuration;
+        if (scheduledStopDuration > 0) {
+          _playStateActions.setScheduledStopDuration(
+            scheduledStopDuration - 1,
+          );
+        } else {
+          unawaited(playbackCoordinator.pause());
+          timer.cancel();
+          _stopTimer = null;
+        }
+      });
+    } else {
+      _playStateActions.setScheduledStopDuration(0);
+      await playbackCoordinator.pause();
+    }
+  }
+
+  /// 取消定时停止
+  void cancelScheduledStop() {
+    _stopTimer?.cancel();
+    _stopTimer = null;
+    _playStateActions.setScheduledStopDuration(0);
+  }
+
+  ///设置超分辨率
+  /// type 1 关闭 2 效率档 3 质量档
+  Future<void> setShader(int type) async {
+    if (!playbackCoordinator.capabilities.supportsShader) {
+      throw UnsupportedError('当前播放器内核不支持 Anime4K');
+    }
+    final shaders = switch (type) {
+      2 => mpvAnime4KShadersLite,
+      3 => mpvAnime4KShaders,
+      _ => const <String>[],
+    };
+    await playbackCoordinator.setShaders(shaders.isEmpty
+        ? ''
+        : Utils.buildShadersAbsolutePath(shadersDirectory.path, shaders));
+    _playStateActions.setSuperResolutionType(type == 2 || type == 3 ? type : 1);
+  }
+
+  Future<Uint8List?> takeScreenshot() => playbackCoordinator.screenshot();
+
+  Future<void> stop() => stopCurrentMedia();
+}

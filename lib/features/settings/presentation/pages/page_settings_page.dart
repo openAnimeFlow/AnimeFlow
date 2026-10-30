@@ -107,7 +107,7 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
         ),
         body: ListView(
           padding: EdgeInsets.fromLTRB(
-              16, 16, 16, 16 + MediaQuery.paddingOf(context).bottom),
+              10, 0, 10, 16 + MediaQuery.paddingOf(context).bottom),
           children: [
             SwitchListTile(
               title: Text(l10n.glassNavigationStyle),

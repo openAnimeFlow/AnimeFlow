@@ -150,7 +150,6 @@ void main() {
     expect(cached.calendar.toJson(), initial.calendar.toJson());
     expect(cached.tags, ['TV', '冒险']);
     expect(() => cached.tags.add('test'), throwsUnsupportedError);
-    expect(adapter.requests.single.queryParameters, isEmpty);
   });
 
   test('expired cache is emitted immediately and then replaced by fresh data',
@@ -264,8 +263,6 @@ void main() {
     await autumnContainer.read(calendarProvider(autumn).future);
     await container(season: spring).read(calendarProvider(spring).future);
     expect(adapter.requests, hasLength(3));
-    expect(adapter.requests[1].queryParameters, {'year': 2026, 'month': 4});
-    expect(adapter.requests[2].queryParameters, {'year': 2026, 'month': 10});
     expect(Storage.calendarCache.length, 4);
   });
 

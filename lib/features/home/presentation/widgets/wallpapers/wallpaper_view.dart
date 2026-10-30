@@ -13,6 +13,7 @@ import 'package:anime_flow/features/home/presentation/widgets/wallpapers/justifi
 import 'package:anime_flow/features/home/presentation/widgets/wallpapers/wallpaper_browser.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/top_occlusion.dart';
 import 'package:material_ui/material_ui.dart';
 
 class WallpaperView extends StatefulWidget {
@@ -122,6 +123,7 @@ class _WallpaperViewState extends State<WallpaperView>
             return LayoutBuilder(builder: (context, constraints) {
               final padding = math.max(
                   12.0, (constraints.maxWidth - LayoutConstant.maxWidth) / 2);
+              final topOcclusion = TopOcclusionScope.of(context);
               return NotificationListener<ScrollMetricsNotification>(
                 onNotification: (notification) {
                   // 图片比例重排和窗口缩放后也要补满视口，多个通知合并检查。
@@ -132,6 +134,8 @@ class _WallpaperViewState extends State<WallpaperView>
                   return false;
                 },
                 child: RefreshIndicator(
+                  edgeOffset: topOcclusion,
+                  displacement: topOcclusion + 40,
                   onRefresh: _refresh,
                   child: OcclusionAwareCustomScrollView(
                     key: const PageStorageKey('wallpapers'),

@@ -10,6 +10,7 @@ import 'package:anime_flow/features/home/presentation/providers/community_provid
 import 'package:anime_flow/shared/models/flow/online_count.dart';
 import 'package:anime_flow/shared/models/flow/watching_subject.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
+import 'package:anime_flow/shared/widgets/top_occlusion.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -38,6 +39,7 @@ class _CommunityPageState extends ConsumerState<CommunityView>
     super.build(context);
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final topOcclusion = TopOcclusionScope.of(context);
 
     return Stack(
       children: [
@@ -75,6 +77,8 @@ class _CommunityPageState extends ConsumerState<CommunityView>
         ),
         RefreshIndicator(
           color: colorScheme.primary,
+          edgeOffset: topOcclusion,
+          displacement: topOcclusion + 40,
           onRefresh: _refresh,
           child: Consumer(
             builder: (context, ref, _) {

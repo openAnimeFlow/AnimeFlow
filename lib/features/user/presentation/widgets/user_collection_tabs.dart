@@ -471,13 +471,11 @@ class _CollectionItemCardState extends State<_CollectionItemCard> {
     return InkWell(
       borderRadius: const BorderRadius.all(Radius.circular(12)),
       onTap: () {
-        appNavigatorOf(context).openAnimeInfoFromExtra<void>(
-            context,
-            InfoRouteExtra(
-              id: collection.id,
-              name: displayName,
-              image: collection.images.large,
-            ));
+        appNavigatorOf(context).openAnimeInfoFromExtra<void>(InfoRouteExtra(
+          id: collection.id,
+          name: displayName,
+          image: collection.images.large,
+        ));
       },
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

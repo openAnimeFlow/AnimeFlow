@@ -148,8 +148,8 @@ class _CalendarViewState extends State<CalendarView> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           InkWell(
-                            onTap: () => appNavigatorOf(context)
-                                .openCalendar<void>(context),
+                            onTap: () =>
+                                appNavigatorOf(context).openCalendar<void>(),
                             child: Row(
                               children: [
                                 Text(
@@ -277,15 +277,14 @@ class _CalendarViewState extends State<CalendarView> {
               borderRadius: BorderRadius.circular(10),
               child: InkWell(
                 onTap: () {
-                  appNavigatorOf(context).openAnimeInfoFromExtra<void>(
-                      context,
-                      InfoRouteExtra(
-                        id: itemData.id,
-                        name: itemData.nameCN.isEmpty
-                            ? itemData.name
-                            : itemData.nameCN,
-                        image: itemData.images.large,
-                      ));
+                  appNavigatorOf(context)
+                      .openAnimeInfoFromExtra<void>(InfoRouteExtra(
+                    id: itemData.id,
+                    name: itemData.nameCN.isEmpty
+                        ? itemData.name
+                        : itemData.nameCN,
+                    image: itemData.images.large,
+                  ));
                 },
                 child: Stack(
                   children: [

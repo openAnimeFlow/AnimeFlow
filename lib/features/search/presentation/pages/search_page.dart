@@ -607,7 +607,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                                     const EdgeInsets.symmetric(horizontal: 10),
                                 onPressed: () async {
                                   final keyword = await appNavigatorOf(context)
-                                      .openImageSearch(context);
+                                      .openImageSearch();
                                   if (keyword != null) {
                                     await onSearch(keyword);
                                   }

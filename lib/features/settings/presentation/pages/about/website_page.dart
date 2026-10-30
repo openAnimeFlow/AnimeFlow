@@ -37,7 +37,7 @@ class _WebsitePageState extends State<WebsitePage> {
     if (context.canPop()) {
       context.pop();
     } else {
-      appNavigatorOf(context).goToSettings(context, SettingsDestination.about);
+      appNavigatorOf(context).goToSettings(SettingsDestination.about);
     }
   }
 

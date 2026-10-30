@@ -20,7 +20,6 @@ class SearchOmittedContent extends StatelessWidget {
         child: InkWell(
             onTap: () {
               appNavigatorOf(context).openAnimeInfoFromExtra<void>(
-                  context,
                   InfoRouteExtra(
                       id: searchData.id,
                       name: searchData.nameCN.isEmpty

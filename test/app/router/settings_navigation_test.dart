@@ -45,7 +45,7 @@ void main() {
     addTearDown(router.dispose);
     await tester.pumpWidget(ProviderScope(
         overrides: [
-          overrideAppNavigator(const GoAppNavigator()),
+          overrideAppNavigator(GoAppNavigator(router)),
           currentUserInfoProvider.overrideWith(_GuestUser.new),
           isLoggedInProvider.overrideWith((ref) async => false),
         ],

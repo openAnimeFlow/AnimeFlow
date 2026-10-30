@@ -12,7 +12,9 @@ final _navigatorProvider = Provider<AppNavigator>((ref) {
 Override overrideAppNavigator(AppNavigator navigator) =>
     _navigatorProvider.overrideWithValue(navigator);
 
-/// 导航实现由所在的 ProviderScope 提供，测试环境也遵循此规则。
+/// UI 层统一导航入口，例如 `appNavigatorOf(context).openSearch<void>()`。
+///
+/// context 仅用于读取所在 ProviderScope 中的实现，不会被导航器持有。
+/// 应用入口和测试需注入与 MaterialApp.router 相同的路由器。
 AppNavigator appNavigatorOf(BuildContext context) =>
-    ProviderScope.containerOf(context, listen: false)
-        .read(_navigatorProvider);
+    ProviderScope.containerOf(context, listen: false).read(_navigatorProvider);

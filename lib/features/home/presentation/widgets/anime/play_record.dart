@@ -91,7 +91,7 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
                 if (playHistory.length > 6)
                   TextButton(
                     onPressed: () =>
-                        appNavigatorOf(context).openPlayRecord<void>(context),
+                        appNavigatorOf(context).openPlayRecord<void>(),
                     child: Row(
                       children: [
                         Text(
@@ -140,7 +140,7 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
                                 onTap: () {
                                   appNavigatorOf(context)
                                       .openAnimeInfoFromExtra<void>(
-                                          context, subjectBasicData);
+                                          subjectBasicData);
                                 },
                                 child: Stack(
                                   children: [
@@ -227,7 +227,6 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
                                               onTap: () {
                                                 appNavigatorOf(context).openPlay<
                                                         void>(
-                                                    context,
                                                     PlayRouteExtra(
                                                         playExtra: PlayExtra(
                                                             subjectId:

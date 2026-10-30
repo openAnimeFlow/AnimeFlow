@@ -6,119 +6,118 @@ import 'package:anime_flow/shared/navigation/args/character_info_extra.dart';
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/widgets.dart';
 
 import 'app_router.dart';
 
 /// 将导航请求转换为生成的类型安全路由调用。
 ///
-/// 使用调用方的上下文，保持嵌套导航器的现有行为。
+/// 路由器由应用入口注入，必须与 MaterialApp.router 使用同一个实例。
+/// Navigator 的归属由路由配置决定；本适配器不持有页面上下文。
 class GoAppNavigator implements AppNavigator {
-  const GoAppNavigator();
+  const GoAppNavigator(this._router);
+
+  final GoRouter _router;
 
   @override
-  Future<T?> openRegister<T>(BuildContext context) =>
-      const RegisterRoute().push<T>(context);
+  Future<T?> openRegister<T>() =>
+      _router.push<T>(const RegisterRoute().location);
 
   @override
-  Future<T?> openForgotPassword<T>(BuildContext context) =>
-      const ForgotPasswordRoute().push<T>(context);
+  Future<T?> openForgotPassword<T>() =>
+      _router.push<T>(const ForgotPasswordRoute().location);
 
   @override
-  void goToUser(BuildContext context) => const UserRoute().go(context);
+  void goToUser() => _router.go(const UserRoute().location);
 
   @override
-  Future<T?> openWallpaper<T>(BuildContext context, WallpaperDetailArgs args) =>
-      WallpaperDetailRoute($extra: args).push<T>(context);
+  Future<T?> openWallpaper<T>(WallpaperDetailArgs args) =>
+      _router.push<T>(WallpaperDetailRoute($extra: args).location, extra: args);
 
   @override
-  Future<T?> openImagePreview<T>(
-          BuildContext context, ImageViewerRouteArgs args) =>
-      ImagePreviewRoute.fromArgs(args).push<T>(context);
+  Future<T?> openImagePreview<T>(ImageViewerRouteArgs args) =>
+      _router.push<T>(ImagePreviewRoute.fromArgs(args).location, extra: args);
 
   @override
-  Future<T?> openAnimeInfo<T>(
-    BuildContext context, {
+  Future<T?> openAnimeInfo<T>({
     required int id,
     required String name,
     required String image,
     InfoRouteExtra? extra,
   }) =>
-      AnimeInfoRoute(id: id, name: name, image: image, $extra: extra)
-          .push<T>(context);
+      _router.push<T>(
+          AnimeInfoRoute(id: id, name: name, image: image, $extra: extra)
+              .location,
+          extra: extra);
 
   @override
-  Future<T?> openAnimeInfoFromExtra<T>(
-          BuildContext context, InfoRouteExtra extra) =>
-      AnimeInfoRoute.fromExtra(extra).push<T>(context);
+  Future<T?> openAnimeInfoFromExtra<T>(InfoRouteExtra extra) =>
+      _router.push<T>(AnimeInfoRoute.fromExtra(extra).location, extra: extra);
 
   @override
-  Future<T?> openPlay<T>(BuildContext context, PlayRouteExtra args) =>
-      PlayRoute.fromExtra(args).push<T>(context);
+  Future<T?> openPlay<T>(PlayRouteExtra args) =>
+      _router.push<T>(PlayRoute.fromExtra(args).location, extra: args);
 
   @override
-  Future<T?> openCharacters<T>(BuildContext context,
-          {required int subjectsId}) =>
-      CharactersRoute(subjectsId: subjectsId).push<T>(context);
+  Future<T?> openCharacters<T>({required int subjectsId}) =>
+      _router.push<T>(CharactersRoute(subjectsId: subjectsId).location);
 
   @override
-  Future<T?> openCharacterInfo<T>(
-    BuildContext context, {
+  Future<T?> openCharacterInfo<T>({
     required int id,
     required String name,
     required String image,
     CharacterInfoExtra? extra,
   }) =>
-      CharacterInfoRoute(id: id, name: name, image: image, $extra: extra)
-          .push<T>(context);
+      _router.push<T>(
+          CharacterInfoRoute(id: id, name: name, image: image, $extra: extra)
+              .location,
+          extra: extra);
 
   @override
-  Future<T?> openUserSpace<T>(BuildContext context, {required String name}) =>
-      UserSpaceRoute(name: name).push<T>(context);
+  Future<T?> openUserSpace<T>({required String name}) =>
+      _router.push<T>(UserSpaceRoute(name: name).location);
 
   @override
-  Future<T?> openAnimePreview<T>(
-    BuildContext context, {
+  Future<T?> openAnimePreview<T>({
     required List<String> images,
     String? title,
   }) =>
-      AnimePreviewPageRoute(images: images, title: title).push<T>(context);
+      _router.push<T>(
+          AnimePreviewPageRoute(images: images, title: title).location);
 
   @override
-  Future<T?> openSearch<T>(BuildContext context, {String? keywords}) =>
-      SearchRoute(keywords: keywords).push<T>(context);
+  Future<T?> openSearch<T>({String? keywords}) =>
+      _router.push<T>(SearchRoute(keywords: keywords).location);
 
   @override
-  Future<String?> openImageSearch(BuildContext context) =>
-      const ImageSearchRoute().push<String>(context);
+  Future<String?> openImageSearch() =>
+      _router.push<String>(const ImageSearchRoute().location);
 
   @override
-  Future<T?> openCalendar<T>(BuildContext context) =>
-      const CalendarRoute().push<T>(context);
+  Future<T?> openCalendar<T>() =>
+      _router.push<T>(const CalendarRoute().location);
   @override
-  Future<T?> openDownload<T>(BuildContext context) =>
-      const DownloadRoute().push<T>(context);
+  Future<T?> openDownload<T>() =>
+      _router.push<T>(const DownloadRoute().location);
   @override
-  Future<T?> openPlayRecord<T>(BuildContext context) =>
-      const PlayRecordRoute().push<T>(context);
+  Future<T?> openPlayRecord<T>() =>
+      _router.push<T>(const PlayRecordRoute().location);
   @override
-  void goToRecommend(BuildContext context) =>
-      const RecommendRoute().go(context);
+  void goToRecommend() => _router.go(const RecommendRoute().location);
 
   @override
-  Future<T?> openSettings<T>(
-    BuildContext context, {
+  Future<T?> openSettings<T>({
     SettingsDestination destination = SettingsDestination.menu,
   }) =>
-      _settingsRoute(destination).push<T>(context);
+      _router.push<T>(_settingsRoute(destination).location);
 
   @override
-  void replaceSettings(BuildContext context, SettingsDestination destination) =>
-      _settingsRoute(destination).replace(context);
+  void replaceSettings(SettingsDestination destination) =>
+      _router.replace(_settingsRoute(destination).location);
 
   @override
-  void goToSettings(BuildContext context, SettingsDestination destination) =>
-      _settingsRoute(destination).go(context);
+  void goToSettings(SettingsDestination destination) =>
+      _router.go(_settingsRoute(destination).location);
 
   @override
   String settingsLocation(SettingsDestination destination) =>
@@ -134,9 +133,8 @@ class GoAppNavigator implements AppNavigator {
   }
 
   @override
-  Future<T?> openPluginEditor<T>(BuildContext context,
-          {String? editPluginKey}) =>
-      SettingAddPluginsRoute(editPluginKey: editPluginKey).push<T>(context);
+  Future<T?> openPluginEditor<T>({String? editPluginKey}) => _router
+      .push<T>(SettingAddPluginsRoute(editPluginKey: editPluginKey).location);
 
   GoRouteData _settingsRoute(SettingsDestination destination) =>
       switch (destination) {

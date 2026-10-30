@@ -105,7 +105,7 @@ class InfoCommentView extends ConsumerWidget {
         children: [
           InkWell(
             onTap: () => appNavigatorOf(context)
-                .openUserSpace<void>(context, name: comment.user.username),
+                .openUserSpace<void>(name: comment.user.username),
             child: AnimationNetworkImage(
               borderRadius: BorderRadius.circular(10),
               url: comment.user.avatar.medium,
@@ -123,9 +123,8 @@ class InfoCommentView extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     InkWell(
-                      onTap: () => appNavigatorOf(context).openUserSpace<void>(
-                          context,
-                          name: comment.user.username),
+                      onTap: () => appNavigatorOf(context)
+                          .openUserSpace<void>(name: comment.user.username),
                       child: Text(
                         comment.user.nickname.isNotEmpty
                             ? comment.user.nickname

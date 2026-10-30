@@ -439,25 +439,23 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
     final completedEpisodes = record.episodes.values
         .where((item) => item.status == DownloadStatus.completed)
         .toList();
-    appNavigatorOf(context).openPlay<void>(
-        context,
-        PlayRouteExtra(
-          playExtra: PlayExtra(
-            subjectId: record.subjectId,
-            subjectName: record.subjectName,
-            subjectCover: record.subjectCover,
-            subjectAliases: const [],
-          ),
-          continueEpisodeId:
-              episode.bangumiEpisodeId > 0 ? episode.bangumiEpisodeId : null,
-          isOfflineMode: true,
-          offlineMediaPath: localMediaPath,
-          offlineDanmakuPath: episode.localDanmakuPath.trim().isEmpty
-              ? null
-              : episode.localDanmakuPath,
-          offlineEpisodeUrl: episode.episodeUrl,
-          offlineEpisodes: completedEpisodes,
-        ));
+    appNavigatorOf(context).openPlay<void>(PlayRouteExtra(
+      playExtra: PlayExtra(
+        subjectId: record.subjectId,
+        subjectName: record.subjectName,
+        subjectCover: record.subjectCover,
+        subjectAliases: const [],
+      ),
+      continueEpisodeId:
+          episode.bangumiEpisodeId > 0 ? episode.bangumiEpisodeId : null,
+      isOfflineMode: true,
+      offlineMediaPath: localMediaPath,
+      offlineDanmakuPath: episode.localDanmakuPath.trim().isEmpty
+          ? null
+          : episode.localDanmakuPath,
+      offlineEpisodeUrl: episode.episodeUrl,
+      offlineEpisodes: completedEpisodes,
+    ));
   }
 
   String _episodeTitle(AppLocalizations l10n, DownloadEpisode episode) {

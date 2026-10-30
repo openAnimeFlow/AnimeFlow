@@ -52,7 +52,6 @@ class RelatedView extends StatelessWidget {
                                 onTap: () {
                                   appNavigatorOf(context)
                                       .openAnimeInfoFromExtra<void>(
-                                          context,
                                           InfoRouteExtra(
                                               id: item.subject.id,
                                               name: item.subject.nameCN.isEmpty

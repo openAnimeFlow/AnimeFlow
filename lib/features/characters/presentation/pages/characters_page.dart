@@ -177,7 +177,7 @@ class _CharacterPageState extends State<CharacterPage> {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
-          appNavigatorOf(context).openCharacterInfo<void>(context,
+          appNavigatorOf(context).openCharacterInfo<void>(
               id: characterData.character.id,
               name: characterData.character.nameCN.isNotEmpty
                   ? characterData.character.nameCN

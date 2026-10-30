@@ -71,8 +71,8 @@ class IntroView extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   BBCodeWidget(
-                      onImageTap: (args) => appNavigatorOf(context)
-                          .openImagePreview<void>(context, args),
+                      onImageTap: (args) =>
+                          appNavigatorOf(context).openImagePreview<void>(args),
                       bbcode: userInfo.bio!),
                   const SizedBox(height: 24),
                 ],

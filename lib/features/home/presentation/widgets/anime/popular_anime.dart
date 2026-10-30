@@ -129,16 +129,14 @@ class _PopularAnimeViewState extends ConsumerState<PopularAnimeView> {
                 if (index < hotState.items.length) {
                   final subject = hotState.items[index].subject;
                   return InkWell(
-                    onTap: () =>
-                        appNavigatorOf(context).openAnimeInfoFromExtra<void>(
-                            context,
-                            InfoRouteExtra(
-                              id: subject.id,
-                              name: subject.nameCN.isEmpty
-                                  ? subject.name
-                                  : subject.nameCN,
-                              image: subject.images.large,
-                            )),
+                    onTap: () => appNavigatorOf(context)
+                        .openAnimeInfoFromExtra<void>(InfoRouteExtra(
+                      id: subject.id,
+                      name: subject.nameCN.isEmpty
+                          ? subject.name
+                          : subject.nameCN,
+                      image: subject.images.large,
+                    )),
                     child: SubjectCard(
                       memCacheWidth: _coverCacheWidth,
                       gaplessResize: true,

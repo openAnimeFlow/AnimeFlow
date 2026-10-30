@@ -163,11 +163,10 @@ class InfoHeadView extends StatelessWidget {
                                   return GestureDetector(
                                     onTap: () => appNavigatorOf(context)
                                         .openImagePreview<void>(
-                                            context,
                                             ImageViewerRouteArgs(
-                                              imageUrls: [image],
-                                              heroTag: image,
-                                            )),
+                                      imageUrls: [image],
+                                      heroTag: image,
+                                    )),
                                     child: Hero(
                                       tag: image,
                                       child: AnimationNetworkImage(
@@ -392,7 +391,7 @@ class InfoHeadView extends StatelessWidget {
                 context,
                 l10n.loginToCollect,
                 Icons.login_rounded,
-                () => appNavigatorOf(context).goToUser(context),
+                () => appNavigatorOf(context).goToUser(),
               )
             else
               CollectionButton(

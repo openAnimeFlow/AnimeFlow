@@ -66,7 +66,7 @@ class _ScreenshotThumbnail extends ConsumerWidget {
   void _openPreview(BuildContext context, WidgetRef ref) {
     ref.read(videoUiProvider.notifier).hideScreenshotPreview();
     appNavigatorOf(context)
-        .openImagePreview<void>(context, ImageViewerRouteArgs.bytes(bytes));
+        .openImagePreview<void>(ImageViewerRouteArgs.bytes(bytes));
   }
 
   @override

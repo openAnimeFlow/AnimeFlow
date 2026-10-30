@@ -25,7 +25,7 @@ class _WallpaperBrowserState extends State<WallpaperBrowser> {
     if (_wide) {
       _selection.value = args;
     } else {
-      unawaited(appNavigatorOf(context).openWallpaper<void>(context, args));
+      unawaited(appNavigatorOf(context).openWallpaper<void>(args));
     }
   }
 

@@ -173,12 +173,12 @@ class UserPage extends ConsumerWidget {
               onSelected: (action) {
                 switch (action) {
                   case _NoLoginOverflowAction.settings:
-                    appNavigatorOf(context).openSettings<void>(context,
+                    appNavigatorOf(context).openSettings<void>(
                         destination: SettingsDestination.menu);
                   case _NoLoginOverflowAction.playRecord:
-                    appNavigatorOf(context).openPlayRecord<void>(context);
+                    appNavigatorOf(context).openPlayRecord<void>();
                   case _NoLoginOverflowAction.downloads:
-                    appNavigatorOf(context).openDownload<void>(context);
+                    appNavigatorOf(context).openDownload<void>();
                 }
               },
             ),

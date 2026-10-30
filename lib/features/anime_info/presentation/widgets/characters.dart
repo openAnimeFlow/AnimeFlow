@@ -44,8 +44,7 @@ class CharactersView extends StatelessWidget {
                         ),
                         InkWell(
                           onTap: () => appNavigatorOf(context)
-                              .openCharacters<void>(context,
-                                  subjectsId: subjectsId),
+                              .openCharacters<void>(subjectsId: subjectsId),
                           child: Row(
                             children: [
                               Text(
@@ -94,7 +93,7 @@ class CharactersView extends StatelessWidget {
                                   // 角色头像
                                   InkWell(
                                     onTap: () => appNavigatorOf(context)
-                                        .openCharacterInfo<void>(context,
+                                        .openCharacterInfo<void>(
                                             id: actor.character.id,
                                             name: actor.character.nameCN.isEmpty
                                                 ? actor.character.name

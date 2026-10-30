@@ -15,7 +15,7 @@ void _exitSettings(BuildContext context) {
   if (navigator.canPop()) {
     navigator.pop();
   } else {
-    appNavigatorOf(context).goToRecommend(context);
+    appNavigatorOf(context).goToRecommend();
   }
 }
 
@@ -202,9 +202,8 @@ class _SettingsMenu extends ConsumerWidget {
         ? userInfo!.avatar
         : null;
     final categories = _categories(context, avatar);
-    final navigation = appNavigatorOf(context);
     final currentDestination =
-        navigation.settingsDestinationForLocation(location);
+        appNavigatorOf(context).settingsDestinationForLocation(location);
     final menu = ListView(
       padding: EdgeInsets.only(
         left: wide ? 15 : 0,
@@ -252,11 +251,11 @@ class _SettingsMenu extends ConsumerWidget {
               onTap: () {
                 if (wide && currentDestination != SettingsDestination.menu) {
                   if (currentDestination != item.destination) {
-                    navigation.replaceSettings(context, item.destination);
+                    appNavigatorOf(context).replaceSettings(item.destination);
                   }
                 } else {
-                  navigation.openSettings<void>(context,
-                      destination: item.destination);
+                  appNavigatorOf(context)
+                      .openSettings<void>(destination: item.destination);
                 }
               },
             ),

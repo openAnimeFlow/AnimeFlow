@@ -61,10 +61,9 @@ class AppShellPage extends StatelessWidget {
                       selectedIndex: navigationShell.currentIndex,
                       onSelected: navigationShell.goBranch,
                       onSearch: () =>
-                          appNavigatorOf(context).openSearch<void>(context),
+                          appNavigatorOf(context).openSearch<void>(),
                       onSettings: () =>
                           appNavigatorOf(context).openSettings<void>(
-                        context,
                         destination: SettingsDestination.menu,
                       ),
                     )),

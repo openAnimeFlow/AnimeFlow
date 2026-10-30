@@ -184,7 +184,7 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
               actions: [
                 IconButton(
                   onPressed: () {
-                    appNavigatorOf(context).openSettings<void>(context,
+                    appNavigatorOf(context).openSettings<void>(
                         destination: SettingsDestination.downloadPlugins);
                   },
                   icon: const Icon(Icons.cloud_download_outlined, size: 30),
@@ -192,7 +192,7 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
                 IconButton(
                   icon: const Icon(Icons.save_as_outlined, size: 30),
                   onPressed: () {
-                    appNavigatorOf(context).openPluginEditor<void>(context);
+                    appNavigatorOf(context).openPluginEditor<void>();
                   },
                 ),
               ],
@@ -227,9 +227,8 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
                 final isPluginBusy = _busyPluginNames.contains(data.name);
                 return InkWell(
                   key: ValueKey(data.name),
-                  onTap: () => appNavigatorOf(context).openPluginEditor<void>(
-                      context,
-                      editPluginKey: data.name),
+                  onTap: () => appNavigatorOf(context)
+                      .openPluginEditor<void>(editPluginKey: data.name),
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 2),
                     padding: const EdgeInsets.symmetric(vertical: 5),

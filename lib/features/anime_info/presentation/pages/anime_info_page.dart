@@ -27,21 +27,19 @@ class AnimeInfoPage extends ConsumerWidget {
       final subject = ref.read(animeInfoProvider).asData?.value;
       if (subject == null) return;
       final args = ref.read(animeInfoArgsProvider);
-      appNavigatorOf(context).openPlay<void>(
-          context,
-          PlayRouteExtra(
-            subjectInfo: subject,
-            playExtra: PlayExtra(
-              subjectId: args.id,
-              subjectName: args.name,
-              subjectCover: args.image,
-              subjectAliases: subject.infobox
-                  .where((item) => item.key == '别名')
-                  .expand((item) => item.values.map((e) => e.v))
-                  .toList(),
-            ),
-            continueEpisodeId: episodeId,
-          ));
+      appNavigatorOf(context).openPlay<void>(PlayRouteExtra(
+        subjectInfo: subject,
+        playExtra: PlayExtra(
+          subjectId: args.id,
+          subjectName: args.name,
+          subjectCover: args.image,
+          subjectAliases: subject.infobox
+              .where((item) => item.key == '别名')
+              .expand((item) => item.values.map((e) => e.v))
+              .toList(),
+        ),
+        continueEpisodeId: episodeId,
+      ));
     }
 
     return AnimeInfoView(onPlay: openPlayer, onPlayEpisode: openPlayer);

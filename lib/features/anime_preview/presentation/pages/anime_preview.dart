@@ -44,7 +44,6 @@ class AnimePreviewPage extends StatelessWidget {
                 final heroTag = ImageViewer.heroTagFor(image, index);
                 return GestureDetector(
                   onTap: () => appNavigatorOf(context).openImagePreview<void>(
-                      context,
                       ImageViewerRouteArgs(
                           imageUrls: images,
                           initialIndex: index,

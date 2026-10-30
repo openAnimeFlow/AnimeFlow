@@ -697,7 +697,7 @@ class _WatchingSubjectCard extends StatelessWidget {
     final imageUrl = subject.images?.common ?? subject.images?.medium ?? '';
     return InkWell(
       borderRadius: BorderRadius.circular(15),
-      onTap: () => appNavigatorOf(context).openAnimeInfo<void>(context,
+      onTap: () => appNavigatorOf(context).openAnimeInfo<void>(
           id: subject.subjectId, name: subject.displayName, image: imageUrl),
       child: Column(
         children: [

@@ -34,7 +34,7 @@ class SubjectStillsView extends ConsumerWidget {
                 if (images.length > 10)
                   IconButton(
                       onPressed: () {
-                        appNavigatorOf(context).openAnimePreview<void>(context,
+                        appNavigatorOf(context).openAnimePreview<void>(
                             images: images, title: subjectName);
                       },
                       icon: const Icon(
@@ -56,12 +56,10 @@ class SubjectStillsView extends ConsumerWidget {
                         right: index == imageFilter.length - 1 ? 0 : 8),
                     child: GestureDetector(
                       onTap: () => appNavigatorOf(context)
-                          .openImagePreview<void>(
-                              context,
-                              ImageViewerRouteArgs(
-                                  imageUrls: imageFilter,
-                                  initialIndex: index,
-                                  heroTag: heroTag)),
+                          .openImagePreview<void>(ImageViewerRouteArgs(
+                              imageUrls: imageFilter,
+                              initialIndex: index,
+                              heroTag: heroTag)),
                       child: Hero(
                         tag: heroTag,
                         child: AnimationNetworkImage(

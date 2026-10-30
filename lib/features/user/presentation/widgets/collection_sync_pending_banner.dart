@@ -27,8 +27,8 @@ class CollectionSyncPendingBanner extends ConsumerWidget {
             : AppLocalizations.of(context).syncPendingSummary(
                 status.pendingConflictCount, status.failedCount)),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () => appNavigatorOf(context).openSettings<void>(context,
-            destination: SettingsDestination.account),
+        onTap: () => appNavigatorOf(context)
+            .openSettings<void>(destination: SettingsDestination.account),
       ),
     );
   }

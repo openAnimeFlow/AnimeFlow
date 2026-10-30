@@ -189,8 +189,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () => appNavigatorOf(context)
-                  .openForgotPassword<void>(context),
+              onPressed: () =>
+                  appNavigatorOf(context).openForgotPassword<void>(),
               child: Text(l10n.forgotPassword),
             ),
           ),
@@ -256,8 +256,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
               ),
               TextButton(
-                onPressed: () =>
-                    appNavigatorOf(context).openRegister<void>(context),
+                onPressed: () => appNavigatorOf(context).openRegister<void>(),
                 child: Text(l10n.registerNow),
               ),
             ],

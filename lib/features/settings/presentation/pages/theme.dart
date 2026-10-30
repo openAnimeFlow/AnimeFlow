@@ -203,7 +203,6 @@ class _ThemePageState extends State<ThemePage> {
                 InkWell(
                   borderRadius: BorderRadius.circular(10),
                   onTap: () => appNavigatorOf(context).openSettings<void>(
-                      context,
                       destination: SettingsDestination.font),
                   child: Row(
                     spacing: 10,

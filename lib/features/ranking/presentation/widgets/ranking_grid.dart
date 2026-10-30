@@ -216,7 +216,6 @@ class _FeaturedCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () => appNavigatorOf(context).openAnimeInfoFromExtra<void>(
-            context,
             InfoRouteExtra(
                 id: subject.id, name: title, image: subject.images.large)),
         child: SizedBox(
@@ -376,7 +375,6 @@ class _RankingPosterTile extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(15),
       onTap: () => appNavigatorOf(context).openAnimeInfoFromExtra<void>(
-          context,
           InfoRouteExtra(
               id: subject.id, name: title, image: subject.images.large)),
       child: DebouncedImageWidth(
@@ -418,7 +416,6 @@ class _RankingListTile extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () => appNavigatorOf(context).openAnimeInfoFromExtra<void>(
-            context,
             InfoRouteExtra(
                 id: subject.id, name: title, image: subject.images.large)),
         child: SizedBox(

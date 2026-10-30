@@ -231,8 +231,7 @@ class _CollectViewState extends ConsumerState<CollectView>
                                   name: collection.nameCN ?? collection.name,
                                   image: collection.images.large);
                               appNavigatorOf(context)
-                                  .openAnimeInfoFromExtra<void>(
-                                      context, subject);
+                                  .openAnimeInfoFromExtra<void>(subject);
                             },
                             child: SubjectCard(
                               image: collection.images.large,

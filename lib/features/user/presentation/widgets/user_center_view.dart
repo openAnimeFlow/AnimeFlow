@@ -456,12 +456,12 @@ class _UserViewState extends ConsumerState<UserCenterView>
             onSelected: (action) {
               switch (action) {
                 case _LoginOverflowAction.settings:
-                  appNavigatorOf(context).openSettings<void>(context,
+                  appNavigatorOf(context).openSettings<void>(
                       destination: SettingsDestination.menu);
                 case _LoginOverflowAction.playRecord:
-                  appNavigatorOf(context).openPlayRecord<void>(context);
+                  appNavigatorOf(context).openPlayRecord<void>();
                 case _LoginOverflowAction.downloads:
-                  appNavigatorOf(context).openDownload<void>(context);
+                  appNavigatorOf(context).openDownload<void>();
                 case _LoginOverflowAction.logout:
                   showDialog<void>(
                     context: context,

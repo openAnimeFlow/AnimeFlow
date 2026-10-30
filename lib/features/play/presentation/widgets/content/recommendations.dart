@@ -84,13 +84,12 @@ class _RecommendationTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => appNavigatorOf(context).openAnimeInfoFromExtra<void>(
-            context,
-            InfoRouteExtra(
-              id: subject.id,
-              name: title,
-              image: subject.images.large,
-            )),
+        onTap: () =>
+            appNavigatorOf(context).openAnimeInfoFromExtra<void>(InfoRouteExtra(
+          id: subject.id,
+          name: title,
+          image: subject.images.large,
+        )),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

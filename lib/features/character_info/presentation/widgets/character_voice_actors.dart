@@ -72,7 +72,7 @@ class _VoiceActorCard extends StatelessWidget {
         if (image.isNotEmpty) ...[
           GestureDetector(
             onTap: () => appNavigatorOf(context).openImagePreview<void>(
-                context, ImageViewerRouteArgs(imageUrls: [image])),
+                ImageViewerRouteArgs(imageUrls: [image])),
             child: AnimationNetworkImage(
               url: image,
               width: 64,

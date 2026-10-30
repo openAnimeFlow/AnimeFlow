@@ -160,9 +160,8 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
     setState(() => _sizes[url] = size);
   }
 
-  void _preview() => appNavigatorOf(context).openImagePreview<void>(
-      context,
-      ImageViewerRouteArgs(
+  void _preview() =>
+      appNavigatorOf(context).openImagePreview<void>(ImageViewerRouteArgs(
         imageUrls: _images,
         initialIndex: _index,
       ));
@@ -390,7 +389,7 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
                         ?.copyWith(color: colors.onSurfaceVariant)),
                 FilledButton(
                     onPressed: () => appNavigatorOf(context)
-                        .openAnimeInfo<void>(context,
+                        .openAnimeInfo<void>(
                             id: _subject.subjectId,
                             name: _subject.displayName,
                             image: _url),
@@ -516,8 +515,7 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
                       if (widget.onOpenRelated != null) {
                         widget.onOpenRelated!(args);
                       } else {
-                        appNavigatorOf(context)
-                            .openWallpaper<void>(context, args);
+                        appNavigatorOf(context).openWallpaper<void>(args);
                       }
                     },
                     child: Column(

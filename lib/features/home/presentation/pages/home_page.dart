@@ -88,7 +88,7 @@ class _RecommendPageState extends State<RecommendPage>
                   ),
                 ),
                 onTap: () {
-                  appNavigatorOf(context).openSearch<void>(context);
+                  appNavigatorOf(context).openSearch<void>();
                 },
                 readOnly: true,
               ),
@@ -98,14 +98,12 @@ class _RecommendPageState extends State<RecommendPage>
         actions: [
           IconButton(
             tooltip: l10n.downloadsTitle,
-            onPressed: () =>
-                appNavigatorOf(context).openDownload<void>(context),
+            onPressed: () => appNavigatorOf(context).openDownload<void>(),
             icon: const Icon(Icons.cloud_download_outlined),
           ),
           IconButton(
             tooltip: l10n.playbackHistory,
-            onPressed: () =>
-                appNavigatorOf(context).openPlayRecord<void>(context),
+            onPressed: () => appNavigatorOf(context).openPlayRecord<void>(),
             icon: const Icon(Icons.access_time_outlined),
           ),
         ],

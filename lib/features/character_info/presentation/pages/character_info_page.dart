@@ -104,11 +104,10 @@ class _CharacterInfoState extends State<CharacterInfo> {
                             GestureDetector(
                               onTap: () {
                                 appNavigatorOf(context).openImagePreview<void>(
-                                    context,
                                     ImageViewerRouteArgs(
-                                      imageUrls: [imageUrl],
-                                      heroTag: heroTag,
-                                    ));
+                                  imageUrls: [imageUrl],
+                                  heroTag: heroTag,
+                                ));
                               },
                               child: Hero(
                                 tag: heroTag,

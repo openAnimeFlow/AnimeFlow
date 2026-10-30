@@ -210,12 +210,10 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
                     return InkWell(
                       borderRadius: BorderRadius.circular(8),
                       onTap: () => appNavigatorOf(context)
-                          .openAnimeInfoFromExtra<void>(
-                              context,
-                              InfoRouteExtra(
-                                  id: playHistory.subjectId,
-                                  name: playHistory.subjectName,
-                                  image: playHistory.cover)),
+                          .openAnimeInfoFromExtra<void>(InfoRouteExtra(
+                              id: playHistory.subjectId,
+                              name: playHistory.subjectName,
+                              image: playHistory.cover)),
                       child: Row(
                         children: [
                           AspectRatio(
@@ -303,23 +301,19 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
                                               elevation: 0),
                                           onPressed: () async {
                                             await appNavigatorOf(context)
-                                                .openPlay<void>(
-                                                    context,
-                                                    PlayRouteExtra(
-                                                        playExtra: PlayExtra(
-                                                          subjectId: playHistory
-                                                              .subjectId,
-                                                          subjectName:
-                                                              playHistory
-                                                                  .subjectName,
-                                                          subjectCover:
-                                                              playHistory.cover,
-                                                          subjectAliases:
-                                                              playHistory.alias,
-                                                        ),
-                                                        continueEpisodeId:
-                                                            playHistory
-                                                                .episodeId));
+                                                .openPlay<void>(PlayRouteExtra(
+                                                    playExtra: PlayExtra(
+                                                      subjectId:
+                                                          playHistory.subjectId,
+                                                      subjectName: playHistory
+                                                          .subjectName,
+                                                      subjectCover:
+                                                          playHistory.cover,
+                                                      subjectAliases:
+                                                          playHistory.alias,
+                                                    ),
+                                                    continueEpisodeId:
+                                                        playHistory.episodeId));
                                           },
                                           child: Text(
                                             l10n.playEpisode(

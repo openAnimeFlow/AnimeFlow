@@ -381,8 +381,7 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
               if (open != null) {
                 open(args);
               } else {
-                unawaited(
-                    appNavigatorOf(context).openWallpaper<void>(context, args));
+                unawaited(appNavigatorOf(context).openWallpaper<void>(args));
               }
             },
             memCacheWidth: decodeWidth,

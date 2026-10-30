@@ -26,15 +26,12 @@ class SearchDetailsContentView extends StatelessWidget {
       height: itemHeight,
       child: InkWell(
         onTap: () {
-          appNavigatorOf(context).openAnimeInfoFromExtra<void>(
-              context,
-              InfoRouteExtra(
-                id: searchData.id,
-                name: searchData.nameCN.isEmpty
-                    ? searchData.name
-                    : searchData.nameCN,
-                image: searchData.images.large,
-              ));
+          appNavigatorOf(context).openAnimeInfoFromExtra<void>(InfoRouteExtra(
+            id: searchData.id,
+            name:
+                searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
+            image: searchData.images.large,
+          ));
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -186,7 +186,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                               title: Text(l10n.projectUpdates),
                               trailing: const Icon(Icons.article_outlined),
                               onTap: () => appNavigatorOf(context)
-                                  .openSettings<void>(context,
+                                  .openSettings<void>(
                                       destination: SettingsDestination.updates),
                             ),
                             const Divider(),
@@ -194,7 +194,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                               title: Text(l10n.projectWebsite),
                               trailing: const Icon(Icons.public_outlined),
                               onTap: () => appNavigatorOf(context)
-                                  .openSettings<void>(context,
+                                  .openSettings<void>(
                                       destination: SettingsDestination.website),
                             ),
                             const Divider(),
@@ -218,7 +218,6 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                               trailing: const Icon(Icons.chevron_right),
                               onTap: () {
                                 appNavigatorOf(context).openSettings<void>(
-                                    context,
                                     destination: SettingsDestination.thanks);
                               },
                             ),
@@ -227,7 +226,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                               title: const Text('关于作者'),
                               trailing: const Icon(Icons.chevron_right),
                               onTap: () => appNavigatorOf(context)
-                                  .openSettings<void>(context,
+                                  .openSettings<void>(
                                       destination: SettingsDestination.author),
                             ),
                             const Divider(),
@@ -238,7 +237,6 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                               ),
                               onTap: () {
                                 appNavigatorOf(context).openSettings<void>(
-                                    context,
                                     destination: SettingsDestination.sponsor);
                               },
                             ),
@@ -248,7 +246,6 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                               trailing: const Icon(Icons.chevron_right),
                               onTap: () {
                                 appNavigatorOf(context).openSettings<void>(
-                                    context,
                                     destination: SettingsDestination.agreement);
                               },
                             ),

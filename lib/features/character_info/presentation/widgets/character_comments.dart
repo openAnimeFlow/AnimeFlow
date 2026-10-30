@@ -83,7 +83,7 @@ class CharacterCommentsView extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () => appNavigatorOf(context)
-                .openUserSpace<void>(context, name: comment.user.username),
+                .openUserSpace<void>(name: comment.user.username),
             child: AnimationNetworkImage(
               borderRadius: BorderRadius.circular(8),
               height: 48,
@@ -98,9 +98,8 @@ class CharacterCommentsView extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 GestureDetector(
-                  onTap: () => appNavigatorOf(context).openUserSpace<void>(
-                      context,
-                      name: comment.user.username),
+                  onTap: () => appNavigatorOf(context)
+                      .openUserSpace<void>(name: comment.user.username),
                   child: Text(
                     comment.user.nickname,
                     style: const TextStyle(
@@ -118,8 +117,8 @@ class CharacterCommentsView extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 BBCodeWidget(
-                  onImageTap: (args) => appNavigatorOf(context)
-                      .openImagePreview<void>(context, args),
+                  onImageTap: (args) =>
+                      appNavigatorOf(context).openImagePreview<void>(args),
                   bbcode: comment.content,
                 ),
                 if (comment.replies.isNotEmpty) ...[
@@ -153,7 +152,7 @@ class CharacterCommentsView extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () => appNavigatorOf(context)
-                      .openUserSpace<void>(context, name: reply.user.username),
+                      .openUserSpace<void>(name: reply.user.username),
                   child: AnimationNetworkImage(
                     borderRadius: BorderRadius.circular(8),
                     height: 32,
@@ -169,8 +168,7 @@ class CharacterCommentsView extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: () => appNavigatorOf(context)
-                            .openUserSpace<void>(context,
-                                name: reply.user.username),
+                            .openUserSpace<void>(name: reply.user.username),
                         child: Text(
                           reply.user.nickname,
                           style: TextStyle(
@@ -195,8 +193,8 @@ class CharacterCommentsView extends StatelessWidget {
             if (reply.content.isNotEmpty) ...[
               const SizedBox(height: 4),
               BBCodeWidget(
-                onImageTap: (args) => appNavigatorOf(context)
-                    .openImagePreview<void>(context, args),
+                onImageTap: (args) =>
+                    appNavigatorOf(context).openImagePreview<void>(args),
                 bbcode: reply.content,
               ),
             ],

@@ -92,15 +92,13 @@ class CharacterWorksView extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
-          appNavigatorOf(context).openAnimeInfoFromExtra<void>(
-              context,
-              InfoRouteExtra(
-                id: work.subject.id,
-                name: work.subject.nameCN.isEmpty
-                    ? work.subject.name
-                    : work.subject.nameCN,
-                image: work.subject.images.large,
-              ));
+          appNavigatorOf(context).openAnimeInfoFromExtra<void>(InfoRouteExtra(
+            id: work.subject.id,
+            name: work.subject.nameCN.isEmpty
+                ? work.subject.name
+                : work.subject.nameCN,
+            image: work.subject.images.large,
+          ));
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

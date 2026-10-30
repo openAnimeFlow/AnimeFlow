@@ -870,13 +870,11 @@ class _CalendarPageState extends State<CalendarPage>
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          appNavigatorOf(context).openAnimeInfoFromExtra<void>(
-              context,
-              InfoRouteExtra(
-                id: subject.id,
-                name: displayName,
-                image: subject.images.large,
-              ));
+          appNavigatorOf(context).openAnimeInfoFromExtra<void>(InfoRouteExtra(
+            id: subject.id,
+            name: displayName,
+            image: subject.images.large,
+          ));
         },
         child: Padding(
           padding: const EdgeInsets.all(9),

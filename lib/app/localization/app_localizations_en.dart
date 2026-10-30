@@ -2277,15 +2277,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playerKernelTroubleshootingHint =>
-      'If playback fails or crashes, try another player kernel. On iOS TrollStore installations, mpv may crash; use MDK instead.';
-
-  @override
-  String get playerKernelSupportsSuperResolution =>
-      'mpv supports Anime4K and other GLSL super-resolution shaders';
-
-  @override
-  String get playerKernelNoSuperResolution =>
-      'MDK does not support Anime4K or other GLSL super-resolution shaders';
+      'If playback fails or crashes, try another player kernel. On iOS TrollStore installations, mpv may crash; try another player kernel.';
 
   @override
   String get playerKernelSwitchFailed => 'Failed to switch player kernel';

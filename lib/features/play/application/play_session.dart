@@ -245,7 +245,7 @@ class PlaySession {
 
   PlayerKernel _readPreferredPlayerKernel() {
     final value = AppSettings.preferredPlayerKernelName;
-    return PlayerKernel.values.firstWhere(
+    return PlayerKernel.available.firstWhere(
       (kernel) => kernel.name == value,
       orElse: () => PlayerKernel.mediaKit,
     );

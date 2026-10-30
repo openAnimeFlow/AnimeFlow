@@ -692,9 +692,7 @@
   ,"@downloadSizeProgress": {"placeholders": {"downloaded": {}, "total": {}}}
   ,"playerKernel": "播放器內核"
   ,"selectPlayerKernel": "選擇播放器內核"
-  ,"playerKernelTroubleshootingHint": "播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，mpv 內核可能閃退，可切換至 MDK。"
-  ,"playerKernelSupportsSuperResolution": "mpv 支援 Anime4K 等 GLSL 超解析度 Shader"
-  ,"playerKernelNoSuperResolution": "MDK 不支援 Anime4K 等 GLSL 超解析度 Shader"
+  ,"playerKernelTroubleshootingHint": "播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，mpv 內核可能閃退，可切換其他內核。"
   ,"playerKernelSwitchFailed": "播放器內核切換失敗"
   ,"playerKernelMpv": "mpv"
   ,"playerKernelMdk": "MDK"

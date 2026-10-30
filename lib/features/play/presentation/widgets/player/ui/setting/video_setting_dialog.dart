@@ -353,7 +353,9 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                 title: Text(l10n.hardwareDecoding),
                 value: _hardwareDecoder,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-                onChanged: switchingKernel || _savingDecoder
+                onChanged: switchingKernel ||
+                        _savingDecoder ||
+                        currentKernel == PlayerKernel.videoPlayer
                     ? null
                     : (enabled) async {
                         setState(() => _savingDecoder = true);
@@ -412,7 +414,7 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                   )
                 : DropDownMenu<PlayerKernel>(
                     key: const ValueKey('select-player-kernel'),
-                    items: PlayerKernel.values,
+                    items: PlayerKernel.available,
                     selectedItem: currentKernel,
                     tooltip: l10n.selectPlayerKernel,
                     offset: const Offset(0, 44),

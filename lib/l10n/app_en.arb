@@ -716,9 +716,7 @@
   ,"@downloadSizeProgress": {"placeholders": {"downloaded": {}, "total": {}}}
   ,"playerKernel": "Player kernel"
   ,"selectPlayerKernel": "Select player kernel"
-  ,"playerKernelTroubleshootingHint": "If playback fails or crashes, try another player kernel. On iOS TrollStore installations, mpv may crash; use MDK instead."
-  ,"playerKernelSupportsSuperResolution": "mpv supports Anime4K and other GLSL super-resolution shaders"
-  ,"playerKernelNoSuperResolution": "MDK does not support Anime4K or other GLSL super-resolution shaders"
+  ,"playerKernelTroubleshootingHint": "If playback fails or crashes, try another player kernel. On iOS TrollStore installations, mpv may crash; try another player kernel."
   ,"playerKernelSwitchFailed": "Failed to switch player kernel"
   ,"playerKernelMpv": "mpv"
   ,"playerKernelMdk": "MDK"

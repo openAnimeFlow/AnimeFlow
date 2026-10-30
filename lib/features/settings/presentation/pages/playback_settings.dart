@@ -46,7 +46,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
 
   PlayerKernel _readPreferredPlayerKernel() {
     final storedKernel = AppSettings.preferredPlayerKernelName;
-    return PlayerKernel.values.firstWhere(
+    return PlayerKernel.available.firstWhere(
       (kernel) => kernel.name == storedKernel,
       orElse: () => PlayerKernel.mediaKit,
     );
@@ -210,7 +210,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                           ),
                         ),
                         DropDownMenu<PlayerKernel>(
-                          items: PlayerKernel.values,
+                          items: PlayerKernel.available,
                           selectedItem: _preferredPlayerKernel,
                           tooltip: l10n.selectPlayerKernel,
                           offset: const Offset(0, 44),
@@ -240,38 +240,6 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                               AppSettings.setPreferredPlayerKernel(kernel.name);
                             });
                           },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          _preferredPlayerKernel == PlayerKernel.mediaKit
-                              ? Icons.check_circle_outline
-                              : Icons.info_outline,
-                          size: 16,
-                          color: _preferredPlayerKernel == PlayerKernel.mediaKit
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _preferredPlayerKernel == PlayerKernel.mediaKit
-                                ? l10n.playerKernelSupportsSuperResolution
-                                : l10n.playerKernelNoSuperResolution,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                          ),
                         ),
                       ],
                     ),

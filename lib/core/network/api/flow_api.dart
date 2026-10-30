@@ -446,6 +446,7 @@ class FlowApi {
       AnimeFlowApi.calendar,
       cancelToken: cancelToken,
       queryParameters: {
+        'useImageCdn': false,
         if (year != null) 'year': year,
         if (month != null) 'month': month,
       },
@@ -460,7 +461,8 @@ class FlowApi {
         queryParameters: {
           'type': 2,
           'limit': limit,
-          'offset': offset
+          'offset': offset,
+          'useImageCdn': false
         }).then((value) => HotItem.fromJson(value.data));
   }
 
@@ -468,11 +470,11 @@ class FlowApi {
   static Future<SubjectsInfoItem> getSubjectByIdService(int id,
       {CancelToken? cancelToken}) async {
     final response = await _client.get('${AnimeFlowApi.subjects}/$id',
-        cancelToken: cancelToken);
+        queryParameters: {'useImageCdn': false}, cancelToken: cancelToken);
     return SubjectsInfoItem.fromJson(response.data);
   }
 
-  /// 按番剧分页获取壁纸墙
+  /// 获取壁纸墙
   static Future<SubjectWallpaperPage> getSubjectWallpapersService({
     required SortType sort,
     required int page,
@@ -552,6 +554,7 @@ class FlowApi {
       'type': type,
       'sort': sort.value,
       'page': page,
+      'useImageCdn': false
     };
     if (cat != null) queryParameters['cat'] = cat;
     if (year != null) queryParameters['year'] = year;
@@ -570,8 +573,10 @@ class FlowApi {
   static Future<List<EpisodeComment>> episodeCommentsService({
     required int episodeId,
   }) async {
-    final response = await _client.get(AnimeFlowApi.episodeComments
-        .replaceFirst('{episodeId}', episodeId.toString()));
+    final response = await _client.get(
+        AnimeFlowApi.episodeComments
+            .replaceFirst('{episodeId}', episodeId.toString()),
+        queryParameters: {'useImageCdn': false});
     return (response.data as List)
         .map((item) => EpisodeComment.fromJson(item as Map<String, dynamic>))
         .toList();
@@ -599,10 +604,7 @@ class FlowApi {
 
     final response = await _client.post(
       AnimeFlowApi.bangumiSearch,
-      queryParameters: {
-        'limit': limit,
-        'offset': offset,
-      },
+      queryParameters: {'limit': limit, 'offset': offset, 'useImageCdn': false},
       data: data,
     );
 
@@ -694,6 +696,7 @@ class FlowApi {
     final response = await _client.get(
         AnimeFlowApi.character
             .replaceFirst('{characterId}', characterId.toString()),
+        queryParameters: {'useImageCdn': false},
         cancelToken: cancelToken);
     return CharacterDetailItem.fromJson(response.data);
   }
@@ -709,6 +712,7 @@ class FlowApi {
             .replaceFirst('{characterId}', characterId.toString()),
         cancelToken: cancelToken,
         queryParameters: {
+          'useImageCdn': false,
           'subjectType': subjectType,
           'limit': limit,
           'offset': offset,
@@ -719,8 +723,10 @@ class FlowApi {
   ///角色吐槽
   static Future<List<CharacterCommentItem>> characterCommentsService(
       int characterId) async {
-    final response = await _client.get(AnimeFlowApi.characterComments
-        .replaceFirst('{characterId}', characterId.toString()));
+    final response = await _client.get(
+        AnimeFlowApi.characterComments
+            .replaceFirst('{characterId}', characterId.toString()),
+        queryParameters: {'useImageCdn': false});
     final list =
         (response.data as Map<String, dynamic>)['data'] as List<dynamic>;
     return list

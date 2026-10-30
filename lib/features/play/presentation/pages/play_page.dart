@@ -13,6 +13,7 @@ import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/player_cache_speed_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/player.dart';
@@ -47,6 +48,7 @@ import 'package:anime_flow/features/play/presentation/providers/recommendation_p
   animeInfoArgs,
   AnimeInfo,
   subjectOnlineCount,
+  playerCacheSpeed,
   DanmakuStateNotifier,
   recommendation,
   SubjectComments,

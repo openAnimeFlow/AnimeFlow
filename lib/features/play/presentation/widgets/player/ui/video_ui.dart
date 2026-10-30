@@ -12,6 +12,7 @@ import 'screenshot_preview.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/player_cache_speed_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
@@ -29,6 +30,7 @@ import 'package:anime_flow/features/play/presentation/providers/subject_online_c
   playExtra,
   AnimeInfo,
   subjectOnlineCount,
+  playerCacheSpeed,
   DanmakuStateNotifier
 ])
 class VideoUi extends StatelessWidget {

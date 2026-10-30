@@ -7,6 +7,7 @@ import 'package:anime_flow/features/play/infrastructure/player/player_video_surf
 import 'package:anime_flow/features/play/presentation/extensions/video_fit_presentation.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/player_cache_speed_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
@@ -29,6 +30,7 @@ import 'package:anime_flow/features/play/presentation/providers/danmaku_state_pr
   playExtra,
   AnimeInfo,
   subjectOnlineCount,
+  playerCacheSpeed,
   DanmakuStateNotifier
 ])
 class PlayerView extends ConsumerStatefulWidget {

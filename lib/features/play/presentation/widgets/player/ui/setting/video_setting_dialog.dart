@@ -346,33 +346,37 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
               currentKernel,
               switchingKernel,
             ),
-            SwitchListTile(
-              title: Text(l10n.hardwareDecoding),
-              value: _hardwareDecoder,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-              onChanged: switchingKernel || _savingDecoder
-                  ? null
-                  : (enabled) async {
-                      setState(() => _savingDecoder = true);
-                      try {
-                        final applied =
-                            await playController.setHardwareDecoder(enabled);
-                        if (!mounted) return;
-                        if (applied) {
-                          setState(() => _hardwareDecoder = enabled);
-                        } else {
-                          NotificationToast.show(l10n.hardwareDecodingFailed);
+            MediaQuery.removePadding(
+              context: context,
+              removeLeft: true,
+              child: SwitchListTile(
+                title: Text(l10n.hardwareDecoding),
+                value: _hardwareDecoder,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+                onChanged: switchingKernel || _savingDecoder
+                    ? null
+                    : (enabled) async {
+                        setState(() => _savingDecoder = true);
+                        try {
+                          final applied =
+                              await playController.setHardwareDecoder(enabled);
+                          if (!mounted) return;
+                          if (applied) {
+                            setState(() => _hardwareDecoder = enabled);
+                          } else {
+                            NotificationToast.show(l10n.hardwareDecodingFailed);
+                          }
+                        } catch (_) {
+                          if (mounted) {
+                            NotificationToast.show(l10n.hardwareDecodingFailed);
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() => _savingDecoder = false);
+                          }
                         }
-                      } catch (_) {
-                        if (mounted) {
-                          NotificationToast.show(l10n.hardwareDecodingFailed);
-                        }
-                      } finally {
-                        if (mounted) {
-                          setState(() => _savingDecoder = false);
-                        }
-                      }
-                    },
+                      },
+              ),
             ),
             const Divider(),
           ],

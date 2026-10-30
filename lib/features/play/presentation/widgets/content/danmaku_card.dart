@@ -274,7 +274,10 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
           icon: const Icon(Icons.subtitles),
           title: Text(AppLocalizations.of(context).switchDanmaku),
           titleTextStyle:
-              const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              Theme.of(dialogContext).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 500),
             child: SizedBox(

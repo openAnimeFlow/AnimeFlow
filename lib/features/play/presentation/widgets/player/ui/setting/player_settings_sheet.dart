@@ -64,6 +64,7 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
   static const _snapDuration = Duration(milliseconds: 250);
 
   final _sheetController = DraggableScrollableController();
+  final _wideScrollController = ScrollController();
 
   void _snapToNearestSize() {
     if (!_sheetController.isAttached ||
@@ -83,6 +84,7 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
   @override
   void dispose() {
     _sheetController.dispose();
+    _wideScrollController.dispose();
     super.dispose();
   }
 
@@ -92,76 +94,82 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
       playStateProvider.select((state) => state.isWideScreen),
     );
     final size = MediaQuery.sizeOf(context);
-    return Align(
-      alignment: isWideScreen ? Alignment.centerRight : Alignment.bottomCenter,
-      child: SizedBox(
-        width: isWideScreen ? LayoutConstant.playContentWidth : size.width,
-        child: DraggableScrollableSheet(
-          controller: _sheetController,
-          initialChildSize: isWideScreen ? 1 : _snapSizes[1],
-          minChildSize: isWideScreen ? 1 : _snapSizes.first,
-          maxChildSize: isWideScreen ? 1 : _snapSizes.last,
-          snap: !isWideScreen,
-          snapSizes: isWideScreen ? null : _snapSizes,
-          snapAnimationDuration: _snapDuration,
-          expand: false,
-          shouldCloseOnMinExtent: false,
-          builder: (context, scrollController) => Material(
-            color: Theme.of(context).cardColor,
-            clipBehavior: Clip.antiAlias,
-            borderRadius: isWideScreen
-                ? const BorderRadius.horizontal(left: Radius.circular(16))
-                : const BorderRadius.vertical(top: Radius.circular(16)),
-            child: SafeArea(
-              left: !isWideScreen,
-              top: isWideScreen,
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: isWideScreen ? 0 : 24,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onVerticalDragUpdate: isWideScreen
-                          ? null
-                          : (details) {
-                              if (!_sheetController.isAttached) return;
-                              _sheetController.jumpTo(
-                                (_sheetController.size -
-                                        _sheetController.pixelsToSize(
-                                          details.delta.dy,
-                                        ))
-                                    .clamp(_snapSizes.first, _snapSizes.last),
-                              );
-                            },
-                      // jumpTo 不触发内置吸附，拖动条松手时主动归位。
-                      onVerticalDragEnd:
-                          isWideScreen ? null : (_) => _snapToNearestSize(),
-                      onVerticalDragCancel:
-                          isWideScreen ? null : _snapToNearestSize,
-                      child: Center(
-                        child: Container(
-                          width: 32,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+    Widget buildSheet(ScrollController scrollController) => Material(
+          color: Theme.of(context).cardColor,
+          clipBehavior: Clip.antiAlias,
+          borderRadius: isWideScreen
+              ? const BorderRadius.horizontal(left: Radius.circular(16))
+              : const BorderRadius.vertical(top: Radius.circular(16)),
+          child: SafeArea(
+            left: !isWideScreen,
+            top: isWideScreen,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: isWideScreen ? 0 : 24,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onVerticalDragUpdate: isWideScreen
+                        ? null
+                        : (details) {
+                            if (!_sheetController.isAttached) return;
+                            _sheetController.jumpTo(
+                              (_sheetController.size -
+                                      _sheetController.pixelsToSize(
+                                        details.delta.dy,
+                                      ))
+                                  .clamp(_snapSizes.first, _snapSizes.last),
+                            );
+                          },
+                    // jumpTo 不触发内置吸附，拖动条松手时主动归位。
+                    onVerticalDragEnd:
+                        isWideScreen ? null : (_) => _snapToNearestSize(),
+                    onVerticalDragCancel:
+                        isWideScreen ? null : _snapToNearestSize,
+                    child: Center(
+                      child: Container(
+                        width: 32,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
                     ),
                   ),
-                  Expanded(
-                    // 内容在滚动视图内部留白，让滚动条保持在抽屉边缘。
-                    child: PrimaryScrollController(
-                      controller: scrollController,
-                      child: widget.child,
-                    ),
+                ),
+                Expanded(
+                  // 内容在滚动视图内部留白，让滚动条保持在抽屉边缘。
+                  child: PrimaryScrollController(
+                    controller: scrollController,
+                    child: widget.child,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ),
+        );
+
+    return Align(
+      alignment: isWideScreen ? Alignment.centerRight : Alignment.bottomCenter,
+      child: SizedBox(
+        width: isWideScreen ? LayoutConstant.playContentWidth : size.width,
+        child: isWideScreen
+            ? SizedBox(
+                height: size.height, child: buildSheet(_wideScrollController))
+            : DraggableScrollableSheet(
+                controller: _sheetController,
+                initialChildSize: _snapSizes[1],
+                minChildSize: _snapSizes.first,
+                maxChildSize: _snapSizes.last,
+                snap: true,
+                snapSizes: _snapSizes,
+                snapAnimationDuration: _snapDuration,
+                expand: false,
+                shouldCloseOnMinExtent: false,
+                builder: (context, scrollController) =>
+                    buildSheet(scrollController),
+              ),
       ),
     );
   }

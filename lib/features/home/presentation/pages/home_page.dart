@@ -20,6 +20,7 @@ class RecommendPage extends StatefulWidget {
 class _RecommendPageState extends State<RecommendPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
 
   @override
   void initState() {
@@ -36,7 +37,7 @@ class _RecommendPageState extends State<RecommendPage>
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<bool>(
-      stream: AppSettings.watchGlassNavigationStyle(),
+      stream: _glassNavigationStyle,
       initialData: AppSettings.glassNavigationStyle,
       builder: (context, snapshot) =>
           _buildPage(context, snapshot.data ?? false),

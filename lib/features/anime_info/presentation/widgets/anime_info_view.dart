@@ -1,5 +1,4 @@
-import 'dart:ui';
-
+import 'package:anime_flow/shared/widgets/adaptive_sliver_app_bar.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
@@ -143,56 +142,22 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
   Widget _buildSliverAppBar(BuildContext context, double contentHeight,
       double toolbarHeight, bool glassStyle) {
     final statusBarHeight = MediaQuery.paddingOf(context).top;
-    return SliverAppBar(
-      automaticallyImplyLeading: false,
-      titleSpacing: 0,
-      toolbarHeight: toolbarHeight,
+    return AdaptiveSliverAppBar(
       title: InfoAppbar(isPinned: isPinned),
-      pinned: true,
-      floating: false,
-      snap: false,
-      backgroundColor: glassStyle ? Colors.transparent : null,
-      surfaceTintColor: glassStyle ? Colors.transparent : null,
-      forceMaterialTransparency: glassStyle,
-      elevation: glassStyle ? 0 : (isPinned ? 4.0 : 0.0),
-      scrolledUnderElevation: glassStyle ? 0 : null,
-      forceElevated: !glassStyle && isPinned,
+      toolbarHeight: toolbarHeight,
+      isPinned: isPinned,
+      glassStyle: glassStyle,
       expandedHeight: contentHeight + statusBarHeight + toolbarHeight,
-      flexibleSpace: Stack(
-        fit: StackFit.expand,
-        children: [
-          FlexibleSpaceBar(
-            collapseMode: CollapseMode.pin,
-            background: Padding(
-              padding: const EdgeInsets.only(bottom: 15),
-              child: InfoHeadView(
-                onPlayEpisode: widget.onPlayEpisode,
-                statusBarHeight: statusBarHeight,
-                contentHeight: contentHeight,
-              ),
-            ),
+      flexibleSpace: FlexibleSpaceBar(
+        collapseMode: CollapseMode.pin,
+        background: Padding(
+          padding: const EdgeInsets.only(bottom: 15),
+          child: InfoHeadView(
+            onPlayEpisode: widget.onPlayEpisode,
+            statusBarHeight: statusBarHeight,
+            contentHeight: contentHeight,
           ),
-          if (glassStyle && isPinned)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: statusBarHeight + toolbarHeight,
-              child: IgnorePointer(
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: ColoredBox(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surface
-                          .withValues(alpha: 0.5),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }

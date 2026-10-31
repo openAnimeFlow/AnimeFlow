@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'dart:async';
 
+import 'package:anime_flow/shared/widgets/adaptive_sliver_app_bar.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'collection_sync_pending_banner.dart';
@@ -40,6 +41,7 @@ class _UserViewState extends ConsumerState<UserCenterView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late final StreamSubscription<CollectType> _collectionSettingSubscription;
+  late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
   final _isPinned = ValueNotifier(false);
   bool isHideUserInfo = true;
 
@@ -198,63 +200,65 @@ class _UserViewState extends ConsumerState<UserCenterView>
     double contentHeight,
   ) {
     final statusBarHeight = MediaQuery.paddingOf(context).top;
-    final header = ValueListenableBuilder<bool>(
-      valueListenable: _isPinned,
-      builder: (context, isPinned, child) => SliverAppBar(
-        automaticallyImplyLeading: false,
-        titleSpacing: 0,
-        title: _buildAppBarTitle(context, isPinned),
-        pinned: true,
-        floating: false,
-        snap: false,
-        elevation: isPinned ? 4.0 : 0.0,
-        forceElevated: isPinned,
-        expandedHeight: contentHeight +
-            statusBarHeight +
-            kToolbarHeight +
-            kTextTabBarHeight,
-        flexibleSpace: child,
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          dividerHeight: 0,
-          tabs: tabs.map((String name) {
-            final parts = name.split('\n');
-            return Tab(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Flexible(
-                    child: Text(
-                      parts[0],
-                      style: const TextStyle(fontSize: 12),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+    final header = StreamBuilder<bool>(
+      stream: _glassNavigationStyle,
+      initialData: AppSettings.glassNavigationStyle,
+      builder: (context, snapshot) {
+        final glassStyle = snapshot.data ?? false;
+        return ValueListenableBuilder<bool>(
+          valueListenable: _isPinned,
+          builder: (context, isPinned, child) => AdaptiveSliverAppBar(
+            title: _buildAppBarTitle(context, isPinned),
+            isPinned: isPinned,
+            glassStyle: glassStyle,
+            expandedHeight: contentHeight +
+                statusBarHeight +
+                kToolbarHeight +
+                kTextTabBarHeight,
+            flexibleSpace: child!,
+            bottom: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              dividerHeight: 0,
+              tabs: tabs.map((String name) {
+                final parts = name.split('\n');
+                return Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          parts[0],
+                          style: const TextStyle(fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        parts.length > 1 ? parts[1] : '0',
+                        style: const TextStyle(fontSize: 11),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    parts.length > 1 ? parts[1] : '0',
-                    style: const TextStyle(fontSize: 11),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-          labelColor: Theme.of(context).colorScheme.primary,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: Theme.of(context).colorScheme.primary,
-        ),
-      ),
-      child: FlexibleSpaceBar(
-        collapseMode: CollapseMode.pin,
-        background: Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: RepaintBoundary(child: _buildHeaderContent()),
-        ),
-      ),
+                );
+              }).toList(),
+              labelColor: Theme.of(context).colorScheme.primary,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          child: FlexibleSpaceBar(
+            collapseMode: CollapseMode.pin,
+            background: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: RepaintBoundary(child: _buildHeaderContent()),
+            ),
+          ),
+        );
+      },
     );
     return Scaffold(
       bottomNavigationBar: const CollectionSyncPendingBanner(),

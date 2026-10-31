@@ -6,6 +6,8 @@ import 'package:anime_flow/shared/widgets/glass_tab_bar.dart';
 import 'package:anime_flow/features/home/presentation/widgets/anime/anime_view.dart';
 import 'package:anime_flow/features/home/presentation/widgets/community/community_view.dart';
 import 'package:anime_flow/features/home/presentation/widgets/wallpapers/wallpaper_view.dart';
+import 'package:anime_flow/features/home/presentation/widgets/wallpapers/wallpaper_browser.dart';
+import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/top_occlusion.dart';
 import 'package:material_ui/material_ui.dart';
@@ -39,12 +41,19 @@ class _RecommendPageState extends State<RecommendPage>
     return StreamBuilder<bool>(
       stream: _glassNavigationStyle,
       initialData: AppSettings.glassNavigationStyle,
-      builder: (context, snapshot) =>
-          _buildPage(context, snapshot.data ?? false),
+      builder: (context, snapshot) => AnimatedBuilder(
+        animation: _tabController,
+        builder: (context, _) => WallpaperBrowser(
+          active: _tabController.index == 2,
+          listBuilder: (context, onOpen) =>
+              _buildPage(context, snapshot.data ?? false, onOpen),
+        ),
+      ),
     );
   }
 
-  Widget _buildPage(BuildContext context, bool glassStyle) {
+  Widget _buildPage(BuildContext context, bool glassStyle,
+      ValueChanged<WallpaperDetailArgs> onOpenWallpaper) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final glassHeaderHeight =
@@ -61,37 +70,39 @@ class _RecommendPageState extends State<RecommendPage>
           children: [
             Text(l10n.recommend),
             const SizedBox(width: 10),
-            Container(
-              width: 200,
-              height: 35,
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: l10n.searchAnimeHint,
-                  hintStyle: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
-                    fontSize: 14,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search_rounded,
-                    color: colorScheme.onSurfaceVariant,
-                    size: 22,
-                  ),
-                  filled: false,
-                  border: const OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                  ),
+            Flexible(
+              child: Container(
+                width: 200,
+                height: 35,
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                onTap: () {
-                  appNavigatorOf(context).openSearch<void>();
-                },
-                readOnly: true,
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: l10n.searchAnimeHint,
+                    hintStyle: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: colorScheme.onSurfaceVariant,
+                      size: 22,
+                    ),
+                    filled: false,
+                    border: const OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                    ),
+                  ),
+                  onTap: () {
+                    appNavigatorOf(context).openSearch<void>();
+                  },
+                  readOnly: true,
+                ),
               ),
             ),
           ],
@@ -123,7 +134,11 @@ class _RecommendPageState extends State<RecommendPage>
               height: glassStyle ? glassHeaderHeight + GlassTabBar.height : 0,
               child: TabBarView(
                 controller: _tabController,
-                children: const [AnimeView(), CommunityView(), WallpaperView()],
+                children: [
+                  const AnimeView(),
+                  const CommunityView(),
+                  WallpaperView(onOpen: onOpenWallpaper),
+                ],
               ),
             ),
           ),

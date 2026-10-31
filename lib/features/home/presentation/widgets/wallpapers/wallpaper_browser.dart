@@ -7,10 +7,12 @@ import 'package:material_ui/material_ui.dart';
 
 /// 保持列表挂载，宽屏原位查看详情，窄屏使用完整详情路由。
 class WallpaperBrowser extends StatefulWidget {
-  const WallpaperBrowser({super.key, required this.listBuilder});
+  const WallpaperBrowser(
+      {super.key, required this.listBuilder, this.active = true});
 
   final Widget Function(BuildContext, ValueChanged<WallpaperDetailArgs>)
       listBuilder;
+  final bool active;
 
   @override
   State<WallpaperBrowser> createState() => _WallpaperBrowserState();
@@ -45,16 +47,24 @@ class _WallpaperBrowserState extends State<WallpaperBrowser> {
             valueListenable: _selection,
             child: widget.listBuilder(context, _open),
             builder: (context, selected, child) {
-              if (!_wide && selected != null && !_handoffScheduled) {
+              if (widget.active &&
+                  !_wide &&
+                  selected != null &&
+                  !_handoffScheduled) {
                 _handoffScheduled = true;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   _handoffScheduled = false;
-                  if (!mounted || _wide || _selection.value != selected) return;
+                  if (!mounted ||
+                      !widget.active ||
+                      _wide ||
+                      _selection.value != selected) {
+                    return;
+                  }
                   _close();
                   _open(selected);
                 });
               }
-              final showDetail = _wide && selected != null;
+              final showDetail = widget.active && _wide && selected != null;
               final listWidth =
                   (constraints.maxWidth * 0.4).clamp(360.0, 600.0);
               // 列表始终位于 Row 的第一个槽位，打开/关闭详情不会重建其状态。

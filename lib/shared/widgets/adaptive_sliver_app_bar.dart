@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:material_ui/material_ui.dart';
 
-/// 吸顶时根据设置显示磨砂背景的应用栏。
 class AdaptiveSliverAppBar extends StatelessWidget {
   const AdaptiveSliverAppBar({
     super.key,

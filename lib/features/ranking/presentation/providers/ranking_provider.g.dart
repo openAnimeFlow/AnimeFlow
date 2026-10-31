@@ -9,88 +9,6 @@ part of 'ranking_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(rankingYears)
-final rankingYearsProvider = RankingYearsProvider._();
-
-final class RankingYearsProvider
-    extends $FunctionalProvider<List<int>, List<int>, List<int>>
-    with $Provider<List<int>> {
-  RankingYearsProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'rankingYearsProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$rankingYearsHash();
-
-  @$internal
-  @override
-  $ProviderElement<List<int>> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  List<int> create(Ref ref) {
-    return rankingYears(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<int> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<List<int>>(value),
-    );
-  }
-}
-
-String _$rankingYearsHash() => r'ae464838384045d4fad25acb5f985d1f68d85207';
-
-@ProviderFor(rankingMonths)
-final rankingMonthsProvider = RankingMonthsProvider._();
-
-final class RankingMonthsProvider
-    extends $FunctionalProvider<List<int>, List<int>, List<int>>
-    with $Provider<List<int>> {
-  RankingMonthsProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'rankingMonthsProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$rankingMonthsHash();
-
-  @$internal
-  @override
-  $ProviderElement<List<int>> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  List<int> create(Ref ref) {
-    return rankingMonths(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<int> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<List<int>>(value),
-    );
-  }
-}
-
-String _$rankingMonthsHash() => r'eef507f9f7584fcfc5f58dce358675765fedd2d6';
-
 @ProviderFor(Ranking)
 final rankingProvider = RankingProvider._();
 
@@ -115,7 +33,7 @@ final class RankingProvider
   Ranking create() => Ranking();
 }
 
-String _$rankingHash() => r'897422310bd1e6828ab34db3f5265579cb2a43f7';
+String _$rankingHash() => r'1a2b6d8d84c5cd1559cf692074e737d16a600f86';
 
 abstract class _$Ranking extends $AsyncNotifier<RankingState> {
   FutureOr<RankingState> build();

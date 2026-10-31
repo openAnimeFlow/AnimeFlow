@@ -6,8 +6,9 @@ import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
-import 'package:anime_flow/features/ranking/presentation/widgets/ranking_filter_bar.dart';
 import 'package:anime_flow/features/ranking/presentation/widgets/ranking_grid.dart';
+import 'package:anime_flow/shared/models/enums/sort_type.dart';
+import 'package:anime_flow/shared/widgets/adaptive_sliver_app_bar.dart';
 import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,8 +21,12 @@ class RankingPage extends StatefulWidget {
 }
 
 class _RankingPageState extends State<RankingPage> {
+  static const _filterHeight = 56.0;
+  static const _progressHeight = 4.0;
   final scrollController = ScrollController();
   final _showBackToTop = ValueNotifier(false);
+  final _isPinned = ValueNotifier(false);
+  late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
   bool isDetailsContent = true;
 
   @override
@@ -42,6 +47,7 @@ class _RankingPageState extends State<RankingPage> {
 
   void scrollListener() {
     _showBackToTop.value = scrollController.offset >= 300;
+    _isPinned.value = scrollController.offset >= _filterHeight;
   }
 
   void scrollToTop() {
@@ -57,6 +63,7 @@ class _RankingPageState extends State<RankingPage> {
     scrollController.removeListener(scrollListener);
     scrollController.dispose();
     _showBackToTop.dispose();
+    _isPinned.dispose();
     super.dispose();
   }
 
@@ -67,6 +74,15 @@ class _RankingPageState extends State<RankingPage> {
     );
   }
 
+  String _sortLabel(SortType type, AppLocalizations l10n) {
+    return switch (type) {
+      SortType.rank => l10n.sortRank,
+      SortType.trends => l10n.sortTrends,
+      SortType.collects => l10n.collection,
+      SortType.date => l10n.sortDate,
+      SortType.title => l10n.sourceName,
+    };
+  }
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -74,9 +90,6 @@ class _RankingPageState extends State<RankingPage> {
     return ValueListenableBuilder<bool>(
       valueListenable: _showBackToTop,
       builder: (context, visible, child) => Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.rankingTitle),
-        ),
         body: child,
         floatingActionButtonLocation:
             OcclusionAwareFabLocation(BottomOcclusionScope.of(context)),
@@ -126,15 +139,35 @@ class _RankingPageState extends State<RankingPage> {
                     child: OcclusionAwareCustomScrollView(
                       controller: scrollController,
                       slivers: [
-                        SliverAppBar(
-                          pinned: true,
-                          floating: true,
-                          title: const RankingFilterBar(),
-                          bottom: PreferredSize(
-                            preferredSize: const Size.fromHeight(4),
-                            child: isReloading
-                                ? const LinearProgressIndicator(minHeight: 4)
-                                : const SizedBox.shrink(),
+                        StreamBuilder<bool>(
+                          stream: _glassNavigationStyle,
+                          initialData: AppSettings.glassNavigationStyle,
+                          builder: (context, snapshot) =>
+                              ValueListenableBuilder<bool>(
+                            valueListenable: _isPinned,
+                            builder: (context, isPinned, child) =>
+                                AdaptiveSliverAppBar(
+                              title: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                child: Text(l10n.rankingTitle),
+                              ),
+                              isPinned: isPinned,
+                              glassStyle: snapshot.data ?? false,
+                              expandedHeight: kToolbarHeight +
+                                  _filterHeight +
+                                  _progressHeight,
+                              flexibleSpace: child!,
+                              bottom: PreferredSize(
+                                preferredSize:
+                                    const Size.fromHeight(_progressHeight),
+                                child: isReloading
+                                    ? const LinearProgressIndicator(
+                                        minHeight: _progressHeight)
+                                    : const SizedBox.shrink(),
+                              ),
+                            ),
+                            child: _buildFilterSpace(context),
                           ),
                         ),
                         if (rankingState?.errorMessage case final errorMessage?)
@@ -206,6 +239,152 @@ class _RankingPageState extends State<RankingPage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildFilterSpace(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return Stack(
+      children: [
+        Positioned(
+          top: MediaQuery.paddingOf(context).top + kToolbarHeight,
+          bottom: _progressHeight,
+          left: 16,
+          right: 16,
+          child: ClipRect(
+            child: OverflowBox(
+              alignment: Alignment.topLeft,
+              minHeight: _filterHeight,
+              maxHeight: _filterHeight,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Consumer(builder: ( context,  ref,  child) {
+                    final (selectedSort, selectedYear, selectedMonth) =
+                    ref.watch(rankingProvider.select((value) {
+                      final state = value.asData?.value;
+                      return (
+                      state?.selectedSort ?? SortType.rank,
+                      state?.selectedYear,
+                      state?.selectedMonth,
+                      );
+                    }));
+                    final notifier = ref.read(rankingProvider.notifier);
+                    return Wrap(
+                      alignment: WrapAlignment.start,
+                      spacing: 5,
+                      children: [
+                        PopupMenuButton<SortType>(
+                          offset: const Offset(0, 40),
+                          initialValue: selectedSort,
+                          itemBuilder: (context) {
+                            return SortType.values.map((type) {
+                              return PopupMenuItem<SortType>(
+                                value: type,
+                                child: Text(_sortLabel(type, l10n)),
+                              );
+                            }).toList();
+                          },
+                          onSelected: notifier.setSort,
+                          child: _filterChip(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.sort, size: 16),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _sortLabel(selectedSort, l10n),
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        PopupMenuButton<int>(
+                          offset: const Offset(0, 40),
+                          initialValue: selectedYear ?? -1,
+                          child: _filterChip(
+                            child: Text(
+                              selectedYear == null
+                                  ? l10n.allYears
+                                  : l10n.yearSuffix(selectedYear),
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          itemBuilder: (context) {
+                            final currentYear = DateTime.now().year;
+                            return [
+                              PopupMenuItem<int>(
+                                value: -1,
+                                child: Text(l10n.all),
+                              ),
+                              ...List.generate(20, (index) {
+                                final year = currentYear - index;
+                                return PopupMenuItem<int>(
+                                  value: year,
+                                  child: Text(l10n.yearSuffix(year)),
+                                );
+                              }),
+                            ];
+                          },
+                          onSelected: (value) {
+                            notifier.setYear(value == -1 ? null : value);
+                          },
+                        ),
+                        PopupMenuButton<int>(
+                          offset: const Offset(0, 40),
+                          initialValue: selectedMonth ?? -1,
+                          child: _filterChip(
+                            child: Text(
+                              selectedMonth == null
+                                  ? l10n.allMonths
+                                  : l10n.monthSuffix(selectedMonth),
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          itemBuilder: (context) {
+                            return [
+                              PopupMenuItem<int>(
+                                value: -1,
+                                child: Text(l10n.all),
+                              ),
+                              ...List.generate(12, (index) {
+                                final month = index + 1;
+                                return PopupMenuItem<int>(
+                                  value: month,
+                                  child: Text(l10n.monthSuffix(month)),
+                                );
+                              }),
+                            ];
+                          },
+                          onSelected: (value) {
+                            notifier.setMonth(value == -1 ? null : value);
+                          },
+                        ),
+                      ],
+                    );
+                  },),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _filterChip({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline,
+        ),
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: child,
     );
   }
 }

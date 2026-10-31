@@ -4,10 +4,12 @@ import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/card_skeleton.dart';
 import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 
 class RankingGrid extends ConsumerWidget {
   const RankingGrid({
@@ -47,8 +49,8 @@ class RankingGrid extends ConsumerWidget {
 
     final items = rankingState.items;
     final isLoadingMore = rankingState.isLoadingMore && rankingState.hasMore;
-    final showProgress = isLoadingMore || rankingState.isReloading;
     final listItemCount = items.length > 3 ? items.length - 3 : 0;
+    final skeletonCount = isLoadingMore ? 3 : 0;
     final columnCount = contentWidth >= 900
         ? 3
         : contentWidth >= 600
@@ -71,9 +73,9 @@ class RankingGrid extends ConsumerWidget {
             onToggleLayout: onToggleLayout,
           ),
         ),
-        if (listItemCount > 0)
+        if (listItemCount + skeletonCount > 0)
           SliverGrid.builder(
-            itemCount: listItemCount,
+            itemCount: listItemCount + skeletonCount,
             gridDelegate: isDetailsContent
                 ? SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: columnCount,
@@ -87,24 +89,29 @@ class RankingGrid extends ConsumerWidget {
                     mainAxisSpacing: 10,
                     childAspectRatio: 2 / 3,
                   ),
-            itemBuilder: (context, index) => isDetailsContent
-                ? _RankingListTile(
-                    subject: items[index + 3],
-                    rank: index + 4,
-                  )
-                : _RankingPosterTile(
-                    subject: items[index + 3],
-                    rank: index + 4,
-                    coverWidth: posterWidth,
-                  ),
+            itemBuilder: (context, index) {
+              if (index >= listItemCount) {
+                return isDetailsContent
+                    ? const _RankingListSkeleton()
+                    : const Padding(
+                        padding: EdgeInsets.all(2),
+                        child: CardSkeleton(),
+                      );
+              }
+              return isDetailsContent
+                  ? _RankingListTile(
+                      subject: items[index + 3],
+                      rank: index + 4,
+                    )
+                  : _RankingPosterTile(
+                      subject: items[index + 3],
+                      rank: index + 4,
+                      coverWidth: posterWidth,
+                    );
+            },
           ),
-        if (showProgress)
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 18),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          )
+        if (isLoadingMore || rankingState.isReloading)
+          const SliverToBoxAdapter(child: SizedBox.shrink())
         else if (rankingState.errorMessage != null && rankingState.hasMore)
           SliverToBoxAdapter(
             child: Padding(
@@ -129,6 +136,76 @@ class RankingGrid extends ConsumerWidget {
         else
           const SliverToBoxAdapter(child: SizedBox(height: 24)),
       ],
+    );
+  }
+}
+
+class _RankingListSkeleton extends StatelessWidget {
+  const _RankingListSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final isDark = colors.brightness == Brightness.dark;
+    final baseColor = colors.surfaceContainerHighest;
+    final highlightColor = Color.lerp(
+      baseColor,
+      isDark ? colors.onSurface : colors.surface,
+      isDark ? 0.08 : 0.65,
+    )!;
+
+    Widget placeholder({double? width, required double height}) => Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: baseColor,
+            borderRadius: BorderRadius.circular(15),
+          ),
+        );
+
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colors.outlineVariant.withValues(alpha: .5)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Shimmer.fromColors(
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            placeholder(width: 100, height: 160),
+            Expanded(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 9, horizontal: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          placeholder(width: 140, height: 16),
+                          const SizedBox(height: 7),
+                          placeholder(width: 90, height: 18),
+                          const SizedBox(height: 8),
+                          placeholder(width: 110, height: 14),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    placeholder(width: 28, height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

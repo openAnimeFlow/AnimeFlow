@@ -62,17 +62,6 @@ class RankingState {
   }
 }
 
-@riverpod
-List<int> rankingYears(Ref ref) {
-  final currentYear = DateTime.now().year;
-  return List.generate(20, (index) => currentYear - index);
-}
-
-@riverpod
-List<int> rankingMonths(Ref ref) {
-  return List.generate(12, (index) => index + 1);
-}
-
 @Riverpod(keepAlive: true)
 class Ranking extends _$Ranking {
   @override

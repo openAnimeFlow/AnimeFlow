@@ -14,6 +14,9 @@ class AssetsPathConstants {
       loadingJson = 'assets/animation/AudioWav.json',
 
       danmakuTop = 'assets/icons/danmaku_top.svg',
+
+      danmakuScroll = 'assets/icons/danmaku_scroll.svg',
+
       /// 弹幕图标
       danmakuIcon = 'assets/icons/danmaku_setting.svg',
 

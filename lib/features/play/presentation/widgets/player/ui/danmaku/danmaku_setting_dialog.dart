@@ -59,7 +59,8 @@ class _DanmakuOptionSliderState extends State<_DanmakuOptionSlider> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
             color: Theme.of(context).textTheme.bodyMedium?.color,
           ),
         ),
@@ -78,6 +79,60 @@ class _DanmakuOptionSliderState extends State<_DanmakuOptionSlider> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DanmakuTypeButton extends StatelessWidget {
+  const _DanmakuTypeButton({
+    required this.label,
+    required this.asset,
+    required this.selected,
+    required this.onTap,
+    this.quarterTurns = 0,
+  });
+
+  final String label;
+  final String asset;
+  final bool selected;
+  final VoidCallback onTap;
+  final int quarterTurns;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Semantics(
+      label: label,
+      selected: selected,
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 70,
+                height: 49,
+                child: RotatedBox(
+                  quarterTurns: quarterTurns,
+                  child: SvgPicture.asset(
+                    asset,
+                    colorFilter: ColorFilter.mode(
+                      selected ? colors.primary : colors.onSurfaceVariant,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ExcludeSemantics(child: Text(label)),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -147,7 +202,9 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(l10n.danmakuChineseConversion),
+                      Text(l10n.danmakuChineseConversion,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20)),
                       Padding(
                         padding: const EdgeInsets.only(top: 12, bottom: 16),
                         child: Align(
@@ -221,142 +278,64 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                     ),
                   ),
                   Wrap(
-                    spacing: 16,
-                    runSpacing: 12,
                     children: [
-                      Column(
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              final newHideScroll = !hideScroll;
-                              setState(() {
-                                danmakuController.updateOption(
-                                  danmakuController.option
-                                      .copyWith(hideScroll: newHideScroll),
-                                );
-                                AppSettings.setSetting(
-                                  DanmakuKey.danmakuHideScroll,
-                                  newHideScroll,
-                                );
-                              });
-                            },
-                            child: Container(
-                              width: 80,
-                              height: 65,
-                              decoration: BoxDecoration(
-                                color: hideScroll
-                                    ? Theme.of(context)
-                                        .dividerColor
-                                        .withValues(alpha: 0.3)
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              margin: const EdgeInsets.only(bottom: 8),
-                              padding: const EdgeInsets.all(8),
-                              child: SvgPicture.asset(
-                                'assets/icons/danmaku_scroll.svg',
-                                colorFilter: const ColorFilter.mode(
-                                    Colors.white, BlendMode.srcIn),
-                              ),
-                            ),
-                          ),
-                          Text(l10n.scrollingDanmaku)
-                        ],
+                      _DanmakuTypeButton(
+                        label: l10n.scrollingDanmaku,
+                        asset: AssetsPathConstants.danmakuScroll,
+                        selected: !hideScroll,
+                        onTap: () {
+                          final hidden = !hideScroll;
+                          setState(() {
+                            danmakuController.updateOption(
+                              danmakuController.option
+                                  .copyWith(hideScroll: hidden),
+                            );
+                          });
+                          AppSettings.setSetting(
+                              DanmakuKey.danmakuHideScroll, hidden);
+                        },
                       ),
-                      Column(
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              final newHideTop = !hideTop;
-                              setState(() {
-                                danmakuController.updateOption(
-                                  danmakuController.option
-                                      .copyWith(hideTop: newHideTop),
-                                );
-                                AppSettings.setSetting(
-                                  DanmakuKey.danmakuHideTop,
-                                  newHideTop,
-                                );
-                              });
-                            },
-                            child: Container(
-                              width: 80,
-                              height: 65,
-                              decoration: BoxDecoration(
-                                color: hideTop
-                                    ? Theme.of(context)
-                                        .dividerColor
-                                        .withValues(alpha: 0.3)
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              margin: const EdgeInsets.only(bottom: 8),
-                              padding: const EdgeInsets.all(8),
-                              child: SvgPicture.asset(
-                                'assets/icons/danmaku_top.svg',
-                                colorFilter: const ColorFilter.mode(
-                                    Colors.white, BlendMode.srcIn),
-                              ),
-                            ),
-                          ),
-                          Text(l10n.topDanmaku)
-                        ],
+                      _DanmakuTypeButton(
+                        label: l10n.topDanmaku,
+                        asset: AssetsPathConstants.danmakuTop,
+                        selected: !hideTop,
+                        onTap: () {
+                          final hidden = !hideTop;
+                          setState(() {
+                            danmakuController.updateOption(
+                              danmakuController.option
+                                  .copyWith(hideTop: hidden),
+                            );
+                          });
+                          AppSettings.setSetting(
+                              DanmakuKey.danmakuHideTop, hidden);
+                        },
                       ),
-                      Column(
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              final newHideBottom = !hideBottom;
-                              setState(() {
-                                danmakuController.updateOption(
-                                  danmakuController.option
-                                      .copyWith(hideBottom: newHideBottom),
-                                );
-                                AppSettings.setSetting(
-                                  DanmakuKey.danmakuHideBottom,
-                                  newHideBottom,
-                                );
-                              });
-                            },
-                            child: Container(
-                              width: 80,
-                              height: 65,
-                              decoration: BoxDecoration(
-                                color: hideBottom
-                                    ? Theme.of(context)
-                                        .dividerColor
-                                        .withValues(alpha: 0.3)
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              margin: const EdgeInsets.only(bottom: 8),
-                              padding: const EdgeInsets.all(8),
-                              child: RotatedBox(
-                                quarterTurns: 2,
-                                child: SvgPicture.asset(
-                                  AssetsPathConstants.danmakuTop,
-                                  colorFilter: const ColorFilter.mode(
-                                      Colors.white, BlendMode.srcIn),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Text(l10n.bottomDanmaku)
-                        ],
-                      )
+                      _DanmakuTypeButton(
+                        label: l10n.bottomDanmaku,
+                        asset: AssetsPathConstants.danmakuTop,
+                        quarterTurns: 2,
+                        selected: !hideBottom,
+                        onTap: () {
+                          final hidden = !hideBottom;
+                          setState(() {
+                            danmakuController.updateOption(
+                              danmakuController.option
+                                  .copyWith(hideBottom: hidden),
+                            );
+                          });
+                          AppSettings.setSetting(
+                              DanmakuKey.danmakuHideBottom, hidden);
+                        },
+                      ),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(l10n.massiveMode,
-                          style: const TextStyle(fontSize: 14)),
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
                       Switch(
                         value: danmakuController.option.massiveMode,
                         onChanged: (value) {

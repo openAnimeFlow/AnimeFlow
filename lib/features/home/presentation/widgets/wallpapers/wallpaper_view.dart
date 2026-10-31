@@ -135,7 +135,7 @@ class _WallpaperViewState extends State<WallpaperView>
                 },
                 child: RefreshIndicator(
                   edgeOffset: topOcclusion,
-                  displacement: topOcclusion + 40,
+                  displacement: 10,
                   onRefresh: _refresh,
                   child: OcclusionAwareCustomScrollView(
                     key: const PageStorageKey('wallpapers'),

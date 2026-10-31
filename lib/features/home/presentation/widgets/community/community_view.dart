@@ -78,7 +78,7 @@ class _CommunityPageState extends ConsumerState<CommunityView>
         RefreshIndicator(
           color: colorScheme.primary,
           edgeOffset: topOcclusion,
-          displacement: topOcclusion + 40,
+          displacement: 10,
           onRefresh: _refresh,
           child: Consumer(
             builder: (context, ref, _) {

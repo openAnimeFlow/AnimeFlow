@@ -17,13 +17,13 @@ class CaptchaView extends StatefulWidget {
     required this.resource,
     required this.dataSourceController,
     required this.subjectName,
-    this.isBottomSheet = false,
+    this.keyboardInsetHandled = false,
   });
 
   final ResourcesItem resource;
   final VideoSourceNotifier dataSourceController;
   final String subjectName;
-  final bool isBottomSheet;
+  final bool keyboardInsetHandled;
 
   @override
   State<CaptchaView> createState() => _CaptchaViewState();
@@ -208,7 +208,7 @@ class _CaptchaViewState extends State<CaptchaView> {
     final resource = widget.resource;
     final l10n = AppLocalizations.of(context);
     final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final compact = widget.isBottomSheet && keyboardInset > 0;
+    final compact = widget.keyboardInsetHandled && keyboardInset > 0;
 
     if (!_sessionActive) {
       return Center(
@@ -273,7 +273,7 @@ class _CaptchaViewState extends State<CaptchaView> {
             padding: EdgeInsets.only(
                 left: 16,
                 right: 16,
-                bottom: widget.isBottomSheet ? 0 : keyboardInset),
+                bottom: widget.keyboardInsetHandled ? 0 : keyboardInset),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [

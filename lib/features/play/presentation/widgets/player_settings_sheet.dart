@@ -11,6 +11,7 @@ Future<void> showPlayerSettingsSheet({
   required Widget child,
   VoidCallback? onOpen,
   VoidCallback? onClose,
+  bool forceSide = false,
 }) async {
   final container = ProviderScope.containerOf(context);
   onOpen?.call();
@@ -26,9 +27,10 @@ Future<void> showPlayerSettingsSheet({
         container: container,
         child: Consumer(
           builder: (context, ref, _) {
-            final isWideScreen = ref.watch(
-              playStateProvider.select((state) => state.isWideScreen),
-            );
+            final isWideScreen = forceSide ||
+                ref.watch(
+                  playStateProvider.select((state) => state.isWideScreen),
+                );
             return SlideTransition(
               position: Tween<Offset>(
                 begin: isWideScreen ? const Offset(1, 0) : const Offset(0, 1),
@@ -50,9 +52,25 @@ Future<void> showPlayerSettingsSheet({
 
 @Dependencies([PlayStateNotifier])
 class PlayerSettingsSheet extends ConsumerStatefulWidget {
-  const PlayerSettingsSheet({super.key, required this.child});
+  const PlayerSettingsSheet({
+    super.key,
+    this.child,
+    this.builder,
+    this.forceSide = false,
+    this.avoidKeyboard = false,
+    this.initialSize = 0.75,
+    this.snapSizes = const [0.35, 0.75, 0.95],
+    this.closeOnMinExtent = false,
+  }) : assert((child == null) != (builder == null));
 
-  final Widget child;
+  final Widget? child;
+  final Widget Function(BuildContext context, ScrollController controller,
+      bool isBottomSheet)? builder;
+  final bool forceSide;
+  final bool avoidKeyboard;
+  final double initialSize;
+  final List<double> snapSizes;
+  final bool closeOnMinExtent;
 
   @override
   ConsumerState<PlayerSettingsSheet> createState() =>
@@ -60,19 +78,19 @@ class PlayerSettingsSheet extends ConsumerStatefulWidget {
 }
 
 class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
-  static const _snapSizes = [0.35, 0.75, 0.95];
   static const _snapDuration = Duration(milliseconds: 250);
 
   final _sheetController = DraggableScrollableController();
   final _wideScrollController = ScrollController();
+  bool _keyboardVisible = false;
 
   void _snapToNearestSize() {
     if (!_sheetController.isAttached ||
-        ref.read(playStateProvider).isWideScreen) {
+        (widget.forceSide || ref.read(playStateProvider).isWideScreen)) {
       return;
     }
     final size = _sheetController.size;
-    final target = _snapSizes
+    final target = widget.snapSizes
         .reduce((a, b) => (a - size).abs() <= (b - size).abs() ? a : b);
     _sheetController.animateTo(
       target,
@@ -90,10 +108,29 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isWideScreen = ref.watch(
-      playStateProvider.select((state) => state.isWideScreen),
-    );
+    final isWideScreen = widget.forceSide ||
+        ref.watch(
+          playStateProvider.select((state) => state.isWideScreen),
+        );
     final size = MediaQuery.sizeOf(context);
+    final keyboardInset = widget.avoidKeyboard && !isWideScreen
+        ? MediaQuery.viewInsetsOf(context).bottom
+        : 0.0;
+    final keyboardVisible = keyboardInset > 0;
+    if (keyboardVisible != _keyboardVisible) {
+      _keyboardVisible = keyboardVisible;
+      if (keyboardVisible) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _keyboardVisible && _sheetController.isAttached) {
+            _sheetController.animateTo(
+              widget.snapSizes.last,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+            );
+          }
+        });
+      }
+    }
     Widget buildSheet(ScrollController scrollController) => Material(
           color: Theme.of(context).cardColor,
           clipBehavior: Clip.antiAlias,
@@ -118,7 +155,8 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
                                       _sheetController.pixelsToSize(
                                         details.delta.dy,
                                       ))
-                                  .clamp(_snapSizes.first, _snapSizes.last),
+                                  .clamp(widget.snapSizes.first,
+                                      widget.snapSizes.last),
                             );
                           },
                     // jumpTo 不触发内置吸附，拖动条松手时主动归位。
@@ -142,7 +180,9 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
                   // 内容在滚动视图内部留白，让滚动条保持在抽屉边缘。
                   child: PrimaryScrollController(
                     controller: scrollController,
-                    child: widget.child,
+                    child: widget.builder
+                            ?.call(context, scrollController, !isWideScreen) ??
+                        widget.child!,
                   ),
                 ),
               ],
@@ -150,26 +190,43 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
           ),
         );
 
-    return Align(
-      alignment: isWideScreen ? Alignment.centerRight : Alignment.bottomCenter,
-      child: SizedBox(
-        width: isWideScreen ? LayoutConstant.playContentWidth : size.width,
-        child: isWideScreen
-            ? SizedBox(
-                height: size.height, child: buildSheet(_wideScrollController))
-            : DraggableScrollableSheet(
-                controller: _sheetController,
-                initialChildSize: _snapSizes[1],
-                minChildSize: _snapSizes.first,
-                maxChildSize: _snapSizes.last,
-                snap: true,
-                snapSizes: _snapSizes,
-                snapAnimationDuration: _snapDuration,
-                expand: false,
-                shouldCloseOnMinExtent: false,
-                builder: (context, scrollController) =>
-                    buildSheet(scrollController),
-              ),
+    return AnimatedPadding(
+      padding: EdgeInsets.only(bottom: keyboardInset),
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOutCubic,
+      child: Align(
+        alignment:
+            isWideScreen ? Alignment.centerRight : Alignment.bottomCenter,
+        child: SizedBox(
+          width: isWideScreen ? LayoutConstant.playContentWidth : size.width,
+          child: isWideScreen
+              ? SizedBox(
+                  height: size.height, child: buildSheet(_wideScrollController))
+              : NotificationListener<DraggableScrollableNotification>(
+                  onNotification: (notification) {
+                    if (notification.depth == 0 &&
+                        notification.shouldCloseOnMinExtent &&
+                        notification.extent <= notification.minExtent) {
+                      Navigator.of(context).maybePop();
+                    }
+                    return false;
+                  },
+                  child: DraggableScrollableSheet(
+                    controller: _sheetController,
+                    initialChildSize: widget.initialSize,
+                    minChildSize: widget.snapSizes.first,
+                    maxChildSize: widget.snapSizes.last,
+                    snap: !keyboardVisible,
+                    snapSizes: keyboardVisible ? null : widget.snapSizes,
+                    snapAnimationDuration: _snapDuration,
+                    expand: false,
+                    shouldCloseOnMinExtent:
+                        widget.closeOnMinExtent && !keyboardVisible,
+                    builder: (context, scrollController) =>
+                        buildSheet(scrollController),
+                  ),
+                ),
+        ),
       ),
     );
   }

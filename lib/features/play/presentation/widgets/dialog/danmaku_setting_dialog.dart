@@ -1,13 +1,13 @@
 import 'package:anime_flow/features/play/application/play_session.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/player_settings_sheet.dart';
+import 'package:anime_flow/features/play/presentation/widgets/danmaku/canvas_danmaku_adapter.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
 import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/canvas_danmaku_adapter.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:material_ui/material_ui.dart';

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/features/play/application/play_session.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/player_settings_sheet.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/player_more_button.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/play/application/player_bindings.dart';
@@ -15,7 +15,7 @@ import 'package:anime_flow/features/play/presentation/providers/video_ui_provide
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/video_setting_dialog.dart';
+import 'package:anime_flow/features/play/presentation/widgets/dialog/video_setting_dialog.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/models/enums/collect_type.dart';
@@ -23,7 +23,7 @@ import 'package:anime_flow/shared/widgets/ios_battery_icon.dart';
 import 'package:anime_flow/shared/widgets/network_icon.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:anime_flow/features/play/presentation/widgets/source_drawers/video_source_drawers.dart';
+import 'package:anime_flow/features/play/presentation/widgets/dialog/video_source_dialog.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:battery_plus/battery_plus.dart';
@@ -87,40 +87,6 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
       NotificationToast.show(e.toString(), title: l10n.updateFailed);
       rethrow;
     }
-  }
-
-  Future<T?> _showRightSlideDialog<T>({
-    required BuildContext context,
-    required String barrierLabel,
-    required Widget child,
-    bool barrierDismissible = false,
-  }) {
-    final container = ProviderScope.containerOf(context);
-    return showGeneralDialog<T>(
-      context: context,
-      barrierDismissible: barrierDismissible,
-      barrierLabel: barrierLabel,
-      barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return UncontrolledProviderScope(
-          container: container,
-          child: child,
-        );
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(1, 0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          )),
-          child: child,
-        );
-      },
-    );
   }
 
   @override
@@ -349,22 +315,27 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                 return IconButton(
                                   padding: const EdgeInsets.all(0),
                                   onPressed: () {
-                                    _showRightSlideDialog(
+                                    showPlayerSettingsSheet(
                                       context: context,
-                                      barrierLabel: 'SourceDrawer',
-                                      barrierDismissible: true,
-                                      child: VideoSourceDrawers(
-                                        onVideoUrlSelected: (url) {
-                                          unawaited(playController.stop());
-                                          videoSourceController
-                                              .loadVideoPage(url);
-                                          videoUiStateController
-                                              .showParsingIndicator();
-                                        },
-                                        isBottomSheet: false,
-                                        videoSourceNotifier:
-                                            videoSourceController,
-                                        subjectName: subjectName,
+                                      label: l10n.videoSource,
+                                      forceSide: true,
+                                      child: PlayerSettingsSheet(
+                                        forceSide: true,
+                                        builder:
+                                            (context, scrollController, _) =>
+                                                VideoSourceDialog(
+                                          scrollController: scrollController,
+                                          onVideoUrlSelected: (url) {
+                                            unawaited(playController.stop());
+                                            videoSourceController
+                                                .loadVideoPage(url);
+                                            videoUiStateController
+                                                .showParsingIndicator();
+                                          },
+                                          videoSourceNotifier:
+                                              videoSourceController,
+                                          subjectName: subjectName,
+                                        ),
                                       ),
                                     );
                                   },

@@ -4,9 +4,9 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/rate_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/shader_button.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/danmaku_setting_dialog.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/player_settings_sheet.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/video_setting_dialog.dart';
+import 'package:anime_flow/features/play/presentation/widgets/dialog/danmaku_setting_dialog.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
+import 'package:anime_flow/features/play/presentation/widgets/dialog/video_setting_dialog.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';

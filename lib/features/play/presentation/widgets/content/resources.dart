@@ -11,7 +11,8 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:anime_flow/features/play/presentation/widgets/source_drawers/video_source_drawers.dart';
+import 'package:anime_flow/features/play/presentation/widgets/dialog/video_source_dialog.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -49,84 +50,24 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     }
 
     final subjectName = ref.read(playExtraProvider).playExtra.subjectName;
-    final providerContainer = ProviderScope.containerOf(context);
-
-    if (ref.read(playStateProvider).isWideScreen) {
-      showGeneralDialog(
-        context: context,
-        barrierDismissible: true,
-        barrierLabel: "SourceDrawer",
-        barrierColor: Colors.black54,
-        transitionDuration: const Duration(milliseconds: 300),
-        transitionBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(1, 0),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOut,
-            )),
-            child: child,
-          );
-        },
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return UncontrolledProviderScope(
-            container: providerContainer,
-            child: VideoSourceDrawers(
-              isBottomSheet: false,
-              onVideoUrlSelected: onVideoUrlSelected,
-              videoSourceNotifier: videoSourceController,
-              subjectName: subjectName,
-            ),
-          );
-        },
-      );
-    } else {
-      final drawerController = DraggableScrollableController();
-      showModalBottomSheet<void>(
-        context: context,
-        // Use the full page height, outside the introduction's nested navigator.
-        useRootNavigator: true,
-        isScrollControlled: true,
-        useSafeArea: true,
-        backgroundColor: Colors.transparent,
-        builder: (sheetContext) {
-          final keyboardInset = MediaQuery.viewInsetsOf(sheetContext).bottom;
-          final keyboardVisible = keyboardInset > 0;
-          return UncontrolledProviderScope(
-            container: providerContainer,
-            child: AnimatedPadding(
-              padding: EdgeInsets.only(bottom: keyboardInset),
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              child: DraggableScrollableSheet(
-                controller: drawerController,
-                expand: false,
-                // Give the form the available space above the keyboard, even
-                // when the user previously collapsed the drawer.
-                initialChildSize: keyboardVisible ? 0.95 : 0.60,
-                minChildSize: keyboardVisible ? 0.95 : 0.3,
-                maxChildSize: 0.95,
-                shouldCloseOnMinExtent: !keyboardVisible,
-                snap: !keyboardVisible,
-                snapSizes: keyboardVisible ? const [0.95] : const [0.52, 0.95],
-                builder: (context, scrollController) {
-                  return VideoSourceDrawers(
-                    isBottomSheet: true,
-                    scrollController: scrollController,
-                    draggableController: drawerController,
-                    onVideoUrlSelected: onVideoUrlSelected,
-                    videoSourceNotifier: videoSourceController,
-                    subjectName: subjectName,
-                  );
-                },
-              ),
-            ),
-          );
-        },
-      );
-    }
+    showPlayerSettingsSheet(
+      context: context,
+      label: AppLocalizations.of(context).videoSource,
+      child: PlayerSettingsSheet(
+        avoidKeyboard: true,
+        initialSize: 0.60,
+        snapSizes: const [0.3, 0.52, 0.95],
+        closeOnMinExtent: true,
+        builder: (context, scrollController, isBottomSheet) =>
+            VideoSourceDialog(
+          keyboardInsetHandled: isBottomSheet,
+          scrollController: scrollController,
+          onVideoUrlSelected: onVideoUrlSelected,
+          videoSourceNotifier: videoSourceController,
+          subjectName: subjectName,
+        ),
+      ),
+    );
   }
 
   Future<void> _openSourcePageInBrowser(String videoUrl) async {

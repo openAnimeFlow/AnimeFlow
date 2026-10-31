@@ -1,5 +1,6 @@
 import 'package:anime_flow/features/play/application/play_session.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/player_settings_sheet.dart';
+import 'package:anime_flow/features/play/presentation/widgets/dialog/episodes_dialog.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
 import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
@@ -13,7 +14,7 @@ import 'package:anime_flow/features/subject_episodes/application/subject_episode
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/fit_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/rate_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/shader_button.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/danmaku_setting_dialog.dart';
+import 'package:anime_flow/features/play/presentation/widgets/dialog/danmaku_setting_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_progress_bar.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_time_display.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
@@ -23,7 +24,6 @@ import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/danmaku_text_field.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/play/presentation/widgets/loading_animation.dart';
-import 'package:anime_flow/features/play/presentation/widgets/episodes_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/play_pause_icon.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';

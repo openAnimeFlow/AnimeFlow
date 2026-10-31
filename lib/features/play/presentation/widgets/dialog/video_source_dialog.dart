@@ -1,7 +1,7 @@
 import 'package:anime_flow/features/play/application/episode_source_matcher.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/features/play/presentation/widgets/captcha_view.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
@@ -10,7 +10,6 @@ import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'captcha_view.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,32 +21,27 @@ enum _SourceEpisodeMode { matched, all }
 typedef _PlayingSource = ({String url, String lineName, String resourceTitle});
 
 @Dependencies([Episodes, VideoSourceNotifier])
-class VideoSourceDrawers extends ConsumerStatefulWidget {
+class VideoSourceDialog extends ConsumerStatefulWidget {
   final Function(String url)? onVideoUrlSelected;
   final VideoSourceNotifier videoSourceNotifier;
   final String subjectName;
-  final bool isBottomSheet;
+  final bool keyboardInsetHandled;
   final ScrollController? scrollController;
-  final DraggableScrollableController? draggableController;
 
-  const VideoSourceDrawers({
+  const VideoSourceDialog({
     super.key,
     this.onVideoUrlSelected,
-    this.isBottomSheet = false,
+    this.keyboardInsetHandled = false,
     this.scrollController,
-    this.draggableController,
     required this.videoSourceNotifier,
     required this.subjectName,
   });
 
   @override
-  ConsumerState<VideoSourceDrawers> createState() => _VideoSourceDrawersState();
+  ConsumerState<VideoSourceDialog> createState() => _VideoSourceDrawersState();
 }
 
-class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
-  static const double _minSheetSize = 0.3;
-  static const double _initialSheetSize = 0.52;
-  static const double _maxSheetSize = 0.95;
+class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
   static const String _allLinesValue = '__all_lines__';
 
   final logger = LiggLogger();
@@ -75,8 +69,13 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   }
 
   @override
-  void didUpdateWidget(VideoSourceDrawers oldWidget) {
+  void didUpdateWidget(VideoSourceDialog oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.scrollController != widget.scrollController) {
+      (oldWidget.scrollController ?? _fallbackScrollController)
+          .removeListener(_handleSourceListScroll);
+      _scrollController.addListener(_handleSourceListScroll);
+    }
     if (oldWidget.subjectName != widget.subjectName) {
       _searchController.text = widget.subjectName;
     }
@@ -84,11 +83,11 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   void _handleSourceListScroll() {
     if (!_scrollController.hasClients) return;
-    final collapsed = _scrollController.offset > 8;
+    final position = _scrollController.position;
+    final offset = position.pixels - position.minScrollExtent;
+    final collapsed = _sourceControlsCollapsed ? offset > 0 : offset > 8;
     if (collapsed == _sourceControlsCollapsed) return;
-    setState(() {
-      _sourceControlsCollapsed = collapsed;
-    });
+    setState(() => _sourceControlsCollapsed = collapsed);
   }
 
   void _setSelectedWebsite(int index) {
@@ -116,6 +115,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   /// 切换数据源 / 重新搜索后，线路、集数模式与排序都回到默认值。
   void _resetSourceViewState() {
+    _sourceControlsCollapsed = false;
     _sourceEpisodeMode = _SourceEpisodeMode.matched;
     _selectedLineName = null;
     _sortDescending = false;
@@ -181,9 +181,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   @override
   void dispose() {
     _scrollController.removeListener(_handleSourceListScroll);
-    if (widget.scrollController == null) {
-      _fallbackScrollController.dispose();
-    }
+    _fallbackScrollController.dispose();
     _disposeSiteSearchControllers();
     _searchController.dispose();
     super.dispose();
@@ -191,95 +189,24 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isBottomSheet) {
-      return Material(
-        color: Theme.of(context).cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-              16, 20, 16, MediaQuery.paddingOf(context).bottom),
-          child: _buildDrawerContent(includeDragHandle: true),
-        ),
-      );
-    }
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Container(
-        width: LayoutConstant.playContentWidth,
-        height: MediaQuery.of(context).size.height,
-        padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top,
-          left: 16,
-          right: 16,
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        color: Theme.of(context).cardColor,
-        child: _buildDrawerContent(),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        0,
+        16,
+        widget.keyboardInsetHandled
+            ? 0
+            : MediaQuery.viewInsetsOf(context).bottom,
       ),
+      child: _buildDrawerContent(),
     );
   }
 
-  Widget _buildDragHandle(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onVerticalDragUpdate: widget.draggableController == null
-          ? null
-          : (details) {
-              final controller = widget.draggableController!;
-              if (!controller.isAttached) return;
-              final height = MediaQuery.sizeOf(context).height;
-              final nextSize =
-                  (controller.size - details.primaryDelta! / height).clamp(
-                _minSheetSize,
-                _maxSheetSize,
-              );
-              controller.jumpTo(nextSize);
-            },
-      onVerticalDragEnd: widget.draggableController == null
-          ? null
-          : (_) {
-              final controller = widget.draggableController!;
-              if (!controller.isAttached) return;
-              final currentSize = controller.size;
-              final snapTargets = [
-                _minSheetSize,
-                _initialSheetSize,
-                _maxSheetSize,
-              ];
-              final target = snapTargets.reduce(
-                (a, b) =>
-                    (currentSize - a).abs() < (currentSize - b).abs() ? a : b,
-              );
-              controller.animateTo(
-                target,
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOutCubic,
-              );
-            },
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          width: 40,
-          height: 4,
-          decoration: BoxDecoration(
-            color: Theme.of(context)
-                .colorScheme
-                .onSurfaceVariant
-                .withValues(alpha: 0.45),
-            borderRadius: BorderRadius.circular(999),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDrawerContent({bool includeDragHandle = false}) {
+  Widget _buildDrawerContent() {
     final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (includeDragHandle) _buildDragHandle(context),
         _buildHeader(l10n),
         _buildManualSearch(l10n),
         const SizedBox(height: 16),
@@ -506,7 +433,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         resource: selectedResource,
         dataSourceController: widget.videoSourceNotifier,
         subjectName: widget.subjectName,
-        isBottomSheet: widget.isBottomSheet,
+        keyboardInsetHandled: widget.keyboardInsetHandled,
       );
     }
 
@@ -573,23 +500,33 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     return Material(
       child: Column(
         children: [
-          AnimatedSize(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOutCubic,
-            child: _sourceControlsCollapsed
-                ? const SizedBox.shrink()
-                : _buildSourceControls(
-                    lineNames: lineNames,
-                    selectedLineName: selectedLineName,
-                  ),
+          ClipRect(
+            child: AnimatedAlign(
+              alignment: Alignment.topCenter,
+              heightFactor: _sourceControlsCollapsed ? 0 : 1,
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              child: ExcludeSemantics(
+                excluding: _sourceControlsCollapsed,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildSourceControls(
+                      lineNames: lineNames,
+                      selectedLineName: selectedLineName,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildEpisodeModeSelector(
+                      matchedCount: matchedResources.length,
+                      allCount: filteredEpisodeResources.fold<int>(
+                          0, (sum, item) => sum + item.episodes.length),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 8),
-          _buildEpisodeModeSelector(
-            matchedCount: matchedResources.length,
-            allCount: filteredEpisodeResources.fold<int>(
-                0, (sum, item) => sum + item.episodes.length),
-          ),
-          const SizedBox(height: 8),
           Expanded(
             child: _sourceEpisodeMode == _SourceEpisodeMode.all
                 ? _buildAllEpisodeSources(

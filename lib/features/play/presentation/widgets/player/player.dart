@@ -11,11 +11,18 @@ import 'package:anime_flow/features/play/presentation/providers/player_cache_spe
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
+import 'package:anime_flow/features/play/presentation/widgets/danmaku/danmaku_view.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
-import 'ui/danmaku/danmaku_view.dart';
-import 'ui/video_ui.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
+import 'gesture/desktop_gesture_detector.dart';
+import 'gesture/mobile_gesture_detector.dart';
+import 'ui/control/bottom_area_control.dart';
+import 'ui/control/middle_area_control.dart';
+import 'ui/control/right_area_control.dart';
+import 'ui/control/top_area_control.dart';
+import 'ui/screenshot_preview.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
@@ -126,12 +133,9 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
         /// 视频层
         Consumer(
           builder: (context, ref, child) {
-            final videoFit =
-                ref.watch(playStateProvider.select((state) => state.videoFit));
-            final kernel =
-                ref.watch(playStateProvider.select((state) => state.kernel));
-            final switching = ref.watch(
-                playStateProvider.select((state) => state.switchingKernel));
+            final (videoFit, kernel, switching) = ref.watch(
+                playStateProvider.select((state) =>
+                    (state.videoFit, state.kernel, state.switchingKernel)));
             return Positioned.fill(
               child: KeyedSubtree(
                 key: ValueKey((kernel, switching)),
@@ -149,7 +153,24 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
         ),
 
         /// UI层
-        const Positioned.fill(child: VideoUi()),
+        Positioned.fill(
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: SystemUtil.isMobile
+                    ? const MobileGestureDetector(child: MiddleAreaControl())
+                    : const DesktopGestureDetector(child: MiddleAreaControl()),
+              ),
+              const Positioned(
+                  top: 0, left: 0, right: 0, child: TopAreaControl()),
+              const Positioned(
+                  bottom: 0, left: 0, right: 0, child: BottomAreaControl()),
+              const Positioned(
+                  right: 0, top: 0, bottom: 0, child: RightAreaControl()),
+              const ScreenshotPreviewOverlay(),
+            ],
+          ),
+        ),
       ],
     );
   }

@@ -190,8 +190,8 @@ class _UserCollectionTab extends ConsumerWidget {
         return RefreshIndicator(
           key: refreshIndicatorKey,
           onRefresh: () => _onRefresh(ref, context),
-          edgeOffset: _refreshIndicatorOffset,
-          displacement: _refreshIndicatorOffset + 16,
+          edgeOffset: _refreshIndicatorOffset + 8,
+          displacement: 15,
           notificationPredicate: (notification) =>
               notification.depth == 0 &&
               notification.metrics.axis == Axis.vertical,

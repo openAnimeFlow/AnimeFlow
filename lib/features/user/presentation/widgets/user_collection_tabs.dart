@@ -187,17 +187,23 @@ class _UserCollectionTab extends ConsumerWidget {
     return Builder(
       builder: (BuildContext context) {
         final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
+        // 内层视口从固定顶部栏后方开始，刷新图标和越界效果需要避开顶部栏。
+        final overlap =
+            MediaQuery.paddingOf(context).top + _refreshIndicatorOffset;
         return RefreshIndicator(
           key: refreshIndicatorKey,
           onRefresh: () => _onRefresh(ref, context),
-          edgeOffset: _refreshIndicatorOffset + 8,
+          edgeOffset: overlap + 8,
           displacement: 15,
           notificationPredicate: (notification) =>
               notification.depth == 0 &&
               notification.metrics.axis == Axis.vertical,
           child: NotificationListener<Notification>(
             onNotification: (notification) {
-              if (notification is ScrollMetricsNotification) {
+              if (notification is OverscrollIndicatorNotification &&
+                  notification.depth == 0 && notification.leading) {
+                notification.paintOffset = overlap;
+              } else if (notification is ScrollMetricsNotification) {
                 _scheduleLoadMoreForMetrics(
                     context, ref, notification.metrics, notification.depth);
               } else if (notification is ScrollUpdateNotification ||

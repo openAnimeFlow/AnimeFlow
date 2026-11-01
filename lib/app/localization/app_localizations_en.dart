@@ -2269,7 +2269,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String downloadSizeProgress(Object downloaded, Object total) {
-    return 'Downloaded $downloaded / Total $total';
+    return '$downloaded / $total';
   }
 
   @override

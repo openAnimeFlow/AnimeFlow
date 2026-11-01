@@ -725,7 +725,7 @@
   ,"downloadNotificationStatus": "正在下载 {active} 个任务 · 已完成 {completed}/{total} · {speed}"
   ,"@downloadNotificationStatus": {"placeholders": {"active": {}, "completed": {}, "total": {}, "speed": {}}}
   ,"downloadPauseAll": "暂停全部"
-  ,"downloadSizeProgress": "已下载 {downloaded} / 总大小 {total}"
+  ,"downloadSizeProgress": "{downloaded} / {total}"
   ,"@downloadSizeProgress": {"placeholders": {"downloaded": {}, "total": {}}}
   ,"playerKernel": "播放器内核"
   ,"selectPlayerKernel": "选择播放器内核"

@@ -713,7 +713,7 @@
   ,"downloadNotificationStatus": "{active} active - {completed}/{total} - {speed}"
   ,"@downloadNotificationStatus": {"placeholders": {"active": {}, "completed": {}, "total": {}, "speed": {}}}
   ,"downloadPauseAll": "Pause all"
-  ,"downloadSizeProgress": "Downloaded {downloaded} / Total {total}"
+  ,"downloadSizeProgress": "{downloaded} / {total}"
   ,"@downloadSizeProgress": {"placeholders": {"downloaded": {}, "total": {}}}
   ,"playerKernel": "Player kernel"
   ,"selectPlayerKernel": "Select player kernel"

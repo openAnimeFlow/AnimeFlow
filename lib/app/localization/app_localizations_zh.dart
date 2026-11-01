@@ -2197,7 +2197,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String downloadSizeProgress(Object downloaded, Object total) {
-    return '已下載 $downloaded / 總大小 $total';
+    return '$downloaded / $total';
   }
 
   @override
@@ -4730,7 +4730,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String downloadSizeProgress(Object downloaded, Object total) {
-    return '已下载 $downloaded / 总大小 $total';
+    return '$downloaded / $total';
   }
 
   @override
@@ -7264,7 +7264,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String downloadSizeProgress(Object downloaded, Object total) {
-    return '已下載 $downloaded / 總大小 $total';
+    return '$downloaded / $total';
   }
 
   @override
@@ -9799,7 +9799,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String downloadSizeProgress(Object downloaded, Object total) {
-    return '已下載 $downloaded / 總大小 $total';
+    return '$downloaded / $total';
   }
 
   @override

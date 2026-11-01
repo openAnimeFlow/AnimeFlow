@@ -4170,7 +4170,7 @@ abstract class AppLocalizations {
   /// No description provided for @downloadSizeProgress.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'已下载 {downloaded} / 总大小 {total}'**
+  /// **'{downloaded} / {total}'**
   String downloadSizeProgress(Object downloaded, Object total);
 
   /// No description provided for @playerKernel.

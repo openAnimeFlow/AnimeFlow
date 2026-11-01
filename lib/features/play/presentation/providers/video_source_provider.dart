@@ -74,6 +74,11 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     _syncVideoResources(configs);
   }
 
+  void setManualSearchDraft(String value) {
+    if (state.manualSearchDraft == value) return;
+    state = state.copyWith(manualSearchDraft: value);
+  }
+
   Future<void> initResources(
     String keyword, {
     bool preserveCurrentPlayback = false,

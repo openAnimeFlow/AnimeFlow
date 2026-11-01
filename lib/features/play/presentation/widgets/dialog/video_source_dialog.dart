@@ -65,7 +65,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
     super.initState();
     _fallbackScrollController = ScrollController();
     _scrollController.addListener(_handleSourceListScroll);
-    _searchController.text = widget.subjectName;
+    _searchController.text =
+        ref.read(videoSourceProvider).manualSearchDraft ?? widget.subjectName;
   }
 
   @override
@@ -78,6 +79,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
     }
     if (oldWidget.subjectName != widget.subjectName) {
       _searchController.text = widget.subjectName;
+      widget.videoSourceNotifier.setManualSearchDraft(widget.subjectName);
     }
   }
 
@@ -95,6 +97,15 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
     _selectedWebsiteIndex = index;
     widget.videoSourceNotifier.setSelectedWebsiteIndex(index);
     setState(_resetSourceViewState);
+  }
+
+  void _restoreDefaultSearchKeyword() {
+    final keyword = widget.subjectName;
+    _searchController.value = TextEditingValue(
+      text: keyword,
+      selection: TextSelection.collapsed(offset: keyword.length),
+    );
+    widget.videoSourceNotifier.setManualSearchDraft(keyword);
   }
 
   void _performSearch() {
@@ -301,13 +312,19 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
             child: Material(
               child: TextField(
                 controller: _searchController,
+                onChanged: widget.videoSourceNotifier.setManualSearchDraft,
                 decoration: InputDecoration(
                   hintText: l10n.manualSearchResource,
+                  suffixIcon: IconButton(
+                    tooltip: l10n.restoreDefaultSearchKeyword,
+                    onPressed: _restoreDefaultSearchKeyword,
+                    icon: const Icon(Icons.restart_alt_rounded),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 onSubmitted: (_) => _performSearch(),

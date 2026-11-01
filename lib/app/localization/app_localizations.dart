@@ -3674,6 +3674,12 @@ abstract class AppLocalizations {
   /// **'手动搜索资源'**
   String get manualSearchResource;
 
+  /// No description provided for @restoreDefaultSearchKeyword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'恢复默认关键词'**
+  String get restoreDefaultSearchKeyword;
+
   /// No description provided for @fetchingResource.
   ///
   /// In zh_Hans, this message translates to:

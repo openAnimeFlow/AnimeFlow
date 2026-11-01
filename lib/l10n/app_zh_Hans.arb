@@ -639,6 +639,7 @@
   "mysteriousUser": "该用户很神秘",
   "manualSearch": "手动搜索",
   "manualSearchResource": "手动搜索资源",
+  "restoreDefaultSearchKeyword": "恢复默认关键词",
   "fetchingResource": "正在获取 {website} 的资源",
   "reSearchingResource": "当前站点正在重新检索，请稍候片刻。",
   "resourceRequestFailed": "{website} 请求失败",

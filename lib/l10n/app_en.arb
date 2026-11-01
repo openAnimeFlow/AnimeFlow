@@ -592,6 +592,7 @@
   "mysteriousUser": "This user is mysterious",
   "manualSearch": "Manual search",
   "manualSearchResource": "Search resources manually",
+  "restoreDefaultSearchKeyword": "Restore default keyword",
   "fetchingResource": "Fetching resources from {website}",
   "reSearchingResource": "The site is being searched again. Please wait.",
   "resourceRequestFailed": "{website} request failed",

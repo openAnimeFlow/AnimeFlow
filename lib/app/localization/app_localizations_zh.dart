@@ -1915,6 +1915,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get manualSearchResource => '手動搜尋資源';
 
   @override
+  String get restoreDefaultSearchKeyword => '恢復預設關鍵字';
+
+  @override
   String fetchingResource(Object website) {
     return '正在取得 $website 的資源';
   }
@@ -4444,6 +4447,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get manualSearchResource => '手动搜索资源';
+
+  @override
+  String get restoreDefaultSearchKeyword => '恢复默认关键词';
 
   @override
   String fetchingResource(Object website) {
@@ -6976,6 +6982,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get manualSearchResource => '手動搜尋資源';
 
   @override
+  String get restoreDefaultSearchKeyword => '恢復預設關鍵字';
+
+  @override
   String fetchingResource(Object website) {
     return '正在取得 $website 的資源';
   }
@@ -9506,6 +9515,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get manualSearchResource => '手動搜尋資源';
+
+  @override
+  String get restoreDefaultSearchKeyword => '恢復預設關鍵字';
 
   @override
   String fetchingResource(Object website) {

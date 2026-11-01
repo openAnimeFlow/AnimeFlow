@@ -568,6 +568,7 @@
   "mysteriousUser": "這位使用者很神秘",
   "manualSearch": "手動搜尋",
   "manualSearchResource": "手動搜尋資源",
+  "restoreDefaultSearchKeyword": "恢復預設關鍵字",
   "fetchingResource": "正在取得 {website} 的資源",
   "reSearchingResource": "目前網站正在重新搜尋，請稍候片刻。",
   "resourceRequestFailed": "{website} 請求失敗",

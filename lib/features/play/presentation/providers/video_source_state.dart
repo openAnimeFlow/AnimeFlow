@@ -6,6 +6,7 @@ class VideoSourceState {
     this.videoResources = const [],
     this.selectedSource,
     this.keyword = '',
+    this.manualSearchDraft,
     this.isSearchCompleted = false,
     this.selectedWebsiteIndex = 0,
     this.userManuallySelected = false,
@@ -17,6 +18,8 @@ class VideoSourceState {
   final List<ResourcesItem> videoResources;
   final SelectedVideoSource? selectedSource;
   final String keyword;
+  /// 手动搜索框的输入草稿；null 表示尚未编辑。
+  final String? manualSearchDraft;
   final bool isSearchCompleted;
 
   /// 界面正在浏览的站点，可以与 selectedSource 的播放站点不同。
@@ -34,6 +37,7 @@ class VideoSourceState {
     List<ResourcesItem>? videoResources,
     Object? selectedSource = _unset,
     String? keyword,
+    String? manualSearchDraft,
     bool? isSearchCompleted,
     int? selectedWebsiteIndex,
     bool? userManuallySelected,
@@ -45,6 +49,7 @@ class VideoSourceState {
           ? this.selectedSource
           : selectedSource as SelectedVideoSource?,
       keyword: keyword ?? this.keyword,
+      manualSearchDraft: manualSearchDraft ?? this.manualSearchDraft,
       isSearchCompleted: isSearchCompleted ?? this.isSearchCompleted,
       selectedWebsiteIndex: selectedWebsiteIndex ?? this.selectedWebsiteIndex,
       userManuallySelected: userManuallySelected ?? this.userManuallySelected,

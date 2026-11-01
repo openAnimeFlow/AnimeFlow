@@ -1972,6 +1972,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manualSearchResource => 'Search resources manually';
 
   @override
+  String get restoreDefaultSearchKeyword => 'Restore default keyword';
+
+  @override
   String fetchingResource(Object website) {
     return 'Fetching resources from $website';
   }

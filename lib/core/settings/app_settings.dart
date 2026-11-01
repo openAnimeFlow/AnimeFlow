@@ -31,8 +31,8 @@ abstract final class AppSettings {
       setSetting(SettingKey.startupPage, page.name);
 
   static bool get glassNavigationStyle =>
-      getSetting<bool>(SettingKey.glassNavigationStyle, defaultValue: false) ??
-      false;
+      getSetting<bool>(SettingKey.glassNavigationStyle, defaultValue: true) ??
+      true;
 
   static Future<void> setGlassNavigationStyle(bool value) =>
       setSetting(SettingKey.glassNavigationStyle, value);

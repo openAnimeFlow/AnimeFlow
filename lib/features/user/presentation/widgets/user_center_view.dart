@@ -42,7 +42,10 @@ class _UserViewState extends ConsumerState<UserCenterView>
   late TabController _tabController;
   late final StreamSubscription<CollectType> _collectionSettingSubscription;
   late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
+  late final _scrollController = ScrollController()
+    ..addListener(_updatePinnedState);
   final _isPinned = ValueNotifier(false);
+  double _collapseExtent = 0;
   bool isHideUserInfo = true;
 
   final Map<int, GlobalKey<RefreshIndicatorState>> _refreshIndicatorKeys = {
@@ -146,11 +149,18 @@ class _UserViewState extends ConsumerState<UserCenterView>
     }
   }
 
+  void _updatePinnedState() {
+    if (!mounted || !_scrollController.hasClients) return;
+    // 只在吸顶状态改变时通知顶部栏，避免每个滚动帧都重新构建。
+    _isPinned.value = _scrollController.offset >= _collapseExtent;
+  }
+
   @override
   void dispose() {
     _collectionSettingSubscription.cancel();
     _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
+    _scrollController.dispose();
     _isPinned.dispose();
     super.dispose();
   }
@@ -200,6 +210,16 @@ class _UserViewState extends ConsumerState<UserCenterView>
     double contentHeight,
   ) {
     final statusBarHeight = MediaQuery.paddingOf(context).top;
+    _collapseExtent = contentHeight + statusBarHeight;
+    // 尺寸变化或恢复滚动位置后，在布局完成时同步一次吸顶状态。
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updatePinnedState());
+    final flexibleSpace = FlexibleSpaceBar(
+      collapseMode: CollapseMode.pin,
+      background: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: RepaintBoundary(child: _buildHeaderContent()),
+      ),
+    );
     final header = StreamBuilder<bool>(
       stream: _glassNavigationStyle,
       initialData: AppSettings.glassNavigationStyle,
@@ -207,86 +227,78 @@ class _UserViewState extends ConsumerState<UserCenterView>
         final glassStyle = snapshot.data ?? false;
         return ValueListenableBuilder<bool>(
           valueListenable: _isPinned,
-          builder: (context, isPinned, child) => AdaptiveSliverAppBar(
-            title: _buildAppBarTitle(context, isPinned),
-            isPinned: isPinned,
-            glassStyle: glassStyle,
-            expandedHeight: contentHeight +
-                statusBarHeight +
-                kToolbarHeight +
-                kTextTabBarHeight,
-            flexibleSpace: child!,
-            bottom: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              dividerHeight: 0,
-              tabs: tabs.map((String name) {
-                final parts = name.split('\n');
-                return Tab(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          parts[0],
-                          style: const TextStyle(fontSize: 12),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+          builder: (context, isPinned, child) {
+            return AdaptiveSliverAppBar(
+              title: _buildAppBarTitle(context, isPinned),
+              isPinned: isPinned,
+              glassStyle: glassStyle,
+              expandedHeight: contentHeight +
+                  statusBarHeight +
+                  kToolbarHeight +
+                  kTextTabBarHeight,
+              flexibleSpace: flexibleSpace,
+              bottom: TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                dividerHeight: 0,
+                tabs: tabs.map((String name) {
+                  final parts = name.split('\n');
+                  return Tab(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            parts[0],
+                            style: const TextStyle(fontSize: 12),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        parts.length > 1 ? parts[1] : '0',
-                        style: const TextStyle(fontSize: 11),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-              labelColor: Theme.of(context).colorScheme.primary,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          child: FlexibleSpaceBar(
-            collapseMode: CollapseMode.pin,
-            background: Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: RepaintBoundary(child: _buildHeaderContent()),
-            ),
-          ),
+                        const SizedBox(width: 4),
+                        Text(
+                          parts.length > 1 ? parts[1] : '0',
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                labelColor: Theme.of(context).colorScheme.primary,
+                unselectedLabelColor: Colors.grey,
+                indicatorColor: Theme.of(context).colorScheme.primary,
+              ),
+            );
+          },
         );
       },
     );
     return Scaffold(
       bottomNavigationBar: const CollectionSyncPendingBanner(),
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          if (notification.depth == 0 &&
-              notification.metrics.axis == Axis.vertical &&
-              notification is ScrollUpdateNotification) {
-            _isPinned.value = notification.metrics.pixels >= contentHeight;
-          }
-          return false;
-        },
-        child: NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              SliverOverlapAbsorber(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                  context,
-                ),
-                sliver: header,
+      body: NestedScrollView(
+        controller: _scrollController,
+        // 外层越界拉伸会影响顶部 BackdropFilter 的背景采样。
+        // 越界反馈由内层收藏列表处理，外层只负责折叠顶部栏。
+        scrollBehavior: ScrollConfiguration.of(context).copyWith(
+          scrollbars: false,
+          overscroll: false,
+        ),
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return <Widget>[
+            SliverOverlapAbsorber(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                context,
               ),
-            ];
-          },
-          body: UserCollectionTabs(
-            tabController: _tabController,
-            tabs: tabs,
-            refreshIndicatorKeys: _refreshIndicatorKeys,
-          ),
+              sliver: header,
+            ),
+          ];
+        },
+        body: UserCollectionTabs(
+          tabController: _tabController,
+          tabs: tabs,
+          refreshIndicatorKeys: _refreshIndicatorKeys,
         ),
       ),
       floatingActionButtonLocation:

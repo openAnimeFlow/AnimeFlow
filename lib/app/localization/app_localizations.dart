@@ -112,7 +112,7 @@ abstract class AppLocalizations {
   /// No description provided for @glassNavigationStyleDescription.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'推荐页标签栏和底部导航栏使用磨砂玻璃胶囊风格。'**
+  /// **'顶部栏、标签栏和底部导航栏使用磨砂玻璃风格。'**
   String get glassNavigationStyleDescription;
 
   /// No description provided for @defaultCollectionCategory.

@@ -1,6 +1,6 @@
 {
   "glassNavigationStyle": "毛玻璃導覽風格",
-  "glassNavigationStyleDescription": "推薦頁分頁列與底部導覽列使用毛玻璃膠囊風格。",
+  "glassNavigationStyleDescription": "頂部列、分頁列與底部導覽列使用毛玻璃風格。",
   "defaultCollectionCategory": "預設收藏分類",
   "defaultCollectionCategoryDescription": "選擇開啟我的收藏時顯示的分類。",
   "pageSettings": "頁面設定",

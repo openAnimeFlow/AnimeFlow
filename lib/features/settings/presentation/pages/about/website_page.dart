@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
@@ -53,52 +55,56 @@ class _WebsitePageState extends State<WebsitePage> {
     final controller = _controller!;
     return ListenableBuilder(
       listenable: controller,
-      builder: (context, _) => Scaffold(
-        appBar: AppBar(
-          leading: BackButton(onPressed: _back),
-          title: Text(l10n.projectWebsite),
-          actions: [
-            IconButton(
-              tooltip: l10n.reload,
-              onPressed: controller.isLoading ? null : controller.load,
-              icon: const Icon(Icons.refresh),
-            ),
-            IconButton(
-              tooltip: l10n.openInBrowser,
-              onPressed: _openInBrowser,
-              icon: const Icon(Icons.open_in_new),
-            ),
-          ],
-        ),
-        body: SafeArea(
-          child: Column(children: [
-            if (controller.isLoading) const LinearProgressIndicator(),
-            Expanded(
-              child: controller.hasError
-                  ? Center(
-                      child: Column(mainAxisSize: MainAxisSize.min, children: [
-                        Text(l10n.loadFailed),
-                        const SizedBox(height: 12),
-                        FilledButton(
-                            onPressed: controller.load,
-                            child: Text(l10n.retry)),
-                      ]),
-                    )
-                  : controller.buildView() ??
-                      Center(
-                        child: controller.isLoading
-                            ? const CircularProgressIndicator()
-                            : controller.isWindowOpen
-                                ? Text(l10n.websiteWindowOpened)
-                                : FilledButton(
-                                    onPressed: controller.load,
-                                    child: Text(l10n.openWebsiteWindow),
-                                  ),
-                      ),
-            ),
-          ]),
-        ),
-      ),
+      builder: (context, _) => SettingsPageBuilder(
+          builder: (context, glassStyle) => Scaffold(
+                appBar: AdaptiveAppBar(
+                  glassStyle: glassStyle,
+                  leading: BackButton(onPressed: _back),
+                  title: Text(l10n.projectWebsite),
+                  actions: [
+                    IconButton(
+                      tooltip: l10n.reload,
+                      onPressed: controller.isLoading ? null : controller.load,
+                      icon: const Icon(Icons.refresh),
+                    ),
+                    IconButton(
+                      tooltip: l10n.openInBrowser,
+                      onPressed: _openInBrowser,
+                      icon: const Icon(Icons.open_in_new),
+                    ),
+                  ],
+                ),
+                body: SafeArea(
+                  child: Column(children: [
+                    if (controller.isLoading) const LinearProgressIndicator(),
+                    Expanded(
+                      child: controller.hasError
+                          ? Center(
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(l10n.loadFailed),
+                                    const SizedBox(height: 12),
+                                    FilledButton(
+                                        onPressed: controller.load,
+                                        child: Text(l10n.retry)),
+                                  ]),
+                            )
+                          : controller.buildView() ??
+                              Center(
+                                child: controller.isLoading
+                                    ? const CircularProgressIndicator()
+                                    : controller.isWindowOpen
+                                        ? Text(l10n.websiteWindowOpened)
+                                        : FilledButton(
+                                            onPressed: controller.load,
+                                            child: Text(l10n.openWebsiteWindow),
+                                          ),
+                              ),
+                    ),
+                  ]),
+                ),
+              )),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/startup_page.dart';
@@ -100,107 +102,118 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
     return MediaQuery.removePadding(
       context: context,
       removeLeft: true,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(l10n.pageSettings),
-          automaticallyImplyLeading: !wide,
-        ),
-        body: ListView(
-          padding: EdgeInsets.fromLTRB(
-              10, 0, 10, 16 + MediaQuery.paddingOf(context).bottom),
-          children: [
-            SwitchListTile(
-              title: Text(l10n.glassNavigationStyle),
-              subtitle: Text(l10n.glassNavigationStyleDescription),
-              value: _glassNavigationStyle,
-              onChanged: _saving ? null : _setGlassNavigationStyle,
-            ),
-            ListTile(
-              title: Text(l10n.startupPage),
-              subtitle: Text(l10n.startupPageDescription),
-              trailing: AbsorbPointer(
-                absorbing: _saving,
-                child: DropDownMenu<StartupPage>(
-                  items: StartupPage.values,
-                  selectedItem: _startupPage,
-                  tooltip: l10n.startupPage,
-                  buttonBorderRadius: BorderRadius.circular(8),
-                  onOpenedChanged: (isOpen) =>
-                      setState(() => _isMenuOpen = isOpen),
-                  buttonBuilder: (context, selectedItem) => Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(label(selectedItem!),
-                          style: TextStyle(color: primary,fontSize: 15)),
-                      AnimatedRotation(
-                        turns: _isMenuOpen ? 0.5 : 0,
-                        duration: const Duration(milliseconds: 180),
-                        curve: Curves.easeOutCubic,
-                        child: Icon(Icons.arrow_drop_down, color: primary),
-                      ),
-                    ],
-                  ),
-                  itemBuilder: (context, page, isSelected) => Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 24,
-                        child: isSelected
-                            ? Icon(Icons.check, size: 18, color: primary)
-                            : null,
-                      ),
-                      Text(label(page)),
-                    ],
-                  ),
-                  onSelected: _selectPage,
+      child: SettingsPageBuilder(
+          builder: (context, glassStyle) => Scaffold(
+                extendBodyBehindAppBar: glassStyle,
+                appBar: AdaptiveAppBar(
+                  glassStyle: glassStyle,
+                  title: Text(l10n.pageSettings),
+                  automaticallyImplyLeading: !wide,
                 ),
-              ),
-            ),
-            ListTile(
-              title: Text(l10n.defaultCollectionCategory),
-              subtitle: Text(l10n.defaultCollectionCategoryDescription),
-              trailing: AbsorbPointer(
-                absorbing: _saving,
-                child: DropDownMenu<CollectType>(
-                  items: CollectType.values
-                      .where((type) => type.isCollected)
-                      .toList(),
-                  buttonBorderRadius: BorderRadius.circular(8),
-                  selectedItem: _collectionType,
-                  tooltip: l10n.defaultCollectionCategory,
-                  onOpenedChanged: (isOpen) =>
-                      setState(() => _isCollectionMenuOpen = isOpen),
-                  buttonBuilder: (context, selectedItem) => Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(collectionLabel(selectedItem!),
-                          style: TextStyle(color: primary,fontSize: 15)),
-                      AnimatedRotation(
-                        turns: _isCollectionMenuOpen ? 0.5 : 0,
-                        duration: const Duration(milliseconds: 180),
-                        curve: Curves.easeOutCubic,
-                        child: Icon(Icons.arrow_drop_down, color: primary),
+                body: ListView(
+                  padding: (EdgeInsets.fromLTRB(
+                          10, 0, 10, 16 + MediaQuery.paddingOf(context).bottom))
+                      .add(EdgeInsets.only(
+                          top: SettingsPageBuilder.topInsetOf(context))),
+                  children: [
+                    SwitchListTile(
+                      title: Text(l10n.glassNavigationStyle),
+                      subtitle: Text(l10n.glassNavigationStyleDescription),
+                      value: _glassNavigationStyle,
+                      onChanged: _saving ? null : _setGlassNavigationStyle,
+                    ),
+                    ListTile(
+                      title: Text(l10n.startupPage),
+                      subtitle: Text(l10n.startupPageDescription),
+                      trailing: AbsorbPointer(
+                        absorbing: _saving,
+                        child: DropDownMenu<StartupPage>(
+                          items: StartupPage.values,
+                          selectedItem: _startupPage,
+                          tooltip: l10n.startupPage,
+                          buttonBorderRadius: BorderRadius.circular(8),
+                          onOpenedChanged: (isOpen) =>
+                              setState(() => _isMenuOpen = isOpen),
+                          buttonBuilder: (context, selectedItem) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(label(selectedItem!),
+                                  style:
+                                      TextStyle(color: primary, fontSize: 15)),
+                              AnimatedRotation(
+                                turns: _isMenuOpen ? 0.5 : 0,
+                                duration: const Duration(milliseconds: 180),
+                                curve: Curves.easeOutCubic,
+                                child:
+                                    Icon(Icons.arrow_drop_down, color: primary),
+                              ),
+                            ],
+                          ),
+                          itemBuilder: (context, page, isSelected) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 24,
+                                child: isSelected
+                                    ? Icon(Icons.check,
+                                        size: 18, color: primary)
+                                    : null,
+                              ),
+                              Text(label(page)),
+                            ],
+                          ),
+                          onSelected: _selectPage,
+                        ),
                       ),
-                    ],
-                  ),
-                  itemBuilder: (context, type, isSelected) => Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                          width: 24,
-                          child: isSelected
-                              ? Icon(Icons.check, size: 18, color: primary)
-                              : null),
-                      Text(collectionLabel(type)),
-                    ],
-                  ),
-                  onSelected: _selectCollection,
+                    ),
+                    ListTile(
+                      title: Text(l10n.defaultCollectionCategory),
+                      subtitle: Text(l10n.defaultCollectionCategoryDescription),
+                      trailing: AbsorbPointer(
+                        absorbing: _saving,
+                        child: DropDownMenu<CollectType>(
+                          items: CollectType.values
+                              .where((type) => type.isCollected)
+                              .toList(),
+                          buttonBorderRadius: BorderRadius.circular(8),
+                          selectedItem: _collectionType,
+                          tooltip: l10n.defaultCollectionCategory,
+                          onOpenedChanged: (isOpen) =>
+                              setState(() => _isCollectionMenuOpen = isOpen),
+                          buttonBuilder: (context, selectedItem) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(collectionLabel(selectedItem!),
+                                  style:
+                                      TextStyle(color: primary, fontSize: 15)),
+                              AnimatedRotation(
+                                turns: _isCollectionMenuOpen ? 0.5 : 0,
+                                duration: const Duration(milliseconds: 180),
+                                curve: Curves.easeOutCubic,
+                                child:
+                                    Icon(Icons.arrow_drop_down, color: primary),
+                              ),
+                            ],
+                          ),
+                          itemBuilder: (context, type, isSelected) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                  width: 24,
+                                  child: isSelected
+                                      ? Icon(Icons.check,
+                                          size: 18, color: primary)
+                                      : null),
+                              Text(collectionLabel(type)),
+                            ],
+                          ),
+                          onSelected: _selectCollection,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
+              )),
     );
   }
 }

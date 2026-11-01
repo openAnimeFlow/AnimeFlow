@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/core/settings/player_shortcut_settings.dart';
@@ -174,84 +176,98 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
       PlayerShortcutAction.longPressFastForward:
           l10n.playerShortcutLongPressFastForward,
     };
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.playerShortcuts),
-        automaticallyImplyLeading: !isWideScreen,
-      ),
-      body: Listener(
-        onPointerSignal: (event) {
-          if (event is PointerScrollEvent && _capturing != null) {
-            _captureWheel(event);
-          }
-        },
-        child: Focus(
-          focusNode: _focusNode,
-          onKeyEvent: (node, event) {
-            final wasCapturing = _capturing != null;
-            _capture(event);
-            return wasCapturing
-                ? KeyEventResult.handled
-                : KeyEventResult.ignored;
-          },
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Text(l10n.playerShortcutsDescription),
-              const SizedBox(height: 12),
-              Card(
-                clipBehavior: Clip.antiAlias,
-                child: Column(
-                  children: [
-                    for (final action in PlayerShortcutAction.values) ...[
-                      _ShortcutTile(
-                        keys: _keys[action]!,
-                        keyLabel: _keyLabel,
-                        capturing: _capturing == action,
-                        captureLabel: l10n.playerShortcutPressKey,
-                        title: titles[action]!,
-                        valueEditor: switch (action) {
-                          PlayerShortcutAction.seekBackward ||
-                          PlayerShortcutAction.seekForward =>
-                            ActionChip(
-                              key: ValueKey('seek-seconds-${action.name}'),
-                              label: Text(l10n.playerShortcutSeekSeconds(
-                                action == PlayerShortcutAction.seekBackward
-                                    ? AppSettings.shortcutSeekBackwardSeconds
-                                    : AppSettings.shortcutSeekForwardSeconds,
-                              )),
-                              onPressed: () => _editSeekSeconds(action),
-                            ),
-                          PlayerShortcutAction.speedUp ||
-                          PlayerShortcutAction.speedDown =>
-                            ActionChip(
-                              key: ValueKey('speed-step-${action.name}'),
-                              label: Text(l10n.playerShortcutSpeedStepValue(
-                                  AppSettings.shortcutSpeedStep.toString())),
-                              onPressed: _editSpeedStep,
-                            ),
-                          _ => null,
-                        },
-                        onDelete: (key) => setState(() {
-                          _keys[action]!.remove(key);
-                          action.saveBindings(_keys[action]!);
-                        }),
-                        onTap: () => setState(() {
-                          _capturing = action;
-                          _focusNode.requestFocus();
-                        }),
+    return SettingsPageBuilder(
+        builder: (context, glassStyle) => Scaffold(
+              extendBodyBehindAppBar: glassStyle,
+              appBar: AdaptiveAppBar(
+                glassStyle: glassStyle,
+                title: Text(l10n.playerShortcuts),
+                automaticallyImplyLeading: !isWideScreen,
+              ),
+              body: Listener(
+                onPointerSignal: (event) {
+                  if (event is PointerScrollEvent && _capturing != null) {
+                    _captureWheel(event);
+                  }
+                },
+                child: Focus(
+                  focusNode: _focusNode,
+                  onKeyEvent: (node, event) {
+                    final wasCapturing = _capturing != null;
+                    _capture(event);
+                    return wasCapturing
+                        ? KeyEventResult.handled
+                        : KeyEventResult.ignored;
+                  },
+                  child: ListView(
+                    padding: (const EdgeInsets.all(16)).add(EdgeInsets.only(
+                        top: SettingsPageBuilder.topInsetOf(context))),
+                    children: [
+                      Text(l10n.playerShortcutsDescription),
+                      const SizedBox(height: 12),
+                      Card(
+                        clipBehavior: Clip.antiAlias,
+                        child: Column(
+                          children: [
+                            for (final action
+                                in PlayerShortcutAction.values) ...[
+                              _ShortcutTile(
+                                keys: _keys[action]!,
+                                keyLabel: _keyLabel,
+                                capturing: _capturing == action,
+                                captureLabel: l10n.playerShortcutPressKey,
+                                title: titles[action]!,
+                                valueEditor: switch (action) {
+                                  PlayerShortcutAction.seekBackward ||
+                                  PlayerShortcutAction.seekForward =>
+                                    ActionChip(
+                                      key: ValueKey(
+                                          'seek-seconds-${action.name}'),
+                                      label:
+                                          Text(l10n.playerShortcutSeekSeconds(
+                                        action ==
+                                                PlayerShortcutAction
+                                                    .seekBackward
+                                            ? AppSettings
+                                                .shortcutSeekBackwardSeconds
+                                            : AppSettings
+                                                .shortcutSeekForwardSeconds,
+                                      )),
+                                      onPressed: () => _editSeekSeconds(action),
+                                    ),
+                                  PlayerShortcutAction.speedUp ||
+                                  PlayerShortcutAction.speedDown =>
+                                    ActionChip(
+                                      key:
+                                          ValueKey('speed-step-${action.name}'),
+                                      label: Text(
+                                          l10n.playerShortcutSpeedStepValue(
+                                              AppSettings.shortcutSpeedStep
+                                                  .toString())),
+                                      onPressed: _editSpeedStep,
+                                    ),
+                                  _ => null,
+                                },
+                                onDelete: (key) => setState(() {
+                                  _keys[action]!.remove(key);
+                                  action.saveBindings(_keys[action]!);
+                                }),
+                                onTap: () => setState(() {
+                                  _capturing = action;
+                                  _focusNode.requestFocus();
+                                }),
+                              ),
+                              if (action != PlayerShortcutAction.values.last)
+                                const Divider(height: 1),
+                            ],
+                          ],
+                        ),
                       ),
-                      if (action != PlayerShortcutAction.values.last)
-                        const Divider(height: 1),
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
+            ));
   }
 }
 

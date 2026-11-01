@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -86,189 +88,204 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
         ? ref.read(downloadedFontMetasProvider.notifier).orphansFor(remoteIds)
         : <FontItem>[];
 
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: AppBar(
-          title: Text(l10n.fontStyle),
-          actions: [
-            if (SystemUtil.isDesktop)
-              IconButton(
-                icon: const Icon(Icons.refresh_outlined),
-                tooltip: l10n.refreshFontList,
-                onPressed: _refreshFontList,
-              ),
-          ],
-        ),
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final horizontal =
-              math.max(10.0, (constraints.maxWidth - 1500.0) / 2);
-          return RefreshIndicator(
-            onRefresh: _refreshFontList,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(
-                horizontal,
-                16,
-                horizontal,
-                24.0 + paddingOf.bottom,
-              ),
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l10n.fontLibrary,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+    return SettingsPageBuilder(
+        builder: (context, glassStyle) => Scaffold(
+              extendBodyBehindAppBar: glassStyle,
+              appBar: PreferredSize(
+                preferredSize: const Size.fromHeight(kToolbarHeight),
+                child: AdaptiveAppBar(
+                  glassStyle: glassStyle,
+                  title: Text(l10n.fontStyle),
+                  actions: [
+                    if (SystemUtil.isDesktop)
+                      IconButton(
+                        icon: const Icon(Icons.refresh_outlined),
+                        tooltip: l10n.refreshFontList,
+                        onPressed: _refreshFontList,
                       ),
-                    ),
-                    Row(
-                      spacing: 5,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              l10n.cdnAcceleration,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            Text(
-                              l10n.fontDelayHint,
-                              style: const TextStyle(fontSize: 10),
-                            )
-                          ],
-                        ),
-                        Tooltip(
-                          message: l10n.cdnTooltip,
-                          child: Switch(
-                            value: ref.watch(fontRepoCdnProvider),
-                            onChanged: (value) => ref
-                                .read(fontRepoCdnProvider.notifier)
-                                .setEnabled(value),
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
-                Text(
-                  l10n.fontRestartHint,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                fontsAsync.when(
-                  skipLoadingOnRefresh: false,
-                  skipLoadingOnReload: false,
-                  loading: () => _FontGlassPanel(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Column(
+              ),
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  final horizontal =
+                      math.max(10.0, (constraints.maxWidth - 1500.0) / 2);
+                  return RefreshIndicator(
+                    edgeOffset: SettingsPageBuilder.topInsetOf(context),
+                    onRefresh: _refreshFontList,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: (EdgeInsets.fromLTRB(
+                        horizontal,
+                        16,
+                        horizontal,
+                        24.0 + paddingOf.bottom,
+                      )).add(EdgeInsets.only(
+                          top: SettingsPageBuilder.topInsetOf(context))),
                       children: [
-                        const _SystemFontListTile(),
-                        ...localFonts.map((font) => _FontListTile(
-                              font: font,
-                              previewRefreshKey: _previewRefreshKey,
-                            )),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
-                          child: Center(child: CircularProgressIndicator()),
-                        ),
-                      ],
-                    ),
-                  ),
-                  error: (error, _) => Column(
-                    children: [
-                      _FontGlassPanel(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Column(children: [
-                          const _SystemFontListTile(),
-                          ...localFonts.map((font) => _FontListTile(
-                                font: font,
-                                previewRefreshKey: _previewRefreshKey,
-                              )),
-                        ]),
-                      ),
-                      _FontListError(
-                        message: error.toString(),
-                        onRetry: () {
-                          LiggLogger().e(error);
-                          _refreshFontList();
-                        },
-                      ),
-                    ],
-                  ),
-                  data: (fonts) => _FontGlassPanel(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Column(
-                      children: [
-                        const _SystemFontListTile(),
-                        if (fonts.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                            child: Text(
-                              l10n.noOtherFonts,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              l10n.fontLibrary,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          )
-                        else
-                          ...fonts.map(
-                            (font) => _FontListTile(
-                              font: ref
-                                          .watch(fontDownloadProvider(font.id))
-                                          .status ==
-                                      FontDownloadStatus.done
-                                  ? downloadedMetas[font.id] ?? font
-                                  : font,
-                              previewRefreshKey: _previewRefreshKey,
+                            Row(
+                              spacing: 5,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      l10n.cdnAcceleration,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                    Text(
+                                      l10n.fontDelayHint,
+                                      style: const TextStyle(fontSize: 10),
+                                    )
+                                  ],
+                                ),
+                                Tooltip(
+                                  message: l10n.cdnTooltip,
+                                  child: Switch(
+                                    value: ref.watch(fontRepoCdnProvider),
+                                    onChanged: (value) => ref
+                                        .read(fontRepoCdnProvider.notifier)
+                                        .setEnabled(value),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Text(
+                          l10n.fontRestartHint,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 10),
+                        fontsAsync.when(
+                          skipLoadingOnRefresh: false,
+                          skipLoadingOnReload: false,
+                          loading: () => _FontGlassPanel(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Column(
+                              children: [
+                                const _SystemFontListTile(),
+                                ...localFonts.map((font) => _FontListTile(
+                                      font: font,
+                                      previewRefreshKey: _previewRefreshKey,
+                                    )),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 24),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
+                                ),
+                              ],
                             ),
                           ),
+                          error: (error, _) => Column(
+                            children: [
+                              _FontGlassPanel(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 4),
+                                child: Column(children: [
+                                  const _SystemFontListTile(),
+                                  ...localFonts.map((font) => _FontListTile(
+                                        font: font,
+                                        previewRefreshKey: _previewRefreshKey,
+                                      )),
+                                ]),
+                              ),
+                              _FontListError(
+                                message: error.toString(),
+                                onRetry: () {
+                                  LiggLogger().e(error);
+                                  _refreshFontList();
+                                },
+                              ),
+                            ],
+                          ),
+                          data: (fonts) => _FontGlassPanel(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Column(
+                              children: [
+                                const _SystemFontListTile(),
+                                if (fonts.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16, 8, 16, 16),
+                                    child: Text(
+                                      l10n.noOtherFonts,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                    ),
+                                  )
+                                else
+                                  ...fonts.map(
+                                    (font) => _FontListTile(
+                                      font: ref
+                                                  .watch(fontDownloadProvider(
+                                                      font.id))
+                                                  .status ==
+                                              FontDownloadStatus.done
+                                          ? downloadedMetas[font.id] ?? font
+                                          : font,
+                                      previewRefreshKey: _previewRefreshKey,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (orphans.isNotEmpty) ...[
+                          const SizedBox(height: 20),
+                          Text(
+                            l10n.downloadedOrphanFonts,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            l10n.orphanFontDescription,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                          ),
+                          const SizedBox(height: 10),
+                          _FontGlassPanel(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Column(
+                              children: orphans
+                                  .map(
+                                      (font) => _OrphanFontListTile(font: font))
+                                  .toList(),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
-                  ),
-                ),
-                if (orphans.isNotEmpty) ...[
-                  const SizedBox(height: 20),
-                  Text(
-                    l10n.downloadedOrphanFonts,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    l10n.orphanFontDescription,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                  const SizedBox(height: 10),
-                  _FontGlassPanel(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Column(
-                      children: orphans
-                          .map((font) => _OrphanFontListTile(font: font))
-                          .toList(),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          );
-        },
-      ),
-    );
+                  );
+                },
+              ),
+            ));
   }
 }
 

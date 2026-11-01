@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -120,235 +122,247 @@ class SponsorPage extends StatelessWidget {
     final methods = _methods(l10n, colorScheme);
     final paddingOf = MediaQuery.paddingOf(context);
     final topPadding = paddingOf.top + kToolbarHeight;
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text(l10n.sponsor),
-        backgroundColor: Colors.transparent,
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          const maxContentWidth = 1500.0;
-          const horizontalMargin = 10.0;
-          final availableWidth = constraints.maxWidth - horizontalMargin * 2;
-          final contentWidth =
-              availableWidth.clamp(0.0, maxContentWidth).toDouble();
-          final crossAxisCount =
-              contentWidth > 600 ? (contentWidth > 900 ? 3 : 2) : 1;
-          // 内容居中并限制最大宽度，但滚动条仍贴在窗口右侧。
-          final horizontalPadding = horizontalMargin +
-              (availableWidth > maxContentWidth
-                  ? (availableWidth - maxContentWidth) / 2
-                  : 0.0);
-          return Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: IgnorePointer(
-                  child: SizedBox(
-                    height: 360,
-                    child: ShaderMask(
-                      blendMode: BlendMode.dstIn,
-                      shaderCallback: (bounds) => const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white,
-                          Colors.white,
-                          Colors.transparent,
-                        ],
-                        stops: [0, 0.68, 1],
-                      ).createShader(bounds),
-                      child: SvgPicture.asset(
-                        AssetsPathConstants.ambientWaveBackground,
-                        fit: BoxFit.cover,
-                        colorFilter: ColorFilter.mode(
-                          colorScheme.primary.withValues(alpha: 0.42),
-                          BlendMode.srcIn,
+    return SettingsPageBuilder(
+        builder: (context, glassStyle) => Scaffold(
+              extendBodyBehindAppBar: true,
+              appBar: AdaptiveAppBar(
+                glassStyle: glassStyle,
+                title: Text(l10n.sponsor),
+                backgroundColor: Colors.transparent,
+              ),
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  const maxContentWidth = 1500.0;
+                  const horizontalMargin = 10.0;
+                  final availableWidth =
+                      constraints.maxWidth - horizontalMargin * 2;
+                  final contentWidth =
+                      availableWidth.clamp(0.0, maxContentWidth).toDouble();
+                  final crossAxisCount =
+                      contentWidth > 600 ? (contentWidth > 900 ? 3 : 2) : 1;
+                  // 内容居中并限制最大宽度，但滚动条仍贴在窗口右侧。
+                  final horizontalPadding = horizontalMargin +
+                      (availableWidth > maxContentWidth
+                          ? (availableWidth - maxContentWidth) / 2
+                          : 0.0);
+                  return Stack(
+                    children: [
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: IgnorePointer(
+                          child: SizedBox(
+                            height: 360,
+                            child: ShaderMask(
+                              blendMode: BlendMode.dstIn,
+                              shaderCallback: (bounds) => const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.white,
+                                  Colors.white,
+                                  Colors.transparent,
+                                ],
+                                stops: [0, 0.68, 1],
+                              ).createShader(bounds),
+                              child: SvgPicture.asset(
+                                AssetsPathConstants.ambientWaveBackground,
+                                fit: BoxFit.cover,
+                                colorFilter: ColorFilter.mode(
+                                  colorScheme.primary.withValues(alpha: 0.42),
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-              ),
-              CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
-                    ),
-                    sliver: SliverMainAxisGroup(
-                      slivers: [
-                        // 顶部 logo 与文案
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding:
-                                EdgeInsets.only(top: topPadding, bottom: 8),
-                            child: Column(
-                              children: [
-                                Image.asset(
-                                  AssetsPathConstants.logo,
-                                  height: 180,
-                                  width: 180,
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      l10n.sponsorHeroTitle,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            letterSpacing: 0.5,
-                                          ),
-                                    ),
-                                    const Padding(
-                                      padding: EdgeInsets.only(left: 8),
-                                      child: Icon(
-                                        Icons.favorite,
-                                        color: Colors.redAccent,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 24),
-                                  child: Text(
-                                    l10n.sponsorHeroDescription,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: colorScheme.onSurfaceVariant,
-                                          height: 1.6,
+                      CustomScrollView(
+                        slivers: [
+                          SliverPadding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: horizontalPadding,
+                            ),
+                            sliver: SliverMainAxisGroup(
+                              slivers: [
+                                // 顶部 logo 与文案
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                        top: topPadding, bottom: 8),
+                                    child: Column(
+                                      children: [
+                                        Image.asset(
+                                          AssetsPathConstants.logo,
+                                          height: 180,
+                                          width: 180,
                                         ),
-                                    textAlign: TextAlign.center,
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              l10n.sponsorHeroTitle,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headlineSmall
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                    letterSpacing: 0.5,
+                                                  ),
+                                            ),
+                                            const Padding(
+                                              padding: EdgeInsets.only(left: 8),
+                                              child: Icon(
+                                                Icons.favorite,
+                                                color: Colors.redAccent,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 24),
+                                          child: Text(
+                                            l10n.sponsorHeroDescription,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  color: colorScheme
+                                                      .onSurfaceVariant,
+                                                  height: 1.6,
+                                                ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+
+                                // 资金用途
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(6, 8, 6, 4),
+                                    child: _SectionTitle(
+                                      title: l10n.sponsorReasonsTitle,
+                                      icon: Icons.lightbulb_outline,
+                                      colorScheme: colorScheme,
+                                    ),
+                                  ),
+                                ),
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 4, horizontal: 2),
+                                    child: _DescriptionCard(
+                                      description:
+                                          l10n.sponsorReasonsDescription,
+                                      colorScheme: colorScheme,
+                                    ),
+                                  ),
+                                ),
+
+                                // 赞助方式
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(6, 20, 6, 4),
+                                    child: _SectionTitle(
+                                      title: l10n.sponsorMethodsTitle,
+                                      icon: Icons.volunteer_activism_outlined,
+                                      colorScheme: colorScheme,
+                                    ),
+                                  ),
+                                ),
+                                SliverPadding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 4),
+                                  sliver: SliverGrid(
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: crossAxisCount,
+                                      mainAxisSpacing: 4,
+                                      crossAxisSpacing: 4,
+                                      mainAxisExtent: 116,
+                                    ),
+                                    delegate: SliverChildBuilderDelegate(
+                                      (context, index) {
+                                        return _SponsorMethodCard(
+                                          method: methods[index],
+                                          colorScheme: colorScheme,
+                                        );
+                                      },
+                                      childCount: methods.length,
+                                    ),
+                                  ),
+                                ),
+
+                                // 结语
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(2, 20, 2, 8),
+                                    child: Card(
+                                      elevation: 0,
+                                      color: colorScheme.primaryContainer
+                                          .withValues(alpha: 0.45),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(18),
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              l10n.sponsorFooterTitle,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              l10n.sponsorFooterDescription,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.copyWith(
+                                                    color: colorScheme
+                                                        .onSurfaceVariant,
+                                                    height: 1.6,
+                                                  ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // 底部间距
+                                SliverToBoxAdapter(
+                                  child:
+                                      SizedBox(height: 24.0 + paddingOf.bottom),
+                                ),
                               ],
                             ),
                           ),
-                        ),
-
-                        // 资金用途
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(6, 8, 6, 4),
-                            child: _SectionTitle(
-                              title: l10n.sponsorReasonsTitle,
-                              icon: Icons.lightbulb_outline,
-                              colorScheme: colorScheme,
-                            ),
-                          ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 4, horizontal: 2),
-                            child: _DescriptionCard(
-                              description: l10n.sponsorReasonsDescription,
-                              colorScheme: colorScheme,
-                            ),
-                          ),
-                        ),
-
-                        // 赞助方式
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(6, 20, 6, 4),
-                            child: _SectionTitle(
-                              title: l10n.sponsorMethodsTitle,
-                              icon: Icons.volunteer_activism_outlined,
-                              colorScheme: colorScheme,
-                            ),
-                          ),
-                        ),
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          sliver: SliverGrid(
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: crossAxisCount,
-                              mainAxisSpacing: 4,
-                              crossAxisSpacing: 4,
-                              mainAxisExtent: 116,
-                            ),
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                return _SponsorMethodCard(
-                                  method: methods[index],
-                                  colorScheme: colorScheme,
-                                );
-                              },
-                              childCount: methods.length,
-                            ),
-                          ),
-                        ),
-
-                        // 结语
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(2, 20, 2, 8),
-                            child: Card(
-                              elevation: 0,
-                              color: colorScheme.primaryContainer
-                                  .withValues(alpha: 0.45),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(18),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      l10n.sponsorFooterTitle,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      l10n.sponsorFooterDescription,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            color: colorScheme.onSurfaceVariant,
-                                            height: 1.6,
-                                          ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // 底部间距
-                        SliverToBoxAdapter(
-                          child: SizedBox(height: 24.0 + paddingOf.bottom),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
-            ],
-          );
-        },
-      ),
-    );
+            ));
   }
 }
 

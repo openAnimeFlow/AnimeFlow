@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -62,162 +64,168 @@ class ThanksPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text(l10n.thanks),
-        backgroundColor: Colors.transparent,
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          const maxContentWidth = 1500.0;
-          const horizontalMargin = 10.0;
-          final availableWidth = constraints.maxWidth - horizontalMargin * 2;
-          final contentWidth =
-              availableWidth.clamp(0.0, maxContentWidth).toDouble();
-          final crossAxisCount =
-              contentWidth > 600 ? (contentWidth > 900 ? 3 : 2) : 1;
-          final horizontalPadding = horizontalMargin +
-              (availableWidth > maxContentWidth
-                  ? (availableWidth - maxContentWidth) / 2
-                  : 0.0);
-          final paddingOf = MediaQuery.paddingOf(context);
-          final topPadding = paddingOf.top + kToolbarHeight;
-          return Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: IgnorePointer(
-                  child: SizedBox(
-                    height: 360,
-                    child: ShaderMask(
-                      blendMode: BlendMode.dstIn,
-                      shaderCallback: (bounds) => const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white,
-                          Colors.white,
-                          Colors.transparent,
-                        ],
-                        stops: [0, 0.68, 1],
-                      ).createShader(bounds),
-                      child: SvgPicture.asset(
-                        AssetsPathConstants.ambientWaveBackground,
-                        fit: BoxFit.cover,
-                        colorFilter: ColorFilter.mode(
-                          Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withValues(alpha: 0.42),
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+    return SettingsPageBuilder(
+        builder: (context, glassStyle) => Scaffold(
+              extendBodyBehindAppBar: true,
+              appBar: AdaptiveAppBar(
+                glassStyle: glassStyle,
+                title: Text(l10n.thanks),
+                backgroundColor: Colors.transparent,
               ),
-              CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
-                    ),
-                    sliver: SliverMainAxisGroup(
-                      slivers: [
-                        // 顶部 logo 和标题
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding:
-                                EdgeInsets.only(top: topPadding, bottom: 16),
-                            child: Column(
-                              children: [
-                                Image.asset(
-                                  AssetsPathConstants.logo,
-                                  height: 200,
-                                  width: 200,
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  const maxContentWidth = 1500.0;
+                  const horizontalMargin = 10.0;
+                  final availableWidth =
+                      constraints.maxWidth - horizontalMargin * 2;
+                  final contentWidth =
+                      availableWidth.clamp(0.0, maxContentWidth).toDouble();
+                  final crossAxisCount =
+                      contentWidth > 600 ? (contentWidth > 900 ? 3 : 2) : 1;
+                  final horizontalPadding = horizontalMargin +
+                      (availableWidth > maxContentWidth
+                          ? (availableWidth - maxContentWidth) / 2
+                          : 0.0);
+                  final paddingOf = MediaQuery.paddingOf(context);
+                  final topPadding = paddingOf.top + kToolbarHeight;
+                  return Stack(
+                    children: [
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: IgnorePointer(
+                          child: SizedBox(
+                            height: 360,
+                            child: ShaderMask(
+                              blendMode: BlendMode.dstIn,
+                              shaderCallback: (bounds) => const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.white,
+                                  Colors.white,
+                                  Colors.transparent,
+                                ],
+                                stops: [0, 0.68, 1],
+                              ).createShader(bounds),
+                              child: SvgPicture.asset(
+                                AssetsPathConstants.ambientWaveBackground,
+                                fit: BoxFit.cover,
+                                colorFilter: ColorFilter.mode(
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withValues(alpha: 0.42),
+                                  BlendMode.srcIn,
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      l10n.specialThanks,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            letterSpacing: 0.5,
-                                          ),
-                                    ),
-                                    const Icon(Icons.code_rounded)
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 24),
-                                  child: Text(
-                                    l10n.thanksDescription,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant,
-                                          height: 1.5,
-                                        ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                              ],
+                              ),
                             ),
                           ),
                         ),
+                      ),
+                      CustomScrollView(
+                        slivers: [
+                          SliverPadding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: horizontalPadding,
+                            ),
+                            sliver: SliverMainAxisGroup(
+                              slivers: [
+                                // 顶部 logo 和标题
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                        top: topPadding, bottom: 16),
+                                    child: Column(
+                                      children: [
+                                        Image.asset(
+                                          AssetsPathConstants.logo,
+                                          height: 200,
+                                          width: 200,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              l10n.specialThanks,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headlineSmall
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                    letterSpacing: 0.5,
+                                                  ),
+                                            ),
+                                            const Icon(Icons.code_rounded)
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 24),
+                                          child: Text(
+                                            l10n.thanksDescription,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                                  height: 1.5,
+                                                ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                      ],
+                                    ),
+                                  ),
+                                ),
 
-                        // 鸣谢项目 Grid
-                        SliverGrid(
-                          // 设置内边距
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: crossAxisCount,
-                            mainAxisSpacing: 4,
-                            crossAxisSpacing: 4,
-                            mainAxisExtent: 110,
-                          ),
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final item = _thanksItems(l10n)[index];
-                              return _buildThanksCard(
-                                context: context,
-                                icon: item['icon'] as Widget,
-                                title: item['title'] as String,
-                                description: item['description'] as String,
-                                url: item['url'] as String?,
-                              );
-                            },
-                            childCount: _thanksItems(l10n).length,
-                          ),
-                        ),
+                                // 鸣谢项目 Grid
+                                SliverGrid(
+                                  // 设置内边距
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: crossAxisCount,
+                                    mainAxisSpacing: 4,
+                                    crossAxisSpacing: 4,
+                                    mainAxisExtent: 110,
+                                  ),
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                      final item = _thanksItems(l10n)[index];
+                                      return _buildThanksCard(
+                                        context: context,
+                                        icon: item['icon'] as Widget,
+                                        title: item['title'] as String,
+                                        description:
+                                            item['description'] as String,
+                                        url: item['url'] as String?,
+                                      );
+                                    },
+                                    childCount: _thanksItems(l10n).length,
+                                  ),
+                                ),
 
-                        // 底部间距
-                        SliverToBoxAdapter(
-                          child: SizedBox(height: 24.0 + paddingOf.bottom),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                                // 底部间距
+                                SliverToBoxAdapter(
+                                  child:
+                                      SizedBox(height: 24.0 + paddingOf.bottom),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
-            ],
-          );
-        },
-      ),
-    );
+            ));
   }
 
   Widget _buildThanksCard({

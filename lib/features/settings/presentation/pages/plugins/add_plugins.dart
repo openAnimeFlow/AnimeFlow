@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/crawler/api_crawler.dart';
 import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
@@ -193,36 +195,42 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_originalKey != null ? l10n.editSource : l10n.addSource),
-        actions: [
-          IconButton(
-            tooltip: l10n.pastePlugin,
-            onPressed: _pastePluginConfig,
-            icon: const Icon(Icons.content_paste),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'add_source_save',
-        onPressed: () async {
-          final saved = await _saveConfig();
-          if (saved && context.mounted) {
-            context.pop();
-          }
-        },
-        child: const Icon(Icons.save_rounded),
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1440),
-          child: ListView(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            children: PluginFormView.sections(context, _form),
-          ),
-        ),
-      ),
-    );
+    return SettingsPageBuilder(
+        builder: (context, glassStyle) => Scaffold(
+              extendBodyBehindAppBar: glassStyle,
+              appBar: AdaptiveAppBar(
+                glassStyle: glassStyle,
+                title: Text(
+                    _originalKey != null ? l10n.editSource : l10n.addSource),
+                actions: [
+                  IconButton(
+                    tooltip: l10n.pastePlugin,
+                    onPressed: _pastePluginConfig,
+                    icon: const Icon(Icons.content_paste),
+                  ),
+                ],
+              ),
+              floatingActionButton: FloatingActionButton(
+                heroTag: 'add_source_save',
+                onPressed: () async {
+                  final saved = await _saveConfig();
+                  if (saved && context.mounted) {
+                    context.pop();
+                  }
+                },
+                child: const Icon(Icons.save_rounded),
+              ),
+              body: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1440),
+                  child: ListView(
+                    padding: (const EdgeInsets.symmetric(vertical: 10)).add(
+                        EdgeInsets.only(
+                            top: SettingsPageBuilder.topInsetOf(context))),
+                    children: PluginFormView.sections(context, _form),
+                  ),
+                ),
+              ),
+            ));
   }
 }

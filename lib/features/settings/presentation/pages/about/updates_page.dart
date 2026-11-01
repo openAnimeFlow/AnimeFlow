@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/settings/presentation/providers/releases_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,57 +83,68 @@ class _UpdatesPageState extends ConsumerState<UpdatesPage> {
     final error = result.error;
     final isLoadingMore = data?.isLoadingMore ?? false;
     final loadMoreError = data?.loadMoreError;
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.projectUpdates)),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : error != null
-              ? _ErrorView(
-                  message: _errorMessage(error, l10n),
-                  onRetry: _loadInitial,
-                )
-              : releases.isEmpty
-                  ? _ErrorView(
-                      message: l10n.noData,
-                      onRetry: _loadInitial,
-                    )
-                  : RefreshIndicator(
-                      onRefresh: _loadInitial,
-                      child: ListView.separated(
-                        controller: _scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
-                        itemCount: releases.length +
-                            (isLoadingMore || loadMoreError != null ? 1 : 0),
-                        separatorBuilder: (_, __) => const SizedBox(height: 5),
-                        itemBuilder: (context, index) {
-                          if (index == releases.length) {
-                            if (loadMoreError != null) {
-                              return Center(
-                                child: TextButton.icon(
-                                  onPressed: _loadMore,
-                                  icon: const Icon(Icons.refresh),
-                                  label: Text(
-                                    _errorMessage(loadMoreError, l10n),
-                                  ),
-                                ),
-                              );
-                            }
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(12),
-                                child: CircularProgressIndicator(),
+    return SettingsPageBuilder(
+        builder: (context, glassStyle) => Scaffold(
+              extendBodyBehindAppBar: glassStyle,
+              appBar: AdaptiveAppBar(
+                  glassStyle: glassStyle, title: Text(l10n.projectUpdates)),
+              body: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : error != null
+                      ? _ErrorView(
+                          message: _errorMessage(error, l10n),
+                          onRetry: _loadInitial,
+                        )
+                      : releases.isEmpty
+                          ? _ErrorView(
+                              message: l10n.noData,
+                              onRetry: _loadInitial,
+                            )
+                          : RefreshIndicator(
+                              edgeOffset:
+                                  SettingsPageBuilder.topInsetOf(context),
+                              onRefresh: _loadInitial,
+                              child: ListView.separated(
+                                controller: _scrollController,
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: (const EdgeInsets.all(16)).add(
+                                    EdgeInsets.only(
+                                        top: SettingsPageBuilder.topInsetOf(
+                                            context))),
+                                itemCount: releases.length +
+                                    (isLoadingMore || loadMoreError != null
+                                        ? 1
+                                        : 0),
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(height: 5),
+                                itemBuilder: (context, index) {
+                                  if (index == releases.length) {
+                                    if (loadMoreError != null) {
+                                      return Center(
+                                        child: TextButton.icon(
+                                          onPressed: _loadMore,
+                                          icon: const Icon(Icons.refresh),
+                                          label: Text(
+                                            _errorMessage(loadMoreError, l10n),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  }
+                                  return _ReleaseCard(
+                                    release: releases[index],
+                                    initiallyExpanded: index == 0,
+                                  );
+                                },
                               ),
-                            );
-                          }
-                          return _ReleaseCard(
-                            release: releases[index],
-                            initiallyExpanded: index == 0,
-                          );
-                        },
-                      ),
-                    ),
-    );
+                            ),
+            ));
   }
 
   String _errorMessage(Object? error, AppLocalizations l10n) {

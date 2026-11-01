@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:math' as math;
 
@@ -128,41 +130,52 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
     return MediaQuery.removePadding(
       context: context,
       removeLeft: true,
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight),
-          child: Consumer(
-            builder: (context, ref, _) {
-              final isWideScreen = ref.watch(settingsLayoutProvider);
-              return AppBar(
-                title: Text(l10n.accountSettings),
-                automaticallyImplyLeading: !isWideScreen,
-              );
-            },
-          ),
-        ),
-        body: isLoggedInAsync.when(
-          data: (isLoggedIn) {
-            if (!isLoggedIn) {
-              return const LoginPage();
-            }
-            return userInfoAsync.when(
-              data: (user) => user == null
-                  ? _buildErrorState(l10n.profileLoadFailed)
-                  : _buildLoggedInContent(
-                      context,
-                      user,
-                      bangumiBindAsync,
-                      isBinding,
-                    ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => _buildErrorState(l10n.profileLoadFailed),
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => _buildErrorState(l10n.loginStateLoadFailed),
-        ),
-      ),
+      child: SettingsPageBuilder(
+          builder: (context, glassStyle) => Scaffold(
+                extendBodyBehindAppBar: glassStyle,
+                appBar: PreferredSize(
+                  preferredSize: const Size.fromHeight(kToolbarHeight),
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final isWideScreen = ref.watch(settingsLayoutProvider);
+                      return AdaptiveAppBar(
+                        glassStyle: glassStyle,
+                        title: Text(l10n.accountSettings),
+                        automaticallyImplyLeading: !isWideScreen,
+                      );
+                    },
+                  ),
+                ),
+                body: isLoggedInAsync.when(
+                  data: (isLoggedIn) {
+                    if (!isLoggedIn) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          top: SettingsPageBuilder.topInsetOf(context),
+                        ),
+                        child: const LoginPage(),
+                      );
+                    }
+                    return userInfoAsync.when(
+                      data: (user) => user == null
+                          ? _buildErrorState(l10n.profileLoadFailed)
+                          : _buildLoggedInContent(
+                              context,
+                              user,
+                              bangumiBindAsync,
+                              isBinding,
+                            ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (_, __) =>
+                          _buildErrorState(l10n.profileLoadFailed),
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, __) => _buildErrorState(l10n.loginStateLoadFailed),
+                ),
+              )),
     );
   }
 
@@ -178,12 +191,12 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
       builder: (context, constraints) {
         final horizontal = math.max(10.0, (constraints.maxWidth - 1500.0) / 2);
         return ListView(
-          padding: EdgeInsets.fromLTRB(
+          padding: (EdgeInsets.fromLTRB(
             horizontal,
             16,
             horizontal,
             paddingOf.bottom,
-          ),
+          )).add(EdgeInsets.only(top: SettingsPageBuilder.topInsetOf(context))),
           children: [
             _buildSectionTitle(l10n.accountInfo),
             AccountContentView(

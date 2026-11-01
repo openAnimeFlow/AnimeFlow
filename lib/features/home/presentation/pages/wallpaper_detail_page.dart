@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/home/presentation/providers/wallpaper_recommendations_provider.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
@@ -10,6 +11,7 @@ import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/models/flow/subject_wallpaper.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,6 +32,7 @@ class WallpaperDetailPage extends ConsumerStatefulWidget {
 }
 
 class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
+  late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
   final _sizes = <String, Size>{};
   final _thumbnails = ScrollController();
   double _thumbnailItemExtent = 104;
@@ -167,12 +170,20 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
       ));
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => StreamBuilder<bool>(
+        stream: _glassNavigationStyle,
+        initialData: AppSettings.glassNavigationStyle,
+        builder: (context, snapshot) =>
+            _buildPage(context, snapshot.data ?? false),
+      );
+
+  Widget _buildPage(BuildContext context, bool glassStyle) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
     if (_images.isEmpty) {
       return Scaffold(
-          appBar: AppBar(
+          appBar: AdaptiveAppBar(
+              glassStyle: glassStyle,
               leading: widget.onClose == null
                   ? null
                   : CloseButton(onPressed: widget.onClose),
@@ -180,13 +191,20 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
           body: Center(child: Text(l10n.noData)));
     }
     return Scaffold(
-      appBar: AppBar(
+      extendBodyBehindAppBar: glassStyle,
+      appBar: AdaptiveAppBar(
+        glassStyle: glassStyle,
         leading: widget.onClose == null
             ? null
             : CloseButton(onPressed: widget.onClose),
         title: Text(_subject.nameCn.isEmpty ? _subject.name : _subject.nameCn),
       ),
       body: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          top: glassStyle
+              ? MediaQuery.paddingOf(context).top + kToolbarHeight
+              : 0,
+        ),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1800),

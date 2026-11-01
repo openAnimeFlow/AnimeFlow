@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_factory.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
@@ -42,108 +44,117 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
     return MediaQuery.removePadding(
       context: context,
       removeLeft: true,
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight),
-          child: Consumer(
-            builder: (context, ref, _) {
-              final isWideScreen = ref.watch(settingsLayoutProvider);
-              return AppBar(
-                title: Text(l10n.downloadSettings),
-                automaticallyImplyLeading: !isWideScreen,
-              );
-            },
-          ),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.downloadDanmaku),
-                    subtitle: Text(l10n.downloadDanmakuDescription),
-                    value: _downloadDanmaku,
-                    onChanged: (value) {
-                      setState(() {
-                        _downloadDanmaku = value;
-                      });
-                      AppSettings.setDownloadDanmaku(value);
+      child: SettingsPageBuilder(
+          builder: (context, glassStyle) => Scaffold(
+                extendBodyBehindAppBar: glassStyle,
+                appBar: PreferredSize(
+                  preferredSize: const Size.fromHeight(kToolbarHeight),
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final isWideScreen = ref.watch(settingsLayoutProvider);
+                      return AdaptiveAppBar(
+                        glassStyle: glassStyle,
+                        title: Text(l10n.downloadSettings),
+                        automaticallyImplyLeading: !isWideScreen,
+                      );
                     },
                   ),
-                  _buildConcurrencySetting(
-                    title: l10n.downloadParallelEpisodes,
-                    subtitle: l10n.downloadParallelEpisodesDescription,
-                    maxValue: 5,
-                    value: _maxParallelEpisodes,
-                    onChanged: (value) {
-                      setState(() {
-                        _maxParallelEpisodes = value;
-                      });
-                      AppSettings.setDownloadMaxParallelEpisodes(value);
-                      ref.read(downloadManagerProvider).maxParallelEpisodes =
-                          value;
-                    },
-                  ),
-                  _buildConcurrencySetting(
-                    title: l10n.downloadParallelSegments,
-                    subtitle: l10n.downloadParallelSegmentsDescription,
-                    maxValue: 10,
-                    value: _maxParallelSegments,
-                    onChanged: (value) {
-                      setState(() {
-                        _maxParallelSegments = value;
-                      });
-                      AppSettings.setDownloadMaxParallelSegments(value);
-                      ref.read(downloadManagerProvider).maxParallelSegments =
-                          value;
-                    },
-                  ),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.downloadLocation),
-                    subtitle: FutureBuilder<String>(
-                      future: _downloadDirectory,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState != ConnectionState.done) {
-                          return const SizedBox.square(
-                            dimension: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          );
-                        }
-                        if (snapshot.hasError || !snapshot.hasData) {
-                          return Text(l10n.downloadLocationUnavailable);
-                        }
-                        return Text(
-                          snapshot.data!,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        );
-                      },
+                ),
+                body: SingleChildScrollView(
+                  padding: (const EdgeInsets.all(16)).add(EdgeInsets.only(
+                      top: SettingsPageBuilder.topInsetOf(context))),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(l10n.downloadDanmaku),
+                            subtitle: Text(l10n.downloadDanmakuDescription),
+                            value: _downloadDanmaku,
+                            onChanged: (value) {
+                              setState(() {
+                                _downloadDanmaku = value;
+                              });
+                              AppSettings.setDownloadDanmaku(value);
+                            },
+                          ),
+                          _buildConcurrencySetting(
+                            title: l10n.downloadParallelEpisodes,
+                            subtitle: l10n.downloadParallelEpisodesDescription,
+                            maxValue: 5,
+                            value: _maxParallelEpisodes,
+                            onChanged: (value) {
+                              setState(() {
+                                _maxParallelEpisodes = value;
+                              });
+                              AppSettings.setDownloadMaxParallelEpisodes(value);
+                              ref
+                                  .read(downloadManagerProvider)
+                                  .maxParallelEpisodes = value;
+                            },
+                          ),
+                          _buildConcurrencySetting(
+                            title: l10n.downloadParallelSegments,
+                            subtitle: l10n.downloadParallelSegmentsDescription,
+                            maxValue: 10,
+                            value: _maxParallelSegments,
+                            onChanged: (value) {
+                              setState(() {
+                                _maxParallelSegments = value;
+                              });
+                              AppSettings.setDownloadMaxParallelSegments(value);
+                              ref
+                                  .read(downloadManagerProvider)
+                                  .maxParallelSegments = value;
+                            },
+                          ),
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(l10n.downloadLocation),
+                            subtitle: FutureBuilder<String>(
+                              future: _downloadDirectory,
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState !=
+                                    ConnectionState.done) {
+                                  return const SizedBox.square(
+                                    dimension: 16,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
+                                  );
+                                }
+                                if (snapshot.hasError || !snapshot.hasData) {
+                                  return Text(l10n.downloadLocationUnavailable);
+                                }
+                                return Text(
+                                  snapshot.data!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                );
+                              },
+                            ),
+                            trailing: _selectingDirectory
+                                ? const SizedBox.square(
+                                    dimension: 20,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
+                                  )
+                                : _directoryPlatform.supportsSelection
+                                    ? const Icon(Icons.drive_file_move_outline)
+                                    : null,
+                            onTap: _selectingDirectory ||
+                                    !_directoryPlatform.supportsSelection
+                                ? null
+                                : () => _selectDownloadDirectory(l10n),
+                          ),
+                        ],
+                      ),
                     ),
-                    trailing: _selectingDirectory
-                        ? const SizedBox.square(
-                            dimension: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : _directoryPlatform.supportsSelection
-                            ? const Icon(Icons.drive_file_move_outline)
-                            : null,
-                    onTap: _selectingDirectory ||
-                            !_directoryPlatform.supportsSelection
-                        ? null
-                        : () => _selectDownloadDirectory(l10n),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+                ),
+              )),
     );
   }
 

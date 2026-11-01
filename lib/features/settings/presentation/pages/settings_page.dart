@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
@@ -72,15 +74,19 @@ class SettingsMenuPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) =>
       ref.watch(settingsLayoutProvider)
           ? const AccountSettingsPage()
-          : Scaffold(
-              appBar: AppBar(
-                  leading: BackButton(onPressed: () => _exitSettings(context)),
-                  title: Text(AppLocalizations.of(context).settings)),
-              body: _SettingsMenu(
-                  location: appNavigatorOf(context)
-                      .settingsLocation(SettingsDestination.menu),
-                  wide: false),
-            );
+          : SettingsPageBuilder(
+              builder: (context, glassStyle) => Scaffold(
+                    extendBodyBehindAppBar: glassStyle,
+                    appBar: AdaptiveAppBar(
+                        glassStyle: glassStyle,
+                        leading:
+                            BackButton(onPressed: () => _exitSettings(context)),
+                        title: Text(AppLocalizations.of(context).settings)),
+                    body: _SettingsMenu(
+                        location: appNavigatorOf(context)
+                            .settingsLocation(SettingsDestination.menu),
+                        wide: false),
+                  ));
 }
 
 class _SettingsMenu extends ConsumerWidget {
@@ -205,12 +211,12 @@ class _SettingsMenu extends ConsumerWidget {
     final currentDestination =
         appNavigatorOf(context).settingsDestinationForLocation(location);
     final menu = ListView(
-      padding: EdgeInsets.only(
+      padding: (EdgeInsets.only(
         left: wide ? 15 : 0,
         right: wide ? 15 : 0,
         top: 8,
         bottom: wide ? 8 : paddingOf.bottom,
-      ),
+      )).add(EdgeInsets.only(top: SettingsPageBuilder.topInsetOf(context))),
       children: [
         for (final category in categories) ...[
           Padding(

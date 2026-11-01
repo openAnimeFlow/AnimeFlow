@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -46,15 +48,18 @@ class _AgreementPageState extends State<AgreementPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.openSourceLicense),
-      ),
-      body: _buildBody(l10n),
-    );
+    return SettingsPageBuilder(
+        builder: (context, glassStyle) => Scaffold(
+              extendBodyBehindAppBar: glassStyle,
+              appBar: AdaptiveAppBar(
+                glassStyle: glassStyle,
+                title: Text(l10n.openSourceLicense),
+              ),
+              body: _buildBody(context, l10n),
+            ));
   }
 
-  Widget _buildBody(AppLocalizations l10n) {
+  Widget _buildBody(BuildContext context, AppLocalizations l10n) {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -105,7 +110,8 @@ class _AgreementPageState extends State<AgreementPage> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: (const EdgeInsets.all(16))
+          .add(EdgeInsets.only(top: SettingsPageBuilder.topInsetOf(context))),
       child: Center(
         child: SelectableText(
           _licenseText!,

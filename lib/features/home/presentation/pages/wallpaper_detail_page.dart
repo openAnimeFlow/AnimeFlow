@@ -13,6 +13,7 @@ import 'package:anime_flow/shared/models/flow/subject_wallpaper.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -31,7 +32,8 @@ class WallpaperDetailPage extends ConsumerStatefulWidget {
       _WallpaperDetailPageState();
 }
 
-class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
+class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
   final _sizes = <String, Size>{};
   final _thumbnails = ScrollController();
@@ -41,6 +43,10 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
   late final List<String> _images;
   late final PageController _pages;
   late int _index;
+  late final AnimationController _slideshowProgress;
+  bool _slideshowEnabled = false;
+  bool _slideshowVisible = true;
+  bool _advancingSlide = false;
   bool _downloading = false;
   bool _sharing = false;
 
@@ -59,10 +65,63 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
     }.toList(growable: false);
     _index = 0;
     _pages = PageController();
+    _slideshowEnabled = _images.length > 1;
+    _slideshowProgress = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+      animationBehavior: AnimationBehavior.preserve,
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          unawaited(_advanceSlideshow());
+        }
+      });
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _slideshowVisible = TickerMode.valuesOf(context).enabled &&
+        (ModalRoute.isCurrentOf(context) ?? true);
+    _syncSlideshow();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _syncSlideshow();
+  }
+
+  void _syncSlideshow() {
+    if (_slideshowEnabled &&
+        _slideshowVisible &&
+        !_advancingSlide &&
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+      _slideshowProgress.forward();
+    } else {
+      _slideshowProgress.stop();
+    }
+  }
+
+  Future<void> _advanceSlideshow() async {
+    if (!_slideshowEnabled || _advancingSlide) return;
+    _advancingSlide = true;
+    _slideshowProgress.reset();
+    try {
+      if (_pages.hasClients) {
+        await _select((_index + 1) % _images.length, manual: false);
+      }
+    } finally {
+      if (mounted) {
+        _advancingSlide = false;
+        _syncSlideshow();
+      }
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _slideshowProgress.dispose();
     _pages.dispose();
     _thumbnails.dispose();
     super.dispose();
@@ -106,7 +165,14 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
     }
   }
 
-  Future<void> _select(int index) async {
+  void _stopSlideshow() {
+    if (!_slideshowEnabled) return;
+    _slideshowProgress.stop();
+    setState(() => _slideshowEnabled = false);
+  }
+
+  Future<void> _select(int index, {bool manual = true}) async {
+    if (manual) _stopSlideshow();
     if (index < 0 || index >= _images.length || index == _index) return;
     _selectionTarget = index;
     try {
@@ -262,20 +328,29 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
           child: ColoredBox(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Stack(fit: StackFit.expand, children: [
-              PageView.builder(
-                controller: _pages,
-                itemCount: _images.length,
-                onPageChanged: _onPageChanged,
-                itemBuilder: (context, index) => GestureDetector(
-                  onTap: _preview,
-                  child: AnimationNetworkImage(
-                    url: _images[index],
-                    fit: BoxFit.contain,
-                    width: double.infinity,
-                    height: double.infinity,
-                    placeholderWidth: double.infinity,
-                    placeholderHeight: double.infinity,
-                    onImageSize: (size) => _reportSize(_images[index], size),
+              NotificationListener<UserScrollNotification>(
+                onNotification: (notification) {
+                  if (notification.depth == 0 &&
+                      notification.direction != ScrollDirection.idle) {
+                    _stopSlideshow();
+                  }
+                  return false;
+                },
+                child: PageView.builder(
+                  controller: _pages,
+                  itemCount: _images.length,
+                  onPageChanged: _onPageChanged,
+                  itemBuilder: (context, index) => GestureDetector(
+                    onTap: _preview,
+                    child: AnimationNetworkImage(
+                      url: _images[index],
+                      fit: BoxFit.contain,
+                      width: double.infinity,
+                      height: double.infinity,
+                      placeholderWidth: double.infinity,
+                      placeholderHeight: double.infinity,
+                      onImageSize: (size) => _reportSize(_images[index], size),
+                    ),
                   ),
                 ),
               ),
@@ -362,21 +437,23 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
                 child: InkWell(
                   onTap: () => _select(index),
                   borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            width: 2,
-                            color: _index == index
-                                ? colors.primary
-                                : Colors.transparent)),
-                    child: AnimationNetworkImage(
-                      url: _images[index],
-                      fit: BoxFit.cover,
-                      width: imageWidth,
-                      height: imageHeight,
-                      borderRadius: BorderRadius.circular(7),
+                  child: CustomPaint(
+                    foregroundPainter: _index == index
+                        ? _ThumbnailCountdownPainter(
+                            progress: _slideshowProgress,
+                            color: colors.primary,
+                            countingDown: _slideshowEnabled,
+                          )
+                        : null,
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: AnimationNetworkImage(
+                        url: _images[index],
+                        fit: BoxFit.cover,
+                        width: imageWidth,
+                        height: imageHeight,
+                        borderRadius: BorderRadius.circular(7),
+                      ),
                     ),
                   ),
                 ),
@@ -556,6 +633,56 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage> {
           ),
         );
       });
+}
+
+class _ThumbnailCountdownPainter extends CustomPainter {
+  _ThumbnailCountdownPainter({
+    required this.progress,
+    required this.color,
+    required this.countingDown,
+  }) : super(repaint: progress);
+
+  final Animation<double> progress;
+  final Color color;
+  final bool countingDown;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const strokeWidth = 3.0;
+    final rect = (Offset.zero & size).deflate(strokeWidth / 2);
+    const radius = Radius.circular(12 - strokeWidth / 2);
+    // 从左上角的顶部切点开始，沿圆角边框顺时针显示倒计时进度。
+    final path = Path()
+      ..moveTo(rect.left + radius.x, rect.top)
+      ..lineTo(rect.right - radius.x, rect.top)
+      ..arcToPoint(Offset(rect.right, rect.top + radius.y), radius: radius)
+      ..lineTo(rect.right, rect.bottom - radius.y)
+      ..arcToPoint(Offset(rect.right - radius.x, rect.bottom), radius: radius)
+      ..lineTo(rect.left + radius.x, rect.bottom)
+      ..arcToPoint(Offset(rect.left, rect.bottom - radius.y), radius: radius)
+      ..lineTo(rect.left, rect.top + radius.y)
+      ..arcToPoint(Offset(rect.left + radius.x, rect.top), radius: radius)
+      ..close();
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..color = countingDown ? color.withValues(alpha: 0.2) : color;
+    canvas.drawPath(path, paint);
+    if (countingDown) {
+      final metric = path.computeMetrics().first;
+      final length = metric.length * progress.value;
+      if (length <= 0) return;
+      paint.color = color;
+      canvas.drawPath(metric.extractPath(0, length), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ThumbnailCountdownPainter oldDelegate) =>
+      oldDelegate.progress != progress ||
+      oldDelegate.color != color ||
+      oldDelegate.countingDown != countingDown;
 }
 
 class _GalleryButton extends StatelessWidget {

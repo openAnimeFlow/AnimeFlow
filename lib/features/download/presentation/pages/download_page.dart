@@ -215,6 +215,7 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
 
   @override
   Widget build(BuildContext context) {
+    final manager = ref.watch(downloadManagerProvider);
     ref.watch(
       downloadControllerProvider.select(
         (state) {
@@ -231,6 +232,9 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
             item.progressPercent,
             item.totalBytes,
             item.totalSizeBytes,
+            item.status == DownloadStatus.downloading
+                ? manager.getSpeed(widget.recordKey, widget.episodeUrl)
+                : 0.0,
             item.danmakuDownloaded,
             item.errorMessage,
             item.localMediaPath,
@@ -259,8 +263,7 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
         episode.status == DownloadStatus.pending;
     final canRetry = episode.status == DownloadStatus.paused ||
         episode.status == DownloadStatus.failed;
-    final localMediaPath =
-        ref.watch(downloadManagerProvider).getLocalMediaPath(episode);
+    final localMediaPath = manager.getLocalMediaPath(episode);
     final canPlay = localMediaPath != null;
 
     return InkWell(
@@ -350,7 +353,11 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
             ],
           ),
           Text(
-            _statusText(l10n, episode),
+            _statusText(
+              l10n,
+              episode,
+              manager.getSpeed(widget.recordKey, widget.episodeUrl),
+            ),
             maxLines: _directoryErrorText(l10n, episode.errorMessage) != null
                 ? null
                 : 2,
@@ -474,7 +481,11 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
     return episode.episodeSort;
   }
 
-  String _statusText(AppLocalizations l10n, DownloadEpisode episode) {
+  String _statusText(
+    AppLocalizations l10n,
+    DownloadEpisode episode,
+    double speed,
+  ) {
     final status = switch (episode.status) {
       DownloadStatus.pending => l10n.downloadQueued,
       DownloadStatus.resolving => l10n.downloadResolving,
@@ -487,7 +498,7 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
     if (episode.status == DownloadStatus.completed) {
       final details = <String>[];
       if (episode.totalBytes > 0) {
-        details.add(Utils.formatBytes(episode.totalBytes));
+        details.add(Utils.formatBytes(episode.totalBytes, fractionDigits: 0));
       }
       details.add(
         episode.danmakuDownloaded
@@ -503,12 +514,15 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
           episode.errorMessage.trim();
       return detail.isEmpty ? status : '$status - $detail';
     }
+    final speedSuffix = episode.status == DownloadStatus.downloading
+        ? ' - ${Utils.formatBytesPerSec(speed)}'
+        : '';
     if (episode.totalSizeBytes > 0) {
-      return '$status - ${l10n.downloadSizeProgress(Utils.formatBytes(episode.totalBytes), Utils.formatBytes(episode.totalSizeBytes))}';
+      return '$status - ${l10n.downloadSizeProgress(Utils.formatBytes(episode.totalBytes, fractionDigits: 0), Utils.formatBytes(episode.totalSizeBytes, fractionDigits: 0))}$speedSuffix';
     }
     final progress =
         '${episode.progressPercent.clamp(0, 100).toStringAsFixed(1)}%';
-    return '$status - $progress';
+    return '$status - $progress$speedSuffix';
   }
 }
 

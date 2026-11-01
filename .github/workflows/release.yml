@@ -531,17 +531,6 @@ jobs:
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-      - name: Record release source
-        env:
-          SOURCE_SHA: ${{ needs.resolve-source.outputs.source_sha }}
-          SOURCE_TAG: ${{ needs.resolve-source.outputs.tag }}
-        run: |
-          python3 - <<'PY'
-          import json, os
-          with open('source-metadata.json', 'w', encoding='utf-8') as stream:
-              json.dump({key: os.environ[key] for key in ['SOURCE_SHA', 'SOURCE_TAG', 'VERSION']}, stream, indent=2)
-          PY
-
       - name: Generate release notes
         run: |
           CHANGELOG_CONTENT=$(cat .github/workflows/CHANGELOG.md)
@@ -575,7 +564,6 @@ jobs:
           name: AnimeFlow ${{ env.VERSION }}
           body_path: release_notes.md
           files: |
-            source-metadata.json
             artifacts/ios/*.ipa
             artifacts/android/*.apk
             artifacts/windows/*.zip

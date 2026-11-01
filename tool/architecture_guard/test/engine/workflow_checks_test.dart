@@ -149,7 +149,22 @@ void main() {
         publish['with']['target_commitish'],
         r'${{ needs.resolve-source.outputs.source_sha }}',
       );
-      expect(publish['with']['files'], contains('source-metadata.json'));
+      final files = (publish['with']['files'] as String)
+          .split('\n')
+          .map((file) => file.trim())
+          .where((file) => file.isNotEmpty);
+      expect(
+        files,
+        unorderedEquals([
+          'artifacts/ios/*.ipa',
+          'artifacts/android/*.apk',
+          'artifacts/windows/*.zip',
+          'artifacts/windows/*.exe',
+          'artifacts/linux/*.tar.gz',
+          'artifacts/linux/*.deb',
+          'artifacts/macos/*.dmg',
+        ]),
+      );
     },
   );
   test('tag resolver handles real lightweight/annotated tags and rejects invalid sources', () async {

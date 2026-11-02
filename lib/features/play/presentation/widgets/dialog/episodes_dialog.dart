@@ -8,7 +8,6 @@ import 'package:anime_flow/features/play/presentation/widgets/episode_load_more_
 import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
 @Dependencies([Episodes, playExtra])
@@ -78,7 +77,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () => context.pop(),
+                    onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close_rounded),
                   ),
                 ],
@@ -246,7 +245,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
             child: InkWell(
               onTap: () {
                 ref.read(episodesProvider.notifier).selectEpisode(episode.id);
-                context.pop();
+                Navigator.of(context).pop();
               },
               // 长按
               onLongPress: () => widget.onEpisodeLongPress?.call(episode),

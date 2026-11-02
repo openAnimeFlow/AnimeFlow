@@ -17,6 +17,7 @@ import 'package:anime_flow/features/play/presentation/providers/player_cache_spe
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/player.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player_route_navigator.dart';
 import 'package:anime_flow/features/play/presentation/utils/playback_screen_awake.dart';
 import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/navigation/app_route_observer.dart';
@@ -120,7 +121,8 @@ class _PlayPageState extends ConsumerState<PlayPage>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_subscribedRouteObserver) return;
-    final route = ModalRoute.of(context);
+    final route =
+        PlayerRouteNavigator.outerRouteOf(context) ?? ModalRoute.of(context);
     if (route is PageRoute<dynamic>) {
       appRouteObserver.subscribe(this, route);
       _subscribedRouteObserver = true;

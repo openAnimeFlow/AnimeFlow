@@ -23,14 +23,12 @@ class ApplyUpdatesLinuxController implements ApplyUpdatesController {
     required DownloadInfo downloadInfo,
     void Function(int received, int total)? onProgress,
   }) async {
-    final authUrl = Uri.parse(downloadInfo.htmlUrl);
-    if (await canLaunchUrl(authUrl)) {
-      await launchUrl(authUrl);
-      return null;
-    } else {
-      LiggLogger().e('无法打开链接:$authUrl');
-      throw 'Could not launch ';
+    final downloadUrl = Uri.parse(downloadInfo.url);
+    if (!await launchUrl(downloadUrl, mode: LaunchMode.externalApplication)) {
+      LiggLogger().e('无法打开下载链接:$downloadUrl');
+      throw StateError('无法打开下载链接');
     }
+    return null;
   }
 
   @override

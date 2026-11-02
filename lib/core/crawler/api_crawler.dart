@@ -26,6 +26,10 @@ class ApiCrawler {
     RestrictedJsonPath.validate(config.listPath);
     RestrictedJsonPath.validate(config.namePath);
     RestrictedJsonPath.validate(config.sourcePath);
+    if (config.sourceTemplate.isNotEmpty) {
+      RuleTemplate.render(config.sourceTemplate, {'source': 'example'},
+          encode: true);
+    }
   }
 
   static void validateChapterConfig(ApiChapterConfig config) {
@@ -90,7 +94,11 @@ class ApiCrawler {
           logger.w('ApiCrawler: 搜索节点 $index 缺少名称或链接，已跳过');
           continue;
         }
-        items.add(SearchResourcesItem(name: name, link: source));
+        final link = config.sourceTemplate.isEmpty
+            ? source
+            : RuleTemplate.render(config.sourceTemplate, {'source': source},
+                encode: true);
+        items.add(SearchResourcesItem(name: name, link: link));
       } on ApiRuleFormatException {
         rethrow;
       } catch (error) {

@@ -36,7 +36,9 @@ class RuleApiLevel {
   static const int apiMode = 2;
 
   /// 当前客户端支持的规则 API 级别。
-  static const int current = apiMode;
+  static const int sourceTemplate = 3;
+
+  static const int current = sourceTemplate;
 
   /// 规则未声明 `api` 字段时的默认级别（老规则视作 1）。
   static const String defaultApi = '1';
@@ -45,7 +47,9 @@ class RuleApiLevel {
   static int requiredFor({
     required bool usesApiSearch,
     required bool usesApiChapter,
+    bool usesSourceTemplate = false,
   }) {
+    if (usesApiSearch && usesSourceTemplate) return sourceTemplate;
     return (usesApiSearch || usesApiChapter) ? apiMode : legacyXpath;
   }
 
@@ -57,10 +61,12 @@ class RuleApiLevel {
     required bool usesApiSearch,
     required bool usesApiChapter,
     String? declared,
+    bool usesSourceTemplate = false,
   }) {
     final required = requiredFor(
       usesApiSearch: usesApiSearch,
       usesApiChapter: usesApiChapter,
+      usesSourceTemplate: usesSourceTemplate,
     );
     final parsed = int.tryParse(declared?.trim() ?? '');
     final value = (parsed != null && parsed > required) ? parsed : required;

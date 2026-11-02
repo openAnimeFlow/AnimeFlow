@@ -89,6 +89,7 @@ class PluginFormController {
   final TextEditingController apiListPath = TextEditingController();
   final TextEditingController apiNamePath = TextEditingController();
   final TextEditingController apiSourcePath = TextEditingController();
+  final TextEditingController apiSourceTemplate = TextEditingController();
 
   // ---- API 章节 ----
   final ApiRequestControllers chapterRequest = ApiRequestControllers();
@@ -236,6 +237,7 @@ class PluginFormController {
     apiListPath.text = config.listPath;
     apiNamePath.text = config.namePath;
     apiSourcePath.text = config.sourcePath;
+    apiSourceTemplate.text = config.sourceTemplate;
   }
 
   void _applyChapterApiConfig(ApiChapterConfig config) {
@@ -325,6 +327,7 @@ class PluginFormController {
       listPath: apiListPath.text.trim(),
       namePath: apiNamePath.text.trim(),
       sourcePath: apiSourcePath.text.trim(),
+      sourceTemplate: apiSourceTemplate.text.trim(),
     );
   }
 
@@ -433,6 +436,7 @@ class PluginFormController {
         apiListPath,
         apiNamePath,
         apiSourcePath,
+        apiSourceTemplate,
         chapterRequest.url,
         chapterRequest.headers,
         chapterRequest.query,

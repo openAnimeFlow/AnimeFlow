@@ -70,13 +70,14 @@ class ApiSearchConfigAdapter extends TypeAdapter<ApiSearchConfig> {
       listPath: fields[1] as String?,
       namePath: fields[2] as String?,
       sourcePath: fields[3] as String?,
+      sourceTemplate: fields[4] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ApiSearchConfig obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.request)
       ..writeByte(1)
@@ -84,7 +85,9 @@ class ApiSearchConfigAdapter extends TypeAdapter<ApiSearchConfig> {
       ..writeByte(2)
       ..write(obj.namePath)
       ..writeByte(3)
-      ..write(obj.sourcePath);
+      ..write(obj.sourcePath)
+      ..writeByte(4)
+      ..write(obj.sourceTemplate);
   }
 
   @override

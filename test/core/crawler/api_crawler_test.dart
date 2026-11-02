@@ -90,6 +90,31 @@ CrawlConfigItem _apiRule() {
 }
 
 void main() {
+  test('搜索 sourceTemplate 生成详情页并编码来源值', () {
+    final config = ApiSearchConfig(
+      listPath: r'$.list[*]',
+      sourcePath: r'$.id',
+      sourceTemplate: 'https://example.com/detail/@source.html',
+    );
+    final items = ApiCrawler.parseSearch(
+      '{"list":[{"name":"番剧","id":"a/b"}]}',
+      config,
+    );
+    expect(items.single.link, 'https://example.com/detail/a%2Fb.html');
+    expect(ApiSearchConfig.fromJson(config.toJson()).sourceTemplate,
+        config.sourceTemplate);
+    expect(ApiSearchConfig.fromJson({}).sourceTemplate, isEmpty);
+  });
+
+  test('搜索模板未知变量会被校验拒绝', () {
+    expect(
+      () => ApiCrawler.validateSearchConfig(
+        ApiSearchConfig(sourceTemplate: '@unknown'),
+      ),
+      throwsA(isA<ApiRuleFormatException>()),
+    );
+  });
+
   group('模板渲染', () {
     test('@变量 与 {变量} 都会被替换并编码', () {
       expect(

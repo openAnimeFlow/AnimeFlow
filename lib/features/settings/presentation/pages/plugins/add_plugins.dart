@@ -83,6 +83,7 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
         usesApiSearch: _form.searchMode == RuleMode.api,
         usesApiChapter: _form.chapterMode == RuleMode.api,
         declared: _originalApi,
+        usesSourceTemplate: _form.apiSourceTemplate.text.trim().isNotEmpty,
       );
       final item = _form.build(api: api);
 

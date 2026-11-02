@@ -82,6 +82,11 @@ class PluginFormView {
           errorText:
               PluginFormFields.apiErrorText(context, form, 'searchSourcePath'),
         ),
+        PluginFormFields.labeledField(
+          context,
+          controller: form.apiSourceTemplate,
+          label: 'Source URL template (@source)',
+        ),
       ],
     ];
   }

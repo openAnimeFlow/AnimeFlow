@@ -117,15 +117,21 @@ class ApiSearchConfig {
   @HiveField(3)
   String sourcePath;
 
+  /// 可选的详情页地址模板，使用 @source 或 {source} 引用提取值。
+  @HiveField(4)
+  String sourceTemplate;
+
   ApiSearchConfig({
     ApiRequestConfig? request,
     String? listPath,
     String? namePath,
     String? sourcePath,
+    String? sourceTemplate,
   })  : request = request ?? ApiRequestConfig(),
         listPath = listPath ?? r'$.data[*]',
         namePath = namePath ?? r'$.name',
-        sourcePath = sourcePath ?? r'$.url';
+        sourcePath = sourcePath ?? r'$.url',
+        sourceTemplate = sourceTemplate ?? '';
 
   factory ApiSearchConfig.fromJson(Map<String, dynamic> json) {
     return ApiSearchConfig(
@@ -133,6 +139,7 @@ class ApiSearchConfig {
       listPath: json['listPath']?.toString(),
       namePath: json['namePath']?.toString(),
       sourcePath: json['sourcePath']?.toString(),
+      sourceTemplate: json['sourceTemplate']?.toString(),
     );
   }
 
@@ -141,6 +148,7 @@ class ApiSearchConfig {
         'listPath': listPath,
         'namePath': namePath,
         'sourcePath': sourcePath,
+        if (sourceTemplate.isNotEmpty) 'sourceTemplate': sourceTemplate,
       };
 }
 

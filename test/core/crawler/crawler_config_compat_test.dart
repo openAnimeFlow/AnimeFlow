@@ -165,6 +165,22 @@ CrawlConfigItem _apiRule() {
 
 void main() {
   group('RuleApiLevel', () {
+    test('搜索地址模板需要 API 3', () {
+      expect(
+          RuleApiLevel.requiredFor(
+            usesApiSearch: true,
+            usesApiChapter: false,
+            usesSourceTemplate: true,
+          ),
+          3);
+      expect(
+          RuleApiLevel.declarationFor(
+            usesApiSearch: true,
+            usesApiChapter: false,
+            usesSourceTemplate: true,
+          ),
+          '3');
+    });
     test('缺省 api 视为兼容', () {
       expect(RuleApiLevel.check(null), RuleCompatibility.compatible);
       expect(RuleApiLevel.check(''), RuleCompatibility.compatible);
@@ -195,7 +211,7 @@ void main() {
     test('当前级别覆盖纯 XPath 与 API 模式两种规则', () {
       expect(RuleApiLevel.legacyXpath, 1);
       expect(RuleApiLevel.apiMode, 2);
-      expect(RuleApiLevel.current, RuleApiLevel.apiMode);
+      expect(RuleApiLevel.current, RuleApiLevel.sourceTemplate);
       // 向下兼容：低级别规则仍可用。
       expect(
         RuleApiLevel.check('${RuleApiLevel.legacyXpath}'),

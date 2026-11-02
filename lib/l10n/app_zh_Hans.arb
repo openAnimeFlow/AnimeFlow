@@ -89,6 +89,7 @@
   "downloading": "正在下载...",
   "selectDownloadSource": "请选择下载地址:",
   "checkForUpdates": "检查更新",
+  "checkingForUpdates": "正在检查更新…",
   "latestVersion": "当前为最新版本",
   "downloadFailed": "下载失败",
   "updateDownloadFailed": "更新下载失败: {error}",
@@ -873,5 +874,8 @@
   "selectedCacheCleared": "所选缓存已清理",
   "selectedCacheClearFailed": "部分缓存清理失败，请重试",
   "rulesMirrorLabel": "规则下载线路",
-  "rulesMirrorSubtitle": "用于规则列表、下载与更新"
+  "rulesMirrorSubtitle": "用于规则列表、下载与更新",
+  "updateDownloadRoute": "下载线路",
+  "updateDownloadRouteHint": "您可以在下方选择下载线路",
+  "startUpdateDownload": "开始下载"
 }

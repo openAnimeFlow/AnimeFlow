@@ -235,6 +235,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get checkForUpdates => '檢查更新';
 
   @override
+  String get checkingForUpdates => '正在檢查更新…';
+
+  @override
   String get latestVersion => '目前已是最新版本';
 
   @override
@@ -2542,6 +2545,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rulesMirrorSubtitle => '用于规则列表、下载与更新';
+
+  @override
+  String get updateDownloadRoute => '下载线路';
+
+  @override
+  String get updateDownloadRouteHint => '您可以在下方选择下载线路';
+
+  @override
+  String get startUpdateDownload => '开始下载';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2773,6 +2785,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get checkForUpdates => '检查更新';
+
+  @override
+  String get checkingForUpdates => '正在检查更新…';
 
   @override
   String get latestVersion => '当前为最新版本';
@@ -5081,6 +5096,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get rulesMirrorSubtitle => '用于规则列表、下载与更新';
+
+  @override
+  String get updateDownloadRoute => '下载线路';
+
+  @override
+  String get updateDownloadRouteHint => '您可以在下方选择下载线路';
+
+  @override
+  String get startUpdateDownload => '开始下载';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -5312,6 +5336,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get checkForUpdates => '檢查更新';
+
+  @override
+  String get checkingForUpdates => '正在檢查更新…';
 
   @override
   String get latestVersion => '目前已是最新版本';
@@ -7621,6 +7648,15 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get rulesMirrorSubtitle => '用於規則列表、下載與更新';
+
+  @override
+  String get updateDownloadRoute => '下載線路';
+
+  @override
+  String get updateDownloadRouteHint => '您可以在下方選擇下載線路';
+
+  @override
+  String get startUpdateDownload => '開始下載';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -7852,6 +7888,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get checkForUpdates => '檢查更新';
+
+  @override
+  String get checkingForUpdates => '正在檢查更新…';
 
   @override
   String get latestVersion => '目前已是最新版本';
@@ -10162,4 +10201,13 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get rulesMirrorSubtitle => '用於規則列表、下載與更新';
+
+  @override
+  String get updateDownloadRoute => '下載線路';
+
+  @override
+  String get updateDownloadRouteHint => '您可以在下方選擇下載線路';
+
+  @override
+  String get startUpdateDownload => '開始下載';
 }

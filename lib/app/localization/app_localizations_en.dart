@@ -245,6 +245,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkForUpdates => 'Check for updates';
 
   @override
+  String get checkingForUpdates => 'Checking for updates…';
+
+  @override
   String get latestVersion => 'You are using the latest version';
 
   @override
@@ -2630,4 +2633,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get rulesMirrorSubtitle =>
       'Used for rule lists, downloads and updates';
+
+  @override
+  String get updateDownloadRoute => 'Download route';
+
+  @override
+  String get updateDownloadRouteHint =>
+      'You can choose a download route below.';
+
+  @override
+  String get startUpdateDownload => 'Start download';
 }

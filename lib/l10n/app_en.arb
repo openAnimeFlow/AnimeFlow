@@ -89,6 +89,7 @@
   "downloading": "Downloading...",
   "selectDownloadSource": "Select a download source:",
   "checkForUpdates": "Check for updates",
+  "checkingForUpdates": "Checking for updates…",
   "latestVersion": "You are using the latest version",
   "downloadFailed": "Download failed",
   "updateDownloadFailed": "Update download failed: {error}",
@@ -867,5 +868,8 @@
   "selectedCacheCleared": "Selected cache cleared",
   "selectedCacheClearFailed": "Some cache could not be cleared. Please retry.",
   "rulesMirrorLabel": "Rule download route",
-  "rulesMirrorSubtitle": "Used for rule lists, downloads and updates"
+  "rulesMirrorSubtitle": "Used for rule lists, downloads and updates",
+  "updateDownloadRoute": "Download route",
+  "updateDownloadRouteHint": "You can choose a download route below.",
+  "startUpdateDownload": "Start download"
 }

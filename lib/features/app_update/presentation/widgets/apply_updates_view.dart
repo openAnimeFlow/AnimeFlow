@@ -1,9 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/shared/models/download_info.dart';
 import 'package:anime_flow/shared/models/version_download_state.dart';
 import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,8 +14,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class ApplyUpdatesView extends StatefulWidget {
   final List<DownloadInfo> download;
   final String body;
-  final Future<void> Function(String url, String fileName) onStartDownload;
+  final Future<void> Function(DownloadInfo download) onStartDownload;
   final VoidCallback onCancelDownload;
+  final bool supportsDownloadRoutes;
 
   const ApplyUpdatesView({
     super.key,
@@ -20,6 +24,7 @@ class ApplyUpdatesView extends StatefulWidget {
     required this.onCancelDownload,
     required this.download,
     required this.body,
+    this.supportsDownloadRoutes = true,
   });
 
   @override
@@ -28,8 +33,35 @@ class ApplyUpdatesView extends StatefulWidget {
 
 class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
   int _selectedIndex = 0;
+  UpdateDownloadRoute _route = UpdateDownloadRoute.github;
+  bool _downloadRouteMenuOpen = false;
+  bool _startingDownload = false;
+  bool _showDownloadRouteHint = false;
+  bool _animateDownloadRouteHint = false;
+  bool _scrollingToDownloadRoute = false;
   final ScrollController _scrollController = ScrollController();
   bool _hasScrolledToDownloadProgress = false;
+
+  Future<void> _promptDownloadRoute() async {
+    setState(() {
+      _showDownloadRouteHint = true;
+      _scrollingToDownloadRoute = true;
+    });
+    try {
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted || !_scrollController.hasClients) return;
+      await _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+      if (mounted && !MediaQuery.disableAnimationsOf(context)) {
+        setState(() => _animateDownloadRouteHint = true);
+      }
+    } finally {
+      if (mounted) setState(() => _scrollingToDownloadRoute = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -47,7 +79,7 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
         final download = ref.watch(
           appInfoProvider.select((s) => s.download),
         );
-        final isDownloading = download.isDownloading;
+        final isDownloading = download.isDownloading || _startingDownload;
         if (download.isDownloading && !_hasScrolledToDownloadProgress) {
           _hasScrolledToDownloadProgress = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -67,61 +99,143 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.sizeOf(context).height * 0.6,
-                ),
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      MarkdownBody(
-                        data: widget.body,
-                        styleSheet: MarkdownStyleSheet(
-                          p: TextStyle(
-                            fontSize: 14,
-                            color: colorScheme.onSurface,
-                          ),
-                          h1: TextStyle(color: colorScheme.onSurface),
-                          h2: TextStyle(color: colorScheme.onSurface),
-                          h3: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
-                          h4: TextStyle(color: colorScheme.onSurface),
-                          h5: TextStyle(color: colorScheme.onSurface),
-                          h6: TextStyle(color: colorScheme.onSurface),
-                          listBullet: TextStyle(
-                            fontSize: 14,
-                            color: colorScheme.onSurface,
-                          ),
-                          code: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'monospace',
-                            color: colorScheme.onSurfaceVariant,
-                            backgroundColor:
-                                colorScheme.surfaceContainerHighest,
-                          ),
-                          codeblockDecoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(4),
+              Flexible(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.sizeOf(context).height * 0.6,
+                  ),
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        MarkdownBody(
+                          data: widget.body,
+                          styleSheet: MarkdownStyleSheet(
+                            p: TextStyle(
+                              fontSize: 14,
+                              color: colorScheme.onSurface,
+                            ),
+                            h1: TextStyle(color: colorScheme.onSurface),
+                            h2: TextStyle(color: colorScheme.onSurface),
+                            h3: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                            h4: TextStyle(color: colorScheme.onSurface),
+                            h5: TextStyle(color: colorScheme.onSurface),
+                            h6: TextStyle(color: colorScheme.onSurface),
+                            listBullet: TextStyle(
+                              fontSize: 14,
+                              color: colorScheme.onSurface,
+                            ),
+                            code: TextStyle(
+                              fontSize: 12,
+                              fontFamily: 'monospace',
+                              color: colorScheme.onSurfaceVariant,
+                              backgroundColor:
+                                  colorScheme.surfaceContainerHighest,
+                            ),
+                            codeblockDecoration: BoxDecoration(
+                              color: colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      if (!download.isDownloading)
-                        _DownloadUrlSection(
-                          downloadList: widget.download,
-                          selectedIndex: _selectedIndex,
-                          onSelected: (index) =>
-                              setState(() => _selectedIndex = index),
-                        ),
-                      if (download.isDownloading)
-                        _DownloadProgressSection(download: download),
-                    ],
+                        const SizedBox(height: 10),
+                        if (!isDownloading &&
+                            widget.supportsDownloadRoutes &&
+                            _showDownloadRouteHint)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: TweenAnimationBuilder<double>(
+                              tween: Tween(
+                                begin: 0,
+                                end: _animateDownloadRouteHint ? 1 : 0,
+                              ),
+                              duration: const Duration(milliseconds: 500),
+                              builder: (context, progress, child) =>
+                                  Transform.translate(
+                                offset: Offset(
+                                  math.sin(progress * math.pi * 6) *
+                                      (1 - progress) *
+                                      8,
+                                  0,
+                                ),
+                                child: child,
+                              ),
+                              child: Text(
+                                l10n.updateDownloadRouteHint,
+                                style: TextStyle(color: colorScheme.primary),
+                              ),
+                            ),
+                          ),
+                        if (!isDownloading && widget.supportsDownloadRoutes)
+                          Wrap(
+                            spacing: 16,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(l10n.updateDownloadRoute),
+                              DropDownMenu<UpdateDownloadRoute>(
+                                items: UpdateDownloadRoute.values,
+                                selectedItem: _route,
+                                tooltip: l10n.updateDownloadRoute,
+                                onOpenedChanged: (isOpen) {
+                                  if (mounted) {
+                                    setState(
+                                        () => _downloadRouteMenuOpen = isOpen);
+                                  }
+                                },
+                                onSelected: (route) =>
+                                    setState(() => _route = route),
+                                buttonBuilder: (context, route) => Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(_routeLabel(route!),
+                                          style: TextStyle(
+                                              color: colorScheme.primary)),
+                                      AnimatedRotation(
+                                        turns: _downloadRouteMenuOpen ? 0.5 : 0,
+                                        duration:
+                                            const Duration(milliseconds: 300),
+                                        curve: Curves.easeInOut,
+                                        child: Icon(Icons.arrow_drop_down,
+                                            color: colorScheme.primary),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                itemBuilder: (context, route, selected) => Row(
+                                  children: [
+                                    SizedBox(
+                                        width: 28,
+                                        child: selected
+                                            ? Icon(Icons.check,
+                                                size: 18,
+                                                color: colorScheme.primary)
+                                            : null),
+                                    Text(_routeLabel(route)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        if (!isDownloading)
+                          _DownloadUrlSection(
+                            downloadList: widget.download,
+                            selectedIndex: _selectedIndex,
+                            onSelected: (index) =>
+                                setState(() => _selectedIndex = index),
+                          ),
+                        if (isDownloading)
+                          _DownloadProgressSection(download: download),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -156,13 +270,29 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
                     else
                       TextButton(
                         onPressed: () async {
-                          final downloadData = widget.download[_selectedIndex];
-                          await widget.onStartDownload(
-                            downloadData.url,
-                            downloadData.fileName,
-                          );
+                          if (_startingDownload || _scrollingToDownloadRoute) {
+                            return;
+                          }
+                          if (widget.supportsDownloadRoutes &&
+                              !_showDownloadRouteHint) {
+                            await _promptDownloadRoute();
+                            return;
+                          }
+                          setState(() => _startingDownload = true);
+                          try {
+                            await widget.onStartDownload(
+                              widget.download[_selectedIndex].withRoute(_route),
+                            );
+                          } finally {
+                            if (mounted) {
+                              setState(() => _startingDownload = false);
+                            }
+                          }
                         },
-                        child: Text(l10n.updateNow),
+                        child: Text(widget.supportsDownloadRoutes &&
+                                _showDownloadRouteHint
+                            ? l10n.startUpdateDownload
+                            : l10n.updateNow),
                       ),
                   ],
                 ),
@@ -173,6 +303,11 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
       },
     );
   }
+
+  String _routeLabel(UpdateDownloadRoute route) => switch (route) {
+        UpdateDownloadRoute.ghProxy => 'gh-proxy.org',
+        UpdateDownloadRoute.github => 'GitHub',
+      };
 }
 
 class _DownloadProgressSection extends StatelessWidget {

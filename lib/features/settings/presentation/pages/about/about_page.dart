@@ -1,4 +1,5 @@
 import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/shared/models/version_check_result.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
@@ -24,6 +25,28 @@ class AboutSettingsPage extends StatefulWidget {
 
 class _AboutSettingsPageState extends State<AboutSettingsPage> {
   late bool autoUpdate;
+  bool _checkingForUpdates = false;
+
+  Future<void> _checkForUpdates(BuildContext context, WidgetRef ref) async {
+    if (_checkingForUpdates) return;
+    final notifier = ref.read(appInfoProvider.notifier);
+    setState(() => _checkingForUpdates = true);
+    final VersionCheckResult result;
+    try {
+      result = await notifier.checkVersion();
+    } finally {
+      if (mounted) setState(() => _checkingForUpdates = false);
+    }
+    if (!context.mounted) return;
+    await handleVersionCheckResult(
+      context,
+      result,
+      onStartDownload: notifier.performUpdateDownload,
+      onDownloadedPackageAction: notifier.openDownloadedPackage,
+      onCancelDownload: notifier.cancelUpdateDownload,
+      notifyWhenUpToDate: true,
+    );
+  }
 
   @override
   void initState() {
@@ -162,28 +185,26 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                     Consumer(
                                       builder: (context, ref, _) {
                                         return ListTile(
-                                          title: Text(l10n.checkForUpdates),
-                                          trailing: const Icon(
-                                              Icons.browser_updated_outlined),
-                                          onTap: () async {
-                                            final notifier = ref
-                                                .read(appInfoProvider.notifier);
-                                            final result =
-                                                await notifier.checkVersion();
-                                            if (!context.mounted) return;
-                                            await handleVersionCheckResult(
-                                              context,
-                                              result,
-                                              onStartDownload: notifier
-                                                  .performUpdateDownload,
-                                              onDownloadedPackageAction:
-                                                  notifier
-                                                      .openDownloadedPackage,
-                                              onCancelDownload:
-                                                  notifier.cancelUpdateDownload,
-                                              notifyWhenUpToDate: true,
-                                            );
-                                          },
+                                          title: Text(_checkingForUpdates
+                                              ? l10n.checkingForUpdates
+                                              : l10n.checkForUpdates),
+                                          enabled: !_checkingForUpdates,
+                                          trailing: _checkingForUpdates
+                                              ? SizedBox.square(
+                                                  dimension: 24,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                    semanticsLabel:
+                                                        l10n.checkingForUpdates,
+                                                  ),
+                                                )
+                                              : const Icon(Icons
+                                                  .browser_updated_outlined),
+                                          onTap: _checkingForUpdates
+                                              ? null
+                                              : () => _checkForUpdates(
+                                                  context, ref),
                                         );
                                       },
                                     ),

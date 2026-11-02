@@ -541,6 +541,12 @@ abstract class AppLocalizations {
   /// **'检查更新'**
   String get checkForUpdates;
 
+  /// No description provided for @checkingForUpdates.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在检查更新…'**
+  String get checkingForUpdates;
+
   /// No description provided for @latestVersion.
   ///
   /// In zh_Hans, this message translates to:
@@ -4832,6 +4838,24 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'用于规则列表、下载与更新'**
   String get rulesMirrorSubtitle;
+
+  /// No description provided for @updateDownloadRoute.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载线路'**
+  String get updateDownloadRoute;
+
+  /// No description provided for @updateDownloadRouteHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'您可以在下方选择下载线路'**
+  String get updateDownloadRouteHint;
+
+  /// No description provided for @startUpdateDownload.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'开始下载'**
+  String get startUpdateDownload;
 }
 
 class _AppLocalizationsDelegate

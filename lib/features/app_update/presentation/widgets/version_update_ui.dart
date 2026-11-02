@@ -1,5 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/app_update/application/apply_updates_controller.dart';
+import 'package:anime_flow/features/app_update/application/apply_updates_factory.dart';
 import 'package:anime_flow/shared/models/download_info.dart';
 import 'package:anime_flow/shared/models/enums/version_type.dart';
 import 'package:anime_flow/shared/models/version_check_result.dart';
@@ -72,12 +73,9 @@ Future<void> showVersionUpdateDialog(
     builder: (dialogContext) => ApplyUpdatesView(
       download: updateInfo.download,
       body: updateInfo.body,
-      onStartDownload: (downloadUrl, fileName) async {
-        final downloadInfo = updateInfo.download.firstWhere(
-          (info) => info.url == downloadUrl && info.fileName == fileName,
-          orElse: () => updateInfo.download[0],
-        );
-
+      supportsDownloadRoutes:
+          ApplyUpdatesFactory.getController().supportsInAppDownload,
+      onStartDownload: (downloadInfo) async {
         try {
           final downloadResult = await onStartDownload(downloadInfo);
 
@@ -96,9 +94,6 @@ Future<void> showVersionUpdateDialog(
           if (e is UpdateDownloadCancelledException) {
             return;
           }
-          if (dialogContext.mounted) {
-            Navigator.of(dialogContext, rootNavigator: true).pop();
-          }
           NotificationToast.show(
             l10n.updateDownloadFailed(e.toString()),
             title: l10n.downloadFailed,
@@ -108,9 +103,6 @@ Future<void> showVersionUpdateDialog(
       },
       onCancelDownload: () {
         onCancelDownload();
-        final l10n = AppLocalizations.of(context);
-        NotificationToast.show(l10n.downloadCancelledMessage,
-            title: l10n.downloadCancelled, maxWidth: 500);
       },
     ),
   );

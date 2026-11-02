@@ -1,4 +1,5 @@
 import 'package:anime_flow/core/network/core/rules_ech_adapter.dart';
+import 'package:anime_flow/core/network/core/update_ech_adapter.dart';
 import 'package:anime_flow/core/network/clients/flow_token_refresh_client.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
@@ -17,6 +18,7 @@ class DioFactory {
   static Dio? _apiDio;
   static Dio? _githubDio;
   static Dio? _rulesRepoDio;
+  static Dio? _appUpdateDio;
   static Dio? _pluginDio;
   static Dio? _downloadDio;
   static Dio? _animeFlowDio;
@@ -89,6 +91,19 @@ class DioFactory {
         ),
       );
 
+  static Dio get appUpdateDio => _appUpdateDio ??= _create(
+        NetworkConfig.fromSettings(
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 30),
+          allowBadCertificates: false,
+        ),
+        defaultHeaders: {'user-agent': Utils.getRandomUA()},
+        adapter: UpdateEchAdapter(
+          fallback: NetworkConfig.fromSettings(allowBadCertificates: false)
+              .createAdapter(),
+        ),
+      );
+
   static Dio get pluginDio => _pluginDio ??= _create(
         NetworkConfig.fromSettings(),
         defaultHeaders: {
@@ -112,6 +127,8 @@ class DioFactory {
     _animeFlowDio?.close();
     _animeFlowRefreshDio?.close();
     _rulesRepoDio?.close();
+    _appUpdateDio?.close();
+    _appUpdateDio = null;
     _rulesRepoDio = null;
     _apiDio = null;
     _githubDio = null;

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:anime_flow/core/crawler/api_crawler.dart';
-import 'package:anime_flow/core/crawler/html_crawler.dart';
 import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/rule_api_level.dart';
@@ -66,26 +65,6 @@ void main() {
         }
       }
     });
-  });
-
-  test('LMM 搜索结果转换为详情页并解析线路剧集', () async {
-    final plugin =
-        _loadBuiltinPlugins().firstWhere((item) => item.name == '路慢慢动漫');
-    expect(plugin.api, '3');
-    expect(plugin.usesApiSearch, isTrue);
-    expect(plugin.usesApiChapter, isFalse);
-    final items = ApiCrawler.parseSearch(
-      '{"list":[{"id":2012,"name":"火影忍者"}]}',
-      plugin.searchApiConfig,
-    );
-    expect(items.single.link,
-        'https://www.lmm85.com/index.php/vod/detail/id/2012.html');
-    final roads = await HtmlCrawler.parseEpisodeResources('''
-      <div class="module-tab-items"><div class="module-tab-item tab-item selected"><span>聚合线路</span></div></div>
-      <div class="module-list module-player-list tab-list"><a href="/play/2012_1_1.html"><span>第01集</span></a></div>
-    ''', plugin);
-    expect(roads.single.lineNames, '聚合线路');
-    expect(roads.single.episodes.single.like, '/play/2012_1_1.html');
   });
 
   group('xfdmnext（Kazumi API 规则转换）', () {

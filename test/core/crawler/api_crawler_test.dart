@@ -1,4 +1,5 @@
 import 'package:anime_flow/core/crawler/api_crawler.dart';
+import 'package:anime_flow/core/crawler/html_crawler.dart';
 import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/restricted_json_path.dart';
@@ -90,6 +91,35 @@ CrawlConfigItem _apiRule() {
 }
 
 void main() {
+  test('API 搜索来源模板生成详情页并使用 XPath 解析剧集', () async {
+    final plugin = _xpathRule().copyWith(
+      api: '3',
+      searchMode: RuleMode.api,
+      searchApiConfig: ApiSearchConfig(
+        listPath: r'$.list[*]',
+        namePath: r'$.name',
+        sourcePath: r'$.id',
+        sourceTemplate: 'https://example.com/detail/@source.html',
+      ),
+      lineNames: "//div[contains(@class, 'module-tab-item')]/span",
+      lineList: "//div[contains(@class, 'module-player-list')]",
+      episode: '/a',
+    );
+    expect(plugin.usesApiSearch, isTrue);
+    expect(plugin.usesApiChapter, isFalse);
+    final items = ApiCrawler.parseSearch(
+      '{"list":[{"id":2012,"name":"火影忍者"}]}',
+      plugin.searchApiConfig,
+    );
+    expect(items.single.link, 'https://example.com/detail/2012.html');
+    final roads = await HtmlCrawler.parseEpisodeResources('''
+      <div class="module-tab-items"><div class="module-tab-item tab-item selected"><span>聚合线路</span></div></div>
+      <div class="module-list module-player-list tab-list"><a href="/play/2012_1_1.html"><span>第01集</span></a></div>
+    ''', plugin);
+    expect(roads.single.lineNames, '聚合线路');
+    expect(roads.single.episodes.single.like, '/play/2012_1_1.html');
+  });
+
   test('搜索 sourceTemplate 生成详情页并编码来源值', () {
     final config = ApiSearchConfig(
       listPath: r'$.list[*]',

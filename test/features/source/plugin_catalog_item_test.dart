@@ -1,3 +1,4 @@
+import 'package:anime_flow/core/crawler/rule_api_level.dart';
 import 'package:anime_flow/features/source/application/providers/plugin_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -29,15 +30,18 @@ void main() {
     });
 
     test('目录声明当前客户端级别时兼容', () {
-      final item = PluginCatalogItem.fromJson(_entry(api: 2));
+      final item = PluginCatalogItem.fromJson(
+        _entry(api: RuleApiLevel.current),
+      );
 
       expect(item.requiresNewerClient, isFalse);
     });
 
     test('目录声明高于当前客户端一级时标记为需要更新', () {
-      final item = PluginCatalogItem.fromJson(_entry(api: 3));
+      const requiredApi = RuleApiLevel.current + 1;
+      final item = PluginCatalogItem.fromJson(_entry(api: requiredApi));
 
-      expect(item.api, '3');
+      expect(item.api, requiredApi.toString());
       expect(item.requiresNewerClient, isTrue);
     });
 

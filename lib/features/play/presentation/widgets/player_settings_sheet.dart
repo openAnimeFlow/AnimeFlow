@@ -13,32 +13,36 @@ Future<void> showPlayerSettingsSheet({
   VoidCallback? onClose,
   bool forceSide = false,
 }) async {
+  final container = ProviderScope.containerOf(context);
   onOpen?.call();
   try {
     await showGeneralDialog<void>(
       context: context,
-      useRootNavigator: false,
       barrierDismissible: true,
       barrierLabel: label,
       barrierColor: Colors.black54,
       transitionDuration: const Duration(milliseconds: 250),
-      pageBuilder: (context, animation, secondaryAnimation) => Consumer(
-        builder: (context, ref, _) {
-          final isWideScreen = forceSide ||
-              ref.watch(
-                playStateProvider.select((state) => state.isWideScreen),
-              );
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: isWideScreen ? const Offset(1, 0) : const Offset(0, 1),
-              end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-            )),
-            child: child,
-          );
-        },
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          UncontrolledProviderScope(
+        container: container,
+        child: Consumer(
+          builder: (context, ref, _) {
+            final isWideScreen = forceSide ||
+                ref.watch(
+                  playStateProvider.select((state) => state.isWideScreen),
+                );
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: isWideScreen ? const Offset(1, 0) : const Offset(0, 1),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              )),
+              child: child,
+            );
+          },
+        ),
       ),
     );
   } finally {

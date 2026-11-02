@@ -357,11 +357,9 @@ class _BottomControlsContent extends ConsumerWidget {
                   if (!showEpisodeSelection) return const SizedBox.shrink();
                   return TextButton(
                     onPressed: () {
-                      final container =
-                          ProviderScope.containerOf(context, listen: false);
+                      final container = ProviderScope.containerOf(context);
                       showGeneralDialog(
                         context: context,
-                        useRootNavigator: false,
                         barrierDismissible: true,
                         barrierLabel: 'EpisodesDialog',
                         barrierColor: Colors.black54,
@@ -381,27 +379,30 @@ class _BottomControlsContent extends ConsumerWidget {
                         },
                         pageBuilder:
                             (dialogContext, animation, secondaryAnimation) {
-                          return EpisodesDialog(
-                            isSelectedIcon: Consumer(
-                              builder: (context, ref, _) {
-                                final playing = ref.watch(
-                                  playStateProvider.select(
-                                    (s) => s.playing,
-                                  ),
-                                );
-                                return LoadingAnimation(
-                                  size: 30,
-                                  isPlaying: playing,
+                          return UncontrolledProviderScope(
+                            container: container,
+                            child: EpisodesDialog(
+                              isSelectedIcon: Consumer(
+                                builder: (context, ref, _) {
+                                  final playing = ref.watch(
+                                    playStateProvider.select(
+                                      (s) => s.playing,
+                                    ),
+                                  );
+                                  return LoadingAnimation(
+                                    size: 30,
+                                    isPlaying: playing,
+                                  );
+                                },
+                              ),
+                              onEpisodeLongPress: (episode) {
+                                _updateEpisodeWatched(
+                                  dialogContext,
+                                  container,
+                                  episode,
                                 );
                               },
                             ),
-                            onEpisodeLongPress: (episode) {
-                              _updateEpisodeWatched(
-                                dialogContext,
-                                container,
-                                episode,
-                              );
-                            },
                           );
                         },
                       );

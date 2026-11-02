@@ -12,6 +12,7 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
 enum _SourceEpisodeMode { matched, all }
@@ -1032,7 +1033,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
         child: InkWell(
           onTap: () {
             try {
-              Navigator.of(context).pop();
+              context.pop();
               final videoUrl = resolveSourceUrl(baseUrl, episode.like);
               widget.videoSourceNotifier.bindManualSourceForCurrentEpisode(
                 websiteName: websiteName,

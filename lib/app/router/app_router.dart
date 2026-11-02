@@ -11,7 +11,6 @@ import 'package:anime_flow/features/auth/presentation/pages/forgot_password_page
 import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
 import 'package:anime_flow/features/download/presentation/pages/download_page.dart';
 import 'package:anime_flow/features/play/presentation/pages/play_page.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player_route_navigator.dart';
 import 'package:anime_flow/features/play/presentation/pages/play_record_page.dart';
 import 'package:anime_flow/features/shell/presentation/pages/app_shell_page.dart';
 import 'package:anime_flow/features/user/presentation/pages/user_page.dart';
@@ -245,7 +244,7 @@ class PlayRoute extends GoRouteData with $PlayRoute {
             extra.subjectInfo,
           ),
       ],
-      child: const PlayerRouteNavigator(child: PlayPage()),
+      child: const PlayPage(),
     );
   }
 }

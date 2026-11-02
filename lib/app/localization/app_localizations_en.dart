@@ -2623,4 +2623,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get selectedCacheClearFailed =>
       'Some cache could not be cleared. Please retry.';
+
+  @override
+  String get rulesMirrorLabel => 'Rule download route';
+
+  @override
+  String get rulesMirrorSubtitle =>
+      'Used for rule lists, downloads and updates';
 }

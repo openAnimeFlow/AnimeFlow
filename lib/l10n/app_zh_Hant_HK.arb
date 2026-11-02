@@ -865,5 +865,7 @@
   "clearSelectedCacheTitle": "清除所選快取？",
   "clearSelectedCacheDescription": "快取會在下次使用時重新載入。下載的影片、觀看紀錄和設定會保留。",
   "selectedCacheCleared": "所選快取已清除",
-  "selectedCacheClearFailed": "部分快取清除失敗，請重試"
+  "selectedCacheClearFailed": "部分快取清除失敗，請重試",
+  "rulesMirrorLabel": "規則下載線路",
+  "rulesMirrorSubtitle": "用於規則列表、下載與更新"
 }

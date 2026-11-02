@@ -865,5 +865,7 @@
   "clearSelectedCacheTitle": "Clear selected cache?",
   "clearSelectedCacheDescription": "Cached content will reload when needed. Downloaded videos, watch history, and settings will be kept.",
   "selectedCacheCleared": "Selected cache cleared",
-  "selectedCacheClearFailed": "Some cache could not be cleared. Please retry."
+  "selectedCacheClearFailed": "Some cache could not be cleared. Please retry.",
+  "rulesMirrorLabel": "Rule download route",
+  "rulesMirrorSubtitle": "Used for rule lists, downloads and updates"
 }

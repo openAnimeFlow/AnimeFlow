@@ -2536,6 +2536,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get selectedCacheClearFailed => '部分缓存清理失败，请重试';
+
+  @override
+  String get rulesMirrorLabel => '规则下载线路';
+
+  @override
+  String get rulesMirrorSubtitle => '用于规则列表、下载与更新';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -5069,6 +5075,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get selectedCacheClearFailed => '部分缓存清理失败，请重试';
+
+  @override
+  String get rulesMirrorLabel => '规则下载线路';
+
+  @override
+  String get rulesMirrorSubtitle => '用于规则列表、下载与更新';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -7603,6 +7615,12 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get selectedCacheClearFailed => '部分快取清除失敗，請重試';
+
+  @override
+  String get rulesMirrorLabel => '規則下載線路';
+
+  @override
+  String get rulesMirrorSubtitle => '用於規則列表、下載與更新';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -10138,4 +10156,10 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get selectedCacheClearFailed => '部分快取清除失敗，請重試';
+
+  @override
+  String get rulesMirrorLabel => '規則下載線路';
+
+  @override
+  String get rulesMirrorSubtitle => '用於規則列表、下載與更新';
 }

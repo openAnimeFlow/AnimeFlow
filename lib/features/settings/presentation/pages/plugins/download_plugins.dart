@@ -2,7 +2,8 @@ import 'dart:math' as math;
 
 import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
-import 'package:anime_flow/core/settings/storage_key.dart';
+import 'package:anime_flow/core/settings/rules_mirror.dart';
+import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_install_message.dart';
@@ -28,8 +29,9 @@ class DownloadPluginsPage extends ConsumerStatefulWidget {
 }
 
 class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
-  SourceRepository get sourceRepository => ref.read(sourceRepositoryProvider);
-  late bool isMirror;
+  late RulesMirror _mirror;
+  late final SourceRepository _sourceRepository;
+  bool _savingMirror = false;
   bool hasChanged = false; // 跟踪是否有插件被下载或更新
 
   /// 正在下载或更新中的插件名
@@ -38,9 +40,30 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
   @override
   void initState() {
     super.initState();
-    isMirror = AppSettings.getSetting<bool>(SettingKey.isMirror,
-            defaultValue: false) ??
-        false;
+    _sourceRepository = ref.read(sourceRepositoryProvider);
+    _mirror = AppSettings.rulesMirror;
+  }
+
+  String _mirrorLabel(RulesMirror mirror) => switch (mirror) {
+        RulesMirror.ghProxy => 'gh-proxy.org',
+        RulesMirror.jsDelivr => 'jsDelivr',
+        RulesMirror.direct => 'GitHub',
+      };
+
+  Future<void> _selectMirror(RulesMirror mirror) async {
+    if (_savingMirror || mirror == _mirror) return;
+    setState(() => _savingMirror = true);
+    try {
+      await AppSettings.setRulesMirror(mirror);
+      if (!mounted) return;
+      setState(() => _mirror = mirror);
+    } catch (error) {
+      if (mounted) NotificationToast.show(error.toString());
+      return;
+    } finally {
+      if (mounted) setState(() => _savingMirror = false);
+    }
+    if (mounted) await _getPlugins();
   }
 
   Future<void> _getPlugins() async {
@@ -56,7 +79,7 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
       _busyPluginNames.add(pluginName);
     });
     try {
-      await sourceRepository.downloadPlugin(
+      await _sourceRepository.downloadPlugin(
         pluginPath: plugin.path,
         catalogVersion: plugin.version,
       );
@@ -97,7 +120,7 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
       _busyPluginNames.add(pluginName);
     });
     try {
-      await sourceRepository.updatePlugin(
+      await _sourceRepository.updatePlugin(
         pluginPath: plugin.path,
         catalogVersion: pluginVersion,
       );
@@ -185,18 +208,45 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
                                     )
                                   : null,
                             ),
-                            SwitchListTile(
-                              title: Text(l10n.useMirror),
-                              subtitle: Text(l10n.useMirrorSubtitle),
-                              value: isMirror,
-                              onChanged: (v) {
-                                setState(() {
-                                  AppSettings.setSetting(
-                                      SettingKey.isMirror, v);
-                                  isMirror = v;
-                                });
-                                _getPlugins();
-                              },
+                            ListTile(
+                              title: Text(l10n.rulesMirrorLabel),
+                              subtitle: Text(l10n.rulesMirrorSubtitle),
+                              trailing: IgnorePointer(
+                                ignoring: _savingMirror,
+                                child: DropDownMenu<RulesMirror>(
+                                  items: RulesMirror.values,
+                                  selectedItem: _mirror,
+                                  tooltip: l10n.rulesMirrorLabel,
+                                  onSelected: _selectMirror,
+                                  buttonBuilder: (context, selected) => Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 12),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(_mirrorLabel(selected!),
+                                            style: TextStyle(
+                                                color: colorScheme.primary)),
+                                        Icon(Icons.arrow_drop_down,
+                                            color: colorScheme.primary),
+                                      ],
+                                    ),
+                                  ),
+                                  itemBuilder: (context, mirror, selected) =>
+                                      Row(
+                                    children: [
+                                      SizedBox(
+                                          width: 28,
+                                          child: selected
+                                              ? Icon(Icons.check,
+                                                  size: 18,
+                                                  color: colorScheme.primary)
+                                              : null),
+                                      Text(_mirrorLabel(mirror)),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                             ...ref.watch(pluginCatalogProvider).when(
                                   loading: () => [
@@ -227,7 +277,7 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
                                         ]
                                       : plugins.map((plugin) {
                                           final pluginName = plugin.name;
-                                          final localPlugin = sourceRepository
+                                          final localPlugin = _sourceRepository
                                               .getSourceSync(pluginName);
                                           final isPluginBusy = _busyPluginNames
                                               .contains(pluginName);

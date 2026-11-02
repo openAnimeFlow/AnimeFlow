@@ -871,5 +871,7 @@
   "clearSelectedCacheTitle": "清理所选缓存？",
   "clearSelectedCacheDescription": "缓存会在下次使用时重新加载。下载的视频、观看记录和设置会保留。",
   "selectedCacheCleared": "所选缓存已清理",
-  "selectedCacheClearFailed": "部分缓存清理失败，请重试"
+  "selectedCacheClearFailed": "部分缓存清理失败，请重试",
+  "rulesMirrorLabel": "规则下载线路",
+  "rulesMirrorSubtitle": "用于规则列表、下载与更新"
 }

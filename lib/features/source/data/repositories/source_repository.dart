@@ -1,12 +1,9 @@
 import 'dart:convert';
 
+import 'package:anime_flow/core/network/clients/rules_repo_client.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/rule_api_level.dart';
-import 'package:anime_flow/core/settings/storage_key.dart';
-import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/network/api_path.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/features/source/data/datasources/source_local_datasource.dart';
 import 'package:flutter/foundation.dart';
 
@@ -123,15 +120,11 @@ class SourceRepository {
     required String pluginPath,
     required String catalogVersion,
   }) async {
-    var downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
-    if (_isPluginMirrorEnabled()) {
-      downloadUrl = Utils.jsDelivrCdnUrl(downloadUrl);
-    }
-
-    final raw = await Api.getResources(downloadUrl);
+    final raw = await RulesRepoClient.instance
+        .getText('${CommonApi.pluginRepo}/$pluginPath');
     final Map<String, dynamic> json;
     try {
-      final decoded = raw is String ? jsonDecode(raw) : raw;
+      final decoded = jsonDecode(raw);
       if (decoded is! Map) {
         throw const FormatException('插件配置必须是 JSON 对象');
       }
@@ -205,13 +198,5 @@ class SourceRepository {
       if (left[i] != right[i]) return false;
     }
     return true;
-  }
-
-  bool _isPluginMirrorEnabled() {
-    return AppSettings.getSetting<bool>(
-          SettingKey.isMirror,
-          defaultValue: false,
-        ) ??
-        false;
   }
 }

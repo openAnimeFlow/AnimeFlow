@@ -76,6 +76,8 @@ class CommonApi {
       ///jsDelivr cdn
       jsDelivr = 'https://cdn.jsdelivr.net/gh/',
 
+      ghProxy = 'gh-proxy.org',
+
       ///插件仓库
       pluginRepo =
           'https://raw.githubusercontent.com/openAnimeFlow/animeFlow-assets/main/plugins',

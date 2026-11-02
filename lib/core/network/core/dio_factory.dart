@@ -1,3 +1,4 @@
+import 'package:anime_flow/core/network/core/rules_ech_adapter.dart';
 import 'package:anime_flow/core/network/clients/flow_token_refresh_client.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
@@ -15,6 +16,7 @@ class DioFactory {
 
   static Dio? _apiDio;
   static Dio? _githubDio;
+  static Dio? _rulesRepoDio;
   static Dio? _pluginDio;
   static Dio? _downloadDio;
   static Dio? _animeFlowDio;
@@ -59,7 +61,8 @@ class DioFactory {
       if (!options.headers.containsKey('user-agent')) {
         options.headers['user-agent'] = await (deviceUserAgent ??=
             Utils.getCurrentUserAgent().catchError((Object error) {
-          LiggLogger().w('生成或校验设备 User-Agent 失败，使用基础 AnimeFlow UA (${error.runtimeType})');
+          LiggLogger().w(
+              '生成或校验设备 User-Agent 失败，使用基础 AnimeFlow UA (${error.runtimeType})');
           return 'AnimeFlow/unknown';
         }));
       }
@@ -75,6 +78,15 @@ class DioFactory {
           'user-agent': Utils.getRandomUA(),
         },
         interceptors: [_GithubMirrorInterceptor()],
+      );
+
+  static Dio get rulesRepoDio => _rulesRepoDio ??= _create(
+        NetworkConfig.fromSettings(allowBadCertificates: false),
+        defaultHeaders: {'user-agent': Utils.getRandomUA()},
+        adapter: RulesEchAdapter(
+          fallback: NetworkConfig.fromSettings(allowBadCertificates: false)
+              .createAdapter(),
+        ),
       );
 
   static Dio get pluginDio => _pluginDio ??= _create(
@@ -99,6 +111,8 @@ class DioFactory {
   static void reset() {
     _animeFlowDio?.close();
     _animeFlowRefreshDio?.close();
+    _rulesRepoDio?.close();
+    _rulesRepoDio = null;
     _apiDio = null;
     _githubDio = null;
     _pluginDio = null;

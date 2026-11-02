@@ -1,3 +1,4 @@
+import 'package:anime_flow/core/settings/rules_mirror.dart';
 import 'dart:io';
 
 import 'package:anime_flow/core/settings/startup_page.dart';
@@ -18,6 +19,13 @@ abstract final class AppSettings {
       Storage.setting.put(key, value);
 
   static Future<void> deleteSetting(String key) => Storage.setting.delete(key);
+
+  static RulesMirror get rulesMirror => RulesMirror.fromSettings(
+        getSetting<String>(SettingKey.rulesMirror),
+      );
+
+  static Future<void> setRulesMirror(RulesMirror mirror) =>
+      setSetting(SettingKey.rulesMirror, mirror.name);
 
   static StartupPage get startupPage {
     final saved = getSetting<String>(SettingKey.startupPage);

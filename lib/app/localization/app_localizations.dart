@@ -4820,6 +4820,18 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'部分缓存清理失败，请重试'**
   String get selectedCacheClearFailed;
+
+  /// No description provided for @rulesMirrorLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'规则下载线路'**
+  String get rulesMirrorLabel;
+
+  /// No description provided for @rulesMirrorSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'用于规则列表、下载与更新'**
+  String get rulesMirrorSubtitle;
 }
 
 class _AppLocalizationsDelegate

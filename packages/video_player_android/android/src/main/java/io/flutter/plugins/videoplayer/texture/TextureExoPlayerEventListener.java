@@ -8,25 +8,48 @@ import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
 import androidx.media3.common.Format;
 import androidx.media3.common.VideoSize;
+import androidx.media3.common.util.Size;
 import androidx.media3.exoplayer.ExoPlayer;
 import io.flutter.plugins.videoplayer.ExoPlayerEventListener;
 import io.flutter.plugins.videoplayer.VideoPlayerCallbacks;
+import io.flutter.plugins.videoplayer.VideoEffectPipeline;
 import java.util.Objects;
 
 public final class TextureExoPlayerEventListener extends ExoPlayerEventListener {
   private final boolean surfaceProducerHandlesCropAndRotation;
+  private final boolean videoEffectsEnabled;
 
   public TextureExoPlayerEventListener(
       @NonNull ExoPlayer exoPlayer,
       @NonNull VideoPlayerCallbacks events,
       boolean surfaceProducerHandlesCropAndRotation) {
+    this(exoPlayer, events, surfaceProducerHandlesCropAndRotation, false);
+  }
+
+  public TextureExoPlayerEventListener(
+      @NonNull ExoPlayer exoPlayer,
+      @NonNull VideoPlayerCallbacks events,
+      boolean surfaceProducerHandlesCropAndRotation,
+      boolean videoEffectsEnabled) {
     super(exoPlayer, events);
     this.surfaceProducerHandlesCropAndRotation = surfaceProducerHandlesCropAndRotation;
+    this.videoEffectsEnabled = videoEffectsEnabled;
   }
 
   @Override
+  @OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
   protected void sendInitialized() {
     VideoSize videoSize = exoPlayer.getVideoSize();
+    if (videoEffectsEnabled && (videoSize.width == 0 || videoSize.height == 0)) {
+      // GPU output size may arrive only after playback starts, while Dart waits
+      // for initialized before calling play. Bootstrap from the same normalized
+      // input dimensions used to size the output surface, avoiding a 0x0 texture.
+      Format format = exoPlayer.getVideoFormat();
+      if (format != null) {
+        Size outputSize = VideoEffectPipeline.outputSizeForFormat(format);
+        videoSize = new VideoSize(outputSize.getWidth(), outputSize.getHeight());
+      }
+    }
     RotationDegrees rotationCorrection = RotationDegrees.ROTATE_0;
     int width = videoSize.width;
     int height = videoSize.height;

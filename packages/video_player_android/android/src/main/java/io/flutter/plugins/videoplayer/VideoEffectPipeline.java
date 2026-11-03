@@ -61,6 +61,18 @@ public final class VideoEffectPipeline implements AnalyticsListener {
       @NonNull Format format,
       @Nullable DecoderReuseEvaluation decoderReuseEvaluation) {
     if (disposed || format.width <= 0 || format.height <= 0) return;
+    Size outputSize = outputSizeForFormat(format);
+    int nextWidth = outputSize.getWidth();
+    int nextHeight = outputSize.getHeight();
+    if (width == nextWidth && height == nextHeight) return;
+    width = nextWidth;
+    height = nextHeight;
+    if (surfaceAvailable) bindSurface();
+  }
+
+  /** Initial output dimensions shared by the surface and Flutter initialization. */
+  public static Size outputSizeForFormat(Format format) {
+    if (format.width <= 0 || format.height <= 0) return new Size(0, 0);
     // Use input metadata: waiting for output-size events can deadlock the first frame.
     // Media3's effect pipeline normalizes pixel aspect ratio and rotation before output.
     float ratio = format.pixelWidthHeightRatio;
@@ -71,10 +83,7 @@ public final class VideoEffectPipeline implements AnalyticsListener {
       nextWidth = nextHeight;
       nextHeight = swap;
     }
-    if (width == nextWidth && height == nextHeight) return;
-    width = nextWidth;
-    height = nextHeight;
-    if (surfaceAvailable) bindSurface();
+    return new Size(nextWidth, nextHeight);
   }
 
   public void onSurfaceAvailable() {

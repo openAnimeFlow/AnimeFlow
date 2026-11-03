@@ -6,6 +6,7 @@ package io.flutter.plugins.videoplayer;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 import androidx.media3.common.Format;
 import androidx.media3.common.Player;
@@ -33,6 +34,53 @@ public class TextureExoPlayerEventListenerTest {
   @Mock private VideoPlayerCallbacks mockCallbacks;
 
   @Rule public MockitoRule initRule = MockitoJUnit.rule();
+
+  @Test
+  public void effectPlayerUsesInputSizeWhenReadyPrecedesGpuOutputSize() {
+    when(mockExoPlayer.getVideoSize()).thenReturn(VideoSize.UNKNOWN);
+    when(mockExoPlayer.getVideoFormat()).thenReturn(
+        new Format.Builder().setWidth(640).setHeight(360).build());
+    when(mockExoPlayer.getDuration()).thenReturn(1000L);
+    TextureExoPlayerEventListener listener =
+        new TextureExoPlayerEventListener(mockExoPlayer, mockCallbacks, true, true);
+    listener.onPlaybackStateChanged(Player.STATE_READY);
+    listener.onPlaybackStateChanged(Player.STATE_READY);
+    verify(mockCallbacks).onInitialized(640, 360, 1000L, 0);
+  }
+
+  @Test
+  public void effectPlayerNormalizesRotationAndPixelAspectRatioOnce() {
+    when(mockExoPlayer.getVideoSize()).thenReturn(VideoSize.UNKNOWN);
+    when(mockExoPlayer.getVideoFormat()).thenReturn(new Format.Builder()
+        .setWidth(640).setHeight(360).setRotationDegrees(90)
+        .setPixelWidthHeightRatio(2f).build());
+    when(mockExoPlayer.getDuration()).thenReturn(1000L);
+    TextureExoPlayerEventListener listener =
+        new TextureExoPlayerEventListener(mockExoPlayer, mockCallbacks, true, true);
+    listener.onPlaybackStateChanged(Player.STATE_READY);
+    verify(mockCallbacks).onInitialized(360, 1280, 1000L, 0);
+  }
+
+  @Test
+  public void effectPlayerPrefersAvailableGpuOutputSize() {
+    when(mockExoPlayer.getVideoSize()).thenReturn(new VideoSize(1280, 720));
+    when(mockExoPlayer.getDuration()).thenReturn(1000L);
+    TextureExoPlayerEventListener listener =
+        new TextureExoPlayerEventListener(mockExoPlayer, mockCallbacks, true, true);
+    listener.onPlaybackStateChanged(Player.STATE_READY);
+    verify(mockCallbacks).onInitialized(1280, 720, 1000L, 0);
+    verify(mockExoPlayer, never()).getVideoFormat();
+  }
+
+  @Test
+  public void effectPlayerWithAudioOnlyDoesNotWaitForVideoSize() {
+    when(mockExoPlayer.getVideoSize()).thenReturn(VideoSize.UNKNOWN);
+    when(mockExoPlayer.getDuration()).thenReturn(1000L);
+    TextureExoPlayerEventListener listener =
+        new TextureExoPlayerEventListener(mockExoPlayer, mockCallbacks, true, true);
+    listener.onPlaybackStateChanged(Player.STATE_READY);
+    verify(mockCallbacks).onInitialized(0, 0, 1000L, 0);
+  }
 
   @Test
   public void

@@ -13,7 +13,7 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/fit_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/rate_button.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/shader_button.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/upscale_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/dialog/danmaku_setting_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_progress_bar.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_time_display.dart';
@@ -415,16 +415,20 @@ class _BottomControlsContent extends ConsumerWidget {
                 if (isWideScreen || fullscreen)
                   Consumer(
                     builder: (context, ref, child) {
-                      final shaderType = ref.watch(
+                      ref.watch(
+                          playStateProvider.select((state) => state.kernel));
+                      final upscalePreset = ref.watch(
                         playStateProvider.select(
-                          (state) => state.superResolutionType,
+                          (state) => state.upscalePreset,
                         ),
                       );
-                      return ShaderButton(
-                        value: shaderType,
+                      return UpscaleButton(
+                        value: upscalePreset,
+                        capabilities:
+                            playController.playbackCoordinator.capabilities,
                         onChanged: (type) async {
                           try {
-                            await playController.setShader(type);
+                            await playController.setUpscalePreset(type);
                           } catch (error) {
                             if (!context.mounted) return;
                             NotificationToast.show(

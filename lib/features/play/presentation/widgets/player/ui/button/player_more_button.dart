@@ -1,9 +1,10 @@
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/application/player_bindings.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/rate_button.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/shader_button.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/upscale_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/dialog/danmaku_setting_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
 import 'package:anime_flow/features/play/presentation/widgets/dialog/video_setting_dialog.dart';
@@ -22,9 +23,15 @@ class PlayerMoreButton extends ConsumerWidget {
     final player = ref.read(playSessionProvider);
     final controls = ref.read(videoUiProvider.notifier);
     final rate = ref.watch(playStateProvider.select((state) => state.rate));
-    final shader = ref.watch(
-      playStateProvider.select((state) => state.superResolutionType),
+    final upscalePreset = ref.watch(
+      playStateProvider.select((state) => state.upscalePreset),
     );
+
+    ref.watch(playStateProvider.select((state) => state.kernel));
+    final capabilities = player.playbackCoordinator.capabilities;
+    final effectivePreset = capabilities.supportsUpscalePreset(upscalePreset)
+        ? upscalePreset
+        : UpscalePreset.off;
 
     return MenuAnchor(
       onOpen: controls.cancelUiTimer,
@@ -67,24 +74,26 @@ class PlayerMoreButton extends ConsumerWidget {
         SubmenuButton(
           leadingIcon: const Icon(Icons.four_k_outlined),
           menuChildren: [
-            for (var index = 0; index < ShaderButton.labels.length; index++)
+            for (final preset in UpscalePreset.values)
               MenuItemButton(
                 trailingIcon:
-                    shader == index + 1 ? const Icon(Icons.check) : null,
-                onPressed: () async {
-                  try {
-                    await player.setShader(index + 1);
-                  } catch (error) {
-                    if (!context.mounted) return;
-                    NotificationToast.show(
-                      error is UnsupportedError
-                          ? error.message ?? error.toString()
-                          : error.toString(),
-                      title: l10n.tip,
-                    );
-                  }
-                },
-                child: Text(ShaderButton.labels[index]),
+                    effectivePreset == preset ? const Icon(Icons.check) : null,
+                onPressed: !capabilities.supportsUpscalePreset(preset)
+                    ? null
+                    : () async {
+                        try {
+                          await player.setUpscalePreset(preset);
+                        } catch (error) {
+                          if (!context.mounted) return;
+                          NotificationToast.show(
+                            error is UnsupportedError
+                                ? error.message ?? error.toString()
+                                : error.toString(),
+                            title: l10n.tip,
+                          );
+                        }
+                      },
+                child: Text(UpscaleButton.labels[preset]!),
               ),
           ],
           child: const Text('4K'),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
@@ -356,8 +357,11 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
   }
 
   @override
-  Future<void> setShaders(String shaderList) async {
-    throw UnsupportedError('FVP does not support MPV GLSL shader chains');
+  Future<void> setUpscalePreset(UpscalePreset preset) async {
+    _ensureReady();
+    if (!capabilities.supportsUpscalePreset(preset)) {
+      throw UnsupportedError('FVP does not support upscaling');
+    }
   }
 
   @override

@@ -14,7 +14,6 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
-import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,7 +57,6 @@ PlaySession playSession(Ref ref) {
   // 保留路由内的 UI 状态，控件暂时隐藏时仍能响应播放状态变化。
   ref.watch(videoUiProvider.notifier);
   final controller = PlaySession(
-    shadersDirectory: ref.watch(shadersDirectoryProvider).requireValue,
     playStateActions: playStateActions,
     readPlayState: () => ref.read(playStateProvider),
     episodesActions: ref.watch(episodesProvider.notifier),

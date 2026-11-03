@@ -4,6 +4,7 @@ import 'player_capabilities.dart';
 import 'player_event.dart';
 import 'player_kernel.dart';
 import 'playback_source.dart';
+import 'upscale_preset.dart';
 
 abstract interface class PlayerEngine {
   PlayerKernel get kernel;
@@ -23,7 +24,10 @@ abstract interface class PlayerEngine {
   Future<void> setVolume(double volume);
   Future<void> setRate(double rate);
   Future<Uint8List?> screenshot();
-  Future<void> setShaders(String shaderList);
+
+  /// 应用超分档位，并在后续 open 重建底层播放器时恢复。
+  /// 所有内核均须接受 off；不支持的启用档位应抛出 UnsupportedError。
+  Future<void> setUpscalePreset(UpscalePreset preset);
 
   /// 当前媒体输入速度（B/s）；内核不支持或数据不可用时返回 null。
   Future<double?> readCacheSpeed();

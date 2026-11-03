@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'dart:typed_data';
 import 'package:anime_flow/features/play/domain/player/video_fit.dart';
 import 'dart:async';
@@ -12,6 +13,69 @@ import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('configures upscaling before opening the replacement engine', () async {
+    final operations = <String>[];
+    final factory = _FakeEngineFactory(configure: (engine) {
+      engine.capabilities = const PlayerCapabilities(
+        supportedUpscalePresets: {UpscalePreset.efficiency},
+      );
+      engine.beforeOperation = (operation) async => operations.add(operation);
+    });
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
+    await coordinator.initialize();
+    addTearDown(coordinator.dispose);
+    expect(
+        await coordinator.switchKernel(PlayerKernel.fvp, _snapshot(),
+            upscalePreset: UpscalePreset.efficiency),
+        isTrue);
+    expect(operations.indexOf('upscale'), lessThan(operations.indexOf('open')));
+    expect(factory.created.last.upscalePreset, UpscalePreset.efficiency);
+    await expectLater(coordinator.setUpscalePreset(UpscalePreset.quality),
+        throwsUnsupportedError);
+    expect(factory.created.last.upscalePreset, UpscalePreset.efficiency);
+    await coordinator.setUpscalePreset(UpscalePreset.off);
+    expect(factory.created.last.upscalePreset, UpscalePreset.off);
+  });
+
+  test(
+      'failed upscale initialization rolls back switching and resumes the old engine',
+      () async {
+    final factory = _FakeEngineFactory(configure: (engine) {
+      engine.capabilities = const PlayerCapabilities(
+        supportedUpscalePresets: {UpscalePreset.quality},
+      );
+      if (engine.kernel == PlayerKernel.fvp) {
+        engine.beforeOperation = (operation) async {
+          if (operation == 'upscale') {
+            throw StateError('shader compilation failed');
+          }
+        };
+      }
+    });
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
+    await coordinator.initialize();
+    addTearDown(coordinator.dispose);
+    await coordinator.setUpscalePreset(UpscalePreset.quality);
+    expect(
+        await coordinator.switchKernel(PlayerKernel.fvp, _snapshot(),
+            upscalePreset: UpscalePreset.quality),
+        isFalse);
+    expect(coordinator.engine, same(factory.created.first));
+    expect(factory.created.first.upscalePreset, UpscalePreset.quality);
+    expect(factory.created.first.disposeCount, 0);
+    expect(factory.created.first.playCount, 1);
+    expect(factory.created.last.disposeCount, 1);
+    expect(factory.created.last.openedSource, isNull);
+  });
+
   test(
       'screenshot returns bytes while disposal drains active work and cancels queued commands',
       () async {
@@ -510,7 +574,8 @@ class _FakePlayerEngine implements PlayerEngine {
   Uint8List? screenshotBytes;
 
   @override
-  final capabilities = const PlayerCapabilities();
+  var capabilities = const PlayerCapabilities();
+  UpscalePreset upscalePreset = UpscalePreset.off;
 
   @override
   Stream<PlayerEvent> get events => _events.stream;
@@ -567,7 +632,10 @@ class _FakePlayerEngine implements PlayerEngine {
   }
 
   @override
-  Future<void> setShaders(String shaderList) async {}
+  Future<void> setUpscalePreset(UpscalePreset preset) async {
+    await beforeOperation?.call('upscale');
+    upscalePreset = preset;
+  }
 
   @override
   Future<double?> readCacheSpeed() async => null;

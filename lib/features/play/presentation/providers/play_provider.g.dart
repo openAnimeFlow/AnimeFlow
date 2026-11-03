@@ -45,7 +45,7 @@ final class PlayStateNotifierProvider
   }
 }
 
-String _$playStateNotifierHash() => r'8a7580129a927e7c4ee7ab2494cdc491ea04b208';
+String _$playStateNotifierHash() => r'a78fd44ca6228c9b63ba1b69c1141dd81d1161df';
 
 abstract class _$PlayStateNotifier extends $Notifier<PlayState> {
   PlayState build();

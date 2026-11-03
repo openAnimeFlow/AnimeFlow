@@ -1,16 +1,24 @@
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
+import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
 import 'package:material_ui/material_ui.dart';
 
-class ShaderButton extends StatelessWidget {
-  static const labels = ['关闭', '效率档', '质量档'];
+class UpscaleButton extends StatelessWidget {
+  static const labels = {
+    UpscalePreset.off: '关闭',
+    UpscalePreset.efficiency: '效率档',
+    UpscalePreset.quality: '质量档',
+  };
 
-  final int value;
-  final ValueChanged<int> onChanged;
+  final UpscalePreset value;
+  final PlayerCapabilities capabilities;
+  final ValueChanged<UpscalePreset> onChanged;
   final VoidCallback? onMenuOpen;
   final VoidCallback? onMenuClose;
 
-  const ShaderButton({
+  const UpscaleButton({
     super.key,
     required this.value,
+    required this.capabilities,
     required this.onChanged,
     this.onMenuOpen,
     this.onMenuClose,
@@ -24,20 +32,23 @@ class ShaderButton extends StatelessWidget {
       menuChildren: List<MenuItemButton>.generate(
         labels.length,
         (int index) {
-          final type = index + 1;
-          final isSelected = value == type;
+          final preset = UpscalePreset.values[index];
+          final effectivePreset = capabilities.supportsUpscalePreset(value)
+              ? value
+              : UpscalePreset.off;
+          final isSelected = effectivePreset == preset;
 
           return MenuItemButton(
-            onPressed: () {
-              onChanged(type);
-            },
+            onPressed: capabilities.supportsUpscalePreset(preset)
+                ? () => onChanged(preset)
+                : null,
             child: Container(
               height: 48,
               constraints: const BoxConstraints(minWidth: 112),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  labels[index],
+                  labels[preset]!,
                   style: TextStyle(
                     color: isSelected
                         ? Theme.of(context).colorScheme.primary
@@ -67,9 +78,10 @@ class ShaderButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: value == 2 || value == 3
-                  ? themePrimary.withValues(alpha: 0.5)
-                  : null,
+              color:
+                  value.isEnabled && capabilities.supportsUpscalePreset(value)
+                      ? themePrimary.withValues(alpha: 0.5)
+                      : null,
             ),
             child: Text(
               '4k',

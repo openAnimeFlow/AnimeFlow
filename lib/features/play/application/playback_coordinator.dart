@@ -7,6 +7,7 @@ import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/core/async/serial_operation_queue.dart';
 
 /// 播放器基础协调层。
@@ -78,8 +79,12 @@ class PlaybackCoordinator {
   Future<void> setRate(double rate) => _run(() => _activeEngine.setRate(rate));
   Future<Uint8List?> screenshot() =>
       _run<Uint8List?>(() => _activeEngine.screenshot());
-  Future<void> setShaders(String shaderList) =>
-      _run(() => _activeEngine.setShaders(shaderList));
+  Future<void> setUpscalePreset(UpscalePreset preset) => _run(() {
+        if (!capabilities.supportsUpscalePreset(preset)) {
+          throw UnsupportedError('当前播放器内核不支持此超分档位');
+        }
+        return _activeEngine.setUpscalePreset(preset);
+      });
 
   /// 只在 UI 需要时读取，不向播放操作队列添加周期性任务。
   Future<double?> readCacheSpeed() async {
@@ -101,7 +106,9 @@ class PlaybackCoordinator {
 
   /// 切换内核并恢复快照；提交前失败时保留原内核，提交后由新内核承接异常。
   Future<bool> switchKernel(PlayerKernel target, PlayerSnapshot snapshot,
-          {bool force = false, String? shaders, bool? hardwareDecoder}) async =>
+          {bool force = false,
+          UpscalePreset upscalePreset = UpscalePreset.off,
+          bool? hardwareDecoder}) async =>
       await _run(() async {
         if (!force && target == _activeEngine.kernel) return true;
 
@@ -116,6 +123,13 @@ class PlaybackCoordinator {
               hardwareDecoder: hardwareDecoder ?? this.hardwareDecoder);
           await next.initialize();
           _ensureReady();
+          // 在 open 前配置，允许原生内核在 prepare 前建立 GPU 处理管线。
+          await next.setUpscalePreset(
+            next.capabilities.supportsUpscalePreset(upscalePreset)
+                ? upscalePreset
+                : UpscalePreset.off,
+          );
+          _ensureReady();
           if (source != null) {
             await next.open(
               source,
@@ -127,9 +141,6 @@ class PlaybackCoordinator {
           await next.setVolume(snapshot.volume);
           _ensureReady();
           await next.setRate(snapshot.rate);
-          if (shaders != null && next.capabilities.supportsShader) {
-            await next.setShaders(shaders);
-          }
           _ensureReady();
         } catch (error, stackTrace) {
           await _cleanup(next?.dispose);

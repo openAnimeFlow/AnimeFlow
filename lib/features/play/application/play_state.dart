@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/domain/player/video_fit.dart';
@@ -6,7 +7,8 @@ import 'package:anime_flow/features/play/domain/player/video_fit.dart';
 class PlayState {
   final PlayerKernel kernel;
   final bool switchingKernel;
-  final int superResolutionType;
+  /// 超分辨率挡位
+  final UpscalePreset upscalePreset;
   final bool isWideScreen;
   final bool isContentExpanded;
   final bool isFullscreen;
@@ -26,7 +28,7 @@ class PlayState {
   const PlayState({
     this.kernel = PlayerKernel.mediaKit,
     this.switchingKernel = false,
-    this.superResolutionType = 0,
+    this.upscalePreset = UpscalePreset.off,
     this.isWideScreen = false,
     this.isContentExpanded = true,
     this.isFullscreen = false,
@@ -47,7 +49,7 @@ class PlayState {
   PlayState copyWith({
     PlayerKernel? kernel,
     bool? switchingKernel,
-    int? superResolutionType,
+    UpscalePreset? upscalePreset,
     bool? isWideScreen,
     bool? isContentExpanded,
     bool? isFullscreen,
@@ -67,7 +69,7 @@ class PlayState {
     return PlayState(
       kernel: kernel ?? this.kernel,
       switchingKernel: switchingKernel ?? this.switchingKernel,
-      superResolutionType: superResolutionType ?? this.superResolutionType,
+      upscalePreset: upscalePreset ?? this.upscalePreset,
       isWideScreen: isWideScreen ?? this.isWideScreen,
       isContentExpanded: isContentExpanded ?? this.isContentExpanded,
       isFullscreen: isFullscreen ?? this.isFullscreen,

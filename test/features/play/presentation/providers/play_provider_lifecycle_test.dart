@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
@@ -14,7 +13,6 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
-import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,8 +39,6 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
     engines = [];
     root = ProviderContainer(overrides: [
-      shadersDirectoryProvider
-          .overrideWith((ref) async => Directory.systemTemp),
       playerEngineFactoryProvider.overrideWithValue((kernel,
           {required adBlocker, required hardwareDecoder}) {
         final engine = _Engine(kernel);
@@ -75,7 +71,6 @@ void main() {
 
   test('page subscriptions retain hidden playback and release the whole chain',
       () async {
-    await root.read(shadersDirectoryProvider.future);
     final container = route(1);
     final sourceOwner =
         container.listen(videoSourceProvider.notifier, (_, __) {});
@@ -116,7 +111,6 @@ void main() {
 
   test('disposing an old playback route preserves the next route session',
       () async {
-    await root.read(shadersDirectoryProvider.future);
     final oldRoute = route(1);
     final newRoute = route(2);
     oldRoute.listen(playSessionProvider, (_, __) {});

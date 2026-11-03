@@ -1,19 +1,15 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
 import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/features/play/application/system_volume_synchronizer.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
-import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/core/utils/vibrate.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
@@ -22,6 +18,7 @@ import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/video_fit.dart';
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
 import 'package:anime_flow/features/play/application/play_request.dart';
 import 'package:anime_flow/features/play/application/play_state.dart';
@@ -30,7 +27,6 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 /// 协调播放、切集、内核切换和播放会话的生命周期。
 class PlaySession {
   PlaySession({
-    required this.shadersDirectory,
     required PlayStateNotifier playStateActions,
     required PlayState Function() readPlayState,
     required Episodes episodesActions,
@@ -58,9 +54,6 @@ class PlaySession {
     required int episodeId,
     required bool watched,
   }) _setEpisodeWatched;
-
-  /// 着色器所在目录（由 [shadersDirectoryProvider] 在启动时准备）
-  final Directory shadersDirectory;
 
   /// 视频地址
   String? videoUrl;
@@ -219,17 +212,10 @@ class PlaySession {
       fit: state.videoFit,
     );
     _playStateActions.setSwitchingKernel(true);
-    final shaderList = switch (state.superResolutionType) {
-      2 => mpvAnime4KShadersLite,
-      3 => mpvAnime4KShaders,
-      _ => const <String>[],
-    };
     final switched = await playbackCoordinator.switchKernel(target, snapshot,
         force: force,
         hardwareDecoder: hardwareDecoder,
-        shaders: force && shaderList.isNotEmpty
-            ? Utils.buildShadersAbsolutePath(shadersDirectory.path, shaderList)
-            : null);
+        upscalePreset: state.upscalePreset);
     if (_isDisposed) return false;
     if (switched) {
       _playStateActions.setKernel(target);
@@ -703,22 +689,13 @@ class PlaySession {
     _playStateActions.setScheduledStopDuration(0);
   }
 
-  ///设置超分辨率
-  /// type 1 关闭 2 效率档 3 质量档
-  Future<void> setShader(int type) async {
-    if (!playbackCoordinator.capabilities.supportsShader) {
-      throw UnsupportedError('当前播放器内核不支持 Anime4K');
-    }
-    final shaders = switch (type) {
-      2 => mpvAnime4KShadersLite,
-      3 => mpvAnime4KShaders,
-      _ => const <String>[],
-    };
-    await playbackCoordinator.setShaders(shaders.isEmpty
-        ? ''
-        : Utils.buildShadersAbsolutePath(shadersDirectory.path, shaders));
-    _playStateActions.setSuperResolutionType(type == 2 || type == 3 ? type : 1);
-  }
+  /// 与切集和内核切换串行，成功应用后才更新用户选择。
+  Future<void> setUpscalePreset(UpscalePreset preset) =>
+      _serializePlaybackChange(() async {
+        if (_isDisposed) return;
+        await playbackCoordinator.setUpscalePreset(preset);
+        if (!_isDisposed) _playStateActions.setUpscalePreset(preset);
+      });
 
   Future<Uint8List?> takeScreenshot() => playbackCoordinator.screenshot();
 

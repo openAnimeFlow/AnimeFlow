@@ -1,3 +1,5 @@
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
+import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
 import 'package:anime_flow/features/play/application/play_request.dart';
 import 'package:anime_flow/features/play/application/play_session.dart';
 import 'package:anime_flow/features/play/application/play_state.dart';
@@ -29,6 +31,77 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() => Storage.setting = _Settings());
   setUp(() => (Storage.setting as _Settings).stored.clear());
+
+  test(
+      'upscale selection survives episodes, decoder rebuilds and kernel round trips',
+      () async {
+    final factory = _Factory();
+    final state = _State();
+    final session = _Session(factory, state: state);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session.initPlayState(_request(1));
+    await session.setUpscalePreset(UpscalePreset.quality);
+    await session.initPlayState(_request(2));
+    expect(factory.engines.last.upscalePreset, UpscalePreset.quality);
+    expect(await session.setHardwareDecoder(false), isTrue);
+    expect(factory.engines.last.upscalePreset, UpscalePreset.quality);
+    expect(await session.switchKernel(PlayerKernel.fvp), isTrue);
+    expect(factory.engines.last.upscalePreset, UpscalePreset.off);
+    expect(state._value.upscalePreset, UpscalePreset.quality);
+    expect(await session.switchKernel(PlayerKernel.mediaKit), isTrue);
+    expect(factory.engines.last.upscalePreset, UpscalePreset.quality);
+  });
+
+  test(
+      'failed and unsupported upscale selections preserve state; off works on any kernel',
+      () async {
+    final factory = _Factory();
+    final state = _State();
+    final session = _Session(factory, state: state);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session.setUpscalePreset(UpscalePreset.efficiency);
+    factory.engines.last.failUpscale = true;
+    await expectLater(
+        session.setUpscalePreset(UpscalePreset.quality), throwsStateError);
+    expect(state._value.upscalePreset, UpscalePreset.efficiency);
+    expect(await session.switchKernel(PlayerKernel.fvp), isTrue);
+    await expectLater(session.setUpscalePreset(UpscalePreset.quality),
+        throwsUnsupportedError);
+    expect(state._value.upscalePreset, UpscalePreset.efficiency);
+    await session.setUpscalePreset(UpscalePreset.off);
+    expect(state._value.upscalePreset, UpscalePreset.off);
+    expect(await session.switchKernel(PlayerKernel.mediaKit), isTrue);
+    expect(factory.engines.last.upscalePreset, UpscalePreset.off);
+  });
+
+  test('upscale changes queued during a kernel switch apply to the new engine',
+      () async {
+    final factory = _Factory();
+    final state = _State();
+    final session = _Session(factory, state: state);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session.initPlayState(_request(1));
+    await session.setUpscalePreset(UpscalePreset.quality);
+    final started = Completer<void>();
+    final gate = Completer<void>();
+    factory.beforeOpen = (_) async {
+      started.complete();
+      await gate.future;
+    };
+    final switching = session.switchKernel(PlayerKernel.fvp);
+    await started.future;
+    final disabling = session.setUpscalePreset(UpscalePreset.off);
+    expect(state._value.upscalePreset, UpscalePreset.quality);
+    gate.complete();
+    expect(await switching, isTrue);
+    await disabling;
+    expect(state._value.upscalePreset, UpscalePreset.off);
+    expect(factory.engines.first.upscalePreset, UpscalePreset.quality);
+    expect(factory.engines.last.upscalePreset, UpscalePreset.off);
+  });
 
   test(
       'speed adjustments accumulate, clamp and restore correctly after temporary boost',
@@ -346,7 +419,6 @@ class _Session extends PlaySession {
 
   _Session._(_Factory factory, _State state)
       : super(
-          shadersDirectory: Directory.systemTemp,
           playStateActions: state,
           readPlayState: () => state._value,
           episodesActions: _Episodes(),
@@ -407,6 +479,20 @@ class _Engine implements PlayerEngine {
   int pauseCalls = 0;
   int disposeCount = 0;
   double? volume;
+  UpscalePreset upscalePreset = UpscalePreset.off;
+  bool failUpscale = false;
+  @override
+  PlayerCapabilities get capabilities => PlayerCapabilities(
+        supportedUpscalePresets: kernel == PlayerKernel.mediaKit
+            ? const {UpscalePreset.efficiency, UpscalePreset.quality}
+            : const {},
+      );
+  @override
+  Future<void> setUpscalePreset(UpscalePreset preset) async {
+    if (failUpscale) throw StateError('upscale failed');
+    upscalePreset = preset;
+  }
+
   @override
   Stream<PlayerEvent> get events => const Stream.empty();
   @override
@@ -476,6 +562,11 @@ class _Settings implements Box<dynamic> {
 
 class _State implements PlayStateNotifier {
   PlayState _value = const PlayState(playing: true);
+  @override
+  void setUpscalePreset(UpscalePreset preset) {
+    _value = _value.copyWith(upscalePreset: preset);
+  }
+
   @override
   void setRate(double rate) {
     _value = _value.copyWith(rate: rate);

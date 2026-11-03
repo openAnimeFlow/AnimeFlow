@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
@@ -11,6 +12,8 @@ import 'package:anime_flow/core/async/serial_operation_queue.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
+import 'mpv_upscale_shaders.dart';
 
 class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
   final bool adBlocker;
@@ -22,7 +25,8 @@ class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
   bool _released = true;
   double _volume = 100;
   double _rate = 1;
-  String _shaders = '';
+  UpscalePreset _upscalePreset = UpscalePreset.off;
+  final MpvUpscaleShaders _upscaleShaders;
   final StreamController<PlayerEvent> _events =
       StreamController<PlayerEvent>.broadcast();
   final List<StreamSubscription<Object?>> _subscriptions = [];
@@ -32,7 +36,8 @@ class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
   MediaKitEngine({
     required this.adBlocker,
     this.hardwareDecoder = true,
-  }) {
+    required Future<Directory> Function() loadShadersDirectory,
+  }) : _upscaleShaders = MpvUpscaleShaders(loadShadersDirectory) {
     _createPlayer();
   }
 
@@ -42,7 +47,10 @@ class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
   @override
   PlayerCapabilities get capabilities => const PlayerCapabilities(
         supportsScreenshot: true,
-        supportsShader: true,
+        supportedUpscalePresets: {
+          UpscalePreset.efficiency,
+          UpscalePreset.quality,
+        },
         supportsHardwareDecoder: true,
         supportsAudioOnly: true,
       );
@@ -125,7 +133,9 @@ class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
           _createPlayer();
           await _player.setVolume(_volume);
           await _player.setRate(_rate);
-          if (_shaders.isNotEmpty) await _applyShaders(_shaders);
+          if (_upscalePreset.isEnabled) {
+            await _applyUpscalePreset(_upscalePreset);
+          }
         }
         _opened = true;
         _ensureReady();
@@ -170,9 +180,9 @@ class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
   Future<Uint8List?> screenshot() => _enqueue(() => _player.screenshot());
 
   @override
-  Future<void> setShaders(String shaderList) => _enqueue(() async {
-        await _applyShaders(shaderList);
-        _shaders = shaderList;
+  Future<void> setUpscalePreset(UpscalePreset preset) => _enqueue(() async {
+        await _applyUpscalePreset(preset);
+        _upscalePreset = preset;
       });
 
   @override
@@ -192,7 +202,8 @@ class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
     }
   }
 
-  Future<void> _applyShaders(String shaderList) async {
+  Future<void> _applyUpscalePreset(UpscalePreset preset) async {
+    final shaderList = await _upscaleShaders.resolve(preset);
     _ensureReady();
     final nativePlayer = _player.platform as NativePlayer;
     await nativePlayer.waitForPlayerInitialization;

@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/application/play_state.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
@@ -25,8 +26,8 @@ class PlayStateNotifier extends _$PlayStateNotifier {
     state = state.copyWith(switchingKernel: value);
   }
 
-  void setSuperResolutionType(int value) {
-    state = state.copyWith(superResolutionType: value);
+  void setUpscalePreset(UpscalePreset value) {
+    state = state.copyWith(upscalePreset: value);
   }
 
   void setIsWideScreen(bool value) {

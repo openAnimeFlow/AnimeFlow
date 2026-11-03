@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -140,8 +141,13 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
   @override
   Future<Uint8List?> screenshot() async => null;
   @override
-  Future<void> setShaders(String shaderList) async =>
-      throw UnsupportedError('Video Player does not support MPV shaders');
+  Future<void> setUpscalePreset(UpscalePreset preset) async {
+    _ensureReady();
+    if (!capabilities.supportsUpscalePreset(preset)) {
+      throw UnsupportedError('Video Player does not support upscaling');
+    }
+  }
+
   @override
   Future<double?> readCacheSpeed() async => null;
 

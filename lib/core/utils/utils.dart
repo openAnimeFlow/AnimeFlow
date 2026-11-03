@@ -7,7 +7,6 @@ import 'package:anime_flow/core/logger/logger.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path/path.dart' as path;
 
 class Utils {
   static LiggLogger logger = LiggLogger();
@@ -140,17 +139,6 @@ class Utils {
       return '${percentage.toInt()}%';
     }
     return '${percentage.toStringAsFixed(1)}%';
-  }
-
-  static String buildShadersAbsolutePath(
-      String baseDirectory, List<String> shaders) {
-    List<String> absolutePaths = shaders.map((shader) {
-      return path.join(baseDirectory, shader);
-    }).toList();
-    if (Platform.isWindows) {
-      return absolutePaths.join(';');
-    }
-    return absolutePaths.join(':');
   }
 
   /// 网速格式化

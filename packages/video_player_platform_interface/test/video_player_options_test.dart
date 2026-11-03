@@ -1,0 +1,29 @@
+// Copyright 2013 The Flutter Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:video_player_platform_interface/video_player_platform_interface.dart';
+
+void main() {
+  test('VideoPlayerOptions allowBackgroundPlayback defaults to false', () {
+    final options = VideoPlayerOptions();
+    expect(options.allowBackgroundPlayback, false);
+  });
+  test('VideoPlayerOptions mixWithOthers defaults to false', () {
+    final options = VideoPlayerOptions();
+    expect(options.mixWithOthers, false);
+  });
+  test('VideoPlayerOptions preventsDisplaySleepDuringVideoPlayback defaults to true', () {
+    final options = VideoPlayerOptions();
+    expect(options.preventsDisplaySleepDuringVideoPlayback, true);
+  });
+  test('VideoPlayerOptions backBufferDurationMs defaults to null', () {
+    final options = VideoPlayerOptions();
+    expect(options.backBufferDurationMs, null);
+  });
+  test('VideoPlayerOptions backBufferDurationMs stores configured value', () {
+    final options = VideoPlayerOptions(backBufferDurationMs: 20000);
+    expect(options.backBufferDurationMs, 20000);
+  });
+}

@@ -12,8 +12,14 @@ import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 
 class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
+  /// 可选的 Android GPU 管线配置。
+  VideoPlayerEngine({VideoEffectConfiguration? videoEffects})
+      : _videoEffects = videoEffects;
+
+  VideoEffectConfiguration? _videoEffects;
   late final _events = StreamController<PlayerEvent>.broadcast(onListen: () {
     _lastValue = null;
     _onChanged();
@@ -88,6 +94,7 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
           // ExoPlayer 保留近期播放过的媒体数据，供向后跳转时复用。
           // 不支持控制回退缓冲的平台会忽略此选项。
           backBufferDurationMs: 60 * 1000,
+          videoEffects: _videoEffects,
         );
         final controller = source.isLocal || source.uri.isScheme('file')
             ? VideoPlayerController.file(File(source.uri.toFilePath()),
@@ -140,6 +147,22 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
       });
   @override
   Future<Uint8List?> screenshot() async => null;
+
+  /// 管线须在创建 Controller 时启用。配置随切集恢复，不修改超分能力声明。
+  Future<void> setVideoEffectConfiguration(
+          VideoEffectConfiguration configuration) =>
+      _operations.run(() async {
+        if (defaultTargetPlatform != TargetPlatform.android) {
+          throw UnsupportedError('Video effects require Android');
+        }
+        final controller = _controller.value;
+        if (controller != null) {
+          await controller.setVideoEffectConfiguration(configuration);
+          _ensureReady();
+        }
+        _videoEffects = configuration;
+      });
+
   @override
   Future<void> setUpscalePreset(UpscalePreset preset) async {
     _ensureReady();

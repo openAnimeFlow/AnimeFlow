@@ -157,6 +157,60 @@ void main() {
       expect(player.buildViewWithOptions(VideoViewOptions(playerId: playerId!)), isA<Texture>());
     });
 
+    test('Anime4K is encoded during creation and runtime updates', () async {
+      final (player, api, instanceApi) = setUpMockPlayer(playerId: 1, textureId: 100);
+      when(
+        api.createForTextureView(any),
+      ).thenAnswer((_) async => TexturePlayerIds(playerId: 2, textureId: 101));
+      const configuration = VideoEffectConfiguration(effect: VideoEffectType.anime4kX2S);
+      await player.createWithOptions(
+        VideoCreationOptions(
+          viewType: VideoViewType.textureView,
+          dataSource: DataSource(
+            sourceType: DataSourceType.network,
+            uri: 'https://example.com/v.mp4',
+          ),
+          videoPlayerOptions: VideoPlayerOptions(videoEffects: configuration),
+        ),
+      );
+      final options =
+          verify(api.createForTextureView(captureAny)).captured.single as CreationOptions;
+      expect(options.videoEffect, PlatformVideoEffect.anime4kX2S);
+      await player.setVideoEffectConfiguration(1, configuration);
+      verify(instanceApi.setVideoEffect(PlatformVideoEffect.anime4kX2S, null, null));
+      await player.setVideoEffectConfiguration(1, const VideoEffectConfiguration());
+      verify(instanceApi.setVideoEffect(PlatformVideoEffect.none, null, null));
+    });
+
+    test('complete efficiency carries physical output dimensions through the bridge', () async {
+      final (player, api, instanceApi) = setUpMockPlayer(playerId: 1, textureId: 100);
+      when(
+        api.createForTextureView(any),
+      ).thenAnswer((_) async => TexturePlayerIds(playerId: 2, textureId: 101));
+      const configuration = VideoEffectConfiguration(
+        effect: VideoEffectType.anime4kEfficiency,
+        outputWidth: 1920,
+        outputHeight: 1080,
+      );
+      await player.createWithOptions(
+        VideoCreationOptions(
+          viewType: VideoViewType.textureView,
+          dataSource: DataSource(
+            sourceType: DataSourceType.network,
+            uri: 'https://example.com/v.mp4',
+          ),
+          videoPlayerOptions: VideoPlayerOptions(videoEffects: configuration),
+        ),
+      );
+      final options =
+          verify(api.createForTextureView(captureAny)).captured.single as CreationOptions;
+      expect(options.videoEffect, PlatformVideoEffect.anime4kEfficiency);
+      expect(options.videoEffectOutputWidth, 1920);
+      expect(options.videoEffectOutputHeight, 1080);
+      await player.setVideoEffectConfiguration(1, configuration);
+      verify(instanceApi.setVideoEffect(PlatformVideoEffect.anime4kEfficiency, 1920, 1080));
+    });
+
     test('create with network passes headers', () async {
       final (AndroidVideoPlayer player, MockAndroidVideoPlayerApi api, _) = setUpMockPlayer(
         playerId: 1,

@@ -118,6 +118,10 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
       videoEffect: options.videoPlayerOptions?.videoEffects == null
           ? null
           : _platformVideoEffect(options.videoPlayerOptions!.videoEffects!),
+      videoEffectOutputWidth:
+          options.videoPlayerOptions?.videoEffects?.outputWidth,
+      videoEffectOutputHeight:
+          options.videoPlayerOptions?.videoEffects?.outputHeight,
     );
 
     if (pigeonCreationOptions.videoEffect != null &&
@@ -200,9 +204,11 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
     int playerId,
     VideoEffectConfiguration configuration,
   ) {
-    return _playerWith(
-      id: playerId,
-    ).setVideoEffect(_platformVideoEffect(configuration));
+    return _playerWith(id: playerId).setVideoEffect(
+      _platformVideoEffect(configuration),
+      configuration.outputWidth,
+      configuration.outputHeight,
+    );
   }
 
   PlatformVideoEffect _platformVideoEffect(
@@ -210,6 +216,8 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
   ) => switch (configuration.effect) {
     VideoEffectType.none => PlatformVideoEffect.none,
     VideoEffectType.debugGrayscale => PlatformVideoEffect.debugGrayscale,
+    VideoEffectType.anime4kX2S => PlatformVideoEffect.anime4kX2S,
+    VideoEffectType.anime4kEfficiency => PlatformVideoEffect.anime4kEfficiency,
   };
 
   @override
@@ -411,8 +419,11 @@ class _PlayerInstance {
     return _api.setPlaybackSpeed(speed);
   }
 
-  Future<void> setVideoEffect(PlatformVideoEffect effect) =>
-      _api.setVideoEffect(effect);
+  Future<void> setVideoEffect(
+    PlatformVideoEffect effect,
+    int? outputWidth,
+    int? outputHeight,
+  ) => _api.setVideoEffect(effect, outputWidth, outputHeight);
 
   Future<void> seekTo(Duration position) {
     return _api.seekTo(position.inMilliseconds);

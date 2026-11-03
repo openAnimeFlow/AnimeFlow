@@ -111,6 +111,8 @@ enum PlatformVideoFormat {
 enum PlatformVideoEffect {
   none,
   debugGrayscale,
+  anime4kX2S,
+  anime4kEfficiency,
 }
 
 /// Pigeon equivalent of Player's playback state.
@@ -442,6 +444,8 @@ class CreationOptions {
     this.userAgent,
     this.backBufferDurationMs,
     this.videoEffect,
+    this.videoEffectOutputWidth,
+    this.videoEffectOutputHeight,
   });
 
   String uri;
@@ -456,6 +460,10 @@ class CreationOptions {
 
   PlatformVideoEffect? videoEffect;
 
+  int? videoEffectOutputWidth;
+
+  int? videoEffectOutputHeight;
+
   List<Object?> _toList() {
     return <Object?>[
       uri,
@@ -464,6 +472,8 @@ class CreationOptions {
       userAgent,
       backBufferDurationMs,
       videoEffect,
+      videoEffectOutputWidth,
+      videoEffectOutputHeight,
     ];
   }
 
@@ -479,6 +489,8 @@ class CreationOptions {
       userAgent: result[3] as String?,
       backBufferDurationMs: result[4] as int?,
       videoEffect: result[5] as PlatformVideoEffect?,
+      videoEffectOutputWidth: result[6] as int?,
+      videoEffectOutputHeight: result[7] as int?,
     );
   }
 
@@ -491,7 +503,7 @@ class CreationOptions {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(uri, other.uri) && _deepEquals(formatHint, other.formatHint) && _deepEquals(httpHeaders, other.httpHeaders) && _deepEquals(userAgent, other.userAgent) && _deepEquals(backBufferDurationMs, other.backBufferDurationMs) && _deepEquals(videoEffect, other.videoEffect);
+    return _deepEquals(uri, other.uri) && _deepEquals(formatHint, other.formatHint) && _deepEquals(httpHeaders, other.httpHeaders) && _deepEquals(userAgent, other.userAgent) && _deepEquals(backBufferDurationMs, other.backBufferDurationMs) && _deepEquals(videoEffect, other.videoEffect) && _deepEquals(videoEffectOutputWidth, other.videoEffectOutputWidth) && _deepEquals(videoEffectOutputHeight, other.videoEffectOutputHeight);
   }
 
   @override
@@ -500,7 +512,7 @@ class CreationOptions {
 
   @override
   String toString() {
-    return 'CreationOptions(uri: $uri, formatHint: $formatHint, httpHeaders: $httpHeaders, userAgent: $userAgent, backBufferDurationMs: $backBufferDurationMs, videoEffect: $videoEffect)';
+    return 'CreationOptions(uri: $uri, formatHint: $formatHint, httpHeaders: $httpHeaders, userAgent: $userAgent, backBufferDurationMs: $backBufferDurationMs, videoEffect: $videoEffect, videoEffectOutputWidth: $videoEffectOutputWidth, videoEffectOutputHeight: $videoEffectOutputHeight)';
   }
 }
 
@@ -1204,14 +1216,14 @@ class VideoPlayerInstanceApi {
   final String pigeonVar_messageChannelSuffix;
 
   /// Updates a pipeline opted in at creation time.
-  Future<void> setVideoEffect(PlatformVideoEffect effect) async {
+  Future<void> setVideoEffect(PlatformVideoEffect effect, int? outputWidth, int? outputHeight) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.video_player_android.VideoPlayerInstanceApi.setVideoEffect$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[effect]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[effect, outputWidth, outputHeight]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(

@@ -5,19 +5,21 @@
 package io.flutter.plugins.videoplayer.texture;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.media3.common.Format;
 import androidx.media3.common.VideoSize;
 import androidx.media3.common.util.Size;
 import androidx.media3.exoplayer.ExoPlayer;
 import io.flutter.plugins.videoplayer.ExoPlayerEventListener;
-import io.flutter.plugins.videoplayer.VideoPlayerCallbacks;
 import io.flutter.plugins.videoplayer.VideoEffectPipeline;
+import io.flutter.plugins.videoplayer.VideoPlayerCallbacks;
 import java.util.Objects;
 
 public final class TextureExoPlayerEventListener extends ExoPlayerEventListener {
   private final boolean surfaceProducerHandlesCropAndRotation;
   private final boolean videoEffectsEnabled;
+  @Nullable private final VideoEffectPipeline videoEffectPipeline;
 
   public TextureExoPlayerEventListener(
       @NonNull ExoPlayer exoPlayer,
@@ -31,22 +33,37 @@ public final class TextureExoPlayerEventListener extends ExoPlayerEventListener 
       @NonNull VideoPlayerCallbacks events,
       boolean surfaceProducerHandlesCropAndRotation,
       boolean videoEffectsEnabled) {
+    this(exoPlayer, events, surfaceProducerHandlesCropAndRotation, videoEffectsEnabled, null);
+  }
+
+  public TextureExoPlayerEventListener(
+      @NonNull ExoPlayer exoPlayer,
+      @NonNull VideoPlayerCallbacks events,
+      boolean surfaceProducerHandlesCropAndRotation,
+      boolean videoEffectsEnabled,
+      @Nullable VideoEffectPipeline videoEffectPipeline) {
     super(exoPlayer, events);
     this.surfaceProducerHandlesCropAndRotation = surfaceProducerHandlesCropAndRotation;
     this.videoEffectsEnabled = videoEffectsEnabled;
+    this.videoEffectPipeline = videoEffectPipeline;
   }
 
   @Override
   @OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)
   protected void sendInitialized() {
     VideoSize videoSize = exoPlayer.getVideoSize();
-    if (videoEffectsEnabled && (videoSize.width == 0 || videoSize.height == 0)) {
+    boolean hasDisplaySize = videoEffectPipeline != null && videoEffectPipeline.hasDisplaySize();
+    if (videoEffectsEnabled && (videoSize.width == 0 || videoSize.height == 0 || hasDisplaySize)) {
       // GPU output size may arrive only after playback starts, while Dart waits
       // for initialized before calling play. Bootstrap from the same normalized
       // input dimensions used to size the output surface, avoiding a 0x0 texture.
       Format format = exoPlayer.getVideoFormat();
       if (format != null) {
-        Size outputSize = VideoEffectPipeline.outputSizeForFormat(format);
+        // Flutter lays out from the source aspect ratio, not a previous episode's viewport.
+        Size outputSize =
+            videoEffectPipeline == null || hasDisplaySize
+                ? VideoEffectPipeline.outputSizeForFormat(format)
+                : videoEffectPipeline.getOutputSize(format);
         videoSize = new VideoSize(outputSize.getWidth(), outputSize.getHeight());
       }
     }

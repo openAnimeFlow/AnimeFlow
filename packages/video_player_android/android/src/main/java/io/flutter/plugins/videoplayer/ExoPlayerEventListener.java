@@ -134,7 +134,11 @@ public abstract class ExoPlayerEventListener implements Player.Listener {
       exoPlayer.seekToDefaultPosition();
       exoPlayer.prepare();
     } else {
-      events.onError("VideoError", "Video player had error " + error, null);
+      android.util.Log.e("VideoPlayer", "Playback failed: " + error.getErrorCodeName(), error);
+      events.onError(
+          "VideoError",
+          "Video player had error " + error,
+          android.util.Log.getStackTraceString(error));
     }
   }
 

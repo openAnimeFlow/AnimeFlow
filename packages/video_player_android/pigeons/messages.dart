@@ -17,7 +17,7 @@ import 'package:pigeon/pigeon.dart';
 enum PlatformVideoFormat { dash, hls, ss }
 
 /// GPU effect configuration for one texture player.
-enum PlatformVideoEffect { none, debugGrayscale }
+enum PlatformVideoEffect { none, debugGrayscale, anime4kX2S, anime4kEfficiency }
 
 /// Pigeon equivalent of Player's playback state.
 /// https://developer.android.com/media/media3/exoplayer/listening-to-player-events#playback-state
@@ -88,6 +88,8 @@ class CreationOptions {
   String? userAgent;
   int? backBufferDurationMs;
   PlatformVideoEffect? videoEffect;
+  int? videoEffectOutputWidth;
+  int? videoEffectOutputHeight;
 }
 
 class TexturePlayerIds {
@@ -212,7 +214,11 @@ abstract class AndroidVideoPlayerApi {
 @HostApi()
 abstract class VideoPlayerInstanceApi {
   /// Updates a pipeline opted in at creation time.
-  void setVideoEffect(PlatformVideoEffect effect);
+  void setVideoEffect(
+    PlatformVideoEffect effect,
+    int? outputWidth,
+    int? outputHeight,
+  );
 
   /// Sets whether to automatically loop playback of the video.
   void setLooping(bool looping);

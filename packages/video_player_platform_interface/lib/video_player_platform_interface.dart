@@ -482,7 +482,16 @@ class DurationRange {
 /// Effects implemented by the local video player fork.
 ///
 /// Debug grayscale validates the GPU path; it is not an upscaling algorithm.
-enum VideoEffectType { none, debugGrayscale }
+enum VideoEffectType {
+  none,
+  debugGrayscale,
+
+  /// Anime4K v3.2 CNN x2 S for SDR video. Requires OpenGL ES 3 and RGBA16F rendering.
+  anime4kX2S,
+
+  /// The complete AnimeFlow MPV efficiency shader chain for SDR video.
+  anime4kEfficiency,
+}
 
 /// Configuration for a per-player GPU effects pipeline.
 ///
@@ -490,16 +499,34 @@ enum VideoEffectType { none, debugGrayscale }
 /// A null option leaves the standard rendering path unchanged.
 @immutable
 class VideoEffectConfiguration {
-  const VideoEffectConfiguration({this.effect = VideoEffectType.none});
+  const VideoEffectConfiguration({
+    this.effect = VideoEffectType.none,
+    this.outputWidth,
+    this.outputHeight,
+  }) : assert(
+         (outputWidth == null && outputHeight == null) ||
+             (outputWidth != null &&
+                 outputWidth > 0 &&
+                 outputHeight != null &&
+                 outputHeight > 0),
+       );
 
   final VideoEffectType effect;
 
-  @override
-  bool operator ==(Object other) =>
-      other is VideoEffectConfiguration && other.effect == effect;
+  /// Fitted video destination in physical pixels, used as MPV's OUTPUT size.
+  /// Both must be null or positive. Null uses the source size until layout is known.
+  final int? outputWidth;
+  final int? outputHeight;
 
   @override
-  int get hashCode => effect.hashCode;
+  bool operator ==(Object other) =>
+      other is VideoEffectConfiguration &&
+      other.effect == effect &&
+      other.outputWidth == outputWidth &&
+      other.outputHeight == outputHeight;
+
+  @override
+  int get hashCode => Object.hash(effect, outputWidth, outputHeight);
 }
 
 /// [VideoPlayerOptions] can be optionally used to set additional player settings

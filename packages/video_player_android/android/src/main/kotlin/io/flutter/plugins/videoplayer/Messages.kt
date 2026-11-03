@@ -211,7 +211,9 @@ enum class PlatformVideoFormat(val raw: Int) {
 /** GPU effect configuration for one texture player. */
 enum class PlatformVideoEffect(val raw: Int) {
   NONE(0),
-  DEBUG_GRAYSCALE(1);
+  DEBUG_GRAYSCALE(1),
+  ANIME4K_X2S(2),
+  ANIME4K_EFFICIENCY(3);
 
   companion object {
     fun ofRaw(raw: Int): PlatformVideoEffect? {
@@ -527,7 +529,9 @@ data class CreationOptions (
   val httpHeaders: Map<String, String>,
   val userAgent: String? = null,
   val backBufferDurationMs: Long? = null,
-  val videoEffect: PlatformVideoEffect? = null
+  val videoEffect: PlatformVideoEffect? = null,
+  val videoEffectOutputWidth: Long? = null,
+  val videoEffectOutputHeight: Long? = null
 )
  {
   companion object {
@@ -538,7 +542,9 @@ data class CreationOptions (
       val userAgent = pigeonVar_list[3] as String?
       val backBufferDurationMs = pigeonVar_list[4] as Long?
       val videoEffect = pigeonVar_list[5] as PlatformVideoEffect?
-      return CreationOptions(uri, formatHint, httpHeaders, userAgent, backBufferDurationMs, videoEffect)
+      val videoEffectOutputWidth = pigeonVar_list[6] as Long?
+      val videoEffectOutputHeight = pigeonVar_list[7] as Long?
+      return CreationOptions(uri, formatHint, httpHeaders, userAgent, backBufferDurationMs, videoEffect, videoEffectOutputWidth, videoEffectOutputHeight)
     }
   }
   fun toList(): List<Any?> {
@@ -549,6 +555,8 @@ data class CreationOptions (
       userAgent,
       backBufferDurationMs,
       videoEffect,
+      videoEffectOutputWidth,
+      videoEffectOutputHeight,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -559,7 +567,7 @@ data class CreationOptions (
       return true
     }
     val other = other as CreationOptions
-    return MessagesPigeonUtils.deepEquals(this.uri, other.uri) && MessagesPigeonUtils.deepEquals(this.formatHint, other.formatHint) && MessagesPigeonUtils.deepEquals(this.httpHeaders, other.httpHeaders) && MessagesPigeonUtils.deepEquals(this.userAgent, other.userAgent) && MessagesPigeonUtils.deepEquals(this.backBufferDurationMs, other.backBufferDurationMs) && MessagesPigeonUtils.deepEquals(this.videoEffect, other.videoEffect)
+    return MessagesPigeonUtils.deepEquals(this.uri, other.uri) && MessagesPigeonUtils.deepEquals(this.formatHint, other.formatHint) && MessagesPigeonUtils.deepEquals(this.httpHeaders, other.httpHeaders) && MessagesPigeonUtils.deepEquals(this.userAgent, other.userAgent) && MessagesPigeonUtils.deepEquals(this.backBufferDurationMs, other.backBufferDurationMs) && MessagesPigeonUtils.deepEquals(this.videoEffect, other.videoEffect) && MessagesPigeonUtils.deepEquals(this.videoEffectOutputWidth, other.videoEffectOutputWidth) && MessagesPigeonUtils.deepEquals(this.videoEffectOutputHeight, other.videoEffectOutputHeight)
   }
 
   override fun hashCode(): Int {
@@ -570,10 +578,12 @@ data class CreationOptions (
     result = 31 * result + MessagesPigeonUtils.deepHash(this.userAgent)
     result = 31 * result + MessagesPigeonUtils.deepHash(this.backBufferDurationMs)
     result = 31 * result + MessagesPigeonUtils.deepHash(this.videoEffect)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.videoEffectOutputWidth)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.videoEffectOutputHeight)
     return result
   }
   override fun toString(): String {
-    return "CreationOptions(uri=$uri, formatHint=$formatHint, httpHeaders=$httpHeaders, userAgent=$userAgent, backBufferDurationMs=$backBufferDurationMs, videoEffect=$videoEffect)"
+    return "CreationOptions(uri=$uri, formatHint=$formatHint, httpHeaders=$httpHeaders, userAgent=$userAgent, backBufferDurationMs=$backBufferDurationMs, videoEffect=$videoEffect, videoEffectOutputWidth=$videoEffectOutputWidth, videoEffectOutputHeight=$videoEffectOutputHeight)"
   }
 }
 
@@ -1255,7 +1265,7 @@ interface AndroidVideoPlayerApi {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface VideoPlayerInstanceApi {
   /** Updates a pipeline opted in at creation time. */
-  fun setVideoEffect(effect: PlatformVideoEffect)
+  fun setVideoEffect(effect: PlatformVideoEffect, outputWidth: Long?, outputHeight: Long?)
   /** Sets whether to automatically loop playback of the video. */
   fun setLooping(looping: Boolean)
   /** Sets the volume, with 0.0 being muted and 1.0 being full volume. */
@@ -1301,8 +1311,10 @@ interface VideoPlayerInstanceApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val effectArg = args[0] as PlatformVideoEffect
+            val outputWidthArg = args[1] as Long?
+            val outputHeightArg = args[2] as Long?
             val wrapped: List<Any?> = try {
-              api.setVideoEffect(effectArg)
+              api.setVideoEffect(effectArg, outputWidthArg, outputHeightArg)
               listOf(null)
             } catch (exception: Throwable) {
               MessagesPigeonUtils.wrapError(exception)

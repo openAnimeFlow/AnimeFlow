@@ -65,6 +65,8 @@ android {
         testImplementation("org.mockito:mockito-core:5.23.0")
         testImplementation("org.robolectric:robolectric:4.16")
         testImplementation("androidx.media3:media3-test-utils:${exoplayerVersion}")
+        androidTestImplementation("androidx.test:runner:1.7.0")
+        androidTestImplementation("androidx.test.ext:junit:1.3.0")
     }
 
     testOptions {

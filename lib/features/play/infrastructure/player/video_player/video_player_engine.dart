@@ -1,4 +1,3 @@
-import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -9,17 +8,23 @@ import 'package:anime_flow/features/play/domain/player/player_capabilities.dart'
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 
 class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
-  /// 可选的 Android GPU 管线配置。
-  VideoPlayerEngine({VideoEffectConfiguration? videoEffects})
-      : _videoEffects = videoEffects;
+  /// Android 默认启用 GPU 管线，超分效果由 [setUpscalePreset] 控制。
+  VideoPlayerEngine()
+      : _videoEffects = defaultTargetPlatform == TargetPlatform.android
+            ? const VideoEffectConfiguration()
+            : null;
 
   VideoEffectConfiguration? _videoEffects;
+  VideoPlayerController? _pendingSurfaceController;
+  Size? _pendingOutputSize;
+  bool _outputSizeScheduled = false;
   late final _events = StreamController<PlayerEvent>.broadcast(onListen: () {
     _lastValue = null;
     _onChanged();
@@ -37,7 +42,11 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
   @override
   PlayerKernel get kernel => PlayerKernel.videoPlayer;
   @override
-  PlayerCapabilities get capabilities => const PlayerCapabilities();
+  PlayerCapabilities get capabilities => PlayerCapabilities(
+        supportedUpscalePresets: defaultTargetPlatform == TargetPlatform.android
+            ? const {UpscalePreset.efficiency}
+            : const {},
+      );
   @override
   Stream<PlayerEvent> get events => _events.stream;
 
@@ -60,8 +69,31 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
                 if (!value.isInitialized || value.size.isEmpty) {
                   return const SizedBox.expand();
                 }
-                return SizedBox.expand(
-                  child: FittedBox(
+                return LayoutBuilder(builder: (context, constraints) {
+                  if (_videoEffects != null &&
+                      constraints.hasBoundedWidth &&
+                      constraints.hasBoundedHeight &&
+                      !constraints.biggest.isEmpty) {
+                    final fitted =
+                        applyBoxFit(fit, value.size, constraints.biggest);
+                    final ratio = MediaQuery.devicePixelRatioOf(context);
+                    // Include the full scaled image for cover/fitWidth; clipping happens in Flutter.
+                    final size = Size(
+                      (value.size.width *
+                              fitted.destination.width /
+                              fitted.source.width *
+                              ratio)
+                          .roundToDouble(),
+                      (value.size.height *
+                              fitted.destination.height /
+                              fitted.source.height *
+                              ratio)
+                          .roundToDouble(),
+                    );
+                    _scheduleOutputSize(controller, size);
+                  }
+                  return SizedBox.expand(
+                      child: FittedBox(
                     fit: fit,
                     clipBehavior: Clip.hardEdge,
                     child: SizedBox(
@@ -69,13 +101,45 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
                       height: value.size.height,
                       child: VideoPlayer(controller),
                     ),
-                  ),
-                );
+                  ));
+                });
               },
             );
           },
         ),
       );
+
+  void _scheduleOutputSize(VideoPlayerController controller, Size size) {
+    if (size.isEmpty || !size.width.isFinite || !size.height.isFinite) return;
+    if (_videoEffects?.outputWidth == size.width &&
+        _videoEffects?.outputHeight == size.height) {
+      return;
+    }
+    _pendingSurfaceController = controller;
+    _pendingOutputSize = size;
+    if (_outputSizeScheduled) return;
+    _outputSizeScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _outputSizeScheduled = false;
+      final target = _pendingSurfaceController;
+      final output = _pendingOutputSize;
+      if (_disposed || target != _controller.value || output == null) return;
+      unawaited(_operations.run(() async {
+        if (target != _controller.value || _videoEffects == null) return;
+        final configuration = VideoEffectConfiguration(
+          effect: _videoEffects!.effect,
+          outputWidth: output.width.toInt(),
+          outputHeight: output.height.toInt(),
+        );
+        if (configuration == _videoEffects) return;
+        await target!.setVideoEffectConfiguration(configuration);
+        _ensureReady();
+        _videoEffects = configuration;
+      }).catchError((Object error) {
+        if (!_disposed) _emit(PlayerError(error));
+      }));
+    });
+  }
 
   @override
   Future<void> open(PlaybackSource source,
@@ -148,7 +212,7 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
   @override
   Future<Uint8List?> screenshot() async => null;
 
-  /// 管线须在创建 Controller 时启用。配置随切集恢复，不修改超分能力声明。
+  /// 管线须在创建 Controller 时启用。配置随切集恢复。
   Future<void> setVideoEffectConfiguration(
           VideoEffectConfiguration configuration) =>
       _operations.run(() async {
@@ -164,12 +228,24 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
       });
 
   @override
-  Future<void> setUpscalePreset(UpscalePreset preset) async {
-    _ensureReady();
-    if (!capabilities.supportsUpscalePreset(preset)) {
-      throw UnsupportedError('Video Player does not support upscaling');
-    }
-  }
+  Future<void> setUpscalePreset(UpscalePreset preset) =>
+      _operations.run(() async {
+        if (!capabilities.supportsUpscalePreset(preset)) {
+          throw UnsupportedError(
+              'Video Player does not support this upscale preset');
+        }
+        if (defaultTargetPlatform != TargetPlatform.android) return;
+        final configuration = VideoEffectConfiguration(
+          effect: preset == UpscalePreset.efficiency
+              ? VideoEffectType.anime4kEfficiency
+              : VideoEffectType.none,
+          outputWidth: _videoEffects?.outputWidth,
+          outputHeight: _videoEffects?.outputHeight,
+        );
+        await _controller.value?.setVideoEffectConfiguration(configuration);
+        _ensureReady();
+        _videoEffects = configuration;
+      });
 
   @override
   Future<double?> readCacheSpeed() async => null;

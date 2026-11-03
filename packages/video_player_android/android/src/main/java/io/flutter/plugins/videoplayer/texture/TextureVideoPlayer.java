@@ -119,8 +119,11 @@ public final class TextureVideoPlayer extends VideoPlayer implements SurfaceProd
     boolean surfaceProducerHandlesCropAndRotation =
         surfaceProducer.handlesCropAndRotation() || videoEffectPipeline != null;
     return new TextureExoPlayerEventListener(
-        exoPlayer, videoPlayerEvents, surfaceProducerHandlesCropAndRotation,
-        videoEffectPipeline != null);
+        exoPlayer,
+        videoPlayerEvents,
+        surfaceProducerHandlesCropAndRotation,
+        videoEffectPipeline != null,
+        videoEffectPipeline);
   }
 
   @RestrictTo(RestrictTo.Scope.LIBRARY)

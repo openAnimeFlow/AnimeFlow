@@ -70,6 +70,21 @@ public final class ExoPlayerEventListenerTest {
   }
 
   @Test
+  public void playbackErrorPreservesNativeCauseInChannelDetails() {
+    PlaybackException error =
+        new PlaybackException(
+            "Unexpected runtime error",
+            new IllegalStateException("Detaching surface timed out"),
+            PlaybackException.ERROR_CODE_TIMEOUT);
+    eventListener.onPlayerError(error);
+    verify(mockCallbacks)
+        .onError(
+            org.mockito.ArgumentMatchers.eq("VideoError"),
+            org.mockito.ArgumentMatchers.contains("Unexpected runtime error"),
+            org.mockito.ArgumentMatchers.contains("Detaching surface timed out"));
+  }
+
+  @Test
   public void onPlaybackStateChangedBufferingSendsBuffering() {
     eventListener.onPlaybackStateChanged(Player.STATE_BUFFERING);
 

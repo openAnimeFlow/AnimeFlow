@@ -4,9 +4,9 @@
 
 package io.flutter.plugins.videoplayer;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
 
 import androidx.media3.common.Format;
 import androidx.media3.common.Player;
@@ -36,10 +36,29 @@ public class TextureExoPlayerEventListenerTest {
   @Rule public MockitoRule initRule = MockitoJUnit.rule();
 
   @Test
+  public void layoutUsesNewSourceAspectRatioRatherThanPreviousViewport() {
+    when(mockExoPlayer.getVideoSize()).thenReturn(new VideoSize(1080, 608));
+    when(mockExoPlayer.getVideoFormat())
+        .thenReturn(new Format.Builder().setWidth(640).setHeight(480).build());
+    when(mockExoPlayer.getDuration()).thenReturn(1000L);
+    VideoEffectPipeline pipeline =
+        new VideoEffectPipeline(
+            mockExoPlayer,
+            org.mockito.Mockito.mock(io.flutter.view.TextureRegistry.SurfaceProducer.class),
+            PlatformVideoEffect.ANIME4K_EFFICIENCY);
+    pipeline.setEffect(PlatformVideoEffect.ANIME4K_EFFICIENCY, 1080L, 608L);
+    TextureExoPlayerEventListener listener =
+        new TextureExoPlayerEventListener(mockExoPlayer, mockCallbacks, true, true, pipeline);
+    listener.onPlaybackStateChanged(Player.STATE_READY);
+    verify(mockCallbacks).onInitialized(640, 480, 1000L, 0);
+    pipeline.dispose();
+  }
+
+  @Test
   public void effectPlayerUsesInputSizeWhenReadyPrecedesGpuOutputSize() {
     when(mockExoPlayer.getVideoSize()).thenReturn(VideoSize.UNKNOWN);
-    when(mockExoPlayer.getVideoFormat()).thenReturn(
-        new Format.Builder().setWidth(640).setHeight(360).build());
+    when(mockExoPlayer.getVideoFormat())
+        .thenReturn(new Format.Builder().setWidth(640).setHeight(360).build());
     when(mockExoPlayer.getDuration()).thenReturn(1000L);
     TextureExoPlayerEventListener listener =
         new TextureExoPlayerEventListener(mockExoPlayer, mockCallbacks, true, true);
@@ -51,9 +70,14 @@ public class TextureExoPlayerEventListenerTest {
   @Test
   public void effectPlayerNormalizesRotationAndPixelAspectRatioOnce() {
     when(mockExoPlayer.getVideoSize()).thenReturn(VideoSize.UNKNOWN);
-    when(mockExoPlayer.getVideoFormat()).thenReturn(new Format.Builder()
-        .setWidth(640).setHeight(360).setRotationDegrees(90)
-        .setPixelWidthHeightRatio(2f).build());
+    when(mockExoPlayer.getVideoFormat())
+        .thenReturn(
+            new Format.Builder()
+                .setWidth(640)
+                .setHeight(360)
+                .setRotationDegrees(90)
+                .setPixelWidthHeightRatio(2f)
+                .build());
     when(mockExoPlayer.getDuration()).thenReturn(1000L);
     TextureExoPlayerEventListener listener =
         new TextureExoPlayerEventListener(mockExoPlayer, mockCallbacks, true, true);
@@ -215,6 +239,25 @@ public class TextureExoPlayerEventListenerTest {
 
     eventListener.onPlaybackStateChanged(Player.STATE_READY);
     verify(mockCallbacks).onInitialized(405, 720, 10L, rotationCorrection);
+  }
+
+  @Test
+  public void anime4kInitializationUsesDoubledInputSizeBeforeFirstOutputFrame() {
+    VideoEffectPipeline pipeline =
+        new VideoEffectPipeline(
+            mockExoPlayer,
+            org.mockito.Mockito.mock(io.flutter.view.TextureRegistry.SurfaceProducer.class),
+            PlatformVideoEffect.ANIME4K_X2S);
+    TextureExoPlayerEventListener eventListener =
+        new TextureExoPlayerEventListener(mockExoPlayer, mockCallbacks, true, true, pipeline);
+    when(mockExoPlayer.getVideoSize()).thenReturn(VideoSize.UNKNOWN);
+    when(mockExoPlayer.getVideoFormat())
+        .thenReturn(
+            new Format.Builder().setWidth(640).setHeight(360).setRotationDegrees(90).build());
+    when(mockExoPlayer.getDuration()).thenReturn(10L);
+    eventListener.onPlaybackStateChanged(Player.STATE_READY);
+    verify(mockCallbacks).onInitialized(720, 1280, 10L, 0);
+    pipeline.dispose();
   }
 
   @Test

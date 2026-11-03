@@ -162,9 +162,17 @@ class MockVideoPlayerInstanceApi extends _i1.Mock
           as String);
 
   @override
-  _i4.Future<void> setVideoEffect(_i2.PlatformVideoEffect? effect) =>
+  _i4.Future<void> setVideoEffect(
+    _i2.PlatformVideoEffect? effect,
+    int? outputWidth,
+    int? outputHeight,
+  ) =>
       (super.noSuchMethod(
-            Invocation.method(#setVideoEffect, [effect]),
+            Invocation.method(#setVideoEffect, [
+              effect,
+              outputWidth,
+              outputHeight,
+            ]),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
           )

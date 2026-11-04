@@ -21,6 +21,7 @@ AnimeFlow 是一款跨平台的看番软件、追番软件与动漫播放器。�
 ## 📥 下载
 
 - [下载最新版本](https://github.com/openAnimeFlow/AnimeFlow/releases)
+- Nix（x86_64-linux）：`nix run github:openAnimeFlow/AnimeFlow`，打包的是官方 Linux Release
 
 ## ✨ 功能概览
 

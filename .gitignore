@@ -52,3 +52,7 @@ app.*.map.json
 /.codegraph/
 # Widget Preview related
 .widget_preview/
+
+# Nix
+result
+result-*

@@ -47,13 +47,17 @@
   zlib,
 }:
 
+let
+  # Written by .github/workflows/nix-update.yml on every release.
+  release = lib.importJSON ./release.json;
+in
 stdenv.mkDerivation (finalAttrs: {
   pname = "animeflow";
-  version = "2.6.7";
+  inherit (release) version;
 
   src = fetchurl {
     url = "https://github.com/openAnimeFlow/AnimeFlow/releases/download/v${finalAttrs.version}/AnimeFlow-linux-${finalAttrs.version}.tar.gz";
-    hash = "sha256:2b498b2df5eff1855c50fd7773b3c7551df74614bbab4157a7709ff22e79a11b";
+    inherit (release) hash;
   };
 
   sourceRoot = ".";
@@ -106,7 +110,7 @@ stdenv.mkDerivation (finalAttrs: {
     zlib
   ];
 
-  # libdartjni only reaches libjvm on Android; the desktop build never loads it.
+  # libdartjni links libjvm, but the desktop app does not load it.
   autoPatchelfIgnoreMissingDeps = [ "libjvm.so" ];
 
   # dlopen resolves against the calling library's RUNPATH, which is not transitive:

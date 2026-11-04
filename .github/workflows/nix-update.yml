@@ -1,0 +1,56 @@
+name: Update Nix package
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Published release tag'
+        type: string
+        required: true
+
+jobs:
+  update:
+    name: Point the flake at the release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - uses: cachix/install-nix-action@v31
+
+      - name: Hash the published tarball
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${TAG#v}"
+          url="https://github.com/openAnimeFlow/AnimeFlow/releases/download/${TAG}/AnimeFlow-linux-${version}.tar.gz"
+          hash="$(nix store prefetch-file --json "$url" | jq -r .hash)"
+          jq -n --arg version "$version" --arg hash "$hash" '{$version, $hash}' > nix/release.json
+
+      # Fails on a wrong hash or on a shared library the package does not provide yet.
+      - name: Build the package
+        run: nix build .#animeflow --no-link
+
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet nix/release.json; then
+            echo "nix/release.json is already at ${TAG}."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898583+github-actions[bot]@users.noreply.github.com'
+          git commit -m "chore(nix): update package to ${TAG}" nix/release.json
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -604,3 +604,13 @@ jobs:
             --write-out '\nHTTP status: %{http_code}\nRequest time: %{time_total}s\n'
           echo
           echo "Latest release cache cleared."
+
+  update-nix:
+    needs: [resolve-source, build-linux, release]
+    # build-linux is skipped when a manual run selects other platforms.
+    if: ${{ !cancelled() && needs.release.result == 'success' && needs.build-linux.result == 'success' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/nix-update.yml
+    with:
+      tag: ${{ needs.resolve-source.outputs.tag }}

@@ -877,5 +877,17 @@
   "rulesMirrorSubtitle": "用于规则列表、下载与更新",
   "updateDownloadRoute": "下载线路",
   "updateDownloadRouteHint": "您可以在下方选择下载线路",
-  "startUpdateDownload": "开始下载"
+  "startUpdateDownload": "开始下载",
+  "updatesHeroTitle": "每一次更新，\n都让体验更进一步。",
+  "updatesHeroSubtitle": "查看 AnimeFlow 的版本记录与改进",
+  "updatesLatest": "最新",
+  "updatesHistory": "历史版本",
+  "updatesScrollHint": "向下滚动查看更多",
+  "updatesErrorTitle": "暂时无法获取更新",
+  "updatesErrorHint": "请检查网络连接，然后重试",
+  "updatesEmptyTitle": "还没有更新记录",
+  "updatesEmptyHint": "有新版本时，更新信息会显示在这里",
+  "updatesReload": "重新加载",
+  "updatesNoNotes": "暂无更新说明",
+  "updatesViewGithub": "查看 GitHub 版本"
 }

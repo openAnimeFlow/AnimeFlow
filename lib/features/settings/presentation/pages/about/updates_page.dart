@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -19,7 +21,9 @@ class UpdatesPage extends ConsumerStatefulWidget {
 
 class _UpdatesPageState extends ConsumerState<UpdatesPage> {
   final ScrollController _scrollController = ScrollController();
+
   ReleasesState? get _data => ref.read(releasesProvider).asData?.value;
+
   bool get _hasMore => _data?.hasMore ?? false;
 
   @override
@@ -77,74 +81,98 @@ class _UpdatesPageState extends ConsumerState<UpdatesPage> {
         _ensureScrollableOrLoadMore();
       }
     });
-    final data = result.asData?.value;
-    final releases = data?.releases ?? const <GithubRelease>[];
-    final isLoading = result.isLoading;
-    final error = result.error;
-    final isLoadingMore = data?.isLoadingMore ?? false;
-    final loadMoreError = data?.loadMoreError;
     return SettingsPageBuilder(
-        builder: (context, glassStyle) => Scaffold(
-              extendBodyBehindAppBar: glassStyle,
-              appBar: AdaptiveAppBar(
-                  glassStyle: glassStyle, title: Text(l10n.projectUpdates)),
-              body: isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : error != null
-                      ? _ErrorView(
-                          message: _errorMessage(error, l10n),
-                          onRetry: _loadInitial,
-                        )
-                      : releases.isEmpty
-                          ? _ErrorView(
-                              message: l10n.noData,
-                              onRetry: _loadInitial,
-                            )
-                          : RefreshIndicator(
-                              edgeOffset:
-                                  SettingsPageBuilder.topInsetOf(context),
-                              onRefresh: _loadInitial,
-                              child: ListView.separated(
-                                controller: _scrollController,
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                padding: (const EdgeInsets.all(16)).add(
-                                    EdgeInsets.only(
-                                        top: SettingsPageBuilder.topInsetOf(
-                                            context))),
-                                itemCount: releases.length +
-                                    (isLoadingMore || loadMoreError != null
-                                        ? 1
-                                        : 0),
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(height: 5),
-                                itemBuilder: (context, index) {
-                                  if (index == releases.length) {
-                                    if (loadMoreError != null) {
-                                      return Center(
-                                        child: TextButton.icon(
-                                          onPressed: _loadMore,
-                                          icon: const Icon(Icons.refresh),
-                                          label: Text(
-                                            _errorMessage(loadMoreError, l10n),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                    return const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(12),
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
-                                  }
-                                  return _ReleaseCard(
-                                    release: releases[index],
-                                    initiallyExpanded: index == 0,
-                                  );
-                                },
+      builder: (context, glassStyle) {
+        final colors = Theme.of(context).colorScheme;
+        return Scaffold(
+          backgroundColor: colors.surface,
+          extendBodyBehindAppBar: glassStyle,
+          appBar: AdaptiveAppBar(
+            glassStyle: glassStyle,
+            backgroundColor: colors.surface,
+            title: Text(l10n.projectUpdates),
+          ),
+          body: Stack(children: [
+            const Positioned.fill(child: _Background()),
+            result.when(
+              skipLoadingOnRefresh: false,
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stackTrace) => _StatusView(
+                title: l10n.updatesErrorTitle,
+                message: _errorMessage(error, l10n),
+                fallback: l10n.projectUpdatesLoadFailed,
+                hint: l10n.updatesErrorHint,
+                onRetry: _loadInitial,
+              ),
+              data: (data) {
+                final releases = data.releases;
+                final loadMoreError = data.loadMoreError;
+                if (releases.isEmpty) {
+                  return _StatusView(
+                    title: l10n.updatesEmptyTitle,
+                    hint: l10n.updatesEmptyHint,
+                    onRetry: _loadInitial,
+                  );
+                }
+                return RefreshIndicator(
+                  edgeOffset: SettingsPageBuilder.topInsetOf(context),
+                  onRefresh: _loadInitial,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(16,
+                        SettingsPageBuilder.topInsetOf(context) + 24, 16, 32),
+                    itemCount: releases.length +
+                        1 +
+                        (data.isLoadingMore || loadMoreError != null ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == 0) return const _Hero();
+                      final releaseIndex = index - 1;
+                      if (releaseIndex == releases.length) {
+                        if (loadMoreError != null) {
+                          return Center(
+                              child: TextButton.icon(
+                            onPressed: _loadMore,
+                            icon: const Icon(Icons.refresh),
+                            label: Text(_errorMessage(loadMoreError, l10n)),
+                          ));
+                        }
+                        return const Center(
+                            child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
+                        ));
+                      }
+                      final release = releases[releaseIndex];
+                      return Center(
+                          child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1500),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (releaseIndex == 1)
+                              _HistoryHeading(hasMore: data.hasMore),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _ReleaseCard(
+                                key: ValueKey(
+                                    'release-$releaseIndex-${release.tagName}'),
+                                release: release,
+                                initiallyExpanded: releaseIndex == 0,
                               ),
                             ),
-            ));
+                          ],
+                        ),
+                      ));
+                    },
+                  ),
+                );
+              },
+            ),
+          ]),
+        );
+      },
+    );
   }
 
   String _errorMessage(Object? error, AppLocalizations l10n) {
@@ -160,74 +188,235 @@ class _UpdatesPageState extends ConsumerState<UpdatesPage> {
   }
 }
 
+class _Background extends StatelessWidget {
+  const _Background();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
+    Widget glow(double size, double opacity) => Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(colors: [
+              scheme.primary.withValues(alpha: opacity),
+              scheme.primary.withValues(alpha: 0),
+            ]),
+          ),
+        );
+    return IgnorePointer(child: LayoutBuilder(builder: (context, constraints) {
+      return Stack(clipBehavior: Clip.hardEdge, children: [
+        Positioned(right: -100, top: 0, child: glow(330, dark ? .22 : .18)),
+        Positioned(
+            left: -160,
+            top: constraints.maxHeight * .53,
+            child: glow(320, dark ? .14 : .12)),
+      ]);
+    }));
+  }
+}
+
+class _Hero extends StatelessWidget {
+  const _Hero();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
+    return Center(
+        child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 1500),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Column(
+              spacing: 15,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.updatesHeroTitle,
+                    style: TextStyle(
+                        color: colors.onSurface,
+                        fontSize: 26,
+                        height: 1.25,
+                        fontWeight: FontWeight.bold)),
+                Text(l10n.updatesHeroSubtitle,
+                    style: TextStyle(
+                        color: colors.onSurfaceVariant, fontSize: 13)),
+              ]),
+        ),
+      ),
+    ));
+  }
+}
+
+class _HistoryHeading extends StatelessWidget {
+  const _HistoryHeading({required this.hasMore});
+
+  final bool hasMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
+    return Padding(
+        padding: const EdgeInsets.fromLTRB(8, 12, 8, 14),
+        child: Row(children: [
+          Expanded(
+              child: Text(l10n.updatesHistory,
+                  style: TextStyle(
+                      color: colors.onSurface,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold))),
+          if (hasMore)
+            Text(l10n.updatesScrollHint,
+                style: TextStyle(color: colors.onSurfaceVariant, fontSize: 11)),
+        ]));
+  }
+}
+
 class _ReleaseCard extends StatelessWidget {
-  const _ReleaseCard({
-    required this.release,
-    required this.initiallyExpanded,
-  });
+  const _ReleaseCard(
+      {super.key, required this.release, required this.initiallyExpanded});
 
   final GithubRelease release;
   final bool initiallyExpanded;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: ExpansionTile(
-        shape: const RoundedRectangleBorder(side: BorderSide.none),
-        collapsedShape: const RoundedRectangleBorder(
-          side: BorderSide.none,
-        ),
-        initiallyExpanded: initiallyExpanded,
-        title: Text(
-          release.name.isNotEmpty ? release.name : release.tagName,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(_formatCreatedAt(release.createdAt)),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        children: [
-          const Divider(),
-          MarkdownBody(
-            data: release.body.isEmpty ? '暂无更新说明' : release.body,
-            selectable: true,
-            styleSheet: MarkdownStyleSheet(
-              p: TextStyle(color: colorScheme.onSurface, height: 1.45),
-              h1: TextStyle(color: colorScheme.onSurface),
-              h2: TextStyle(color: colorScheme.onSurface),
-              h3: TextStyle(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-              listBullet: TextStyle(color: colorScheme.onSurface),
-              code: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                backgroundColor: colorScheme.surfaceContainerHighest,
-              ),
+    final colors = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final dark = colors.brightness == Brightness.dark;
+    return Container(
+      decoration:
+          BoxDecoration(borderRadius: BorderRadius.circular(22), boxShadow: [
+        BoxShadow(
+            color: colors.shadow.withValues(alpha: dark ? .12 : .06),
+            blurRadius: 24,
+            offset: const Offset(0, 8))
+      ]),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              color:
+                  colors.surfaceContainer.withValues(alpha: dark ? .78 : .70),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                  color: colors.outlineVariant.withValues(alpha: .45)),
             ),
-            onTapLink: (text, href, title) async {
-              if (href == null) return;
-              final uri = Uri.tryParse(href);
-              if (uri != null && await canLaunchUrl(uri)) {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
-            },
+            child: ExpansionTile(
+              initiallyExpanded: initiallyExpanded,
+              shape: const RoundedRectangleBorder(side: BorderSide.none),
+              collapsedShape:
+                  const RoundedRectangleBorder(side: BorderSide.none),
+              tilePadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+              iconColor: colors.primary,
+              collapsedIconColor: colors.onSurfaceVariant,
+              title: Row(children: [
+                if (initiallyExpanded)
+                  Container(
+                      width: 4,
+                      height: 38,
+                      margin: const EdgeInsets.only(right: 10),
+                      decoration: BoxDecoration(
+                          color: colors.primary,
+                          borderRadius: BorderRadius.circular(2))),
+                Expanded(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                      Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 10,
+                          runSpacing: 4,
+                          children: [
+                            Text(
+                                release.name.isNotEmpty
+                                    ? release.name
+                                    : release.tagName,
+                                style: TextStyle(
+                                    color: colors.onSurface,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: initiallyExpanded ? 19 : 15)),
+                            if (initiallyExpanded)
+                              Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                      color: colors.primaryContainer,
+                                      borderRadius: BorderRadius.circular(20)),
+                                  child: Text(l10n.updatesLatest,
+                                      style: TextStyle(
+                                          color: colors.onPrimaryContainer,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold))),
+                          ]),
+                      const SizedBox(height: 5),
+                      Text(_formatCreatedAt(release.createdAt),
+                          style: TextStyle(
+                              color: colors.onSurfaceVariant, fontSize: 12)),
+                    ])),
+              ]),
+              children: [
+                Divider(color: colors.outlineVariant, height: 1),
+                const SizedBox(height: 20),
+                MarkdownBody(
+                  data:
+                      release.body.isEmpty ? l10n.updatesNoNotes : release.body,
+                  selectable: true,
+                  styleSheet: MarkdownStyleSheet(
+                    p: TextStyle(
+                        color: colors.onSurface, height: 1.5, fontSize: 13),
+                    h1: TextStyle(
+                        color: colors.onSurface, fontWeight: FontWeight.bold),
+                    h2: TextStyle(
+                        color: colors.onSurface, fontWeight: FontWeight.bold),
+                    h3: TextStyle(
+                        color: colors.primary, fontWeight: FontWeight.bold),
+                    listBullet: TextStyle(color: colors.onSurface),
+                    code: TextStyle(
+                        color: colors.onSurfaceVariant,
+                        backgroundColor: colors.surfaceContainerHighest),
+                    a: TextStyle(color: colors.primary),
+                  ),
+                  onTapLink: (text, href, title) async {
+                    if (href == null) return;
+                    final uri = Uri.tryParse(href);
+                    if (uri != null && await canLaunchUrl(uri)) {
+                      await launchUrl(uri,
+                          mode: LaunchMode.externalApplication);
+                    }
+                  },
+                ),
+                if (release.htmlUrl.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  Divider(color: colors.outlineVariant, height: 1),
+                  Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () async {
+                          final uri = Uri.tryParse(release.htmlUrl);
+                          if (uri != null) {
+                            await launchUrl(uri,
+                                mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        iconAlignment: IconAlignment.end,
+                        icon: const Icon(Icons.open_in_new, size: 17),
+                        label: Text(l10n.updatesViewGithub),
+                      )),
+                ],
+              ],
+            ),
           ),
-          if (release.htmlUrl.isNotEmpty)
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: () async {
-                  final uri = Uri.tryParse(release.htmlUrl);
-                  if (uri != null) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  }
-                },
-                icon: const Icon(Icons.open_in_new, size: 18),
-                label: const Text('GitHub'),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -239,36 +428,46 @@ class _ReleaseCard extends StatelessWidget {
   }
 }
 
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message, required this.onRetry});
+class _StatusView extends StatelessWidget {
+  const _StatusView(
+      {required this.title,
+      required this.hint,
+      required this.onRetry,
+      this.message,
+      this.fallback});
 
-  final String message;
+  final String title, hint;
+  final String? message, fallback;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
+    final colors = Theme.of(context).colorScheme;
+    final detail = message != null && message != fallback ? message! : hint;
+    return Padding(
+      padding: EdgeInsets.only(top: SettingsPageBuilder.topInsetOf(context)),
+      child: Center(
+          child: SingleChildScrollView(
+              child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            FilledButton.icon(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text(title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: colors.onSurface,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          Text(detail,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: colors.onSurfaceVariant, fontSize: 13)),
+          const SizedBox(height: 24),
+          FilledButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: Text(AppLocalizations.of(context).retry),
-            ),
-          ],
-        ),
-      ),
+              icon: const Icon(Icons.refresh, size: 18),
+              label: Text(AppLocalizations.of(context).updatesReload)),
+        ]),
+      ))),
     );
   }
 }

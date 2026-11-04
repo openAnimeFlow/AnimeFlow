@@ -2643,4 +2643,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get startUpdateDownload => 'Start download';
+
+  @override
+  String get updatesHeroTitle => 'Every update makes\nthe experience better.';
+
+  @override
+  String get updatesHeroSubtitle =>
+      'Explore AnimeFlow releases and improvements';
+
+  @override
+  String get updatesLatest => 'Latest';
+
+  @override
+  String get updatesHistory => 'Previous releases';
+
+  @override
+  String get updatesScrollHint => 'Scroll to see more';
+
+  @override
+  String get updatesErrorTitle => 'Unable to load updates';
+
+  @override
+  String get updatesErrorHint => 'Check your connection and try again';
+
+  @override
+  String get updatesEmptyTitle => 'No releases yet';
+
+  @override
+  String get updatesEmptyHint => 'New release notes will appear here';
+
+  @override
+  String get updatesReload => 'Reload';
+
+  @override
+  String get updatesNoNotes => 'No release notes';
+
+  @override
+  String get updatesViewGithub => 'View on GitHub';
 }

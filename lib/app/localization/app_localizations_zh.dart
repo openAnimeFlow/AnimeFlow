@@ -2554,6 +2554,42 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get startUpdateDownload => '开始下载';
+
+  @override
+  String get updatesHeroTitle => '每一次更新，\n都讓體驗更進一步。';
+
+  @override
+  String get updatesHeroSubtitle => '查看 AnimeFlow 的版本記錄與改進';
+
+  @override
+  String get updatesLatest => '最新';
+
+  @override
+  String get updatesHistory => '歷史版本';
+
+  @override
+  String get updatesScrollHint => '向下捲動查看更多';
+
+  @override
+  String get updatesErrorTitle => '暫時無法取得更新';
+
+  @override
+  String get updatesErrorHint => '請檢查網路連線，然後重試';
+
+  @override
+  String get updatesEmptyTitle => '還沒有更新記錄';
+
+  @override
+  String get updatesEmptyHint => '有新版本時，更新資訊會顯示在這裡';
+
+  @override
+  String get updatesReload => '重新載入';
+
+  @override
+  String get updatesNoNotes => '暫無更新說明';
+
+  @override
+  String get updatesViewGithub => '查看 GitHub 版本';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -5105,6 +5141,42 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get startUpdateDownload => '开始下载';
+
+  @override
+  String get updatesHeroTitle => '每一次更新，\n都让体验更进一步。';
+
+  @override
+  String get updatesHeroSubtitle => '查看 AnimeFlow 的版本记录与改进';
+
+  @override
+  String get updatesLatest => '最新';
+
+  @override
+  String get updatesHistory => '历史版本';
+
+  @override
+  String get updatesScrollHint => '向下滚动查看更多';
+
+  @override
+  String get updatesErrorTitle => '暂时无法获取更新';
+
+  @override
+  String get updatesErrorHint => '请检查网络连接，然后重试';
+
+  @override
+  String get updatesEmptyTitle => '还没有更新记录';
+
+  @override
+  String get updatesEmptyHint => '有新版本时，更新信息会显示在这里';
+
+  @override
+  String get updatesReload => '重新加载';
+
+  @override
+  String get updatesNoNotes => '暂无更新说明';
+
+  @override
+  String get updatesViewGithub => '查看 GitHub 版本';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -7657,6 +7729,42 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get startUpdateDownload => '開始下載';
+
+  @override
+  String get updatesHeroTitle => '每一次更新，\n都讓體驗更進一步。';
+
+  @override
+  String get updatesHeroSubtitle => '查看 AnimeFlow 的版本記錄與改進';
+
+  @override
+  String get updatesLatest => '最新';
+
+  @override
+  String get updatesHistory => '歷史版本';
+
+  @override
+  String get updatesScrollHint => '向下捲動查看更多';
+
+  @override
+  String get updatesErrorTitle => '暫時無法取得更新';
+
+  @override
+  String get updatesErrorHint => '請檢查網絡連線，然後重試';
+
+  @override
+  String get updatesEmptyTitle => '還沒有更新記錄';
+
+  @override
+  String get updatesEmptyHint => '有新版本時，更新資訊會顯示在這裡';
+
+  @override
+  String get updatesReload => '重新載入';
+
+  @override
+  String get updatesNoNotes => '暫無更新說明';
+
+  @override
+  String get updatesViewGithub => '查看 GitHub 版本';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -10210,4 +10318,40 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get startUpdateDownload => '開始下載';
+
+  @override
+  String get updatesHeroTitle => '每一次更新，\n都讓體驗更進一步。';
+
+  @override
+  String get updatesHeroSubtitle => '查看 AnimeFlow 的版本記錄與改進';
+
+  @override
+  String get updatesLatest => '最新';
+
+  @override
+  String get updatesHistory => '歷史版本';
+
+  @override
+  String get updatesScrollHint => '向下捲動查看更多';
+
+  @override
+  String get updatesErrorTitle => '暫時無法取得更新';
+
+  @override
+  String get updatesErrorHint => '請檢查網路連線，然後重試';
+
+  @override
+  String get updatesEmptyTitle => '還沒有更新記錄';
+
+  @override
+  String get updatesEmptyHint => '有新版本時，更新資訊會顯示在這裡';
+
+  @override
+  String get updatesReload => '重新載入';
+
+  @override
+  String get updatesNoNotes => '暫無更新說明';
+
+  @override
+  String get updatesViewGithub => '查看 GitHub 版本';
 }

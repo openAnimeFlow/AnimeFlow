@@ -871,5 +871,17 @@
   "rulesMirrorSubtitle": "Used for rule lists, downloads and updates",
   "updateDownloadRoute": "Download route",
   "updateDownloadRouteHint": "You can choose a download route below.",
-  "startUpdateDownload": "Start download"
+  "startUpdateDownload": "Start download",
+  "updatesHeroTitle": "Every update makes\nthe experience better.",
+  "updatesHeroSubtitle": "Explore AnimeFlow releases and improvements",
+  "updatesLatest": "Latest",
+  "updatesHistory": "Previous releases",
+  "updatesScrollHint": "Scroll to see more",
+  "updatesErrorTitle": "Unable to load updates",
+  "updatesErrorHint": "Check your connection and try again",
+  "updatesEmptyTitle": "No releases yet",
+  "updatesEmptyHint": "New release notes will appear here",
+  "updatesReload": "Reload",
+  "updatesNoNotes": "No release notes",
+  "updatesViewGithub": "View on GitHub"
 }

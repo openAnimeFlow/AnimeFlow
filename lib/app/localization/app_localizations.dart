@@ -4856,6 +4856,78 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'开始下载'**
   String get startUpdateDownload;
+
+  /// No description provided for @updatesHeroTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'每一次更新，\n都让体验更进一步。'**
+  String get updatesHeroTitle;
+
+  /// No description provided for @updatesHeroSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'查看 AnimeFlow 的版本记录与改进'**
+  String get updatesHeroSubtitle;
+
+  /// No description provided for @updatesLatest.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'最新'**
+  String get updatesLatest;
+
+  /// No description provided for @updatesHistory.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'历史版本'**
+  String get updatesHistory;
+
+  /// No description provided for @updatesScrollHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'向下滚动查看更多'**
+  String get updatesScrollHint;
+
+  /// No description provided for @updatesErrorTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂时无法获取更新'**
+  String get updatesErrorTitle;
+
+  /// No description provided for @updatesErrorHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请检查网络连接，然后重试'**
+  String get updatesErrorHint;
+
+  /// No description provided for @updatesEmptyTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'还没有更新记录'**
+  String get updatesEmptyTitle;
+
+  /// No description provided for @updatesEmptyHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'有新版本时，更新信息会显示在这里'**
+  String get updatesEmptyHint;
+
+  /// No description provided for @updatesReload.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重新加载'**
+  String get updatesReload;
+
+  /// No description provided for @updatesNoNotes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无更新说明'**
+  String get updatesNoNotes;
+
+  /// No description provided for @updatesViewGithub.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'查看 GitHub 版本'**
+  String get updatesViewGithub;
 }
 
 class _AppLocalizationsDelegate

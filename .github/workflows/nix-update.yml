@@ -33,6 +33,12 @@ jobs:
         run: |
           set -euo pipefail
           version="${TAG#v}"
+          current="$(jq -r .version nix/release.json)"
+          # Re-running an older release must not move the package back.
+          if [ "$(printf '%s\n' "$current" "$version" | sort -V | tail -n1)" != "$version" ]; then
+            echo "Keeping ${current}: ${TAG} is older."
+            exit 0
+          fi
           url="https://github.com/openAnimeFlow/AnimeFlow/releases/download/${TAG}/AnimeFlow-linux-${version}.tar.gz"
           hash="$(nix store prefetch-file --json "$url" | jq -r .hash)"
           jq -n --arg version "$version" --arg hash "$hash" '{$version, $hash}' > nix/release.json

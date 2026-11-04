@@ -46,16 +46,14 @@ class PlaybackCoordinator {
     if (_disposed) {
       return Future<void>.error(StateError('PlaybackCoordinator is disposed'));
     }
-    return _initialization ??= _initialize(kernel);
-  }
-
-  Future<void> _initialize(PlayerKernel kernel) async {
-    final engine = engineFactory(kernel,
-        adBlocker: adBlocker, hardwareDecoder: hardwareDecoder);
-    _engine = engine;
-    await engine.initialize();
-    if (_disposed) return;
-    _subscribeToEngine(engine);
+    return _initialization ??= (() async {
+      final engine = engineFactory(kernel,
+          adBlocker: adBlocker, hardwareDecoder: hardwareDecoder);
+      _engine = engine;
+      await engine.initialize();
+      if (_disposed) return;
+      _subscribeToEngine(engine);
+    })();
   }
 
   Future<void> open(

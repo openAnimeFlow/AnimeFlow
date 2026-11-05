@@ -39,11 +39,23 @@ jobs:
           cache: true
       - name: Install application dependencies
         run: flutter pub get --enforce-lockfile
+      - name: Install video player dependencies
+        working-directory: packages/video_player
+        run: flutter pub get
+      - name: Install Android video player dependencies
+        working-directory: packages/video_player_android
+        run: flutter pub get
+      - name: Install video player platform interface dependencies
+        working-directory: packages/video_player_platform_interface
+        run: flutter pub get
       - name: Install isolated architecture dependencies
         working-directory: tool/architecture_guard
         run: dart pub get --enforce-lockfile
       - name: Check architecture formatting
         run: dart format --output=none --set-exit-if-changed test/architecture tool/architecture_guard
+      - name: Verify Android Anime4K shader assets
+        # Use the isolated tool context to avoid app native build hooks.
+        run: dart --packages=tool/architecture_guard/.dart_tool/package_config.json tool/generate_android_anime4k.dart --check
       - name: Static analysis including Riverpod plugin
         run: flutter analyze --no-pub --fatal-infos
       - name: Analyze architecture tool

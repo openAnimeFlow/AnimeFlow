@@ -136,6 +136,13 @@ dependencies:
   crop_your_image: ^2.0.0 # 在 Flutter 中对图片进行交互式裁剪。
 
 dependency_overrides:
+  # Local video effect bridge; keep these three packages in sync.
+  video_player:
+    path: packages/video_player
+  video_player_android:
+    path: packages/video_player_android
+  video_player_platform_interface:
+    path: packages/video_player_platform_interface
   wakelock_plus: 1.8.0
 
 # logo图标生成生成命令:dart run flutter_launcher_icons

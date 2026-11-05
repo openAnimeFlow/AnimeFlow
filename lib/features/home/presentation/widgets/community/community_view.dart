@@ -16,7 +16,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class CommunityView extends ConsumerStatefulWidget {
-  const CommunityView({super.key});
+  const CommunityView({super.key, required this.active});
+
+  final bool active;
 
   @override
   ConsumerState<CommunityView> createState() => _CommunityPageState();
@@ -24,7 +26,43 @@ class CommunityView extends ConsumerStatefulWidget {
 
 class _CommunityPageState extends ConsumerState<CommunityView>
     with AutomaticKeepAliveClientMixin {
+  AsyncValue<List<WatchingSubject>> _watching = const AsyncLoading();
+  AsyncValue<OnlineCount> _onlineCount = const AsyncLoading();
+  ProviderSubscription<AsyncValue<List<WatchingSubject>>>? _watchingListener;
+  ProviderSubscription<AsyncValue<OnlineCount>>? _onlineListener;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.active) _listen();
+  }
+
+  @override
+  void didUpdateWidget(CommunityView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.active == widget.active) return;
+    if (widget.active) {
+      _listen();
+    } else {
+      _watchingListener?.close();
+      _onlineListener?.close();
+    }
+  }
+
+  void _listen() {
+    _watchingListener =
+        ref.listenManual(communityWatchingSubjectsProvider, (_, next) {
+      if (next.isLoading && _watching.hasValue) return;
+      setState(() => _watching = next);
+    }, fireImmediately: true);
+    _onlineListener = ref.listenManual(communityOnlineCountProvider, (_, next) {
+      if (next.isLoading && _onlineCount.hasValue) return;
+      setState(() => _onlineCount = next);
+    }, fireImmediately: true);
+  }
+
   Future<void> _refresh() async {
+    if (!widget.active) return;
     await Future.wait([
       ref.refresh(communityWatchingSubjectsProvider.future),
       ref.refresh(communityOnlineCountProvider.future),
@@ -82,16 +120,14 @@ class _CommunityPageState extends ConsumerState<CommunityView>
           onRefresh: _refresh,
           child: Consumer(
             builder: (context, ref, _) {
-              final watching = ref.watch(communityWatchingSubjectsProvider);
-              final onlineCount = ref.watch(communityOnlineCountProvider);
               final connection = ref.watch(communityConnectionProvider);
 
               return _CommunityContent(
-                subjects: watching.value ?? const <WatchingSubject>[],
-                isWatchingLoading: watching.isLoading && !watching.hasValue,
-                onlineCount: onlineCount,
+                subjects: _watching.value ?? const <WatchingSubject>[],
+                isWatchingLoading: _watching.isLoading && !_watching.hasValue,
+                onlineCount: _onlineCount,
                 connection: connection,
-                connectionError: watching.error ?? onlineCount.error,
+                connectionError: _watching.error ?? _onlineCount.error,
                 retryLabel: l10n.retry,
                 sectionTitle: l10n.watchingAnimeTitle,
                 sectionSummary: (count, viewers) =>

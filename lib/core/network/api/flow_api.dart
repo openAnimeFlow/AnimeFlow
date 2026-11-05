@@ -113,6 +113,7 @@ class FlowApi {
             yield count;
           }
         }
+        if (cancelToken.isCancelled) return;
         if (!receivedEventFromConnection && !hasReceivedEvent) {
           throw StateError(
             'Presence online count SSE closed before its first event',
@@ -206,6 +207,7 @@ class FlowApi {
           onStatus?.call(SseConnectionStatus.connected);
           yield subjects;
         }
+        if (cancelToken.isCancelled) return;
         if (!receivedEventFromConnection && !hasReceivedEvent) {
           throw StateError(
             'Watching subjects SSE closed before its first event',

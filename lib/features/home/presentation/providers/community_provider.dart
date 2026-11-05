@@ -72,16 +72,30 @@ void _setConnectionStatus(
   required bool watchingSubjects,
   required SseConnectionStatus status,
 }) {
+  if (!ref.mounted) return;
   ref.read(communityConnectionProvider.notifier).update(
         watchingSubjects: watchingSubjects,
         status: status,
       );
 }
 
+// A quick return to the community page reuses the live connection.
+void _keepSubscriptionDuringNavigation(Ref ref) {
+  final link = ref.keepAlive();
+  Timer? timer;
+  ref.onCancel(() {
+    timer?.cancel();
+    timer = Timer(const Duration(seconds: 10), link.close);
+  });
+  ref.onResume(() => timer?.cancel());
+  ref.onDispose(() => timer?.cancel());
+}
+
 @riverpod
 class CommunityWatchingSubjects extends _$CommunityWatchingSubjects {
   @override
   Future<List<WatchingSubject>> build() async {
+    _keepSubscriptionDuringNavigation(ref);
     final cancelToken = CancelToken();
     final stream = FlowApi.getWatchingSubjects(
       cancelToken,
@@ -119,6 +133,7 @@ class CommunityWatchingSubjects extends _$CommunityWatchingSubjects {
 class CommunityOnlineCount extends _$CommunityOnlineCount {
   @override
   Future<OnlineCount> build() async {
+    _keepSubscriptionDuringNavigation(ref);
     final cancelToken = CancelToken();
     final stream = FlowApi.getPresenceOnlineCount(
       cancelToken,

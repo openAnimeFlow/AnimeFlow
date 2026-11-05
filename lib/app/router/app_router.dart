@@ -106,8 +106,15 @@ class RecommendRoute extends GoRouteData with $RecommendRoute {
   const RecommendRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const RecommendPage();
+  Widget build(BuildContext context, GoRouterState state) {
+    final delegate = GoRouter.of(context).routerDelegate;
+    return ListenableBuilder(
+      listenable: delegate,
+      builder: (context, _) => RecommendPage(
+        active: delegate.state.matchedLocation == state.matchedLocation,
+      ),
+    );
+  }
 }
 
 class RankingRoute extends GoRouteData with $RankingRoute {

@@ -13,7 +13,9 @@ import 'package:anime_flow/shared/widgets/top_occlusion.dart';
 import 'package:material_ui/material_ui.dart';
 
 class RecommendPage extends StatefulWidget {
-  const RecommendPage({super.key});
+  const RecommendPage({super.key, required this.active});
+
+  final bool active;
 
   @override
   State<RecommendPage> createState() => _RecommendPageState();
@@ -136,7 +138,9 @@ class _RecommendPageState extends State<RecommendPage>
                 controller: _tabController,
                 children: [
                   const AnimeView(),
-                  const CommunityView(),
+                  CommunityView(
+                    active: widget.active && _tabController.index == 1,
+                  ),
                   WallpaperView(onOpen: onOpenWallpaper),
                 ],
               ),

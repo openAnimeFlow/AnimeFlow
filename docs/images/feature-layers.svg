@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="516" viewBox="0 0 800 516"
+     role="img" aria-labelledby="title description">
+  <title id="title">各层之间的关系</title>
+  <desc id="description">表现层依赖应用层，应用层依赖领域层。基础设施层向上实现领域接口。</desc>
+  <style>
+    text { font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif; }
+    .heading { font-size: 24px; font-weight: 700; fill: #f5f5f5; }
+    .layer { font-size: 15px; font-weight: 650; fill: #f5f6f7; }
+    .detail { font-size: 13px; fill: #bfc2c6; }
+    .note { font-size: 12px; fill: #a9a9a9; }
+    .arrow { fill: none; stroke: #949494; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+
+  <rect width="800" height="516" fill="#181818"/>
+  <text class="heading" x="30" y="37">一、各层之间的关系</text>
+  <rect x="31.5" y="57.5" width="737" height="441" rx="16" fill="none" stroke="#303030"/>
+
+  <g text-anchor="middle">
+    <rect x="44.5" y="70.5" width="711" height="69" rx="12" fill="#1d242e" stroke="#2a425e"/>
+    <text class="layer" x="400" y="100">Presentation</text>
+    <text class="detail" x="400" y="124">Flutter Widget、Riverpod UI 状态、用户交互</text>
+    <path class="arrow" d="M400 151v9m-3.5-3.5 3.5 3.5 3.5-3.5"/>
+
+    <rect x="44.5" y="178.5" width="711" height="69" rx="12" fill="#1d242e" stroke="#2a425e"/>
+    <text class="layer" x="400" y="208">Application</text>
+    <text class="detail" x="400" y="232">用例、业务流程、事务协调、会话生命周期</text>
+    <path class="arrow" d="M400 259v9m-3.5-3.5 3.5 3.5 3.5-3.5"/>
+
+    <rect x="44.5" y="286.5" width="711" height="69" rx="12" fill="#192620" stroke="#24503b"/>
+    <text class="layer" x="400" y="316">Domain</text>
+    <text class="detail" x="400" y="340">业务模型、规则、Repository 接口、能力契约</text>
+    <path class="arrow" d="M356 376v-9m-3.5 3.5 3.5-3.5 3.5 3.5"/>
+    <text class="note" x="372" y="376" text-anchor="start">实现领域接口</text>
+
+    <rect x="44.5" y="394.5" width="711" height="69" rx="12" fill="#181818" stroke="#303030"/>
+    <text class="layer" x="400" y="424">Infrastructure</text>
+    <text class="detail" x="400" y="448">mpv、Dio、Hive、文件系统、原生平台 API</text>
+    <text class="note" x="400" y="485">箭头表示源码依赖方向，运行时通过领域接口调用具体实现。</text>
+  </g>
+</svg>

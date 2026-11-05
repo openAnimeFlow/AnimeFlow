@@ -37,7 +37,7 @@ final class EpisodesProvider
   Episodes create() => Episodes();
 }
 
-String _$episodesHash() => r'cd6c01f10ad5f51814fc803acb59b7aedcbf3e08';
+String _$episodesHash() => r'a0c8bdecd0761b64e19ffb8d3f571290b6969992';
 
 abstract class _$Episodes extends $AsyncNotifier<EpisodesData> {
   FutureOr<EpisodesData> build();

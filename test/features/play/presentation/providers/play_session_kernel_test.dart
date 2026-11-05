@@ -1,16 +1,20 @@
+import 'package:anime_flow/features/play/infrastructure/settings/stored_play_preferences.dart';
+import 'package:anime_flow/features/play/infrastructure/history/hive_play_history_repository.dart';
+import 'package:anime_flow/features/play/infrastructure/player/native_playback_platform.dart';
+import 'package:anime_flow/features/play/infrastructure/danmaku/flow_danmaku_repository.dart';
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
-import 'package:anime_flow/features/play/application/play_request.dart';
+import 'package:anime_flow/features/play/domain/play_request.dart';
 import 'package:anime_flow/features/play/application/play_session.dart';
-import 'package:anime_flow/features/play/application/play_state.dart';
+import 'package:anime_flow/features/play/domain/play_state.dart';
 import 'package:anime_flow/features/play/domain/player/video_fit.dart';
 import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/core/settings/storage_key.dart';
-import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
-import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/infrastructure/danmaku/opencc_converter.dart';
+import 'package:anime_flow/features/play/domain/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
@@ -20,8 +24,7 @@ import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
-import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/domain/play_session_actions.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -419,10 +422,17 @@ class _Session extends PlaySession {
 
   _Session._(_Factory factory, _State state)
       : super(
+          preferences: StoredPlayPreferences(),
+          platform: NativePlaybackPlatform(),
+          history: HivePlayHistoryRepository(),
+          markEpisodeWatched: (_) async {},
           playStateActions: state,
           readPlayState: () => state._value,
           episodesActions: _Episodes(),
           danmaku: DanmakuSession(
+            repository: FlowDanmakuRepository(),
+            useDanmakuColor: () => true,
+            saveEnabled: (_) {},
             store: _DanmakuStore(),
             converter: DanmakuChineseConverter(),
             initialChineseMode: DanmakuChineseMode.none,
@@ -560,7 +570,7 @@ class _Settings implements Box<dynamic> {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-class _State implements PlayStateNotifier {
+class _State implements PlayStateActions {
   PlayState _value = const PlayState(playing: true);
   @override
   void setUpscalePreset(UpscalePreset preset) {
@@ -591,7 +601,7 @@ class _State implements PlayStateNotifier {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-class _Episodes implements Episodes {
+class _Episodes implements EpisodeActions {
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }

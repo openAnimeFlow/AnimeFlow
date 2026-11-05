@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
-import 'package:anime_flow/core/crawler/captcha_page_url.dart';
-import 'package:anime_flow/features/play/presentation/controllers/captcha_controller.dart';
+import 'package:anime_flow/shared/models/player/play/video/captcha_challenge.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
+import 'package:anime_flow/features/play/domain/captcha_session.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
@@ -11,7 +12,7 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// 验证码 UI。
-class CaptchaView extends StatefulWidget {
+class CaptchaView extends ConsumerStatefulWidget {
   const CaptchaView({
     super.key,
     required this.resource,
@@ -26,11 +27,11 @@ class CaptchaView extends StatefulWidget {
   final bool keyboardInsetHandled;
 
   @override
-  State<CaptchaView> createState() => _CaptchaViewState();
+  ConsumerState<CaptchaView> createState() => _CaptchaViewState();
 }
 
-class _CaptchaViewState extends State<CaptchaView> {
-  CaptchaController? _provider;
+class _CaptchaViewState extends ConsumerState<CaptchaView> {
+  CaptchaSession? _provider;
   Timer? _verifyTimer;
   StreamSubscription? _imageSub;
   final _codeController = TextEditingController();
@@ -65,7 +66,7 @@ class _CaptchaViewState extends State<CaptchaView> {
     final keyword = widget.subjectName;
 
     _disposeSession();
-    _provider = CaptchaController();
+    _provider = ref.read(captchaSessionFactoryProvider)();
     final name = widget.resource.websiteName;
     // API 规则没有搜索页，验证页地址来自规则的 captchaPageUrl
     // （见 CrawlConfigItem.captchaPageTemplate）。

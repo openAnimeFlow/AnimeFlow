@@ -1,6 +1,7 @@
 /// 源码来自: https://github.com/Predidit/Kazumi/blob/main/lib/services/logging/logger.dart 进行改进
 library;
 
+import 'app_log.dart' as app_log;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -237,6 +238,9 @@ bool _errorLoggingInitialized = false;
 void initializeErrorLogging() {
   if (_errorLoggingInitialized) return;
   _errorLoggingInitialized = true;
+  final logger = LiggLogger();
+  app_log.logWarning = logger.w;
+  app_log.logError = logger.e;
 
   final previousFlutterError = FlutterError.onError;
   FlutterError.onError = (details) {

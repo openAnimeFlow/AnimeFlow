@@ -1,13 +1,14 @@
 import 'dart:async';
 
 import 'package:anime_flow/features/play/application/play_session.dart';
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/utils/player_screenshot.dart';
-import 'package:anime_flow/core/settings/player_shortcut_settings.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/shared/models/player/player_shortcut_action.dart';
+import 'package:anime_flow/core/input/player_shortcut_bindings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -49,16 +50,18 @@ class _DesktopGestureDetectorState
     super.dispose();
   }
 
-  bool _isFastForwardShortcut(int pressed) =>
-      PlayerShortcutAction.longPressFastForward
-          .readBindings()
-          .any((binding) => binding.id == pressed);
+  bool _isFastForwardShortcut(int pressed) => ref
+      .read(playPreferencesProvider)
+      .shortcutIds(PlayerShortcutAction.longPressFastForward)
+      .contains(pressed);
 
   void _startTemporaryFastForward() {
     if (_isSpeedBoosting || !ref.read(playStateProvider).playing) return;
 
     _isSpeedBoosting = true;
-    playSession.setPlaybackRate(AppSettings.fastForwardSpeed, temporary: true);
+    playSession.setPlaybackRate(
+        ref.read(playPreferencesProvider).fastForwardSpeed,
+        temporary: true);
     videoUiNotifier.showTopIndicator(VideoControlsIndicatorType.speedIndicator);
   }
 
@@ -98,7 +101,7 @@ class _DesktopGestureDetectorState
   KeyEventResult _handleShortcut(int pressed, {bool isRepeat = false}) {
     final shortcut = {
       for (final action in PlayerShortcutAction.values)
-        action: action.readBindings().map((binding) => binding.id).toSet(),
+        action: ref.read(playPreferencesProvider).shortcutIds(action),
     };
     // 已绑定快捷键的重复事件也必须消费，避免方向键长按触发
     // Flutter 默认的焦点遍历；每次按下仍只执行一次播放器操作。
@@ -120,7 +123,10 @@ class _DesktopGestureDetectorState
       final currentPosition = playState.position;
       final duration = playState.duration;
       final newPositionMs = (currentPosition -
-              Duration(seconds: AppSettings.shortcutSeekBackwardSeconds))
+              Duration(
+                  seconds: ref
+                      .read(playPreferencesProvider)
+                      .shortcutSeekBackwardSeconds))
           .inMilliseconds;
       final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
       playSession.seekTo(Duration(milliseconds: clampedMs));
@@ -133,7 +139,10 @@ class _DesktopGestureDetectorState
       final currentPosition = playState.position;
       final duration = playState.duration;
       final newPositionMs = (currentPosition +
-              Duration(seconds: AppSettings.shortcutSeekForwardSeconds))
+              Duration(
+                  seconds: ref
+                      .read(playPreferencesProvider)
+                      .shortcutSeekForwardSeconds))
           .inMilliseconds;
       final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
       playSession.seekTo(Duration(milliseconds: clampedMs));
@@ -164,7 +173,8 @@ class _DesktopGestureDetectorState
         playSession.setPlaybackRate(1.0);
       } else {
         playSession.adjustPlaybackRate(
-            AppSettings.shortcutSpeedStep * (speedUp ? 1 : -1));
+            ref.read(playPreferencesProvider).shortcutSpeedStep *
+                (speedUp ? 1 : -1));
       }
       videoUiNotifier
           .showTopIndicator(VideoControlsIndicatorType.speedIndicator);

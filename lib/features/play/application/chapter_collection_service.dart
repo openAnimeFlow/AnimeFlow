@@ -1,12 +1,10 @@
-import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
-import 'package:anime_flow/core/crawler/rule_engine.dart';
-import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/crawler/rule_exceptions.dart';
+import 'package:anime_flow/core/logger/app_log.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 
 /// 一次章节抓取要用的规则。
 typedef ChapterFetcher = Future<List<CrawlerEpisodeResourcesItem>> Function(
   String sourceUrl,
-  CrawlConfigItem config,
 );
 
 /// 搜索命中的一个候选条目。
@@ -50,17 +48,13 @@ class ChapterCollectionResult {
 /// 不影响其它候选——否则一个异常条目会让整个数据源没有任何结果。
 /// 需要人工验证时直接抛出 [CaptchaRequiredException]，由上层切换验证流程。
 class ChapterCollectionService {
-  ChapterCollectionService({ChapterFetcher? fetcher, RuleEngine? engine})
-      : _fetch = fetcher,
-        _engine = engine ?? RuleEngine();
-
-  final ChapterFetcher? _fetch;
-  final RuleEngine _engine;
-  final LiggLogger _logger = LiggLogger();
+  ChapterCollectionService({required ChapterFetcher fetcher})
+      : _fetch = fetcher;
+  final ChapterFetcher _fetch;
 
   Future<ChapterCollectionResult> collect({
     required List<ChapterCandidate> candidates,
-    required CrawlConfigItem config,
+    required String websiteName,
     bool Function()? isActive,
   }) async {
     final resources = <EpisodeResourcesItem>[];
@@ -72,15 +66,15 @@ class ChapterCollectionService {
 
       final List<CrawlerEpisodeResourcesItem> chapters;
       try {
-        chapters = await _fetchChapters(candidate.link, config);
+        chapters = await _fetch(candidate.link);
       } on CaptchaRequiredException {
         // 验证码要中断整条链路，不能只跳过当前条目。
         rethrow;
       } catch (error) {
         failedCount++;
         lastError = error;
-        _logger.w(
-          'ChapterCollectionService: ${config.name} '
+        logWarning(
+          'ChapterCollectionService: $websiteName '
           '获取「${candidate.name}」剧集失败，已跳过',
           error: error,
         );
@@ -106,14 +100,5 @@ class ChapterCollectionService {
       failedCount: failedCount,
       lastError: lastError,
     );
-  }
-
-  Future<List<CrawlerEpisodeResourcesItem>> _fetchChapters(
-    String sourceUrl,
-    CrawlConfigItem config,
-  ) {
-    final fetcher = _fetch;
-    if (fetcher != null) return fetcher(sourceUrl, config);
-    return _engine.fetchEpisodeResources(sourceUrl: sourceUrl, config: config);
   }
 }

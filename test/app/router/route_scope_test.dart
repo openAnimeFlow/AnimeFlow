@@ -3,7 +3,7 @@ import 'package:anime_flow/features/anime_info/presentation/providers/anime_info
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/character_info/presentation/providers/character_info_args_provider.dart';
 import 'package:anime_flow/features/characters/presentation/providers/characters_args_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/shared/navigation/args/character_info_extra.dart';
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:flutter/material.dart';

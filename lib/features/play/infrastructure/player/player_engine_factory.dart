@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:anime_flow/features/play/infrastructure/player/native_playback_platform.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/infrastructure/player/fvp/fvp_engine.dart';
@@ -21,7 +21,7 @@ PlayerEngine createNativePlayerEngine(
     case PlayerKernel.fvp:
       return FvpEngine(hardwareDecoder: hardwareDecoder);
     case PlayerKernel.videoPlayer:
-      if (!kernel.isSupported) {
+      if (!NativePlaybackPlatform().availableKernels.contains(kernel)) {
         throw UnsupportedError('Video Player is unavailable on this platform');
       }
       return VideoPlayerEngine();

@@ -1,4 +1,5 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/core/utils/playback_format.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
@@ -515,7 +516,7 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
       return detail.isEmpty ? status : '$status - $detail';
     }
     final speedSuffix = episode.status == DownloadStatus.downloading
-        ? ' - ${Utils.formatBytesPerSec(speed)}'
+        ? ' - ${formatBytesPerSec(speed)}'
         : '';
     if (episode.totalSizeBytes > 0) {
       return '$status - ${l10n.downloadSizeProgress(Utils.formatBytes(episode.totalBytes, fractionDigits: 0), Utils.formatBytes(episode.totalSizeBytes, fractionDigits: 0))}$speedSuffix';

@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
 import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/features/play/presentation/extensions/player_kernel_localization.dart';
@@ -9,14 +10,15 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
-class PlaybackSettingsPage extends StatefulWidget {
+class PlaybackSettingsPage extends ConsumerStatefulWidget {
   const PlaybackSettingsPage({super.key});
 
   @override
-  State<PlaybackSettingsPage> createState() => _PlaybackSettingsPageState();
+  ConsumerState<PlaybackSettingsPage> createState() =>
+      _PlaybackSettingsPageState();
 }
 
-class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
+class _PlaybackSettingsPageState extends ConsumerState<PlaybackSettingsPage> {
   // 播放配置状态
   late bool _autoPlayNext;
   late bool _episodesProgress;
@@ -48,10 +50,10 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
 
   PlayerKernel _readPreferredPlayerKernel() {
     final storedKernel = AppSettings.preferredPlayerKernelName;
-    return PlayerKernel.available.firstWhere(
-      (kernel) => kernel.name == storedKernel,
-      orElse: () => PlayerKernel.mediaKit,
-    );
+    return ref.read(playbackPlatformProvider).availableKernels.firstWhere(
+          (kernel) => kernel.name == storedKernel,
+          orElse: () => PlayerKernel.mediaKit,
+        );
   }
 
   @override
@@ -223,7 +225,9 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                                   ),
                                 ),
                                 DropDownMenu<PlayerKernel>(
-                                  items: PlayerKernel.available,
+                                  items: ref
+                                      .read(playbackPlatformProvider)
+                                      .availableKernels,
                                   selectedItem: _preferredPlayerKernel,
                                   tooltip: l10n.selectPlayerKernel,
                                   offset: const Offset(0, 44),

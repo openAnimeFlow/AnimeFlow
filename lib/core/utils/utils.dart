@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:math';
-
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -125,30 +124,6 @@ class Utils {
   static bool get isDocumentStartScriptSupported =>
       _isDocumentStartScriptSupported ?? false;
 
-  ///计算百分率
-  static String calculatePercentage(int value, int total) {
-    if (total <= 0) {
-      return '0%';
-    }
-    final percentage = (value / total) * 100;
-    if (percentage >= 100) {
-      return '100%';
-    }
-    // 保留1位小数，如果小数部分为0则显示整数
-    if (percentage % 1 == 0) {
-      return '${percentage.toInt()}%';
-    }
-    return '${percentage.toStringAsFixed(1)}%';
-  }
-
-  /// 网速格式化
-  static String formatBytesPerSec(num bps) {
-    final kb = bps / 1024.0;
-    if (kb < 1024) return '${kb.toStringAsFixed(1)}KB/s';
-    final mb = kb / 1024.0;
-    return '${mb.toStringAsFixed(1)}MB/s';
-  }
-
   /// 比较两个版本号字符串
   /// 返回值: 1表示v1 > v2, -1表示v1 < v2, 0表示相等
   static int compareVersionNumbers(String v1, String v2) {
@@ -211,37 +186,6 @@ class Utils {
     return url;
   }
 
-  static double calculateSimilarity(String s1, String s2) {
-    int maxLength = max(s1.length, s2.length);
-    if (maxLength == 0) return 1.0;
-    if (s1 == s2) return 1.0;
-    return (1.0 - levenshteinDistance(s1, s2) / maxLength);
-  }
-
-  static int levenshteinDistance(String s1, String s2) {
-    if (s1 == s2) return 0;
-    if (s1.isEmpty) return s2.length;
-    if (s2.isEmpty) return s1.length;
-
-    List<int> v0 = List<int>.generate(s2.length + 1, (i) => i);
-    List<int> v1 = List<int>.filled(s2.length + 1, 0);
-
-    for (int i = 0; i < s1.length; i++) {
-      v1[0] = i + 1;
-
-      for (int j = 0; j < s2.length; j++) {
-        int cost = (s1[i] == s2[j]) ? 0 : 1;
-        v1[j + 1] = min(v1[j] + 1, min(v0[j + 1] + 1, v0[j] + cost));
-      }
-
-      for (int j = 0; j < v0.length; j++) {
-        v0[j] = v1[j];
-      }
-    }
-
-    return v1[s2.length];
-  }
-
   /// 格式化字节数
   static String formatBytes(int bytes, {int fractionDigits = 2}) {
     if (bytes < 1024) {
@@ -254,20 +198,4 @@ class Utils {
       return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(fractionDigits)} GB';
     }
   }
-}
-
-String resolveSourceUrl(String baseUrl, String link) {
-  final trimmed = link.trim();
-  if (trimmed.isEmpty) return '';
-
-  final base = Uri.parse(baseUrl.trim());
-  var resolved = base.resolve(trimmed);
-  if (base.scheme == 'https' &&
-      resolved.scheme == 'http' &&
-      resolved.host == base.host &&
-      resolved.hasPort == base.hasPort &&
-      (!resolved.hasPort || resolved.port == base.port)) {
-    resolved = resolved.replace(scheme: 'https');
-  }
-  return resolved.toString();
 }

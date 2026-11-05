@@ -1,5 +1,5 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/core/network/clients/flow_client.dart';
+import 'package:anime_flow/core/network/core/flow_response.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// 在已加载的剧集旁展示分页错误，重试时保留当前选集和已有列表。

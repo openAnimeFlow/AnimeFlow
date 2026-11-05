@@ -3,18 +3,10 @@ import 'src/model.dart';
 /// 只维护业务/UI 分类和生成代码循环分组，不要求登记 feature 或业务入口。
 ArchitectureSpec projectArchitecture() => ArchitectureSpec(
   scopes: [
-    // 这些 Provider 管理展示状态，允许引用 UI。
-    for (final path in [
-      'lib/features/play/presentation/providers/video_ui_provider.dart',
-      'lib/features/play/presentation/providers/player_cache_speed_provider.dart',
-      'lib/features/play/presentation/providers/captcha_controller.dart',
-      'lib/features/settings/presentation/providers/setting_provider.dart',
-    ])
-      SourceScope(path, Responsibility.ui),
-    // 播放器绑定负责装配实现，不属于业务流程。
+    SourceScope('lib/features/play/presentation/**.dart', Responsibility.ui),
     SourceScope(
-      'lib/features/play/application/player_bindings.dart',
-      Responsibility.other,
+      'lib/features/settings/presentation/providers/setting_provider.dart',
+      Responsibility.ui,
     ),
     SourceScope('lib/**/application/**.dart', Responsibility.business),
     SourceScope('lib/**/domain/**.dart', Responsibility.business),

@@ -41,8 +41,10 @@ void main() {
     platform.firstEnable = Completer<void>();
     final oldEvents = StreamController<PlayerEvent>.broadcast(sync: true);
     final nextEvents = StreamController<PlayerEvent>.broadcast(sync: true);
-    final oldPage = PlaybackScreenAwake(oldEvents.stream);
-    final nextPage = PlaybackScreenAwake(nextEvents.stream);
+    final oldPage = PlaybackScreenAwake(
+        oldEvents.stream, (enabled) => platform.toggle(enable: enabled));
+    final nextPage = PlaybackScreenAwake(
+        nextEvents.stream, (enabled) => platform.toggle(enable: enabled));
     oldEvents.add(const PlayerPlayingChanged(true));
     await platform.started.future;
     final disposing = oldPage.dispose();
@@ -65,8 +67,10 @@ void main() {
       () async {
     final a = StreamController<PlayerEvent>.broadcast(sync: true);
     final b = StreamController<PlayerEvent>.broadcast(sync: true);
-    final first = PlaybackScreenAwake(a.stream);
-    final second = PlaybackScreenAwake(b.stream);
+    final first = PlaybackScreenAwake(
+        a.stream, (enabled) => platform.toggle(enable: enabled));
+    final second = PlaybackScreenAwake(
+        b.stream, (enabled) => platform.toggle(enable: enabled));
     a.add(const PlayerPlayingChanged(true));
     b.add(const PlayerPlayingChanged(true));
     await Future<void>.delayed(Duration.zero);

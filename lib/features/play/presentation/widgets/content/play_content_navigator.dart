@@ -1,10 +1,9 @@
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/anime_info_view.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/introduce_view.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -15,7 +14,7 @@ import 'package:anime_flow/features/anime_info/presentation/providers/anime_info
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_query_providers.dart';
 
 /// 管理播放器内的简介与详情导航，其他条目和角色通过应用路由打开。
 @Dependencies([
@@ -96,7 +95,7 @@ class _PlayContentNavigatorState extends ConsumerState<PlayContentNavigator>
   Widget build(BuildContext context) {
     super.build(context);
     final isWideScreen = ref.watch(
-      playStateProvider.select((state) => state.isWideScreen),
+      videoUiProvider.select((state) => state.isWideScreen),
     );
     return Theme(
       data: Theme.of(context).copyWith(

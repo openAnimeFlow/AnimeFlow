@@ -3,8 +3,8 @@ import 'package:anime_flow/features/settings/presentation/widgets/settings_page_
 import 'package:anime_flow/core/settings/danmaku_font_provider.dart';
 import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
-import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
+import 'package:anime_flow/features/play/domain/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:anime_flow/shared/models/font_item.dart';

@@ -5,7 +5,7 @@ import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
-import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/core/utils/playback_format.dart';
 import 'package:anime_flow/features/play/presentation/widgets/play_pause_icon.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -85,7 +85,7 @@ class _CenterIndicator extends ConsumerWidget {
                 // 重建或切换内核时不展示上一次采样的值。
                 final value = speed.isLoading ? null : speed.asData?.value;
                 if (value == null) return const SizedBox.shrink();
-                return Text(Utils.formatBytesPerSec(value), style: textStyle);
+                return Text(formatBytesPerSec(value), style: textStyle);
               }),
               Text(AppLocalizations.of(context).buffering, style: textStyle),
             ]),

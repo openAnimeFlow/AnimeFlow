@@ -1,11 +1,11 @@
+import 'package:anime_flow/core/logger/app_log.dart';
 import 'package:anime_flow/features/play/application/episode_source_matcher.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/core/utils/source_url.dart';
 import 'package:anime_flow/features/play/presentation/widgets/captcha_view.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
-import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -44,7 +44,6 @@ class VideoSourceDialog extends ConsumerStatefulWidget {
 class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
   static const String _allLinesValue = '__all_lines__';
 
-  final logger = LiggLogger();
   _SourceEpisodeMode _sourceEpisodeMode = _SourceEpisodeMode.matched;
   String? _selectedLineName;
   bool _sortDescending = false;
@@ -1044,7 +1043,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
               );
               widget.onVideoUrlSelected?.call(videoUrl);
             } catch (e) {
-              logger.e('获取视频源失败', error: e);
+              logError('获取视频源失败', error: e);
               NotificationToast.show(
                 l10n.videoSourceLoadFailed(e.toString()),
                 title: l10n.error,

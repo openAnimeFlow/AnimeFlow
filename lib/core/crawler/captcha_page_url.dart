@@ -1,3 +1,5 @@
+export 'package:anime_flow/shared/models/player/play/video/captcha_challenge.dart'
+    show renderKeywordUrl;
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 
 /// 验证页地址的回退链。
@@ -9,12 +11,4 @@ String captchaPageTemplate(CrawlConfigItem config) {
   if (explicit.isNotEmpty) return explicit;
   if (config.searchUrl.trim().isNotEmpty) return config.searchUrl;
   return config.searchApiConfig.request.url;
-}
-
-/// 渲染验证页地址：替换 `{keyword}`。
-///
-/// `@变量` 是 API 请求模板的语法，由 `RuleTemplate` 处理；验证页沿用规则里
-/// 已有的 `{keyword}` 写法，替换值做 URL 编码。
-String renderKeywordUrl(String template, String keyword) {
-  return template.replaceAll('{keyword}', Uri.encodeQueryComponent(keyword));
 }

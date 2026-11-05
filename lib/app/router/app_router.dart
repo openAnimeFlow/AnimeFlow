@@ -48,7 +48,7 @@ import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/features/characters/presentation/providers/characters_args_provider.dart';
 import 'package:anime_flow/features/character_info/presentation/providers/character_info_args_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/shared/navigation/app_route_observer.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:material_ui/material_ui.dart';

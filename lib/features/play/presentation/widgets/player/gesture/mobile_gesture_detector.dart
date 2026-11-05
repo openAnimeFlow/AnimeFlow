@@ -1,10 +1,9 @@
 import 'package:anime_flow/features/play/application/play_session.dart';
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
-import 'package:anime_flow/core/utils/vibrate.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
@@ -76,9 +75,10 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
       //长按开始
       onLongPressStart: (LongPressStartDetails details) {
         if (ref.read(playStateProvider).playing) {
-          vibrateMedium();
+          ref.read(playbackDeviceProvider).vibrateMedium();
           _isSpeedBoosting = true;
-          playSession.setPlaybackRate(AppSettings.fastForwardSpeed,
+          playSession.setPlaybackRate(
+              ref.read(playPreferencesProvider).fastForwardSpeed,
               temporary: true);
           videoUiNotifier.showTopIndicator(
             VideoControlsIndicatorType.speedIndicator,
@@ -172,7 +172,6 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
       onVerticalDragEnd: (DragEndDetails details) {
         if (_isRightSide) {
           // 垂直拖动结束（右半屏）：应用新的音量
-          playSession.endVerticalDrag();
           videoUiNotifier
               .showTopIndicator(VideoControlsIndicatorType.volumeIndicator);
         } else {
@@ -185,10 +184,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
 
       // 垂直拖动取消：用户中断拖动操作
       onVerticalDragCancel: () {
-        if (_isRightSide) {
-          // 垂直拖动取消（右半屏）：结束音量调整并隐藏指示器
-          playSession.endVerticalDrag();
-        } else {
+        if (!_isRightSide) {
           // 垂直拖动取消（左半屏）：结束亮度调整
           videoUiNotifier.endBrightnessDrag();
         }

@@ -1,7 +1,7 @@
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/core/logger/app_log.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/core/exception/storage_exception.dart';
-import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
@@ -19,6 +19,7 @@ Future<void> capturePlayerScreenshot(
   bool notify = true,
 }) async {
   final playController = ref.read(playSessionProvider);
+  final device = ref.read(playbackDeviceProvider);
   final videoUi = ref.read(videoUiProvider.notifier);
 
   void notifyUser(String message) {
@@ -41,16 +42,13 @@ Future<void> capturePlayerScreenshot(
     // 先展示缩略图，避免保存权限弹窗延迟预览。
     videoUi.showScreenshotPreview(bytes);
 
-    final message = await SystemUtil.saveImageBytes(
-      bytes,
-      name: 'video_screenshot',
-    );
+    final message = await device.saveScreenshot(bytes);
     notifyUser(message);
   } on StoragePermissionDeniedException catch (e) {
-    LiggLogger().e(e);
+    logError(e);
     notifyUser(e.message);
   } catch (e) {
-    LiggLogger().e(e);
+    logError(e);
     notifyUser('截图失败: $e');
   }
 }

@@ -24,7 +24,7 @@ class ArchitectureSpec {
   final Set<String> uiLibraries;
   final Map<String, Set<String>> generatedGroups;
   final Map<String, Set<String>> forbiddenDependencies;
-  static const rules = {'R03', 'R07', 'R10'};
+  static const rules = {'R03', 'R07', 'R10', 'R11'};
 
   bool disallowsDependency(String source, String target) =>
       forbiddenDependencies.entries.any(

@@ -1,7 +1,7 @@
 import 'dart:isolate';
 import 'dart:math';
 
-import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/core/utils/string_similarity.dart';
 
 /// 候选标题的匹配度排序结果。
 ///
@@ -112,7 +112,7 @@ class SearchResultRankService {
         final charCoverage = _orderedCharCoverage(item, term);
         rawRatio = charCoverage >= 0.8
             ? charCoverage * 0.82
-            : Utils.calculateSimilarity(item, term);
+            : calculateSimilarity(item, term);
       }
     }
 
@@ -125,7 +125,7 @@ class SearchResultRankService {
       return 0;
     }
     if (term.length >= item.length) {
-      return Utils.calculateSimilarity(item, term);
+      return calculateSimilarity(item, term);
     }
 
     var best = 0.0;
@@ -133,7 +133,7 @@ class SearchResultRankService {
     for (var windowSize = term.length; windowSize <= maxWindow; windowSize++) {
       for (var start = 0; start <= item.length - windowSize; start++) {
         final window = item.substring(start, start + windowSize);
-        final sim = Utils.calculateSimilarity(window, term);
+        final sim = calculateSimilarity(window, term);
         if (sim > best) {
           best = sim;
           // 已达调用方判断阈值，无需继续扫描

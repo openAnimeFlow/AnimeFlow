@@ -5,7 +5,7 @@ import 'package:anime_flow/core/crawler/restricted_json_path.dart';
 import 'package:anime_flow/core/crawler/rule_exceptions.dart';
 import 'package:anime_flow/core/crawler/rule_template.dart';
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/utils.dart' show resolveSourceUrl;
+import 'package:anime_flow/core/utils/source_url.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/search_resources_item.dart';
 

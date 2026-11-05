@@ -8,17 +8,17 @@ part of 'player_cache_speed_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 仅缓冲指示器可见且有订阅者时采样，FVP 不启动采样。
+/// 仅缓冲指示器可见且有订阅者时采样。
 
 @ProviderFor(playerCacheSpeed)
 final playerCacheSpeedProvider = PlayerCacheSpeedProvider._();
 
-/// 仅缓冲指示器可见且有订阅者时采样，FVP 不启动采样。
+/// 仅缓冲指示器可见且有订阅者时采样。
 
 final class PlayerCacheSpeedProvider
     extends $FunctionalProvider<AsyncValue<double?>, double?, Stream<double?>>
     with $FutureModifier<double?>, $StreamProvider<double?> {
-  /// 仅缓冲指示器可见且有订阅者时采样，FVP 不启动采样。
+  /// 仅缓冲指示器可见且有订阅者时采样。
   PlayerCacheSpeedProvider._()
       : super(
           from: null,

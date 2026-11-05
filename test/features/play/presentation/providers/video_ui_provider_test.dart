@@ -1,7 +1,7 @@
+import 'package:anime_flow/features/play/composition/play_overrides.dart';
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
-import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:flutter/services.dart';
@@ -30,6 +30,7 @@ void main() {
   @Dependencies([PlayStateNotifier, VideoUiNotifier])
   ProviderContainer createContainer(PlaybackPhase phase) {
     final container = ProviderContainer(overrides: [
+      ...playFeatureOverrides,
       playExtraProvider.overrideWithValue(const PlayRouteExtra(
         playExtra: PlayExtra(
             subjectId: 1,

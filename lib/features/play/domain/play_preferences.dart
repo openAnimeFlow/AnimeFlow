@@ -1,0 +1,46 @@
+import 'package:anime_flow/shared/models/player/player_shortcut_action.dart';
+
+abstract interface class PlayPreferences {
+  Set<int> shortcutIds(PlayerShortcutAction action);
+  bool get danmakuOn;
+  double get danmakuFontSize;
+  double get danmakuArea;
+  double get danmakuOpacity;
+  double get danmakuDuration;
+  double get danmakuLineHeight;
+  int get danmakuFontWeight;
+  bool get danmakuMassiveMode;
+  double get danmakuStrokeWidth;
+  bool get danmakuColor;
+  bool get danmakuHideScroll;
+  bool get danmakuHideTop;
+  bool get danmakuHideBottom;
+  bool get danmakuPlatformBilibili;
+  bool get danmakuPlatformGamer;
+  bool get danmakuPlatformDanDanPlay;
+  String get danmakuChineseMode;
+  double get fastForwardSpeed;
+  double get shortcutSpeedStep;
+  int get shortcutSeekBackwardSeconds;
+  int get shortcutSeekForwardSeconds;
+  bool get episodesProgress;
+  bool get adBlocker;
+  int get skipDuration;
+  bool get hardwareDecoder;
+  bool get showMiniProgressBar;
+  String get preferredPlayerKernelName;
+  Future<void> setHardwareDecoder(bool value);
+  Future<void> setPreferredPlayerKernel(String value);
+  Future<void> setDanmakuOn(bool value);
+  Future<void> setDanmakuChineseMode(String value);
+  Future<void> setDanmakuHideScroll(bool value);
+  Future<void> setDanmakuHideTop(bool value);
+  Future<void> setDanmakuHideBottom(bool value);
+  Future<void> setDanmakuMassiveMode(bool value);
+  Future<void> setDanmakuFontSize(double value);
+  Future<void> setDanmakuBorder(double value);
+  Future<void> setDanmakuDuration(double value);
+  Future<void> setDanmakuOpacity(double value);
+  Future<void> setDanmakuFontWeight(int value);
+  Future<void> setDanmakuArea(double value);
+}

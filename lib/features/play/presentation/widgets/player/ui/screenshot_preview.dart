@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +14,7 @@ const Size _maxThumbnailSize = Size(160, 90);
 ///
 /// 截图成功后短暂展示，到期自动隐藏；展示期间点击进入大图预览。
 /// 需要作为 [Stack] 的子节点使用（内部返回 [Positioned]）。
-@Dependencies([VideoUiNotifier, PlayStateNotifier])
+@Dependencies([VideoUiNotifier])
 class ScreenshotPreviewOverlay extends ConsumerWidget {
   const ScreenshotPreviewOverlay({super.key});
 
@@ -25,9 +24,9 @@ class ScreenshotPreviewOverlay extends ConsumerWidget {
       videoUiProvider.select((state) => state.screenshotPreviewBytes),
     );
     final isWideScreen =
-        ref.watch(playStateProvider.select((state) => state.isWideScreen));
+        ref.watch(videoUiProvider.select((state) => state.isWideScreen));
     final fullscreen =
-        ref.watch(playStateProvider.select((state) => state.isFullscreen));
+        ref.watch(videoUiProvider.select((state) => state.isFullscreen));
     // 抬高到底部控件栏之上；宽屏/全屏多一行进度条，需要更高的偏移。
     final bottomOffset = isWideScreen || fullscreen ? 108.0 : 80.0;
 

@@ -1,16 +1,13 @@
+import 'package:anime_flow/features/play/domain/play_preferences.dart';
+import 'package:anime_flow/features/play/domain/playback_platform.dart';
+import 'package:anime_flow/features/play/domain/play_history_repository.dart';
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
-import 'package:anime_flow/features/play/application/play_history_service.dart';
-import 'package:anime_flow/features/play/application/system_volume_synchronizer.dart';
-import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/core/presence/presence_service.dart';
-import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
-import 'package:anime_flow/core/utils/vibrate.dart';
+import 'package:anime_flow/features/play/domain/play_session_actions.dart';
+import 'package:anime_flow/core/logger/app_log.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
@@ -20,18 +17,21 @@ import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/video_fit.dart';
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
-import 'package:anime_flow/features/play/application/play_request.dart';
-import 'package:anime_flow/features/play/application/play_state.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/domain/play_request.dart';
+import 'package:anime_flow/features/play/domain/play_state.dart';
 
 /// 协调播放、切集、内核切换和播放会话的生命周期。
 class PlaySession {
   PlaySession({
-    required PlayStateNotifier playStateActions,
+    required PlayStateActions playStateActions,
     required PlayState Function() readPlayState,
-    required Episodes episodesActions,
+    required EpisodeActions episodesActions,
     required this.danmaku,
     required this.engineFactory,
+    required this.preferences,
+    required this.platform,
+    required this.history,
+    required this.markEpisodeWatched,
     required void Function({
       required int subjectId,
       required int episodeId,
@@ -42,12 +42,16 @@ class PlaySession {
         _episodesActions = episodesActions,
         _setEpisodeWatched = setEpisodeWatched;
 
+  final PlayPreferences preferences;
+  final PlaybackPlatform platform;
+  final PlayHistoryRepository history;
+  final MarkEpisodeWatched markEpisodeWatched;
   final PlayerEngineFactory engineFactory;
   late final PlaybackCoordinator playbackCoordinator;
   late final PlaybackProgressManager playbackProgressManager;
-  final PlayStateNotifier _playStateActions;
+  final PlayStateActions _playStateActions;
   final PlayState Function() _readPlayState;
-  final Episodes _episodesActions;
+  final EpisodeActions _episodesActions;
   final DanmakuSession danmaku;
   final void Function({
     required int subjectId,
@@ -90,7 +94,7 @@ class PlaySession {
   /// 垂直拖动相关
   double _dragStartVolume = 100.0;
 
-  late final SystemVolumeSynchronizer systemVolumeSynchronizer;
+  late final PlaybackVolume systemVolumeSynchronizer;
 
   /// 定时停止播放的计时器
   Timer? _stopTimer;
@@ -129,14 +133,14 @@ class PlaySession {
       Duration(milliseconds: 500);
 
   void init() {
-    final adBlocker = AppSettings.adBlocker;
+    final adBlocker = preferences.adBlocker;
     final preferredKernel = _readPreferredPlayerKernel();
     playbackCoordinator = PlaybackCoordinator(
       engineFactory: engineFactory,
       adBlocker: adBlocker,
-      hardwareDecoder: AppSettings.hardwareDecoder,
+      hardwareDecoder: preferences.hardwareDecoder,
       reportError: (message, error, stackTrace) =>
-          LiggLogger().e(message, error: error, stackTrace: stackTrace),
+          logError(message, error: error, stackTrace: stackTrace),
     );
     scheduleMicrotask(() {
       if (!_isDisposed) {
@@ -144,6 +148,9 @@ class PlaySession {
       }
     });
     playbackProgressManager = PlaybackProgressManager(
+      history: history,
+      autoMarkEnabled: () => preferences.episodesProgress,
+      markEpisodeWatched: markEpisodeWatched,
       onEpisodeWatched: ({
         required subjectId,
         required episodeId,
@@ -156,8 +163,8 @@ class PlaySession {
         );
       },
     );
-    systemVolumeSynchronizer = SystemVolumeSynchronizer(
-      onSystemVolumeChanged: (volume) => _updateVolume(
+    systemVolumeSynchronizer = platform.createVolume(
+      (volume) => _updateVolume(
         volume,
         syncSystemVolume: false,
       ),
@@ -176,9 +183,9 @@ class PlaySession {
   Future<bool> setHardwareDecoder(bool enabled) =>
       _serializePlaybackChange(() async {
         if (_isDisposed) return false;
-        final previous = AppSettings.hardwareDecoder;
+        final previous = preferences.hardwareDecoder;
         if (previous == enabled) return true;
-        await AppSettings.setHardwareDecoder(enabled);
+        await preferences.setHardwareDecoder(enabled);
         var applied = false;
         try {
           applied = await _switchKernel(playbackCoordinator.kernel,
@@ -187,7 +194,7 @@ class PlaySession {
         } finally {
           if (!_isDisposed) _playStateActions.setSwitchingKernel(false);
           if (!applied) {
-            await AppSettings.setHardwareDecoder(previous);
+            await preferences.setHardwareDecoder(previous);
           }
         }
       });
@@ -206,7 +213,7 @@ class PlaySession {
       source: source,
       position: state.position,
       // 系统音量已控制输出响度，重建时不能再叠加到播放器内部音量。
-      volume: SystemUtil.supportsSystemVolumeSync ? 100.0 : state.volume,
+      volume: platform.supportsSystemVolumeSync ? 100.0 : state.volume,
       rate: state.rate,
       wasPlaying: state.playing,
       fit: state.videoFit,
@@ -220,18 +227,18 @@ class PlaySession {
     if (switched) {
       _playStateActions.setKernel(target);
       unawaited(
-        AppSettings.setPreferredPlayerKernel(target.name),
+        preferences.setPreferredPlayerKernel(target.name),
       );
     } else {
-      LiggLogger().e('切换播放器内核失败: $target');
+      logError('切换播放器内核失败: $target');
     }
     _playStateActions.setSwitchingKernel(false);
     return switched;
   }
 
   PlayerKernel _readPreferredPlayerKernel() {
-    final value = AppSettings.preferredPlayerKernelName;
-    return PlayerKernel.available.firstWhere(
+    final value = preferences.preferredPlayerKernelName;
+    return platform.availableKernels.firstWhere(
       (kernel) => kernel.name == value,
       orElse: () => PlayerKernel.mediaKit,
     );
@@ -249,7 +256,7 @@ class PlaySession {
       }
       danmaku.onPlaybackChanged(event.playing);
     } else if (event is PlayerVolumeChanged) {
-      if (!SystemUtil.supportsSystemVolumeSync) {
+      if (!platform.supportsSystemVolumeSync) {
         _playStateActions.setVolume(event.volume);
       }
     } else if (event is PlayerBufferedChanged) {
@@ -284,10 +291,10 @@ class PlaySession {
       _playStateActions.setPlaybackPhase(PlaybackPhase.completed);
       if (subjectId > 0) {
         _autoSwitchToNextEpisode();
-        unawaited(PlayHistoryService.clearPosition(subjectId));
+        unawaited(history.clearPosition(subjectId));
       }
     } else if (event is PlayerError) {
-      LiggLogger().e('播放器错误: ${event.error}', error: event.stackTrace);
+      logError('播放器错误: ${event.error}', error: event.stackTrace);
     }
   }
 
@@ -297,7 +304,7 @@ class PlaySession {
         _episodesActions.switchToNextEpisode();
       }
     } catch (e) {
-      LiggLogger().e('自动切换到下一集失败: $e');
+      logError('自动切换到下一集失败: $e');
     }
   }
 
@@ -413,6 +420,8 @@ class PlaySession {
     );
   }
 
+  void clearPresence() => platform.clearPresence();
+
   void handlePlayStateChanged(PlayState state, {required bool isLoggedIn}) {
     playbackProgressManager.updatePlaybackState(
       position: state.position,
@@ -421,7 +430,7 @@ class PlaySession {
       isLoggedIn: isLoggedIn,
     );
     if (subjectId > 0 && episodeId > 0) {
-      PresenceService.instance.setPlaybackContext(
+      platform.updatePresence(
         subjectId: subjectId,
         episodeId: episodeId,
         watching: state.playing || state.buffering,
@@ -456,15 +465,6 @@ class PlaySession {
       {bool watched = true}) async {
     if (_isDisposed || subjectId <= 0) return;
     await _episodesActions.updateEpisodeWatched(episodeId, watched: watched);
-  }
-
-  void updateIsWideScreen(bool value) {
-    _playStateActions.setIsWideScreen(value);
-  }
-
-  // 切换内容区域展开状态
-  void toggleContentExpanded() {
-    _playStateActions.toggleContentExpanded();
   }
 
   void switchToNextEpisode() => _episodesActions.switchToNextEpisode();
@@ -613,7 +613,7 @@ class PlaySession {
     final clampedVolume = newVolume.clamp(0.0, 100.0);
     _playStateActions.setVolume(clampedVolume);
     unawaited(playbackCoordinator.setVolume(
-      SystemUtil.supportsSystemVolumeSync ? 100.0 : clampedVolume,
+      platform.supportsSystemVolumeSync ? 100.0 : clampedVolume,
     ));
     if (syncSystemVolume) {
       systemVolumeSynchronizer.scheduleSync(clampedVolume / 100);
@@ -622,7 +622,6 @@ class PlaySession {
 
   void startVerticalDrag() {
     _dragStartVolume = _readPlayState().volume;
-    _playStateActions.setIsVerticalDragging(true);
   }
 
   void adjustVolumeByWheel(double delta) {
@@ -635,15 +634,11 @@ class PlaySession {
     final newVolume = _dragStartVolume + volumeChange;
     final volume = _readPlayState().volume;
     if (newVolume >= 100 && volume < 100) {
-      vibrateHeavy();
+      platform.vibrate();
     } else if (newVolume <= 0 && volume > 0) {
-      vibrateHeavy();
+      platform.vibrate();
     }
     _updateVolume(newVolume);
-  }
-
-  void endVerticalDrag() {
-    _playStateActions.setIsVerticalDragging(false);
   }
 
   /// 开始播放

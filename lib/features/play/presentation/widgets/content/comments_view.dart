@@ -1,5 +1,5 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/features/play/presentation/providers/episode_comments_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_query_providers.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';

@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/composition/play_overrides.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -93,7 +94,7 @@ void main() {
   test(
       'failed auto sync preserves local records and a later success clears the error',
       () async {
-    final container = ProviderContainer();
+    final container = ProviderContainer(overrides: playFeatureOverrides);
     addTearDown(container.dispose);
     final failed = Completer<void>();
     container.listen(playHistoryProvider, (_, next) {
@@ -122,7 +123,7 @@ void main() {
   test('disposing during sync prevents retries and disposed-state updates',
       () async {
     final pending = adapter.pending = Completer<ResponseBody>();
-    final container = ProviderContainer();
+    final container = ProviderContainer(overrides: playFeatureOverrides);
     container.listen(playHistoryProvider, (_, __) {});
     await container.read(playHistoryProvider.future);
     await adapter.firstRequest.future;

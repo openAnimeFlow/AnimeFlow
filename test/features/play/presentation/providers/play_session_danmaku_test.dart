@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/infrastructure/danmaku/flow_danmaku_repository.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -5,8 +6,8 @@ import 'dart:typed_data';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
-import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
-import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/infrastructure/danmaku/opencc_converter.dart';
+import 'package:anime_flow/features/play/domain/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/application/danmaku_canvas.dart';
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
@@ -253,6 +254,9 @@ DanmakuSession _session(
   int? userId,
 }) =>
     DanmakuSession(
+      repository: FlowDanmakuRepository(),
+      useDanmakuColor: () => true,
+      saveEnabled: (_) {},
       store: store,
       converter: converter,
       initialChineseMode: DanmakuChineseMode.none,

@@ -4,20 +4,18 @@ import 'package:anime_flow/features/play/application/play_session.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/player_more_button.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/core/network/clients/flow_client.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
+import 'package:anime_flow/core/network/core/flow_response.dart';
 import 'package:anime_flow/core/network_speed/network_speed_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_query_providers.dart';
 import 'package:anime_flow/features/play/presentation/widgets/dialog/video_setting_dialog.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
-import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/core/utils/playback_format.dart';
 import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/ios_battery_icon.dart';
 import 'package:anime_flow/shared/widgets/network_icon.dart';
@@ -26,7 +24,6 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/play/presentation/widgets/dialog/video_source_dialog.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:battery_plus/battery_plus.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -62,7 +59,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   void initState() {
     super.initState();
     playController = ref.read(playSessionProvider);
-    _skipDuration = AppSettings.skipDuration;
+    _skipDuration = ref.read(playPreferencesProvider).skipDuration;
   }
 
   void _skipAhead() {
@@ -95,8 +92,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
     final videoUiStateController = ref.read(videoUiProvider.notifier);
     final isShowControlsUi =
         ref.watch(videoUiProvider.select((s) => s.isShowControlsUi));
-    final fullscreen =
-        ref.watch(playStateProvider.select((s) => s.isFullscreen));
+    final fullscreen = ref.watch(videoUiProvider.select((s) => s.isFullscreen));
     final leftPadding = MediaQuery.of(context).padding.left;
     // 自动隐藏时保留子树，避免中断流订阅。
     return TweenAnimationBuilder<double>(
@@ -169,7 +165,8 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                           ),
                         ),
                         const SizedBox(width: 5),
-                        if (SystemUtil.isDesktop || fullscreen)
+                        if (ref.read(playbackDeviceProvider).isDesktop ||
+                            fullscreen)
                           Expanded(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -240,13 +237,13 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                   Consumer(
                     builder: (context, ref, child) {
                       final isWideScreen = ref.watch(
-                        playStateProvider.select((s) => s.isWideScreen),
+                        videoUiProvider.select((s) => s.isWideScreen),
                       );
                       final isContentExpanded = ref.watch(
-                        playStateProvider.select((s) => s.isContentExpanded),
+                        videoUiProvider.select((s) => s.isContentExpanded),
                       );
                       final showContentActions = fullscreen ||
-                          (SystemUtil.isDesktop &&
+                          (ref.read(playbackDeviceProvider).isDesktop &&
                               isWideScreen &&
                               !isContentExpanded);
                       // 只在进度跨过零时更新跳过按钮的可见性。
@@ -347,12 +344,13 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                 );
                               },
                             ),
-                          if (SystemUtil.isDesktop &&
+                          if (ref.read(playbackDeviceProvider).isDesktop &&
                               !fullscreen &&
                               isWideScreen)
                             IconButton(
-                              onPressed: () =>
-                                  playController.toggleContentExpanded(),
+                              onPressed: () => ref
+                                  .read(videoUiProvider.notifier)
+                                  .toggleContentExpanded(),
                               padding: const EdgeInsets.all(0),
                               icon: AnimatedRotation(
                                 turns: isContentExpanded ? 0 : 0.5,
@@ -412,7 +410,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                         ),
                       ),
                       Text(
-                        Utils.formatBytesPerSec(download),
+                        formatBytesPerSec(download),
                         style: const TextStyle(
                           fontSize: 10,
                           color: Colors.white,
@@ -431,7 +429,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                         ),
                       ),
                       Text(
-                        Utils.formatBytesPerSec(upload),
+                        formatBytesPerSec(upload),
                         style: const TextStyle(
                           fontSize: 10,
                           color: Colors.white,
@@ -475,7 +473,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                 ));
                 return _OnlineCountIndicator(onlineUsers: onlineUsers);
               }),
-              if (SystemUtil.isMobile) ...[
+              if (ref.read(playbackDeviceProvider).isMobile) ...[
                 const SizedBox(width: 8),
                 //电池图标
                 Consumer(
@@ -483,10 +481,9 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                     final battery = ref.watch(
                       videoUiProvider.select((state) => state.batteryLevel),
                     );
-                    final batteryState = ref.watch(
-                      videoUiProvider.select((state) => state.batteryState),
+                    final isCharging = ref.watch(
+                      videoUiProvider.select((state) => state.charging),
                     );
-                    final isCharging = batteryState == BatteryState.charging;
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.end,

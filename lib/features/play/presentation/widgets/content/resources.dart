@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'dart:async';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -6,7 +6,6 @@ import 'package:anime_flow/features/download/presentation/widgets/download_episo
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';

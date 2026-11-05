@@ -1,24 +1,22 @@
+import 'package:anime_flow/features/play/domain/playback_device.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:window_manager/window_manager.dart';
 import 'package:anime_flow/shared/widgets/windows_title_bar.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
-import 'package:anime_flow/core/utils/vibrate.dart';
-import 'package:battery_plus/battery_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
 part 'video_ui_provider.g.dart';
 
 class VideoUiState {
   const VideoUiState({
+    this.isWideScreen = false,
+    this.isContentExpanded = true,
+    this.isFullscreen = false,
     this.isShowControlsUi = true,
     this.isHorizontalDragging = false,
     this.dragPosition = Duration.zero,
@@ -28,10 +26,13 @@ class VideoUiState {
     this.isBrightnessDragging = false,
     this.currentTime = '',
     this.batteryLevel = 0,
-    this.batteryState = BatteryState.unknown,
+    this.charging = false,
     this.screenshotPreviewBytes,
   });
 
+  final bool isWideScreen;
+  final bool isContentExpanded;
+  final bool isFullscreen;
   final bool isShowControlsUi;
   final bool isHorizontalDragging;
   final Duration dragPosition;
@@ -41,12 +42,15 @@ class VideoUiState {
   final bool isBrightnessDragging;
   final String currentTime;
   final int batteryLevel;
-  final BatteryState batteryState;
+  final bool charging;
 
   /// 最近一次截图的缩略图数据，为空表示不展示预览。
   final Uint8List? screenshotPreviewBytes;
 
   VideoUiState copyWith({
+    bool? isWideScreen,
+    bool? isContentExpanded,
+    bool? isFullscreen,
     bool? isShowControlsUi,
     bool? isHorizontalDragging,
     Duration? dragPosition,
@@ -56,11 +60,14 @@ class VideoUiState {
     bool? isBrightnessDragging,
     String? currentTime,
     int? batteryLevel,
-    BatteryState? batteryState,
+    bool? charging,
     Uint8List? screenshotPreviewBytes,
     bool clearScreenshotPreview = false,
   }) {
     return VideoUiState(
+      isWideScreen: isWideScreen ?? this.isWideScreen,
+      isContentExpanded: isContentExpanded ?? this.isContentExpanded,
+      isFullscreen: isFullscreen ?? this.isFullscreen,
       isShowControlsUi: isShowControlsUi ?? this.isShowControlsUi,
       isHorizontalDragging: isHorizontalDragging ?? this.isHorizontalDragging,
       dragPosition: dragPosition ?? this.dragPosition,
@@ -70,7 +77,7 @@ class VideoUiState {
       isBrightnessDragging: isBrightnessDragging ?? this.isBrightnessDragging,
       currentTime: currentTime ?? this.currentTime,
       batteryLevel: batteryLevel ?? this.batteryLevel,
-      batteryState: batteryState ?? this.batteryState,
+      charging: charging ?? this.charging,
       screenshotPreviewBytes: clearScreenshotPreview
           ? null
           : screenshotPreviewBytes ?? this.screenshotPreviewBytes,
@@ -85,9 +92,8 @@ class VideoUiNotifier extends _$VideoUiNotifier {
   Timer? _timeUpdateTimer;
   Timer? _batteryUpdateTimer;
   Timer? _screenshotPreviewTimer;
-  StreamSubscription<BatteryState>? _batteryStateSubscription;
-  final ScreenBrightnessPlatform _screenBrightness =
-      ScreenBrightnessPlatform.instance;
+  StreamSubscription<bool>? _chargingSubscription;
+  late PlaybackDevice _device;
 
   double _originalBrightness = 0.5;
   double _dragStartX = 0;
@@ -99,10 +105,11 @@ class VideoUiNotifier extends _$VideoUiNotifier {
   VideoUiState build() {
     // Route arguments establish ownership; UI state lasts for the route.
     ref.read(playExtraProvider);
+    _device = ref.watch(playbackDeviceProvider);
     final revision = ++_runtimeRevision;
     ref.onDispose(_dispose);
     final initialState = VideoUiState(
-      currentTime: SystemUtil.getCurrentTimeWithoutSeconds(),
+      currentTime: _device.clockTime(),
     );
     state = initialState;
     // 展示层根据播放状态维护加载提示，业务会话不再持有 UI 操作接口。
@@ -127,30 +134,43 @@ class VideoUiNotifier extends _$VideoUiNotifier {
     await _initializeBattery(revision);
   }
 
+  void setIsWideScreen(bool value) {
+    if (state.isWideScreen == value) return;
+    state = state.copyWith(isWideScreen: value);
+  }
+
+  void toggleContentExpanded() {
+    state = state.copyWith(isContentExpanded: !state.isContentExpanded);
+  }
+
+  void setIsFullscreen(bool value) {
+    state = state.copyWith(isFullscreen: value);
+  }
+
   /// 进入全屏
   void enterFullScreen() {
-    ref.read(playStateProvider.notifier).setIsFullscreen(true);
-    if (Platform.isWindows) {
+    setIsFullscreen(true);
+    if (_device.isWindows) {
       WindowsTitleBarVisibility.setForceHidden(true);
     }
     // 移动端全屏时自动横屏
-    SystemUtil.enterFullScreen();
+    _device.enterFullScreen();
   }
 
   /// 退出全屏
   void exitFullScreen() {
-    ref.read(playStateProvider.notifier).setIsFullscreen(false);
-    if (Platform.isWindows) {
+    setIsFullscreen(false);
+    if (_device.isWindows) {
       unawaited(_exitWindowsFullScreen());
     } else {
-      SystemUtil.exitFullScreen();
+      _device.exitFullScreen();
     }
   }
 
   /// 先退出窗口全屏再恢复标题栏，避免 forceHidden 已 false 但 _windowFullScreen 仍为 true。
   Future<void> _exitWindowsFullScreen() async {
     final revision = _runtimeRevision;
-    await SystemUtil.exitFullScreen();
+    await _device.exitFullScreen();
     if (_isCurrentRuntime(revision)) {
       WindowsTitleBarVisibility.setForceHidden(false);
     }
@@ -158,7 +178,7 @@ class VideoUiNotifier extends _$VideoUiNotifier {
 
   /// 切换全屏状态
   void toggleFullScreen() {
-    if (ref.read(playStateProvider).isFullscreen) {
+    if (state.isFullscreen) {
       exitFullScreen();
     } else {
       enterFullScreen();
@@ -167,12 +187,12 @@ class VideoUiNotifier extends _$VideoUiNotifier {
 
   /// 检测桌面端全屏状态
   Future<void> checkDesktopFullscreen() async {
-    if (SystemUtil.isDesktop) {
+    if (_device.isDesktop) {
       final revision = _runtimeRevision;
-      final fullScreen = await windowManager.isFullScreen();
+      final fullScreen = await _device.isFullScreen();
       if (!_isCurrentRuntime(revision)) return;
-      ref.read(playStateProvider.notifier).setIsFullscreen(fullScreen);
-      if (Platform.isWindows) {
+      setIsFullscreen(fullScreen);
+      if (_device.isWindows) {
         WindowsTitleBarVisibility.setForceHidden(fullScreen);
       }
     }
@@ -180,13 +200,13 @@ class VideoUiNotifier extends _$VideoUiNotifier {
 
   void _dispose() {
     _runtimeRevision++;
-    if (Platform.isWindows) WindowsTitleBarVisibility.reset();
+    if (_device.isWindows) WindowsTitleBarVisibility.reset();
     _topIndicatorTimer?.cancel();
     _controlsUiTimer?.cancel();
     _timeUpdateTimer?.cancel();
     _batteryUpdateTimer?.cancel();
     _screenshotPreviewTimer?.cancel();
-    _batteryStateSubscription?.cancel();
+    _chargingSubscription?.cancel();
     unawaited(_resetBrightness());
   }
 
@@ -194,7 +214,7 @@ class VideoUiNotifier extends _$VideoUiNotifier {
     _timeUpdateTimer?.cancel();
     _timeUpdateTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       state = state.copyWith(
-        currentTime: SystemUtil.getCurrentTimeWithoutSeconds(),
+        currentTime: _device.clockTime(),
       );
     });
   }
@@ -203,11 +223,11 @@ class VideoUiNotifier extends _$VideoUiNotifier {
     await _updateBatteryInfo(revision);
     if (!_isCurrentRuntime(revision)) return;
 
-    await _batteryStateSubscription?.cancel();
+    await _chargingSubscription?.cancel();
     if (!_isCurrentRuntime(revision)) return;
-    _batteryStateSubscription = SystemUtil.batteryStateStream.listen((state) {
+    _chargingSubscription = _device.chargingChanges.listen((state) {
       if (!_isCurrentRuntime(revision)) return;
-      this.state = this.state.copyWith(batteryState: state);
+      this.state = this.state.copyWith(charging: state);
       unawaited(_updateBatteryInfo(revision));
     });
 
@@ -219,13 +239,13 @@ class VideoUiNotifier extends _$VideoUiNotifier {
 
   Future<void> _updateBatteryInfo(int revision) async {
     try {
-      final level = await SystemUtil.getBatteryLevel();
+      final level = await _device.batteryLevel();
       if (!_isCurrentRuntime(revision)) return;
-      final currentState = await SystemUtil.getBatteryState();
+      final currentState = await _device.isCharging();
       if (!_isCurrentRuntime(revision)) return;
       state = state.copyWith(
         batteryLevel: level,
-        batteryState: currentState,
+        charging: currentState,
       );
     } catch (_) {}
   }
@@ -392,7 +412,7 @@ class VideoUiNotifier extends _$VideoUiNotifier {
 
   Future<void> _initializeBrightness(int revision) async {
     try {
-      final brightness = await _screenBrightness.application;
+      final brightness = await _device.brightness();
       if (!_isCurrentRuntime(revision)) return;
       _originalBrightness = brightness;
       state = state.copyWith(currentBrightness: brightness);
@@ -426,12 +446,12 @@ class VideoUiNotifier extends _$VideoUiNotifier {
         (_dragStartBrightness + brightnessChange).clamp(0.0, 1.0);
 
     if (newBrightness >= 1.0 && state.currentBrightness < 1.0) {
-      vibrateHeavy();
+      _device.vibrateHeavy();
     } else if (newBrightness <= 0.0 && state.currentBrightness > 0.0) {
-      vibrateHeavy();
+      _device.vibrateHeavy();
     }
     state = state.copyWith(currentBrightness: newBrightness);
-    _screenBrightness.setApplicationScreenBrightness(newBrightness);
+    _device.setBrightness(newBrightness);
   }
 
   void endBrightnessDrag() {
@@ -448,11 +468,10 @@ class VideoUiNotifier extends _$VideoUiNotifier {
     // Cleanup must not wait for another frame or write disposed provider state.
     final originalBrightness = _originalBrightness;
     try {
-      await _screenBrightness.resetApplicationScreenBrightness();
+      await _device.resetBrightness();
     } catch (_) {
       try {
-        await _screenBrightness
-            .setApplicationScreenBrightness(originalBrightness);
+        await _device.setBrightness(originalBrightness);
       } catch (_) {}
     }
   }

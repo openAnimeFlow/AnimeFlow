@@ -1,6 +1,6 @@
 # Feature First + Clean Architecture 架构规范
 
-本文定义 `lib/features/` 。
+本文定义 `lib/features/` 目标架构。
 
 ## 核心原则
 

@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
 import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
-import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
+import 'package:anime_flow/features/recommend/presentation/providers/anime_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/features/home/presentation/widgets/anime/calendar.dart';
-import 'package:anime_flow/features/home/presentation/widgets/anime/popular_anime.dart';
+import 'package:anime_flow/features/recommend/presentation/widgets/anime/calendar.dart';
+import 'package:anime_flow/features/recommend/presentation/widgets/anime/popular_anime.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'play_record.dart';

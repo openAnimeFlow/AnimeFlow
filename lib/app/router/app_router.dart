@@ -16,8 +16,8 @@ import 'package:anime_flow/features/shell/presentation/pages/app_shell_page.dart
 import 'package:anime_flow/features/user/presentation/pages/user_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/oauth_callback_page.dart';
 import 'package:anime_flow/features/ranking/presentation/pages/ranking_page.dart';
-import 'package:anime_flow/features/home/presentation/pages/home_page.dart';
-import 'package:anime_flow/features/home/presentation/pages/wallpaper_detail_page.dart';
+import 'package:anime_flow/features/recommend/presentation/pages/recommend.dart';
+import 'package:anime_flow/features/recommend/presentation/pages/wallpaper_detail_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/register_page.dart';
 import 'package:anime_flow/features/search/presentation/pages/image_search_page.dart';
 import 'package:anime_flow/features/search/presentation/pages/search_page.dart';

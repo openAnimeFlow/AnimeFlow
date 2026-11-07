@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:anime_flow/features/home/data/repositories/popular_anime_repository.dart';
+import 'package:anime_flow/features/recommend/data/repositories/popular_anime_repository.dart';
 import 'package:anime_flow/shared/models/bangumi/hot_item.dart';
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

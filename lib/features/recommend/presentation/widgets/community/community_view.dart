@@ -6,7 +6,7 @@ import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/sse/sse_connection_status.dart';
-import 'package:anime_flow/features/home/presentation/providers/community_provider.dart';
+import 'package:anime_flow/features/recommend/presentation/providers/community_provider.dart';
 import 'package:anime_flow/shared/models/flow/online_count.dart';
 import 'package:anime_flow/shared/models/flow/watching_subject.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';

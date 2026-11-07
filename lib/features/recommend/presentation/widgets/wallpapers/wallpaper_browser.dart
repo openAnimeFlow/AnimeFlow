@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
-import 'package:anime_flow/features/home/presentation/pages/wallpaper_detail_page.dart';
+import 'package:anime_flow/features/recommend/presentation/pages/wallpaper_detail_page.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// 保持列表挂载，宽屏原位查看详情，窄屏使用完整详情路由。
@@ -67,21 +67,33 @@ class _WallpaperBrowserState extends State<WallpaperBrowser> {
               final showDetail = widget.active && _wide && selected != null;
               final listWidth =
                   (constraints.maxWidth * 0.4).clamp(360.0, 600.0);
+              final detailWidth = constraints.maxWidth - listWidth - 1;
               // 列表始终位于 Row 的第一个槽位，打开/关闭详情不会重建其状态。
               return Row(children: [
                 Expanded(child: child!),
                 if (showDetail) const VerticalDivider(width: 1),
                 SizedBox(
-                  width: showDetail ? constraints.maxWidth - listWidth - 1 : 0,
-                  child: showDetail
-                      ? WallpaperDetailPage(
-                          key: ValueKey((
-                            selected.subject.subjectId,
-                            selected.initialUrl
-                          )),
-                          args: selected,
-                          onClose: _close,
-                          onOpenRelated: _open,
+                  width: showDetail ? detailWidth : 0,
+                  child: _wide && selected != null
+                      ? OverflowBox(
+                          alignment: Alignment.centerLeft,
+                          minWidth: detailWidth,
+                          maxWidth: detailWidth,
+                          child: Offstage(
+                            offstage: !showDetail,
+                            child: TickerMode(
+                              enabled: showDetail,
+                              child: WallpaperDetailPage(
+                                key: ValueKey((
+                                  selected.subject.subjectId,
+                                  selected.initialUrl
+                                )),
+                                args: selected,
+                                onClose: _close,
+                                onOpenRelated: _open,
+                              ),
+                            ),
+                          ),
                         )
                       : null,
                 ),

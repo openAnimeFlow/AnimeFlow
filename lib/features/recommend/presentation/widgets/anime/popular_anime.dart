@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
-import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
+import 'package:anime_flow/features/recommend/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:anime_flow/shared/widgets/card_skeleton.dart';

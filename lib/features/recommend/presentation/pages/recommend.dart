@@ -3,10 +3,10 @@ import 'dart:ui';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/widgets/glass_tab_bar.dart';
-import 'package:anime_flow/features/home/presentation/widgets/anime/anime_view.dart';
-import 'package:anime_flow/features/home/presentation/widgets/community/community_view.dart';
-import 'package:anime_flow/features/home/presentation/widgets/wallpapers/wallpaper_view.dart';
-import 'package:anime_flow/features/home/presentation/widgets/wallpapers/wallpaper_browser.dart';
+import 'package:anime_flow/features/recommend/presentation/widgets/anime/anime_view.dart';
+import 'package:anime_flow/features/recommend/presentation/widgets/community/community_view.dart';
+import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_view.dart';
+import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_browser.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/top_occlusion.dart';
@@ -44,9 +44,13 @@ class _RecommendPageState extends State<RecommendPage>
       stream: _glassNavigationStyle,
       initialData: AppSettings.glassNavigationStyle,
       builder: (context, snapshot) => AnimatedBuilder(
-        animation: _tabController,
+        animation: Listenable.merge([_tabController, _tabController.animation]),
         builder: (context, _) => WallpaperBrowser(
-          active: _tabController.index == 2,
+          // Keep the viewport width stable until the tab transition completes.
+          active: _tabController.index == 2 ||
+              (_tabController.previousIndex == 2 &&
+                  (_tabController.indexIsChanging ||
+                      _tabController.animation!.value != _tabController.index)),
           listBuilder: (context, onOpen) =>
               _buildPage(context, snapshot.data ?? false, onOpen),
         ),

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>openAnimeFlow/AnimeFlow</title>
+<style>
+:root { color-scheme: light; --ink: #1f232b; --page: #f2f2f7; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; padding: 24px; background: var(--page); color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  font: 17px/22px ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+.card {
+  position: relative; width: min(400px, 100%); padding: 65px 32px 36px;
+  background: #fff; border-radius: 24px; text-align: center;
+}
+.card::before {
+  content: ""; position: absolute; top: 20px; left: 50%; width: 60px; height: 11px;
+  margin-left: -30px; border-radius: 5.5px; background: var(--page);
+}
+.card img.icon { display: block; width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 15px; }
+.card p { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card .title { font-weight: 700; margin-bottom: 3px; }
+.card .dim { opacity: 0.5; }
+.card img.qr { display: block; width: 248px; max-width: 100%; margin: 18px auto 30px; }
+a.open { color: #007aff; text-decoration: underline; }
+</style>
+</head>
+<body>
+<main class="card">
+<img class="icon" src="CydiaIcon.png" alt="">
+<p class="title" id="title"></p>
+<p class="dim" id="address"></p>
+<img class="qr" id="qr" src="qr.svg" alt="">
+<p class="dim">Scan with Camera to add in Irisin</p>
+<p class="dim" id="owner"></p>
+</main>
+<a class="open" id="open">Open in Irisin…</a>
+<script>
+const repository = "openAnimeFlow/AnimeFlow";
+const source = new URL(".", location.href).href;
+const [owner, name] = repository.split("/");
+document.getElementById("title").textContent = name || repository;
+document.getElementById("address").textContent = source.replace(/^https?:[/][/]/, "").replace(/[/]+$/, "");
+document.getElementById("owner").textContent = "@" + owner;
+document.getElementById("open").href = "irisin://repository/add?url=" + encodeURIComponent(source);
+for (const image of document.querySelectorAll("img")) {
+  image.addEventListener("error", () => { image.style.display = "none"; });
+}
+</script>
+</body>
+</html>

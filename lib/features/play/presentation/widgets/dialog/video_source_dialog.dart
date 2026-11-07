@@ -1086,26 +1086,25 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
                 ),
                 Row(
                   children: [
-                    Text(
-                      l10n.lineLabel('').trimRight(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onSurfaceVariant,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              l10n.lineLabel(item.lineNames).trimRight(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Icon(Icons.link,
+                              size: 16, color: colorScheme.onSurfaceVariant),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      item.lineNames,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    Icon(Icons.link,
-                        size: 16, color: colorScheme.onSurfaceVariant),
-                    const Spacer(),
                     Text(l10n.matchLabel),
                     const SizedBox(width: 4),
                     _buildMatchRatioBadge(item.matchRatio),

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/shell/presentation/models/tab_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
@@ -12,13 +14,15 @@ class ShellNavigationRail extends StatelessWidget {
       required this.onSelected,
       required this.onSearch,
       required this.onSettings,
-      this.avatar});
+      this.avatar,
+      this.glassBar = false});
   final List<TabItem> tabs;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
   final VoidCallback onSearch;
   final VoidCallback onSettings;
   final String? avatar;
+  final bool glassBar;
 
   List<NavigationRailDestination> _buildRailDestinations(
     ColorScheme colorScheme,
@@ -69,8 +73,9 @@ class ShellNavigationRail extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
     final desktop = SystemUtil.isDesktop;
-    return NavigationRail(
-      backgroundColor: colorScheme.surfaceContainerHighest,
+    final rail = NavigationRail(
+      backgroundColor:
+          glassBar ? Colors.transparent : colorScheme.surfaceContainerHighest,
       selectedIndex: selectedIndex,
       groupAlignment: 1.0,
       onDestinationSelected: onSelected,
@@ -101,6 +106,26 @@ class ShellNavigationRail extends StatelessWidget {
         ),
       ),
       destinations: _buildRailDestinations(colorScheme, avatar),
+    );
+    if (!glassBar) return rail;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color:
+                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.78),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.45)),
+            ),
+            child: rail,
+          ),
+        ),
+      ),
     );
   }
 }

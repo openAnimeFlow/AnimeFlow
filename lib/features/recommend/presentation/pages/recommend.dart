@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/widgets/glass_tab_bar.dart';
@@ -10,6 +8,7 @@ import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wa
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/top_occlusion.dart';
+import 'package:anime_flow/shared/widgets/top_gradient_mask.dart';
 import 'package:material_ui/material_ui.dart';
 
 class RecommendPage extends StatefulWidget {
@@ -155,17 +154,8 @@ class _RecommendPageState extends State<RecommendPage>
               top: 0,
               left: 0,
               right: 0,
-              height: glassHeaderHeight,
-              child: IgnorePointer(
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: ColoredBox(
-                      color: colorScheme.surface.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ),
-              ),
+              height: glassHeaderHeight + 48,
+              child: const TopGradientMask(),
             ),
           if (glassStyle)
             Positioned(

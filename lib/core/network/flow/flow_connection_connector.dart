@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'flow_secure_socket.dart';
+import 'flow_doh_resolver.dart';
 
 class FlowConnectionCancelled implements Exception {
   const FlowConnectionCancelled();
@@ -46,6 +47,7 @@ class FlowConnectionConnector {
     this.allowDnsFallback = true,
     this.candidateTimeout = const Duration(milliseconds: 1500),
     this.securityContext,
+    this.dohResolver,
     this.onAddressFailure,
     this.isAddressAvailable,
   });
@@ -56,6 +58,7 @@ class FlowConnectionConnector {
   final Duration candidateTimeout;
   static const _dnsReserve = Duration(seconds: 3);
   final SecurityContext? securityContext;
+  final FlowDohResolver? dohResolver;
   final void Function(String address)? onAddressFailure;
   final bool Function(String address)? isAddressAvailable;
 
@@ -102,13 +105,13 @@ class FlowConnectionConnector {
     Future<void> run() async {
       Object lastError = const SocketException('No available Flow endpoint');
       try {
-        for (final address in targets) {
-          if (ended) return;
+        Future<bool> tryAddress(String? address) async {
+          if (ended) return false;
           final remaining = budget - watch.elapsed;
-          if (remaining <= Duration.zero) break;
+          if (remaining <= Duration.zero) return false;
           // 连接时限较短时，将全部剩余时间留给 DNS 路径。
           if (address != null && allowDnsFallback && remaining <= _dnsReserve) {
-            continue;
+            return false;
           }
           var timeout = address == null ? remaining : candidateTimeout;
           if (address != null && allowDnsFallback) {
@@ -128,21 +131,41 @@ class FlowConnectionConnector {
             final socket = await attempt.open().timeout(timeout);
             if (ended) {
               socket.destroy();
-              return;
+              return false;
             }
             ended = true;
             timer.cancel();
             result.complete(socket);
-            return;
+            return true;
           } catch (error) {
             attempt.cancel();
-            if (ended) return;
+            if (ended) return false;
             lastError = error is TimeoutException
                 ? const SocketException('Flow endpoint timed out')
                 : error;
             if (address != null) onAddressFailure?.call(address);
           }
+          return false;
         }
+
+        for (final address in targets.whereType<String>()) {
+          if (await tryAddress(address)) return;
+        }
+        if (isTarget && allowDnsFallback && dohResolver != null && !ended) {
+          try {
+            final resolved = await dohResolver!.resolve(uri.host).timeout(
+                  budget - watch.elapsed,
+                );
+            for (final address in resolved) {
+              if (ended) return;
+              if (await tryAddress(address)) return;
+            }
+          } on Object catch (error) {
+            if (ended) return;
+            lastError = error;
+          }
+        }
+        if (targets.contains(null) && !ended) await tryAddress(null);
         if (!ended) stop(lastError);
       } catch (error) {
         stop(error);

@@ -91,7 +91,8 @@ class FlowEndpointPool extends ChangeNotifier {
       // 加载期间若已切换网络，不得用旧缓存重新覆盖刚清空的路由。
       if (!_disposed && generation == _networkGeneration && cache != null) {
         _routeExpiresAt = cache.verifiedAt.add(FlowEndpointCache.lifetime);
-        _needsRevalidation = true;
+        // 有效缓存直接用于当前进程；等过期、网络变化或连接失败再复验。
+        _needsRevalidation = false;
         if (!cache.preferDns) {
           _setRoute(cache.measurements.map((item) => item.address).toList());
         }

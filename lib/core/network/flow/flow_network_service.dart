@@ -69,9 +69,10 @@ class FlowNetworkService with WidgetsBindingObserver {
     await _pool.initialize();
     if (!_started || !identical(_scheduler, scheduler)) return;
     final addresses = _pool.preferredAddresses;
+    final probeStatus = _pool.needsProbe ? '启动探测至少延迟 10 秒' : '本次启动跳过探测';
     LiggLogger().d('Flow IP 网络服务启动，当前路由策略：'
-        '${addresses.isEmpty ? '系统 DNS（优选 IP 待验证）' : addresses.join(', ')}，'
-        '启动探测至少延迟 10 秒');
+        '${addresses.isEmpty ? 'Cloudflare DoH（优选 IP 待验证，失败时回退系统 DNS）' : addresses.join(', ')}，'
+        '$probeStatus');
     _startPeriodic();
   }
 

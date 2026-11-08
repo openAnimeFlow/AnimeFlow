@@ -105,16 +105,20 @@ class FlowConnectionConnector {
     Future<void> run() async {
       Object lastError = const SocketException('No available Flow endpoint');
       try {
-        Future<bool> tryAddress(String? address) async {
+        Future<bool> tryAddress(String? address,
+            {bool reserveForDnsFallback = true}) async {
           if (ended) return false;
           final remaining = budget - watch.elapsed;
           if (remaining <= Duration.zero) return false;
           // 连接时限较短时，将全部剩余时间留给 DNS 路径。
-          if (address != null && allowDnsFallback && remaining <= _dnsReserve) {
+          if (address != null &&
+              allowDnsFallback &&
+              reserveForDnsFallback &&
+              remaining <= _dnsReserve) {
             return false;
           }
           var timeout = address == null ? remaining : candidateTimeout;
-          if (address != null && allowDnsFallback) {
+          if (address != null && allowDnsFallback && reserveForDnsFallback) {
             final available = remaining - _dnsReserve;
             if (available < timeout) timeout = available;
           }
@@ -158,7 +162,9 @@ class FlowConnectionConnector {
                 );
             for (final address in resolved) {
               if (ended) return;
-              if (await tryAddress(address)) return;
+              if (await tryAddress(address, reserveForDnsFallback: false)) {
+                return;
+              }
             }
           } on Object catch (error) {
             if (ended) return;

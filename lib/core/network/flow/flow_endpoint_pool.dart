@@ -10,6 +10,7 @@ import 'flow_endpoint_cache.dart';
 import 'flow_endpoint_cache_repository.dart';
 import 'flow_endpoint_candidates.dart';
 import 'flow_endpoint_probe.dart';
+import 'flow_doh_resolver.dart';
 
 class FlowEndpointPool extends ChangeNotifier {
   FlowEndpointPool({
@@ -20,8 +21,10 @@ class FlowEndpointPool extends ChangeNotifier {
   })  : _assetBundle = assetBundle ?? rootBundle,
         _cacheRepository = cacheRepository ?? FlowEndpointCacheRepository(),
         _now = now ?? DateTime.now,
-        _probeFactory =
-            probeFactory ?? ((uri) => FlowEndpointProbe(endpoint: uri));
+        dohResolver = FlowDohResolver() {
+    _probeFactory = probeFactory ??
+        ((uri) => FlowEndpointProbe(endpoint: uri, dohResolver: dohResolver));
+  }
 
   static final instance = FlowEndpointPool();
   static const assetPath = 'assets/network/ligg-candidates.txt';
@@ -34,7 +37,8 @@ class FlowEndpointPool extends ChangeNotifier {
   FlowEndpointCache? _cachedForRevalidation;
   Future<void>? _initialization;
   final DateTime Function() _now;
-  final FlowEndpointProbe Function(Uri) _probeFactory;
+  final FlowDohResolver dohResolver;
+  late final FlowEndpointProbe Function(Uri) _probeFactory;
   final _revalidationRequests = StreamController<void>.broadcast(sync: true);
   final Map<String?, _EndpointStats> _stats = {};
   final Map<String, (int, DateTime)> _cooldowns = {};
@@ -349,6 +353,7 @@ class FlowEndpointPool extends ChangeNotifier {
     if (_disposed) return;
     cancelProbe();
     _disposed = true;
+    dohResolver.close();
     unawaited(_revalidationRequests.close());
     super.dispose();
   }

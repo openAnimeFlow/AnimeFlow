@@ -6,18 +6,15 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 
 import 'flow_connection_connector.dart';
-import 'flow_doh_resolver.dart';
 import 'flow_endpoint_pool.dart';
 
 /// 保持实例稳定的 Dio 适配器：旧连接池等待已有请求结束，新请求使用新路由。
 class FlowHttpClientAdapter implements HttpClientAdapter {
-  FlowHttpClientAdapter({required this.pool})
-      : dohResolver = FlowDohResolver() {
+  FlowHttpClientAdapter({required this.pool}) {
     pool.addListener(_routeChanged);
   }
 
   final FlowEndpointPool pool;
-  final FlowDohResolver dohResolver;
   final Set<_AdapterGeneration> _retired = {};
   final Set<FlowConnectionContext> _contexts = {};
   _AdapterGeneration? _current;
@@ -29,7 +26,7 @@ class FlowHttpClientAdapter implements HttpClientAdapter {
           endpoint: pool.endpoint,
           addresses: List.of(pool.preferredAddresses),
           isAddressAvailable: pool.isAddressAvailable,
-          dohResolver: dohResolver,
+          dohResolver: pool.dohResolver,
           onAddressFailure: _failureCallback(pool.networkGeneration),
         ).createClient),
       );
@@ -130,7 +127,6 @@ class FlowHttpClientAdapter implements HttpClientAdapter {
     if (!_closed) {
       _closed = true;
       pool.removeListener(_routeChanged);
-      dohResolver.close();
       _routeChanged();
     }
     if (force) {

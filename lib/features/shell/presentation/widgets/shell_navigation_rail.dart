@@ -4,7 +4,6 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/shell/presentation/models/tab_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
 
 class ShellNavigationRail extends StatelessWidget {
   const ShellNavigationRail(
@@ -72,26 +71,24 @@ class ShellNavigationRail extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
-    final desktop = SystemUtil.isDesktop;
+    final safePadding = MediaQuery.paddingOf(context);
     final rail = NavigationRail(
       backgroundColor:
           glassBar ? Colors.transparent : colorScheme.surfaceContainerHighest,
       selectedIndex: selectedIndex,
       groupAlignment: 1.0,
+      scrollable: true,
       onDestinationSelected: onSelected,
       labelType: NavigationRailLabelType.all,
-      leading: Padding(
-        padding: const EdgeInsets.only(bottom: 16, top: 8),
-        child: FloatingActionButton(
-          heroTag: 'main_search',
-          elevation: 0,
-          onPressed: onSearch,
-          child: const Icon(Icons.search),
-        ),
+      leading: FloatingActionButton(
+        heroTag: 'main_search',
+        elevation: 0,
+        onPressed: onSearch,
+        child: const Icon(Icons.search),
       ),
       trailing: Padding(
         padding: EdgeInsets.only(
-          bottom: desktop ? 16 : MediaQuery.of(context).padding.bottom,
+          bottom: !glassBar && safePadding.bottom > 0 ? 0 : 16,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -107,24 +104,36 @@ class ShellNavigationRail extends StatelessWidget {
       ),
       destinations: _buildRailDestinations(colorScheme, avatar),
     );
-    if (!glassBar) return rail;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color:
-                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.78),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.45)),
-            ),
-            child: rail,
-          ),
-        ),
+    return ColoredBox(
+      color:
+          glassBar ? Colors.transparent : colorScheme.surfaceContainerHighest,
+      child: SafeArea(
+        right: false,
+        minimum: glassBar
+            ? const EdgeInsets.fromLTRB(12, 16, 0, 16)
+            : EdgeInsets.zero,
+        child: !glassBar
+            ? rail
+            : Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.78),
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.45)),
+                      ),
+                      child: rail,
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }

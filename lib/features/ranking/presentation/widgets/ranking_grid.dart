@@ -237,11 +237,15 @@ class _FeaturedRankings extends StatelessWidget {
             child: isCompact
                 ? SizedBox(
                     height: 300,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: cards.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 5),
-                      itemBuilder: (_, index) => cards[index],
+                    child: MediaQuery.removePadding(
+                      context: context,
+                      removeLeft: true,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: cards.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 5),
+                        itemBuilder: (_, index) => cards[index],
+                      ),
                     ),
                   )
                 : Row(

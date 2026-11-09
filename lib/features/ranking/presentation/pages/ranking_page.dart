@@ -12,6 +12,7 @@ import 'package:anime_flow/shared/widgets/top_gradient_mask.dart';
 import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 
 class RankingPage extends StatefulWidget {
   const RankingPage({super.key});
@@ -195,10 +196,13 @@ class _RankingPageState extends State<RankingPage> {
                             ),
                           ),
                         rankingAsync.when(
-                          loading: () => const SliverToBoxAdapter(
-                            child: SizedBox(
-                              height: 320,
-                              child: Center(child: CircularProgressIndicator()),
+                          loading: () => SliverPadding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: horizontalPadding,
+                            ),
+                            sliver: _RankingLoadingSkeleton(
+                              contentWidth: contentWidth,
+                              isDetailsContent: isDetailsContent,
                             ),
                           ),
                           error: (error, _) => SliverToBoxAdapter(
@@ -388,6 +392,58 @@ class _RankingPageState extends State<RankingPage> {
         borderRadius: BorderRadius.circular(13),
       ),
       child: child,
+    );
+  }
+}
+
+class _RankingLoadingSkeleton extends StatelessWidget {
+  const _RankingLoadingSkeleton({
+    required this.contentWidth,
+    required this.isDetailsContent,
+  });
+
+  final double contentWidth;
+  final bool isDetailsContent;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final base = colors.surfaceContainerHighest;
+    final highlight = Color.lerp(base, colors.surface, 0.7)!;
+    Widget block({double? width, required double height, double radius = 14}) =>
+        Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: base,
+            borderRadius: BorderRadius.circular(radius),
+          ),
+        );
+    final columns = isDetailsContent
+        ? (contentWidth >= 900 ? 3 : contentWidth >= 600 ? 2 : 1)
+        : (contentWidth / 200).floor().clamp(3, 7);
+    const spacing = 10.0;
+    final cardWidth = (contentWidth - spacing * (columns - 1)) / columns;
+    return SliverToBoxAdapter(
+      child: Shimmer.fromColors(
+        baseColor: base,
+        highlightColor: highlight,
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SizedBox(
+            height: contentWidth < 600 ? 220 : 300,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              itemBuilder: (_, __) => SizedBox(width: contentWidth / 3.2, child: block(height: double.infinity, radius: 20)),
+            ),
+          ),
+          const SizedBox(height: 32),
+          Row(children: [block(width: 24, height: 24), const SizedBox(width: 10), block(width: 90, height: 22)]),
+          const SizedBox(height: 16),
+          Wrap(spacing: spacing, runSpacing: spacing, children: List.generate(10, (_) => block(width: cardWidth, height: isDetailsContent ? 160 : cardWidth * 1.5))),
+        ]),
+      ),
     );
   }
 }

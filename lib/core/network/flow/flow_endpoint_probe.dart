@@ -5,15 +5,15 @@ import 'dart:io';
 import 'package:anime_flow/core/logger/logger.dart';
 
 import 'flow_connection_connector.dart';
-import 'flow_doh_resolver.dart';
+import 'transport/flow_pinned_connection.dart';
 
 /// 每次测量新建连接的耗时，均使用独立且不携带凭据的客户端。
 class FlowEndpointProbe {
   FlowEndpointProbe(
       {required this.endpoint,
       this.securityContext,
-      required FlowDohResolver dohResolver})
-      : _dohResolver = dohResolver;
+      required FlowHostResolve hostResolver})
+      : _hostResolver = hostResolver;
 
   static const _timeout = Duration(seconds: 3);
   static const _dnsTimeout = Duration(seconds: 4);
@@ -21,7 +21,7 @@ class FlowEndpointProbe {
 
   final Uri endpoint;
   final SecurityContext? securityContext;
-  final FlowDohResolver _dohResolver;
+  final FlowHostResolve _hostResolver;
   final Set<HttpClient> _clients = {};
   final Set<FlowConnectionContext> _contexts = {};
   final Completer<void> _cancelled = Completer<void>();
@@ -40,7 +40,7 @@ class FlowEndpointProbe {
         addresses: address == null ? const [] : [address],
         allowDnsFallback: address == null,
         candidateTimeout: timeout,
-        dohResolver: address == null ? _dohResolver : null,
+        hostResolver: address == null ? _hostResolver : null,
         securityContext: securityContext);
     final client = connector.createClient()
       ..findProxy = findProxy

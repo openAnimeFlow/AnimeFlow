@@ -48,7 +48,7 @@ void main() {
       final probe = FlowEndpointProbe(
           endpoint: endpoint,
           securityContext: trustedTestContext(),
-          dohResolver: resolver());
+          hostResolver: resolver().resolve);
       addTearDown(probe.cancel);
       final result = await HttpOverrides.runZoned(
         () => probe.probe('127.0.0.1'),
@@ -71,7 +71,7 @@ void main() {
     final probe = FlowEndpointProbe(
         endpoint: endpoint,
         securityContext: trustedTestContext(),
-        dohResolver: resolver());
+        hostResolver: resolver().resolve);
     addTearDown(probe.cancel);
     final pending = HttpOverrides.runZoned(
       () => Future.wait([
@@ -88,7 +88,8 @@ void main() {
   test('explicit proxy skips direct IP probes without opening a client',
       () async {
     final probe = FlowEndpointProbe(
-        endpoint: Uri.parse('https://ligg.test'), dohResolver: resolver());
+        endpoint: Uri.parse('https://ligg.test'),
+        hostResolver: resolver().resolve);
     addTearDown(probe.cancel);
     final result = await HttpOverrides.runZoned(
       () => probe.probe('104.19.52.165'),

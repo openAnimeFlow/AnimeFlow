@@ -2,11 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'flow_connection_connector.dart';
+import 'transport/flow_pinned_connection.dart';
 
-/// 通过Cloudflare DoH解析Flow的端点，而不依赖于系统DNS.
+/// 通过 Cloudflare DoH 解析 Flow 的端点，而不依赖系统 DNS。
+///
+/// 它只依赖传输层（[FlowPinnedConnection]）来获得“固定 IP + TLS”的 HTTP 客户端：
+/// 1.1.1.1 直连、证书按 `cloudflare-dns.com` 校验、`allowDnsFallback: false`
+/// 保证解析失败时不会绕回系统 DNS 造成自我递归。
+/// 连接器只需拿到 [FlowHostResolve]（即 `resolve` 的方法引用）。
 class FlowDohResolver {
-
   static const _dohHost = 'cloudflare-dns.com';
   static const _dohAddresses = ['1.1.1.1', '1.0.0.1'];
   static const _timeout = Duration(seconds: 2);
@@ -15,7 +19,7 @@ class FlowDohResolver {
   List<String> _cached = const [];
   DateTime _expiresAt = DateTime.fromMillisecondsSinceEpoch(0);
 
-  static HttpClient _createClient() => FlowConnectionConnector(
+  static HttpClient _createClient() => FlowPinnedConnection(
         endpoint: Uri.https(_dohHost, '/dns-query'),
         addresses: _dohAddresses,
         allowDnsFallback: false,
@@ -23,6 +27,7 @@ class FlowDohResolver {
       ).createClient()
         ..connectionTimeout = _timeout;
 
+  /// 解析 [host]；失败时返回空列表，并缓存成功结果至 TTL 上限。
   Future<List<String>> resolve(String host) {
     if (DateTime.now().isBefore(_expiresAt) && _cached.isNotEmpty) {
       return Future.value(_cached);
@@ -69,7 +74,8 @@ class FlowDohResolver {
           }
         }
       } on Object {
-        // Try the other address family; connector may then use system DNS.
+        // Try the other address family; the pinned client never falls back to
+        // system DNS, so a failure here simply means "no answer".
       }
     }
     final result = answers.toSet().toList(growable: false);

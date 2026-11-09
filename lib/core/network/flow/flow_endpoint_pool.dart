@@ -23,7 +23,8 @@ class FlowEndpointPool extends ChangeNotifier {
         _now = now ?? DateTime.now,
         dohResolver = FlowDohResolver() {
     _probeFactory = probeFactory ??
-        ((uri) => FlowEndpointProbe(endpoint: uri, dohResolver: dohResolver));
+        ((uri) => FlowEndpointProbe(
+            endpoint: uri, hostResolver: dohResolver.resolve));
   }
 
   static final instance = FlowEndpointPool();

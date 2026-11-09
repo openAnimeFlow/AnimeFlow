@@ -10,6 +10,7 @@ import 'package:anime_flow/features/recommend/application/wallpaper_wall.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_layout.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_grid.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_filter_dialog.dart';
+import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_skeleton.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/top_occlusion.dart';
@@ -208,39 +209,53 @@ class _WallpaperViewState extends ConsumerState<WallpaperView>
                         ),
                       ),
                     ),
-                    WallpaperFlow(
-                      items: items,
-                      onOpen: widget.onOpen,
-                      availableWidth: constraints.maxWidth - padding * 2,
-                    ),
+                    if (items.isEmpty && wall.isLoading)
+                      WallpaperSkeleton(
+                        availableWidth: constraints.maxWidth - padding * 2,
+                        rows: WallpaperSkeleton.rowsFor(
+                          availableWidth: constraints.maxWidth - padding * 2,
+                          viewportHeight: constraints.maxHeight,
+                        ),
+                      )
+                    else
+                      WallpaperFlow(
+                        items: items,
+                        onOpen: widget.onOpen,
+                        availableWidth: constraints.maxWidth - padding * 2,
+                        // 加载更多时把占位接在真实图片末尾，随末行一起排布。
+                        skeletonCount:
+                            wall.isLoading && items.isNotEmpty ? 6 : 0,
+                      ),
                   ]),
                 ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Center(
-                      child: wall.isLoading
-                          ? const CircularProgressIndicator()
-                          : wall.failure != null
-                              ? Column(
-                                  children: [
-                                    Text(_failureMessage(wall.failure!, l10n)),
-                                    const SizedBox(height: 8),
-                                    TextButton(
-                                      onPressed: () =>
-                                          unawaited(_wall.loadMore()),
-                                      child: Text(l10n.retry),
-                                    ),
-                                  ],
-                                )
-                              : wall.hasMore
-                                  ? const SizedBox.shrink()
-                                  : Text(items.isEmpty
-                                      ? l10n.noData
-                                      : l10n.rankingEnd),
+                if (wall.failure != null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Text(_failureMessage(wall.failure!, l10n)),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () => unawaited(_wall.loadMore()),
+                              child: Text(l10n.retry),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                else if (!wall.hasMore)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Center(
+                        child:
+                            Text(items.isEmpty ? l10n.noData : l10n.rankingEnd),
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -256,11 +271,15 @@ class WallpaperFlow extends StatefulWidget {
       {super.key,
       required this.items,
       required this.availableWidth,
-      this.onOpen});
+      this.onOpen,
+      this.skeletonCount = 0});
 
   final List<WallpaperPoster> items;
   final double availableWidth;
   final ValueChanged<WallpaperDetailArgs>? onOpen;
+
+  /// 追加在真实图片之后的占位数量，用于「加载更多」时继续填满当前行。
+  final int skeletonCount;
 
   @override
   State<WallpaperFlow> createState() => _WallpaperFlowState();
@@ -310,6 +329,10 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
       _cachedSliver = null;
     }
     if (oldWidget.availableWidth != widget.availableWidth) {
+      _cachedSliver = null;
+    }
+    if (oldWidget.skeletonCount != widget.skeletonCount) {
+      _posterDelegate = null;
       _cachedSliver = null;
     }
   }
@@ -374,10 +397,12 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
     final isCompact = availableWidth < 600;
     final items = widget.items;
     final rows = justifyImageRows(
-      items
-          .map((poster) =>
-              _aspectRatios[poster.url] ?? poster.placeholderAspectRatio)
-          .toList(),
+      [
+        ...items.map((poster) =>
+            _aspectRatios[poster.url] ?? poster.placeholderAspectRatio),
+        // 与真实图片同一次计算，占位才能填进最后一行剩余的位置。
+        ...wallpaperPlaceholderRatios(widget.skeletonCount),
+      ],
       availableWidth: availableWidth,
       targetHeight: targetHeight,
       spacing: spacing,
@@ -406,6 +431,11 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
     final pixelRatio = _pixelRatio;
     return SliverChildBuilderDelegate(
       (context, index) {
+        if (index >= items.length) {
+          return WallpaperSkeletonTile(
+            key: ValueKey('wallpaper-skeleton-$index'),
+          );
+        }
         final poster = items[index];
         // 覆盖窄屏两列的常用尺寸；拖动窗口及跨越 600 断点不切换缓存键。
         final logicalWidth = poster.isBackdrop ? 450.0 : 300.0;
@@ -429,7 +459,7 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
           ),
         );
       },
-      childCount: items.length,
+      childCount: items.length + widget.skeletonCount,
       findChildIndexCallback: (key) =>
           key is ValueKey<int> ? indices[key.value] : null,
     );

@@ -80,11 +80,13 @@ class ShellNavigationRail extends StatelessWidget {
       scrollable: true,
       onDestinationSelected: onSelected,
       labelType: NavigationRailLabelType.all,
-      leading: FloatingActionButton(
-        heroTag: 'main_search',
-        elevation: 0,
-        onPressed: onSearch,
-        child: const Icon(Icons.search),
+      leading: Padding(
+        padding: const EdgeInsets.only(top: 5),
+        child: FloatingActionButton(
+          elevation: 0,
+          onPressed: onSearch,
+          child: const Icon(Icons.search),
+        ),
       ),
       trailing: Padding(
         padding: EdgeInsets.only(

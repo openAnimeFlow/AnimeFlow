@@ -201,6 +201,9 @@ class _WallpaperViewState extends ConsumerState<WallpaperView>
                             if (wall.keyword.isNotEmpty)
                               InputChip(
                                 avatar: const Icon(Icons.search, size: 18),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
                                 label: Text(wall.keyword),
                                 onDeleted: () =>
                                     unawaited(_refresh(keyword: '')),

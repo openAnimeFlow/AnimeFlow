@@ -75,7 +75,7 @@ class _SearchPageState extends ConsumerState<SearchPage>
     if (_suppressSuggestions) return;
     suggestionDebounce?.cancel();
     final keyword = searchController.text;
-    suggestionDebounce = Timer(const Duration(seconds: 2), () {
+    suggestionDebounce = Timer(const Duration(seconds: 1), () {
       if (keyword.trim().isEmpty) {
         ref
             .read(searchPageControllerProvider.notifier)

@@ -430,6 +430,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sortDate => '日期';
 
   @override
+  String get filter => '筛选';
+
+  @override
+  String get resetFilters => '重置';
+
+  @override
+  String get filterWallpapers => '筛选壁纸';
+
+  @override
+  String get wallpaperSortLabel => '排序方式';
+
+  @override
+  String get wallpaperKeywordHint => '输入番剧关键词';
+
+  @override
   String get rankingEnd => '到底了';
 
   @override
@@ -3016,6 +3031,21 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get sortDate => '日期';
+
+  @override
+  String get filter => '筛选';
+
+  @override
+  String get resetFilters => '重置';
+
+  @override
+  String get filterWallpapers => '筛选壁纸';
+
+  @override
+  String get wallpaperSortLabel => '排序方式';
+
+  @override
+  String get wallpaperKeywordHint => '输入番剧关键词';
 
   @override
   String get rankingEnd => '到底了';
@@ -5605,6 +5635,21 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get sortDate => '日期';
 
   @override
+  String get filter => '篩選';
+
+  @override
+  String get resetFilters => '重設';
+
+  @override
+  String get filterWallpapers => '篩選壁紙';
+
+  @override
+  String get wallpaperSortLabel => '排序方式';
+
+  @override
+  String get wallpaperKeywordHint => '輸入番劇關鍵詞';
+
+  @override
   String get rankingEnd => '到底了';
 
   @override
@@ -8191,6 +8236,21 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get sortDate => '日期';
+
+  @override
+  String get filter => '篩選';
+
+  @override
+  String get resetFilters => '重設';
+
+  @override
+  String get filterWallpapers => '篩選壁紙';
+
+  @override
+  String get wallpaperSortLabel => '排序方式';
+
+  @override
+  String get wallpaperKeywordHint => '輸入番劇關鍵詞';
 
   @override
   String get rankingEnd => '到底了';

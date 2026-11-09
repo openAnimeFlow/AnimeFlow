@@ -10,6 +10,7 @@ import 'package:anime_flow/core/network/core/flow_response.dart';
 import 'package:anime_flow/features/recommend/presentation/providers/wallpaper_controller.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_layout.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_grid.dart';
+import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_filter_dialog.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/top_occlusion.dart';
@@ -75,9 +76,27 @@ class _WallpaperViewState extends State<WallpaperView>
     }
   }
 
-  Future<void> _refresh({SortType? sort}) {
+  Future<void> _refresh({SortType? sort, String? keyword}) {
     if (_scrollController.hasClients) _scrollController.jumpTo(0);
-    return _controller.refresh(sort: sort);
+    return _controller.refresh(sort: sort, keyword: keyword);
+  }
+
+  /// 打开筛选弹窗；仅在排序或关键词实际变化时重新拉取，避免无谓的请求。
+  Future<void> _openFilter() async {
+    final result = await showDialog<WallpaperFilterResult>(
+      context: context,
+      useRootNavigator: false,
+      builder: (dialogContext) => WallpaperFilterDialog(
+        initialKeyword: _controller.keyword,
+        initialSort: _controller.sort,
+      ),
+    );
+    if (result == null || !mounted) return;
+    if (result.sort == _controller.sort &&
+        result.keyword == _controller.keyword) {
+      return;
+    }
+    unawaited(_refresh(sort: result.sort, keyword: result.keyword));
   }
 
   @override
@@ -113,12 +132,6 @@ class _WallpaperViewState extends State<WallpaperView>
         animation: _controller,
         builder: (context, _) {
           final items = _controller.items;
-          final sorts = {
-            SortType.trends: l10n.sortTrends,
-            SortType.collects: l10n.collection,
-            SortType.rank: l10n.sortRank,
-            SortType.date: l10n.sortDate,
-          };
           // Box constraints change on resize, not on every scroll offset.
           return LayoutBuilder(builder: (context, constraints) {
             final padding = math.max(
@@ -152,16 +165,27 @@ class _WallpaperViewState extends State<WallpaperView>
                             child: Wrap(
                               spacing: 8,
                               runSpacing: 8,
+                              crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                for (final entry in sorts.entries)
-                                  ChoiceChip(
-                                    label: Text(entry.value),
-                                    selected: _controller.sort == entry.key,
-                                    onSelected: (selected) {
-                                      if (selected) {
-                                        unawaited(_refresh(sort: entry.key));
-                                      }
-                                    },
+                                OutlinedButton.icon(
+                                  onPressed: _openFilter,
+                                  icon: const Icon(Icons.tune, size: 18),
+                                  label: Text(l10n.filter),
+                                ),
+                                // 已生效的筛选条件随按钮一起展示，可单独清除。
+                                if (_controller.sort != SortType.trends)
+                                  InputChip(
+                                    label: Text(wallpaperSortLabel(
+                                        l10n, _controller.sort)),
+                                    onDeleted: () => unawaited(
+                                        _refresh(sort: SortType.trends)),
+                                  ),
+                                if (_controller.keyword.isNotEmpty)
+                                  InputChip(
+                                    avatar: const Icon(Icons.search, size: 18),
+                                    label: Text(_controller.keyword),
+                                    onDeleted: () =>
+                                        unawaited(_refresh(keyword: '')),
                                   ),
                               ],
                             ),

@@ -890,6 +890,36 @@ abstract class AppLocalizations {
   /// **'日期'**
   String get sortDate;
 
+  /// No description provided for @filter.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'筛选'**
+  String get filter;
+
+  /// No description provided for @resetFilters.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重置'**
+  String get resetFilters;
+
+  /// No description provided for @filterWallpapers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'筛选壁纸'**
+  String get filterWallpapers;
+
+  /// No description provided for @wallpaperSortLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'排序方式'**
+  String get wallpaperSortLabel;
+
+  /// No description provided for @wallpaperKeywordHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'输入番剧关键词'**
+  String get wallpaperKeywordHint;
+
   /// No description provided for @rankingEnd.
   ///
   /// In zh_Hans, this message translates to:

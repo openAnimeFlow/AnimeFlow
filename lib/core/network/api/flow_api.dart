@@ -479,6 +479,7 @@ class FlowApi {
   /// 获取壁纸墙
   static Future<SubjectWallpaperPage> getSubjectWallpapersService({
     required SortType sort,
+    String? keyword,
     required int page,
     required int pageSize,
     CancelToken? cancelToken,
@@ -489,6 +490,7 @@ class FlowApi {
         'sort': sort.value,
         'page': page,
         'pageSize': pageSize,
+        if (keyword != null) 'keyword': keyword,
       },
       cancelToken: cancelToken,
     );

@@ -442,6 +442,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortDate => 'Date';
 
   @override
+  String get filter => 'Filter';
+
+  @override
+  String get resetFilters => 'Reset';
+
+  @override
+  String get filterWallpapers => 'Filter wallpapers';
+
+  @override
+  String get wallpaperSortLabel => 'Sort by';
+
+  @override
+  String get wallpaperKeywordHint => 'Enter anime keywords';
+
+  @override
   String get rankingEnd => 'End of list';
 
   @override

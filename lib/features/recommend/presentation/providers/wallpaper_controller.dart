@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 
 typedef WallpaperPageLoader = Future<SubjectWallpaperPage> Function({
   required SortType sort,
+  String? keyword,
   required int page,
   required int pageSize,
   CancelToken? cancelToken,
@@ -41,6 +42,8 @@ class WallpaperController extends ChangeNotifier {
   int _generation = 0;
   int _nextPage = 1;
   SortType sort = SortType.trends;
+
+  String keyword = '';
   bool isLoading = false;
   bool hasMore = true;
   Object? error;
@@ -49,10 +52,11 @@ class WallpaperController extends ChangeNotifier {
   List<WallpaperPoster> get items =>
       _itemsSnapshot ??= List.unmodifiable(_items);
 
-  Future<void> refresh({SortType? sort}) {
+  Future<void> refresh({SortType? sort, String? keyword}) {
     _generation++;
     _cancelToken?.cancel();
     if (sort != null) this.sort = sort;
+    if (keyword != null) this.keyword = keyword.trim();
     _items.clear();
     _itemsSnapshot = null;
     _subjectIds.clear();
@@ -73,6 +77,7 @@ class WallpaperController extends ChangeNotifier {
     try {
       final result = await _loader(
         sort: sort,
+        keyword: keyword.isEmpty ? null : keyword,
         page: _nextPage,
         pageSize: _pageSize,
         cancelToken: cancelToken,

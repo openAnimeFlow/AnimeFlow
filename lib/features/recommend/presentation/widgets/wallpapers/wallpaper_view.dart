@@ -6,28 +6,27 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/core/network/core/flow_response.dart';
-import 'package:anime_flow/features/recommend/presentation/providers/wallpaper_controller.dart';
+import 'package:anime_flow/features/recommend/application/wallpaper_wall.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_layout.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_grid.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_filter_dialog.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/top_occlusion.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
-class WallpaperView extends StatefulWidget {
+class WallpaperView extends ConsumerStatefulWidget {
   const WallpaperView({super.key, this.onOpen});
 
   final ValueChanged<WallpaperDetailArgs>? onOpen;
 
   @override
-  State<WallpaperView> createState() => _WallpaperViewState();
+  ConsumerState<WallpaperView> createState() => _WallpaperViewState();
 }
 
-class _WallpaperViewState extends State<WallpaperView>
+class _WallpaperViewState extends ConsumerState<WallpaperView>
     with AutomaticKeepAliveClientMixin {
-  final _controller = WallpaperController();
   final _scrollController = ScrollController();
   final _backToTopVisible = ValueNotifier(false);
   bool _scrollCheckScheduled = false;
@@ -35,12 +34,16 @@ class _WallpaperViewState extends State<WallpaperView>
   @override
   bool get wantKeepAlive => true;
 
+  WallpaperWall get _wall => ref.read(wallpaperWallProvider.notifier);
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    _controller.addListener(_scheduleScrollCheck);
-    unawaited(_controller.refresh());
+    // 首帧后再触发请求，避免在 initState 期间修改 provider 状态。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_wall.ensureLoaded());
+    });
   }
 
   void _scrollListener() {
@@ -50,7 +53,9 @@ class _WallpaperViewState extends State<WallpaperView>
   }
 
   void _scheduleScrollCheck() {
-    if (_scrollCheckScheduled || _controller.isLoading) return;
+    if (_scrollCheckScheduled || ref.read(wallpaperWallProvider).isLoading) {
+      return;
+    }
     _scrollCheckScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollCheckScheduled = false;
@@ -70,41 +75,46 @@ class _WallpaperViewState extends State<WallpaperView>
   }
 
   void _loadNearBottom() {
-    if (!_scrollController.hasClients || _controller.error != null) return;
+    final wall = ref.read(wallpaperWallProvider);
+    if (!_scrollController.hasClients || wall.failure != null) return;
     if (_scrollController.position.extentAfter < 500) {
-      unawaited(_controller.loadMore());
+      unawaited(_wall.loadMore());
     }
   }
 
   Future<void> _refresh({SortType? sort, String? keyword}) {
     if (_scrollController.hasClients) _scrollController.jumpTo(0);
-    return _controller.refresh(sort: sort, keyword: keyword);
+    return _wall.refresh(sort: sort, keyword: keyword);
   }
 
   /// 打开筛选弹窗；仅在排序或关键词实际变化时重新拉取，避免无谓的请求。
   Future<void> _openFilter() async {
+    final wall = ref.read(wallpaperWallProvider);
     final result = await showDialog<WallpaperFilterResult>(
       context: context,
       useRootNavigator: false,
       builder: (dialogContext) => WallpaperFilterDialog(
-        initialKeyword: _controller.keyword,
-        initialSort: _controller.sort,
+        initialKeyword: wall.keyword,
+        initialSort: wall.sort,
       ),
     );
     if (result == null || !mounted) return;
-    if (result.sort == _controller.sort &&
-        result.keyword == _controller.keyword) {
+    if (result.sort == wall.sort && result.keyword == wall.keyword) {
       return;
     }
     unawaited(_refresh(sort: result.sort, keyword: result.keyword));
+  }
+
+  /// 失败语义已在 Data/Application 收敛，这里只决定展示哪段文案。
+  String _failureMessage(WallpaperWallFailure failure, AppLocalizations l10n) {
+    final message = failure.message?.trim();
+    return message == null || message.isEmpty ? l10n.loadFailed : message;
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
-    _controller.removeListener(_scheduleScrollCheck);
-    _controller.dispose();
     _backToTopVisible.dispose();
     super.dispose();
   }
@@ -113,6 +123,14 @@ class _WallpaperViewState extends State<WallpaperView>
   Widget build(BuildContext context) {
     super.build(context);
     final l10n = AppLocalizations.of(context);
+    final wall = ref.watch(wallpaperWallProvider);
+    // 列表长度变化后补满视口；滚动位置与图片比例属于界面状态，留在本层。
+    ref.listen<WallpaperWallState>(wallpaperWallProvider, (previous, next) {
+      if (previous?.items.length != next.items.length && !next.isLoading) {
+        _scheduleScrollCheck();
+      }
+    });
+    final items = wall.items;
     return ValueListenableBuilder<bool>(
       valueListenable: _backToTopVisible,
       builder: (context, visible, child) => Scaffold(
@@ -128,111 +146,106 @@ class _WallpaperViewState extends State<WallpaperView>
               )
             : null,
       ),
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
-          final items = _controller.items;
-          // Box constraints change on resize, not on every scroll offset.
-          return LayoutBuilder(builder: (context, constraints) {
-            final padding = math.max(
-                12.0, (constraints.maxWidth - LayoutConstant.maxWidth) / 2);
-            final topOcclusion = TopOcclusionScope.of(context);
-            return NotificationListener<ScrollMetricsNotification>(
-              onNotification: (notification) {
-                // 图片比例重排和窗口缩放后也要补满视口，多个通知合并检查。
-                if (notification.depth == 0 &&
-                    notification.metrics.axis == Axis.vertical) {
-                  _scheduleScrollCheck();
-                }
-                return false;
-              },
-              child: RefreshIndicator(
-                edgeOffset: topOcclusion,
-                displacement: 10,
-                onRefresh: _refresh,
-                child: OcclusionAwareCustomScrollView(
-                  key: const PageStorageKey('wallpapers'),
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  slivers: [
-                    SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: padding, vertical: 12),
-                      sliver: SliverMainAxisGroup(slivers: [
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                OutlinedButton.icon(
-                                  onPressed: _openFilter,
-                                  icon: const Icon(Icons.tune, size: 18),
-                                  label: Text(l10n.filter),
-                                ),
-                                // 已生效的筛选条件随按钮一起展示，可单独清除。
-                                if (_controller.sort != SortType.trends)
-                                  InputChip(
-                                    label: Text(wallpaperSortLabel(
-                                        l10n, _controller.sort)),
-                                    onDeleted: () => unawaited(
-                                        _refresh(sort: SortType.trends)),
-                                  ),
-                                if (_controller.keyword.isNotEmpty)
-                                  InputChip(
-                                    avatar: const Icon(Icons.search, size: 18),
-                                    label: Text(_controller.keyword),
-                                    onDeleted: () =>
-                                        unawaited(_refresh(keyword: '')),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        WallpaperFlow(
-                          items: items,
-                          onOpen: widget.onOpen,
-                          availableWidth: constraints.maxWidth - padding * 2,
-                        ),
-                      ]),
-                    ),
+      // Box constraints change on resize, not on every scroll offset.
+      child: LayoutBuilder(builder: (context, constraints) {
+        final padding = math.max(
+            12.0, (constraints.maxWidth - LayoutConstant.maxWidth) / 2);
+        final topOcclusion = TopOcclusionScope.of(context);
+        return NotificationListener<ScrollMetricsNotification>(
+          onNotification: (notification) {
+            // 图片比例重排和窗口缩放后也要补满视口，多个通知合并检查。
+            if (notification.depth == 0 &&
+                notification.metrics.axis == Axis.vertical) {
+              _scheduleScrollCheck();
+            }
+            return false;
+          },
+          child: RefreshIndicator(
+            edgeOffset: topOcclusion,
+            displacement: 10,
+            onRefresh: _refresh,
+            child: OcclusionAwareCustomScrollView(
+              key: const PageStorageKey('wallpapers'),
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverPadding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: padding, vertical: 12),
+                  sliver: SliverMainAxisGroup(slivers: [
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Center(
-                          child: _controller.isLoading
-                              ? const CircularProgressIndicator()
-                              : _controller.error != null
-                                  ? Column(
-                                      children: [
-                                        Text(resolveAnimeFlowErrorMessage(
-                                          _controller.error!,
-                                          fallback: l10n.collectionLoadFailed,
-                                        )),
-                                        const SizedBox(height: 8),
-                                        TextButton(
-                                          onPressed: _controller.loadMore,
-                                          child: Text(l10n.retry),
-                                        ),
-                                      ],
-                                    )
-                                  : _controller.hasMore
-                                      ? const SizedBox.shrink()
-                                      : Text(items.isEmpty
-                                          ? l10n.noData
-                                          : l10n.rankingEnd),
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            OutlinedButton.icon(
+                              onPressed: _openFilter,
+                              icon: const Icon(Icons.tune, size: 18),
+                              label: Text(l10n.filter),
+                            ),
+                            // 已生效的筛选条件随按钮一起展示，可单独清除。
+                            if (wall.sort != SortType.trends)
+                              InputChip(
+                                label:
+                                    Text(wallpaperSortLabel(l10n, wall.sort)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                onDeleted: () =>
+                                    unawaited(_refresh(sort: SortType.trends)),
+                              ),
+                            if (wall.keyword.isNotEmpty)
+                              InputChip(
+                                avatar: const Icon(Icons.search, size: 18),
+                                label: Text(wall.keyword),
+                                onDeleted: () =>
+                                    unawaited(_refresh(keyword: '')),
+                              ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
+                    WallpaperFlow(
+                      items: items,
+                      onOpen: widget.onOpen,
+                      availableWidth: constraints.maxWidth - padding * 2,
+                    ),
+                  ]),
                 ),
-              ),
-            );
-          });
-        },
-      ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Center(
+                      child: wall.isLoading
+                          ? const CircularProgressIndicator()
+                          : wall.failure != null
+                              ? Column(
+                                  children: [
+                                    Text(_failureMessage(wall.failure!, l10n)),
+                                    const SizedBox(height: 8),
+                                    TextButton(
+                                      onPressed: () =>
+                                          unawaited(_wall.loadMore()),
+                                      child: Text(l10n.retry),
+                                    ),
+                                  ],
+                                )
+                              : wall.hasMore
+                                  ? const SizedBox.shrink()
+                                  : Text(items.isEmpty
+                                      ? l10n.noData
+                                      : l10n.rankingEnd),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 }

@@ -3,7 +3,7 @@ import 'dart:math' as math;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/features/recommend/presentation/providers/wallpaper_recommendations_provider.dart';
+import 'package:anime_flow/features/recommend/application/wallpaper_recommendations.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';

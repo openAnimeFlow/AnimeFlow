@@ -51,11 +51,10 @@ class FlowNetworkService with WidgetsBindingObserver {
           ConnectivityPlatform.instance.onConnectivityChanged.listen(
         (results) {
           _events++;
-          // 启动复验前，首个同状态推送视为初始快照，保留恢复的缓存路由。
+          // 首个同状态推送是平台初始快照，保留恢复的缓存路由；
+          // 有效缓存命中时启动阶段不再复验，此处也不能提前作废缓存路由。
           final initialSnapshot = _lastConnectivity == null ||
-              (_events == 1 &&
-                  _pool.needsProbe &&
-                  setEquals(_lastConnectivity, results.toSet()));
+              (_events == 1 && setEquals(_lastConnectivity, results.toSet()));
           _networkChanged(results, invalidateRoute: !initialSnapshot);
         },
         onError: (Object error) =>

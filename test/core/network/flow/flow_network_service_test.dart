@@ -102,10 +102,10 @@ void main() {
         if (!eventBeforeRead) restarted.events.add([ConnectivityResult.wifi]);
         expect(restarted.pool.preferredAddresses, [ipA]);
         expect(restarted.rounds, 0);
-        clock.elapse(const Duration(milliseconds: 9999));
+        // 有效缓存命中时启动阶段跳过探测，路由保持到过期或网络变化。
+        clock.elapse(const Duration(seconds: 10));
         expect(restarted.rounds, 0);
-        clock.elapse(const Duration(milliseconds: 1));
-        expect(restarted.rounds, 1);
+        expect(restarted.pool.needsProbe, isFalse);
 
         restarted.fastest = ipB;
         restarted.events.add([ConnectivityResult.wifi]);

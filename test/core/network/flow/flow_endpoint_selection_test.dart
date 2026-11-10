@@ -89,6 +89,8 @@ void main() {
     final pool = makePool();
     await pool.initialize();
     expect(pool.preferredAddresses, [ipA, ipB, ipC]);
+    expect(pool.needsProbe, isFalse);
+    pool.requestRevalidation();
     expect(pool.needsProbe, isTrue);
     await pool.probe();
     expect(sessions.last.calls, [null, ipA, ipA, null]);

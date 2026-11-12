@@ -2169,6 +2169,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get startDownload => '開始下載';
 
   @override
+  String get resumeDownload => '繼續下載';
+
+  @override
   String get deleteDownloadTask => '刪除下載任務';
 
   @override
@@ -4797,6 +4800,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get startDownload => '开始下载';
+
+  @override
+  String get resumeDownload => '继续下载';
 
   @override
   String get deleteDownloadTask => '删除下载任务';
@@ -7430,6 +7436,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get startDownload => '開始下載';
 
   @override
+  String get resumeDownload => '繼續下載';
+
+  @override
   String get deleteDownloadTask => '刪除下載任務';
 
   @override
@@ -10060,6 +10069,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get startDownload => '開始下載';
+
+  @override
+  String get resumeDownload => '繼續下載';
 
   @override
   String get deleteDownloadTask => '刪除下載任務';

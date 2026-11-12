@@ -688,6 +688,7 @@
   ,"selectedEpisodesCount": "已選 {count} 集"
   ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
   ,"startDownload": "開始下載"
+  ,"resumeDownload": "繼續下載"
   ,"deleteDownloadTask": "刪除下載任務"
   ,"deleteDownloadTaskConfirmation": "確定刪除「{episode}」的下載資源嗎？"
   ,"@deleteDownloadTaskConfirmation": {"placeholders": {"episode": {}}}

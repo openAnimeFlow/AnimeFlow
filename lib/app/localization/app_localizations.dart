@@ -4118,6 +4118,12 @@ abstract class AppLocalizations {
   /// **'开始下载'**
   String get startDownload;
 
+  /// No description provided for @resumeDownload.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'继续下载'**
+  String get resumeDownload;
+
   /// No description provided for @deleteDownloadTask.
   ///
   /// In zh_Hans, this message translates to:

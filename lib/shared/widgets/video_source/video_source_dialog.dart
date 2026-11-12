@@ -42,6 +42,7 @@ class VideoSourceDialog extends StatefulWidget {
     this.onCaptchaVerified,
     this.keyboardInsetHandled = false,
     this.scrollController,
+    this.closeOnSelection = true,
   });
 
   final String subjectName;
@@ -62,6 +63,9 @@ class VideoSourceDialog extends StatefulWidget {
   final ValueChanged<String>? onCaptchaVerified;
   final bool keyboardInsetHandled;
   final ScrollController? scrollController;
+
+  /// 下载等场景可保留弹窗，继续展示解析结果。
+  final bool closeOnSelection;
 
   @override
   State<VideoSourceDialog> createState() => _VideoSourceDialogState();
@@ -231,9 +235,10 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
         16,
         0,
         16,
-        widget.keyboardInsetHandled
-            ? 0
-            : MediaQuery.viewInsetsOf(context).bottom,
+        16 +
+            (widget.keyboardInsetHandled
+                ? 0
+                : MediaQuery.viewInsetsOf(context).bottom),
       ),
       child: _buildDrawerContent(),
     );
@@ -245,7 +250,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
     final selectedIndex =
         resources.isEmpty ? null : _resolveSelectedWebsiteIndex(resources);
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildHeader(l10n),
         _buildManualSearch(l10n),
@@ -839,7 +844,10 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
           return SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              constraints: BoxConstraints(
+                minWidth: constraints.maxWidth,
+                minHeight: constraints.maxHeight,
+              ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
@@ -1013,7 +1021,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
                 url: resolveSourceUrl(website.baseUrl, episode.like),
               );
               final onSourceSelected = widget.onSourceSelected;
-              Navigator.of(context).pop();
+              if (widget.closeOnSelection) Navigator.of(context).pop();
               onSourceSelected(selection);
             } catch (e) {
               logError('获取视频源失败', error: e);

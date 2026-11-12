@@ -6,6 +6,7 @@ import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
+import 'package:anime_flow/shared/navigation/args/video_resource_download_route_args.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
@@ -439,8 +440,16 @@ class InfoHeadView extends StatelessWidget {
                   onPressed: () => EpisodesDrawerView.show(
                     context,
                     subjectId: subjectItem.id,
-                    subjectName: name,
                     onPlayEpisode: onPlayEpisode,
+                    onDownloadEpisodes: (episodes) {
+                      appNavigatorOf(context).openVideoResourceDownload<void>(
+                        VideoResourceDownloadRouteArgs(
+                          subjectName: name,
+                          subjectCover: ref.read(animeInfoArgsProvider).image,
+                          episodes: episodes,
+                        ),
+                      );
+                    },
                     onEpisodeLongPress: (episode) async {
                       try {
                         await ref

@@ -1,35 +1,43 @@
-import 'package:anime_flow/features/play/application/play_session.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
-import 'package:anime_flow/core/network/core/flow_response.dart';
-import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/features/play/presentation/widgets/layout_toggle_icon.dart';
 import 'package:anime_flow/features/play/presentation/widgets/loading_animation.dart';
 import 'package:anime_flow/features/play/presentation/widgets/episode_load_more_error.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
+import 'package:anime_flow/features/play/domain/episodes_data.dart';
 
-@Dependencies([playSession, playExtra, Episodes, PlayStateNotifier])
-class EpisodesListView extends ConsumerStatefulWidget {
-  const EpisodesListView({super.key});
+class EpisodesListView extends StatefulWidget {
+  const EpisodesListView({
+    super.key,
+    required this.episodesAsync,
+    required this.isGridView,
+    required this.subjectCover,
+    required this.isPlaying,
+    required this.onEpisodeSelected,
+    required this.onLoadMore,
+    required this.onRetry,
+    required this.onRetryLoadMore,
+    this.onToggleWatched,
+  });
+
+  final AsyncValue<EpisodesData> episodesAsync;
+  final bool isGridView;
+  final String subjectCover;
+  final bool isPlaying;
+  final ValueChanged<EpisodeData> onEpisodeSelected;
+  final ValueChanged<EpisodeData>? onToggleWatched;
+  final VoidCallback onLoadMore;
+  final VoidCallback onRetry;
+  final VoidCallback onRetryLoadMore;
 
   @override
-  ConsumerState<EpisodesListView> createState() => _EpisodesListViewState();
+  State<EpisodesListView> createState() => _EpisodesListViewState();
 }
 
-class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
+class _EpisodesListViewState extends State<EpisodesListView> {
   final controller = ScrollController();
-  late final PlaySession playSession;
-
-  /// 布局模式：false=列表，true=网格
-  bool isGridView = false;
 
   /// 上次滚动定位对应的 episodeId，避免 rebuild 重复触发滚动
   int? lastScrolledEpisodeId;
@@ -46,7 +54,6 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
   void initState() {
     super.initState();
     controller.addListener(_onScroll);
-    playSession = ref.read(playSessionProvider);
   }
 
   @override
@@ -56,28 +63,20 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
     super.dispose();
   }
 
-  void _toggleLayoutMode() {
-    setState(() {
-      isGridView = !isGridView;
-    });
+  @override
+  void didUpdateWidget(covariant EpisodesListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isGridView && !widget.isGridView) {
+      lastScrolledEpisodeId = null;
+    }
   }
 
   void _onScroll() {
-    if (ref.read(playExtraProvider).isOfflineMode) return;
     if (!controller.hasClients) return;
     final position = controller.position;
     if (position.pixels >=
         position.maxScrollExtent - _loadMoreTriggerDistance) {
-      final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
-      final episodesState =
-          ref.read(subjectEpisodesProvider(subjectId)).asData?.value;
-      if (episodesState == null ||
-          !episodesState.hasMore ||
-          episodesState.loadMoreError != null ||
-          episodesState.isLoadingMore) {
-        return;
-      }
-      ref.read(subjectEpisodesProvider(subjectId).notifier).loadMore();
+      widget.onLoadMore();
     }
   }
 
@@ -86,7 +85,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
     List<EpisodeData> episodes,
     int episodeId,
   ) {
-    if (!mounted || isGridView || !controller.hasClients) return;
+    if (!mounted || widget.isGridView || !controller.hasClients) return;
     final index = episodes.indexWhere(
       (e) => e.id == episodeId,
     );
@@ -100,73 +99,31 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
     );
   }
 
-  /// 更新剧集观看状态
-  Future<void> _updateEpisodeWatched(EpisodeData episode) async {
-    try {
-      await playSession.updateEpisodeWatched(
-        episode.id,
-        watched: episode.watched != true,
-      );
-      if (!mounted) return;
-      NotificationToast.show('已更新观看进度', title: '提示');
-    } on AnimeFlowApiException catch (e) {
-      if (!mounted) return;
-      NotificationToast.show(e.message, title: '更新失败');
-    } catch (e) {
-      if (!mounted) return;
-      NotificationToast.show(e.toString(), title: '更新失败');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final episodesAsync = ref.watch(episodesProvider);
-    final hasEpisodes = episodesAsync.value?.episodes != null;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(l10n.episodeSelection),
-            hasEpisodes
-                ? IconButton(
-                    onPressed: _toggleLayoutMode,
-                    icon: LayoutToggleIcon(isGridView: isGridView),
-                    tooltip: isGridView ? l10n.switchToList : l10n.switchToGrid,
-                  )
-                : const SizedBox.shrink(),
-          ],
-        ),
-        episodesAsync.when(
-          skipLoadingOnReload: true,
-          loading: () => Column(
-            children: [
-              const LinearProgressIndicator(),
-              const SizedBox(height: 12),
-              Text(l10n.fetchingEpisodes),
-            ],
-          ),
-          error: (error, _) => _buildLoadError(error),
-          data: (episodesState) => Column(
-            children: [
-              isGridView
-                  ? buildGridEpisodes(episodesState)
-                  : buildListEpisodes(episodesState),
-              if (episodesState.loadMoreError != null)
-                EpisodeLoadMoreError(
-                  error: episodesState.loadMoreError!,
-                  onRetry: () => ref
-                      .read(subjectEpisodesProvider(episodesState.subjectId)
-                          .notifier)
-                      .loadMore(),
-                ),
-            ],
-          ),
-        ),
-      ],
+    return widget.episodesAsync.when(
+      skipLoadingOnReload: true,
+      loading: () => Column(
+        children: [
+          const LinearProgressIndicator(),
+          const SizedBox(height: 12),
+          Text(l10n.fetchingEpisodes),
+        ],
+      ),
+      error: (error, _) => _buildLoadError(error),
+      data: (episodesState) => Column(
+        children: [
+          widget.isGridView
+              ? buildGridEpisodes(episodesState)
+              : buildListEpisodes(episodesState),
+          if (episodesState.loadMoreError != null)
+            EpisodeLoadMoreError(
+              error: episodesState.loadMoreError!,
+              onRetry: widget.onRetryLoadMore,
+            ),
+        ],
+      ),
     );
   }
 
@@ -199,11 +156,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
             ),
             const SizedBox(height: 12),
             FilledButton.icon(
-              onPressed: () {
-                final subjectId =
-                    ref.read(playExtraProvider).playExtra.subjectId;
-                ref.read(subjectEpisodesProvider(subjectId).notifier).retry();
-              },
+              onPressed: widget.onRetry,
               icon: const Icon(Icons.refresh),
               label: Text(AppLocalizations.of(context).retry),
             ),
@@ -288,10 +241,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
     final colorScheme = Theme.of(context).colorScheme;
     final episodeCover = episode.cover;
     final hasEpisodeCover = episodeCover != null && episodeCover.isNotEmpty;
-    final subjectCover = ref.watch(
-      playExtraProvider.select((extra) => extra.playExtra.subjectCover),
-    );
-    final coverUrl = hasEpisodeCover ? episodeCover : subjectCover;
+    final coverUrl = hasEpisodeCover ? episodeCover : widget.subjectCover;
     final watched = episode.watched == true;
     final theme = Theme.of(context);
     final cardColor = theme.cardTheme.color ??
@@ -315,10 +265,10 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-          onTap: () => _selectEpisode(episode),
-          onLongPress: ref.read(playExtraProvider).isOfflineMode
+          onTap: () => widget.onEpisodeSelected(episode),
+          onLongPress: widget.onToggleWatched == null
               ? null
-              : () => _updateEpisodeWatched(episode),
+              : () => widget.onToggleWatched!(episode),
           child: Row(
             spacing: 5,
             children: [
@@ -477,7 +427,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
             elevation: 0,
             child: InkWell(
               borderRadius: BorderRadius.circular(10),
-              onTap: () => _selectEpisode(episode),
+              onTap: () => widget.onEpisodeSelected(episode),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
@@ -515,20 +465,9 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
   }
 
   Widget _buildPlayingIndicator() {
-    return Consumer(
-      builder: (context, ref, child) {
-        final isPlaying = ref.watch(
-          playStateProvider.select((state) => state.playing),
-        );
-        return LoadingAnimation(
-          size: 35,
-          isPlaying: isPlaying,
-        );
-      },
+    return LoadingAnimation(
+      size: 35,
+      isPlaying: widget.isPlaying,
     );
-  }
-
-  void _selectEpisode(EpisodeData episode) {
-    ref.read(episodesProvider.notifier).selectEpisode(episode.id);
   }
 }

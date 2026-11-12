@@ -4,34 +4,32 @@ import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
-import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
-import 'package:anime_flow/shared/navigation/args/video_resource_download_route_args.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class EpisodesDrawerView extends ConsumerStatefulWidget {
   final int subjectId;
-  final String subjectName;
   final ScrollController scrollController;
   final void Function(EpisodeData episode)? onEpisodeLongPress;
   final ValueChanged<int> onPlayEpisode;
+  final ValueChanged<List<EpisodeData>> onDownloadEpisodes;
 
   const EpisodesDrawerView({
     super.key,
     required this.subjectId,
-    required this.subjectName,
     required this.scrollController,
     this.onEpisodeLongPress,
     required this.onPlayEpisode,
+    required this.onDownloadEpisodes,
   });
 
   static void show(
     BuildContext context, {
     required int subjectId,
-    required String subjectName,
     void Function(EpisodeData episode)? onEpisodeLongPress,
     required ValueChanged<int> onPlayEpisode,
+    required ValueChanged<List<EpisodeData>> onDownloadEpisodes,
   }) {
     final providerContainer = ProviderScope.containerOf(context);
     showModalBottomSheet<void>(
@@ -52,9 +50,12 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
               return EpisodesDrawerView(
                 scrollController: scrollController,
                 subjectId: subjectId,
-                subjectName: subjectName,
                 onEpisodeLongPress: onEpisodeLongPress,
                 onPlayEpisode: onPlayEpisode,
+                onDownloadEpisodes: (episodes) {
+                  Navigator.of(sheetContext).pop();
+                  onDownloadEpisodes(episodes);
+                },
               );
             },
           ),
@@ -170,15 +171,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
               if (!episodesState.hasMore && !episodesState.isLoadingMore) ...[
                 const Spacer(),
                 TextButton(
-                  onPressed: () {
-                    final navigator = appNavigatorOf(context);
-                    final args = VideoResourceDownloadRouteArgs(
-                      subjectName: widget.subjectName,
-                      episodes: sortedEpisodes,
-                    );
-                    Navigator.of(context).pop();
-                    navigator.openVideoResourceDownload<void>(args);
-                  },
+                  onPressed: () => widget.onDownloadEpisodes(sortedEpisodes),
                   child: Text(l10n.downloadResources),
                 ),
               ],

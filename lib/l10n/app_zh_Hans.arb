@@ -716,6 +716,7 @@
   ,"selectedEpisodesCount": "已选 {count} 集"
   ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
   ,"startDownload": "开始下载"
+  ,"resumeDownload": "继续下载"
   ,"deleteDownloadTask": "删除下载任务"
   ,"deleteDownloadTaskConfirmation": "确定删除「{episode}」的下载资源吗？"
   ,"@deleteDownloadTaskConfirmation": {"placeholders": {"episode": {}}}

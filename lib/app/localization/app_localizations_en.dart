@@ -2240,6 +2240,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startDownload => 'Start download';
 
   @override
+  String get resumeDownload => 'Resume download';
+
+  @override
   String get deleteDownloadTask => 'Delete download task';
 
   @override

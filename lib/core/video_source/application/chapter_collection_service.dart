@@ -67,6 +67,8 @@ class ChapterCollectionService {
       final List<CrawlerEpisodeResourcesItem> chapters;
       try {
         chapters = await _fetch(candidate.link);
+      } on RuleRequestCancelledException {
+        rethrow;
       } on CaptchaRequiredException {
         // 验证码要中断整条链路，不能只跳过当前条目。
         rethrow;

@@ -173,6 +173,11 @@ class DownloadController extends _$DownloadController {
           createdAt: DateTime.now(),
         );
 
+    if (record.subjectCover.trim().isEmpty &&
+        params.subjectCover.trim().isNotEmpty) {
+      record.subjectCover = params.subjectCover;
+    }
+
     final normalizedEpisodeUrl = _resolveEpisodeUrl(
       params.sourceBaseUrl,
       params.episodeUrl,
@@ -257,12 +262,6 @@ class DownloadController extends _$DownloadController {
     }
   }
 
-  Future<void> startDownloads(List<StartDownloadParams> paramsList) async {
-    for (final params in paramsList) {
-      await startDownload(params);
-    }
-  }
-
   Future<void> pauseAll() async {
     final repository = ref.read(downloadRepositoryProvider);
     final activeEpisodes = [
@@ -308,8 +307,14 @@ class DownloadController extends _$DownloadController {
     _refresh(speed: 0);
   }
 
-  Future<void> resume(StartDownloadParams params) {
-    return startDownload(params);
+  Future<void> resume(StartDownloadParams params) async {
+    // 暂停会立即更新 UI，但原任务可能仍在释放文件/网络资源。
+    // 等待退出后再入队，避免被同 key 的旧任务拦截或覆盖状态。
+    await ref.read(downloadManagerProvider).cancel(
+          params.recordKey,
+          _resolveEpisodeUrl(params.sourceBaseUrl, params.episodeUrl),
+        );
+    await startDownload(params);
   }
 
   Future<void> downloadDanmaku(String recordKey, String episodeUrl) async {

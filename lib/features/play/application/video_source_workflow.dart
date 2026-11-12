@@ -1,7 +1,7 @@
+import 'package:anime_flow/core/video_source/application/chapter_collection_service.dart';
+import 'package:anime_flow/core/video_source/application/search_result_rank_service.dart';
 import 'package:anime_flow/features/play/domain/play_request.dart';
 import 'package:anime_flow/core/utils/source_url.dart' show resolveSourceUrl;
-import 'package:anime_flow/features/play/application/search_result_rank_service.dart';
-import 'package:anime_flow/features/play/application/chapter_collection_service.dart';
 import 'package:anime_flow/core/video_source/domain/episode_source_matcher.dart';
 import 'package:anime_flow/core/video_source/domain/selected_video_source.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';

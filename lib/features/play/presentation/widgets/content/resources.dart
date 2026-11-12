@@ -1,83 +1,45 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/features/download/presentation/widgets/download_episode_sheet.dart';
-import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
-import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:anime_flow/features/play/presentation/widgets/dialog/play_video_source_dialog.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
 
-enum _SourceAction { downloadResources, openPageUrl, copyPageUrl }
+enum _SourceAction { openPageUrl, copyPageUrl }
 
-@Dependencies([
-  Episodes,
-  playExtra,
-  playSession,
-  VideoSourceNotifier,
-  VideoUiNotifier,
-])
-class VideoResourcesView extends ConsumerStatefulWidget {
-  const VideoResourcesView({super.key});
+class VideoResourcesView extends StatefulWidget {
+  const VideoResourcesView({
+    super.key,
+    required this.isSearchCompleted,
+    required this.webSiteTitle,
+    required this.webSiteIcon,
+    required this.resourceTitle,
+    required this.lineName,
+    required this.onSwitchSource,
+    this.onOpenSourcePage,
+    this.onCopySourcePage,
+  });
+
+  final bool isSearchCompleted;
+  final String webSiteTitle;
+  final String webSiteIcon;
+  final String resourceTitle;
+  final String lineName;
+  final VoidCallback onSwitchSource;
+  final VoidCallback? onOpenSourcePage;
+  final VoidCallback? onCopySourcePage;
 
   @override
-  ConsumerState<VideoResourcesView> createState() => _VideoResourcesViewState();
+  State<VideoResourcesView> createState() => _VideoResourcesViewState();
 }
 
-class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
+class _VideoResourcesViewState extends State<VideoResourcesView> {
   bool _isSourceActionMenuOpen = false;
 
-  void _showSourceDrawer() {
-    final subjectName = ref.read(playExtraProvider).playExtra.subjectName;
-    showPlayerSettingsSheet(
-      context: context,
-      label: AppLocalizations.of(context).videoSource,
-      child: PlayerSettingsSheet(
-        avoidKeyboard: true,
-        initialSize: 0.60,
-        snapSizes: const [0.3, 0.52, 0.95],
-        closeOnMinExtent: true,
-        builder: (context, scrollController, isBottomSheet) =>
-            PlayVideoSourceDialog(
-          keyboardInsetHandled: isBottomSheet,
-          scrollController: scrollController,
-          subjectName: subjectName,
-        ),
-      ),
-    );
-  }
-
-  Future<void> _openSourcePageInBrowser(String videoUrl) async {
-    final url = videoUrl.trim();
-    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-  }
-
-  Future<void> _copySourcePageUrl(String videoUrl) async {
-    final l10n = AppLocalizations.of(context);
-    final url = videoUrl.trim();
-    await Clipboard.setData(ClipboardData(text: url));
-    NotificationToast.show(l10n.sourceLinkCopied, title: l10n.copied);
-  }
-
   Widget _buildSourceActionMenu({
-    required String videoUrl,
-    required bool canDownload,
     required AppLocalizations l10n,
   }) {
     final actions = [
-      if (canDownload) _SourceAction.downloadResources,
-      if (videoUrl.trim().isNotEmpty) ...[
-        _SourceAction.openPageUrl,
-        _SourceAction.copyPageUrl,
-      ],
+      if (widget.onOpenSourcePage != null) _SourceAction.openPageUrl,
+      if (widget.onCopySourcePage != null) _SourceAction.copyPageUrl,
     ];
     return DropDownMenu<_SourceAction>(
       items: actions,
@@ -113,10 +75,6 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       },
       itemBuilder: (context, action, _) {
         final (icon, label) = switch (action) {
-          _SourceAction.downloadResources => (
-              Icons.download_rounded,
-              l10n.downloadResources
-            ),
           _SourceAction.openPageUrl => (
               Icons.open_in_browser_rounded,
               l10n.openPlaybackPage
@@ -139,24 +97,10 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       },
       onSelected: (action) {
         switch (action) {
-          case _SourceAction.downloadResources:
-            showDownloadEpisodeSheet(context,
-                subject: ref.read(playExtraProvider).playExtra,
-                watchSource: (ref) {
-              final state = ref.watch(videoSourceProvider);
-              final sources = state.videoResources;
-              final index = state.selectedWebsiteIndex;
-              return DownloadEpisodeSource(
-                source: sources.isEmpty
-                    ? null
-                    : sources[index >= 0 && index < sources.length ? index : 0],
-                lineName: state.lineName,
-              );
-            });
           case _SourceAction.openPageUrl:
-            _openSourcePageInBrowser(videoUrl);
+            widget.onOpenSourcePage?.call();
           case _SourceAction.copyPageUrl:
-            _copySourcePageUrl(videoUrl);
+            widget.onCopySourcePage?.call();
         }
       },
     );
@@ -165,21 +109,8 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final videoSourceState = ref.watch(videoSourceProvider);
-    final hasSourceUrl = videoSourceState.videoUrl.trim().isNotEmpty;
-    final resources = videoSourceState.videoResources;
-    final selectedIndex = videoSourceState.selectedWebsiteIndex;
-    final selectedSource = resources.isEmpty
-        ? null
-        : resources[selectedIndex >= 0 && selectedIndex < resources.length
-            ? selectedIndex
-            : 0];
-    // Downloads resolve media independently; other sources may still be searching.
-    final canDownload = selectedSource?.episodeResources
-            .any((line) => line.episodes.isNotEmpty) ??
-        false;
-    final resourceTitle = videoSourceState.resourceTitle.trim();
-    final lineName = videoSourceState.lineName.trim();
+    final resourceTitle = widget.resourceTitle.trim();
+    final lineName = widget.lineName.trim();
     final displayLineName = lineName.isEmpty ? '' : lineName;
     final resourceDetail = [
       if (resourceTitle.isNotEmpty) resourceTitle,
@@ -205,8 +136,8 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                         ),
                       ),
                       const SizedBox(height: 5),
-                      if (videoSourceState.isSearchCompleted ||
-                          videoSourceState.webSiteTitle.isNotEmpty)
+                      if (widget.isSearchCompleted ||
+                          widget.webSiteTitle.isNotEmpty)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 5,
@@ -218,13 +149,13 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                                   child: AnimationNetworkImage(
                                     height: 25,
                                     width: 25,
-                                    url: videoSourceState.webSiteIcon,
+                                    url: widget.webSiteIcon,
                                   ),
                                 ),
                                 const SizedBox(width: 5),
                                 Expanded(
                                   child: Text(
-                                    videoSourceState.webSiteTitle,
+                                    widget.webSiteTitle,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
@@ -253,7 +184,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                   ),
                 ),
                 FilledButton.icon(
-                  onPressed: _showSourceDrawer,
+                  onPressed: widget.onSwitchSource,
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.primary,
@@ -279,10 +210,9 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                     ),
                   ),
                 ],
-                if (canDownload || hasSourceUrl)
+                if (widget.onOpenSourcePage != null ||
+                    widget.onCopySourcePage != null)
                   _buildSourceActionMenu(
-                    videoUrl: videoSourceState.videoUrl,
-                    canDownload: canDownload,
                     l10n: l10n,
                   ),
               ],

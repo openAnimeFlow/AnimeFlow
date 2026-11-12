@@ -34,6 +34,7 @@ void main() {
       final state = container.read(downloadControllerProvider);
       expect(state.totalTasks, 1);
       expect(repository.records.single.subjectName, 'Subject');
+      expect(repository.records.single.subjectCover, 'cover');
       expect(
           manager.requests.single.networkMediaUrl, 'https://cdn.test/ep1.m3u8');
       expect(resolverPool.resolveCount, 0);
@@ -41,6 +42,35 @@ void main() {
         repository.records.single.episodes.values.single.status,
         DownloadStatus.downloading,
       );
+    });
+
+    test('fills missing cover when downloading another episode of a record',
+        () async {
+      final repository = _FakeDownloadRepository();
+      final record = DownloadRecord(
+        subjectId: 1,
+        subjectName: 'Subject',
+        subjectCover: '',
+        sourceName: 'source',
+        sourceBaseUrl: 'https://source.test/base/',
+        episodes: {'ep0': _episode('ep0', DownloadStatus.completed)},
+        createdAt: DateTime(2026),
+      );
+      await repository.putRecord(record);
+      final container = ProviderContainer(overrides: [
+        downloadRepositoryProvider.overrideWithValue(repository),
+        downloadManagerProvider.overrideWithValue(_FakeDownloadManager()),
+        videoSourceResolverPoolProvider.overrideWithValue(_FakeResolverPool()),
+      ]);
+      addTearDown(container.dispose);
+
+      await container.read(downloadControllerProvider.notifier).startDownload(
+            _params(networkMediaUrl: 'https://cdn.test/ep1.m3u8'),
+          );
+
+      expect(repository.getRecord(record.key)?.subjectCover, 'cover');
+      expect(repository.getRecord(record.key)?.episodes['ep0']?.status,
+          DownloadStatus.completed);
     });
 
     test('resolves media url before enqueue when networkMediaUrl is empty',
@@ -139,6 +169,37 @@ void main() {
       expect(manager.cancelled, [(record.key, 'ep1')]);
       expect(manager.deletedEpisodes.single.episodeUrl, 'ep1');
       expect(repository.getRecord(record.key), isNull);
+    });
+
+    test('resume waits for the paused worker to exit before enqueueing',
+        () async {
+      final repository = _FakeDownloadRepository();
+      final exit = Completer<void>();
+      final manager = _FakeDownloadManager()..cancelCompletion = exit.future;
+      final resolverPool = _FakeResolverPool();
+      final container = ProviderContainer(overrides: [
+        downloadRepositoryProvider.overrideWithValue(repository),
+        downloadManagerProvider.overrideWithValue(manager),
+        videoSourceResolverPoolProvider.overrideWithValue(resolverPool),
+      ]);
+      addTearDown(container.dispose);
+      final params = _params(networkMediaUrl: 'https://cdn.test/ep1.m3u8');
+      final controller = container.read(downloadControllerProvider.notifier);
+      await controller.startDownload(params);
+      await controller.pause(
+          params.recordKey, manager.requests.single.episodeUrl);
+      final resumed = controller.resume(params);
+      expect(manager.cancelled, hasLength(1));
+      expect(manager.requests, hasLength(1));
+      expect(repository.records.single.episodes.values.single.status,
+          DownloadStatus.paused);
+      exit.complete();
+      await resumed;
+      expect(manager.requests, hasLength(2));
+      expect(manager.requests.last.networkMediaUrl, params.networkMediaUrl);
+      expect(repository.records.single.episodes.values.single.status,
+          DownloadStatus.downloading);
+      expect(resolverPool.resolveCount, 0);
     });
 
     test('pause immediately persists paused status and refreshes state',
@@ -495,6 +556,7 @@ class _FakeDownloadRepository implements IDownloadRepository {
 }
 
 class _FakeDownloadManager implements IDownloadManager {
+  Future<void>? cancelCompletion;
   final requests = <DownloadRequest>[];
   final cancelled = <(String, String)>[];
   final paused = <(String, String)>[];
@@ -512,6 +574,7 @@ class _FakeDownloadManager implements IDownloadManager {
   @override
   Future<void> cancel(String recordKey, String episodeUrl) async {
     cancelled.add((recordKey, episodeUrl));
+    await cancelCompletion;
   }
 
   @override

@@ -15,7 +15,7 @@ class EpisodeSourceMatcher {
 
   static List<EpisodeSourceCandidate> buildCandidates(
     List<ResourcesItem> resources, {
-    required int episodeIndex,
+    required num episodeIndex,
     String? preferredWebsiteName,
   }) {
     final candidates = <EpisodeSourceCandidate>[];

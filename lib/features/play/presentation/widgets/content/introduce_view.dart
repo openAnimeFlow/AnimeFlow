@@ -8,6 +8,8 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/core/network/core/flow_response.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/video_resource_download_route_args.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
@@ -18,6 +20,13 @@ import 'package:anime_flow/features/play/presentation/providers/video_ui_provide
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_query_providers.dart';
+import 'package:anime_flow/features/play/presentation/widgets/dialog/play_video_source_dialog.dart';
+import 'package:anime_flow/features/play/presentation/widgets/layout_toggle_icon.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
+import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 
 @Dependencies([
   playExtra,
@@ -42,6 +51,75 @@ class IntroduceView extends StatefulWidget {
 class _IntroduceViewState extends State<IntroduceView>
     with AutomaticKeepAliveClientMixin {
   final _collectionMenuTurns = ValueNotifier<double>(0);
+  bool _isGridView = false;
+
+  void _loadMoreEpisodes(WidgetRef ref, {bool retry = false}) {
+    final extra = ref.read(playExtraProvider);
+    if (extra.isOfflineMode) return;
+    final provider = subjectEpisodesProvider(extra.playExtra.subjectId);
+    final state = ref.read(provider).asData?.value;
+    if (state == null ||
+        !state.hasMore ||
+        state.isLoadingMore ||
+        (!retry && state.loadMoreError != null)) {
+      return;
+    }
+    ref.read(provider.notifier).loadMore();
+  }
+
+  void _retryEpisodes(WidgetRef ref) {
+    final extra = ref.read(playExtraProvider);
+    if (extra.isOfflineMode) return;
+    ref
+        .read(subjectEpisodesProvider(extra.playExtra.subjectId).notifier)
+        .retry();
+  }
+
+  Future<void> _updateEpisodeWatched(WidgetRef ref, EpisodeData episode) async {
+    if (ref.read(playExtraProvider).isOfflineMode) return;
+    try {
+      await ref.read(playSessionProvider).updateEpisodeWatched(
+            episode.id,
+            watched: episode.watched != true,
+          );
+    } on AnimeFlowApiException catch (e) {
+      if (!mounted) return;
+      NotificationToast.show(e.message, title: '更新失败');
+    } catch (e) {
+      if (!mounted) return;
+      NotificationToast.show(e.toString(), title: '更新失败');
+    }
+  }
+
+  void _showSourceDrawer(String subjectName) {
+    showPlayerSettingsSheet(
+      context: context,
+      label: AppLocalizations.of(context).videoSource,
+      child: PlayerSettingsSheet(
+        avoidKeyboard: true,
+        initialSize: 0.60,
+        snapSizes: const [0.3, 0.52, 0.95],
+        closeOnMinExtent: true,
+        builder: (context, scrollController, isBottomSheet) =>
+            PlayVideoSourceDialog(
+          keyboardInsetHandled: isBottomSheet,
+          scrollController: scrollController,
+          subjectName: subjectName,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openSourcePage(String videoUrl) async {
+    await launchUrl(Uri.parse(videoUrl.trim()),
+        mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _copySourcePage(String videoUrl) async {
+    final l10n = AppLocalizations.of(context);
+    await Clipboard.setData(ClipboardData(text: videoUrl.trim()));
+    NotificationToast.show(l10n.sourceLinkCopied, title: l10n.copied);
+  }
 
   @override
   void dispose() {
@@ -140,9 +218,81 @@ class _IntroduceViewState extends State<IntroduceView>
             }),
             const SizedBox(height: 5),
             //章节
-            const EpisodesListView(),
+            Consumer(builder: (context, ref, child) {
+              final l10n = AppLocalizations.of(context);
+              final episodesAsync = ref.watch(episodesProvider);
+              final episodes = episodesAsync.value?.episodes?.data;
+              final extra = ref.watch(playExtraProvider);
+              final isPlaying = ref.watch(
+                playStateProvider.select((state) => state.playing),
+              );
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(l10n.episodeSelection),
+                      if (episodes != null && episodes.isNotEmpty)
+                        Row(
+                          children: [
+                            IconButton(onPressed: () {
+                              appNavigatorOf(context).openVideoResourceDownload<void>(
+                                VideoResourceDownloadRouteArgs(
+                                  subjectName: extra.playExtra.subjectName,
+                                  subjectCover: extra.playExtra.subjectCover,
+                                  episodes: episodes,
+                                ),
+                              );
+                            }, icon: const Icon(Icons.download_rounded)),
+                            IconButton(
+                              onPressed: () =>
+                                  setState(() => _isGridView = !_isGridView),
+                              icon: LayoutToggleIcon(isGridView: _isGridView),
+                              tooltip: _isGridView
+                                  ? l10n.switchToList
+                                  : l10n.switchToGrid,
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                  EpisodesListView(
+                    episodesAsync: episodesAsync,
+                    isGridView: _isGridView,
+                    subjectCover: extra.playExtra.subjectCover,
+                    isPlaying: isPlaying,
+                    onEpisodeSelected: (episode) => ref
+                        .read(episodesProvider.notifier)
+                        .selectEpisode(episode.id),
+                    onToggleWatched: extra.isOfflineMode
+                        ? null
+                        : (episode) => _updateEpisodeWatched(ref, episode),
+                    onLoadMore: () => _loadMoreEpisodes(ref),
+                    onRetry: () => _retryEpisodes(ref),
+                    onRetryLoadMore: () => _loadMoreEpisodes(ref, retry: true),
+                  ),
+                ],
+              );
+            }),
             //数据源
-            const VideoResourcesView(),
+            Consumer(builder: (context, ref, child) {
+              final state = ref.watch(videoSourceProvider);
+              final hasSourceUrl = state.videoUrl.trim().isNotEmpty;
+              return VideoResourcesView(
+                isSearchCompleted: state.isSearchCompleted,
+                webSiteTitle: state.webSiteTitle,
+                webSiteIcon: state.webSiteIcon,
+                resourceTitle: state.resourceTitle,
+                lineName: state.lineName,
+                onSwitchSource: () => _showSourceDrawer(
+                    ref.read(playExtraProvider).playExtra.subjectName),
+                onOpenSourcePage:
+                    hasSourceUrl ? () => _openSourcePage(state.videoUrl) : null,
+                onCopySourcePage:
+                    hasSourceUrl ? () => _copySourcePage(state.videoUrl) : null,
+              );
+            }),
             //弹幕
             const DanmakuCard(),
             const RecommendationsView(),

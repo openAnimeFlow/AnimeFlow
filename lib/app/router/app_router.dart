@@ -368,6 +368,7 @@ class VideoResourceDownloadRoute extends GoRouteData
     final args = $extra!;
     return VideoResourceDownloadPage(
       subjectName: args.subjectName,
+      subjectCover: args.subjectCover,
       episodes: args.episodes,
     );
   }

@@ -667,6 +667,7 @@
   ,"selectedEpisodesCount": "{count} selected"
   ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
   ,"startDownload": "Start download"
+  ,"resumeDownload": "Resume download"
   ,"deleteDownloadTask": "Delete download task"
   ,"deleteDownloadTaskConfirmation": "Delete the downloaded resource for “{episode}”?"
   ,"@deleteDownloadTaskConfirmation": {"placeholders": {"episode": {}}}

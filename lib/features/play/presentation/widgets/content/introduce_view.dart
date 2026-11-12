@@ -23,6 +23,8 @@ import 'package:anime_flow/features/play/presentation/providers/play_query_provi
 import 'package:anime_flow/features/play/presentation/widgets/dialog/play_video_source_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/layout_toggle_icon.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
+import 'package:anime_flow/features/play/presentation/widgets/content/play_details_sheet.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
@@ -37,12 +39,16 @@ import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
   VideoUiNotifier,
   VideoSourceNotifier,
   DanmakuStateNotifier,
-  recommendation
+  recommendation,
+  animeInfoArgs,
+  SubjectComments,
+  SubjectStills,
+  SubjectCharacters,
+  SubjectProducers,
+  SubjectRelated,
 ])
 class IntroduceView extends StatefulWidget {
-  const IntroduceView({super.key, required this.onShowDetails});
-
-  final VoidCallback onShowDetails;
+  const IntroduceView({super.key});
 
   @override
   State<IntroduceView> createState() => _IntroduceViewState();
@@ -52,6 +58,25 @@ class _IntroduceViewState extends State<IntroduceView>
     with AutomaticKeepAliveClientMixin {
   final _collectionMenuTurns = ValueNotifier<double>(0);
   bool _isGridView = false;
+  bool _detailsOpen = false;
+
+  Future<void> _showDetails() async {
+    if (_detailsOpen) return;
+    _detailsOpen = true;
+    try {
+      await showPlayerSettingsSheet(
+        context: context,
+        label: AppLocalizations.of(context).detailsTitle,
+        child: PlayerSettingsSheet(
+          closeOnMinExtent: true,
+          builder: (context, scrollController, isBottomSheet) =>
+              PlayDetailsSheet(scrollController: scrollController),
+        ),
+      );
+    } finally {
+      _detailsOpen = false;
+    }
+  }
 
   void _loadMoreEpisodes(WidgetRef ref, {bool retry = false}) {
     final extra = ref.read(playExtraProvider);
@@ -150,7 +175,7 @@ class _IntroduceViewState extends State<IntroduceView>
                 children: [
                   Expanded(
                     child: InkWell(
-                      onTap: widget.onShowDetails,
+                      onTap: _showDetails,
                       borderRadius: BorderRadius.circular(10),
                       child: Text(
                         extra.subjectName,
@@ -236,15 +261,19 @@ class _IntroduceViewState extends State<IntroduceView>
                       if (episodes != null && episodes.isNotEmpty)
                         Row(
                           children: [
-                            IconButton(onPressed: () {
-                              appNavigatorOf(context).openVideoResourceDownload<void>(
-                                VideoResourceDownloadRouteArgs(
-                                  subjectName: extra.playExtra.subjectName,
-                                  subjectCover: extra.playExtra.subjectCover,
-                                  episodes: episodes,
-                                ),
-                              );
-                            }, icon: const Icon(Icons.download_rounded)),
+                            IconButton(
+                                onPressed: () {
+                                  appNavigatorOf(context)
+                                      .openVideoResourceDownload<void>(
+                                    VideoResourceDownloadRouteArgs(
+                                      subjectName: extra.playExtra.subjectName,
+                                      subjectCover:
+                                          extra.playExtra.subjectCover,
+                                      episodes: episodes,
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.download_rounded)),
                             IconButton(
                               onPressed: () =>
                                   setState(() => _isGridView = !_isGridView),

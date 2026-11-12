@@ -27,7 +27,7 @@ import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_query_providers.dart';
 
 import '../widgets/content/comments_view.dart';
-import '../widgets/content/play_content_navigator.dart';
+import '../widgets/content/introduce_view.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 
 @Dependencies([
@@ -362,11 +362,9 @@ class _ContentViewState extends ConsumerState<_ContentView>
 
   @override
   Widget build(BuildContext context) {
-    final (isFullscreen, isWideScreen, isContentExpanded) = ref.watch(
-        videoUiProvider.select((state) =>
-            (state.isFullscreen, state.isWideScreen, state.isContentExpanded)));
-    final isContentVisible =
-        !isFullscreen && (!isWideScreen || isContentExpanded);
+    final isWideScreen = ref.watch(
+      videoUiProvider.select((state) => state.isWideScreen),
+    );
     return MediaQuery.removePadding(
       context: context,
       removeLeft: isWideScreen,
@@ -421,17 +419,12 @@ class _ContentViewState extends ConsumerState<_ContentView>
               ),
               const Divider(height: 1),
               Expanded(
-                child: AnimatedBuilder(
-                  animation: tabController,
-                  builder: (context, _) => TabBarView(
-                    controller: tabController,
-                    children: [
-                      PlayContentNavigator(
-                        isActive: tabController.index == 0 && isContentVisible,
-                      ),
-                      const CommentsView(),
-                    ],
-                  ),
+                child: TabBarView(
+                  controller: tabController,
+                  children: const [
+                    IntroduceView(),
+                    CommentsView(),
+                  ],
                 ),
               ),
             ],

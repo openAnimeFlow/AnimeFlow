@@ -47,6 +47,35 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get favoriteWallpapers => 'Favorite wallpapers';
+
+  @override
+  String get favoriteWallpapersSubtitle => 'Keep your favorite scenes close.';
+
+  @override
+  String favoriteWallpapersCount(int count) {
+    return '$count anime';
+  }
+
+  @override
+  String get favoriteWallpapersEmpty => 'No favorite wallpapers yet';
+
+  @override
+  String favoriteWallpapersRemoveConfirm(String name) {
+    return 'Remove $name from your favorites?';
+  }
+
+  @override
+  String get favoriteWallpapersEmptyHint =>
+      'Save your favorite scenes from wallpaper details.';
+
+  @override
+  String get favoriteWallpapersExplore => 'Explore';
+
+  @override
+  String get favoriteWallpapersLoadMore => 'Load more';
+
+  @override
   String get wallpaperDownload => 'Download wallpaper';
 
   @override

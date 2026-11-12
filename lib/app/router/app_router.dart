@@ -18,6 +18,7 @@ import 'package:anime_flow/features/auth/presentation/pages/oauth_callback_page.
 import 'package:anime_flow/features/ranking/presentation/pages/ranking_page.dart';
 import 'package:anime_flow/features/recommend/presentation/pages/recommend.dart';
 import 'package:anime_flow/features/recommend/presentation/pages/wallpaper_detail_page.dart';
+import 'package:anime_flow/features/recommend/presentation/pages/favorite_wallpapers_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/register_page.dart';
 import 'package:anime_flow/features/search/presentation/pages/image_search_page.dart';
 import 'package:anime_flow/features/search/presentation/pages/search_page.dart';
@@ -395,6 +396,16 @@ class WallpaperDetailRoute extends GoRouteData with $WallpaperDetailRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       WallpaperDetailPage(args: $extra);
+}
+
+@TypedGoRoute<FavoriteWallpapersRoute>(path: '/favorite-wallpapers')
+class FavoriteWallpapersRoute extends GoRouteData
+    with $FavoriteWallpapersRoute {
+  const FavoriteWallpapersRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const FavoriteWallpapersPage();
 }
 
 @TypedGoRoute<ImagePreviewRoute>(path: '/image-preview')

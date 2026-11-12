@@ -169,6 +169,54 @@ abstract class AppLocalizations {
   /// **'共 {count} 张图片'**
   String wallpaperImageCount(int count);
 
+  /// No description provided for @favoriteWallpapers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏壁纸'**
+  String get favoriteWallpapers;
+
+  /// No description provided for @favoriteWallpapersSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'把喜欢的画面，留在这里。'**
+  String get favoriteWallpapersSubtitle;
+
+  /// No description provided for @favoriteWallpapersCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{count} 个番剧'**
+  String favoriteWallpapersCount(int count);
+
+  /// No description provided for @favoriteWallpapersEmpty.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'还没有收藏的壁纸'**
+  String get favoriteWallpapersEmpty;
+
+  /// No description provided for @favoriteWallpapersRemoveConfirm.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定取消收藏「{name}」吗？'**
+  String favoriteWallpapersRemoveConfirm(String name);
+
+  /// No description provided for @favoriteWallpapersEmptyHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'在壁纸详情中收藏喜欢的画面'**
+  String get favoriteWallpapersEmptyHint;
+
+  /// No description provided for @favoriteWallpapersExplore.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'去发现'**
+  String get favoriteWallpapersExplore;
+
+  /// No description provided for @favoriteWallpapersLoadMore.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载更多'**
+  String get favoriteWallpapersLoadMore;
+
   /// No description provided for @wallpaperDownload.
   ///
   /// In zh_Hans, this message translates to:

@@ -24,6 +24,7 @@ List<RouteBase> get $appRoutes => [
       $animePreviewPageRoute,
       $imageSearchRoute,
       $wallpaperDetailRoute,
+      $favoriteWallpapersRoute,
       $imagePreviewRoute,
       $settingsShellRoute,
     ];
@@ -679,6 +680,35 @@ mixin $WallpaperDetailRoute on GoRouteData {
   @override
   void replace(BuildContext context) =>
       context.replace(location, extra: _self.$extra);
+}
+
+RouteBase get $favoriteWallpapersRoute => GoRouteData.$route(
+      path: '/favorite-wallpapers',
+      hasOverriddenOnExit: false,
+      factory: $FavoriteWallpapersRoute._fromState,
+    );
+
+mixin $FavoriteWallpapersRoute on GoRouteData {
+  static FavoriteWallpapersRoute _fromState(GoRouterState state) =>
+      const FavoriteWallpapersRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/favorite-wallpapers',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
 }
 
 RouteBase get $imagePreviewRoute => GoRouteData.$route(

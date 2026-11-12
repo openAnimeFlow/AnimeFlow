@@ -44,6 +44,34 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get favoriteWallpapers => '收藏桌布';
+
+  @override
+  String get favoriteWallpapersSubtitle => '把喜歡的畫面，留在這裡。';
+
+  @override
+  String favoriteWallpapersCount(int count) {
+    return '$count 個番劇';
+  }
+
+  @override
+  String get favoriteWallpapersEmpty => '還沒有收藏的桌布';
+
+  @override
+  String favoriteWallpapersRemoveConfirm(String name) {
+    return '確定取消收藏「$name」嗎？';
+  }
+
+  @override
+  String get favoriteWallpapersEmptyHint => '在桌布詳情中收藏喜歡的畫面';
+
+  @override
+  String get favoriteWallpapersExplore => '去探索';
+
+  @override
+  String get favoriteWallpapersLoadMore => '載入更多';
+
+  @override
   String get wallpaperDownload => '下載桌布';
 
   @override
@@ -2645,6 +2673,34 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String wallpaperImageCount(int count) {
     return '共 $count 张图片';
   }
+
+  @override
+  String get favoriteWallpapers => '收藏壁纸';
+
+  @override
+  String get favoriteWallpapersSubtitle => '把喜欢的画面，留在这里。';
+
+  @override
+  String favoriteWallpapersCount(int count) {
+    return '$count 个番剧';
+  }
+
+  @override
+  String get favoriteWallpapersEmpty => '还没有收藏的壁纸';
+
+  @override
+  String favoriteWallpapersRemoveConfirm(String name) {
+    return '确定取消收藏「$name」吗？';
+  }
+
+  @override
+  String get favoriteWallpapersEmptyHint => '在壁纸详情中收藏喜欢的画面';
+
+  @override
+  String get favoriteWallpapersExplore => '去发现';
+
+  @override
+  String get favoriteWallpapersLoadMore => '加载更多';
 
   @override
   String get wallpaperDownload => '下载壁纸';
@@ -5249,6 +5305,34 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   }
 
   @override
+  String get favoriteWallpapers => '收藏桌布';
+
+  @override
+  String get favoriteWallpapersSubtitle => '把喜歡的畫面，留在這裡。';
+
+  @override
+  String favoriteWallpapersCount(int count) {
+    return '$count 個番劇';
+  }
+
+  @override
+  String get favoriteWallpapersEmpty => '還沒有收藏的桌布';
+
+  @override
+  String favoriteWallpapersRemoveConfirm(String name) {
+    return '確定取消收藏「$name」嗎？';
+  }
+
+  @override
+  String get favoriteWallpapersEmptyHint => '在桌布詳情中收藏喜歡的畫面';
+
+  @override
+  String get favoriteWallpapersExplore => '去探索';
+
+  @override
+  String get favoriteWallpapersLoadMore => '載入更多';
+
+  @override
   String get wallpaperDownload => '下載桌布';
 
   @override
@@ -7850,6 +7934,34 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String wallpaperImageCount(int count) {
     return '共 $count 張圖片';
   }
+
+  @override
+  String get favoriteWallpapers => '收藏桌布';
+
+  @override
+  String get favoriteWallpapersSubtitle => '把喜歡的畫面，留在這裡。';
+
+  @override
+  String favoriteWallpapersCount(int count) {
+    return '$count 個番劇';
+  }
+
+  @override
+  String get favoriteWallpapersEmpty => '還沒有收藏的桌布';
+
+  @override
+  String favoriteWallpapersRemoveConfirm(String name) {
+    return '確定取消收藏「$name」嗎？';
+  }
+
+  @override
+  String get favoriteWallpapersEmptyHint => '在桌布詳情中收藏喜歡的畫面';
+
+  @override
+  String get favoriteWallpapersExplore => '去探索';
+
+  @override
+  String get favoriteWallpapersLoadMore => '載入更多';
 
   @override
   String get wallpaperDownload => '下載桌布';

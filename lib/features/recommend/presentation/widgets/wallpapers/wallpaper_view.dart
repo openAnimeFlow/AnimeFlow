@@ -7,6 +7,7 @@ import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/features/recommend/application/wallpaper_wall.dart';
+import 'package:anime_flow/features/recommend/domain/wallpaper_repository.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_layout.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_grid.dart';
@@ -108,7 +109,7 @@ class _WallpaperViewState extends ConsumerState<WallpaperView>
   }
 
   /// 失败语义已在 Data/Application 收敛，这里只决定展示哪段文案。
-  String _failureMessage(WallpaperWallFailure failure, AppLocalizations l10n) {
+  String _failureMessage(WallpaperFailure failure, AppLocalizations l10n) {
     final message = failure.message?.trim();
     return message == null || message.isEmpty ? l10n.loadFailed : message;
   }

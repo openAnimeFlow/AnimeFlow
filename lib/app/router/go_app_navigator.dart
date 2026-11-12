@@ -34,6 +34,10 @@ class GoAppNavigator implements AppNavigator {
       _router.push<T>(WallpaperDetailRoute($extra: args).location, extra: args);
 
   @override
+  Future<T?> openFavoriteWallpapers<T>() =>
+      _router.push<T>(const FavoriteWallpapersRoute().location);
+
+  @override
   Future<T?> openImagePreview<T>(ImageViewerRouteArgs args) =>
       _router.push<T>(ImagePreviewRoute.fromArgs(args).location, extra: args);
 

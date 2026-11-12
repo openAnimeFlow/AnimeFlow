@@ -29,7 +29,6 @@ import 'package:anime_flow/shared/models/player/danmaku/danmaku_episode_response
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/shared/models/flow/background_image_item.dart';
-import 'package:anime_flow/shared/models/flow/subject_wallpaper.dart';
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/shared/models/flow/collection_conflict_item.dart';
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
@@ -477,7 +476,7 @@ class FlowApi {
   }
 
   /// 获取壁纸墙
-  static Future<SubjectWallpaperPage> getSubjectWallpapersService({
+  static Future<Map<String, dynamic>> getSubjectWallpapersService({
     required SortType sort,
     String? keyword,
     required int page,
@@ -494,8 +493,21 @@ class FlowApi {
       },
       cancelToken: cancelToken,
     );
-    return SubjectWallpaperPage.fromJson(
-        Map<String, dynamic>.from(response.data));
+    return Map<String, dynamic>.from(response.data);
+  }
+
+  static Future<Map<String, dynamic>> getFavoriteWallpapersService({
+    required int page,
+    required int pageSize,
+    CancelToken? cancelToken,
+  }) async {
+    final response = await _client.get(
+      '${AnimeFlowApi.subjectWallpapers}/favorites',
+      queryParameters: {'page': page, 'pageSize': pageSize},
+      requireFlowToken: true,
+      cancelToken: cancelToken,
+    );
+    return Map<String, dynamic>.from(response.data);
   }
 
   static Future<void> setWallpaperFavorite(int subjectId, bool favorite) async {
@@ -508,7 +520,7 @@ class FlowApi {
   }
 
   /// 壁纸详情页的更多壁纸，固定获取第一页的 10 个番剧。
-  static Future<SubjectWallpaperPage> getRecommendedWallpapersService(
+  static Future<Map<String, dynamic>> getRecommendedWallpapersService(
     int subjectId, {
     CancelToken? cancelToken,
   }) async {
@@ -521,8 +533,7 @@ class FlowApi {
       },
       cancelToken: cancelToken,
     );
-    return SubjectWallpaperPage.fromJson(
-        Map<String, dynamic>.from(response.data));
+    return Map<String, dynamic>.from(response.data);
   }
 
   /// 获取条目预览图

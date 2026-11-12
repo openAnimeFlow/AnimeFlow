@@ -19,6 +19,8 @@ abstract interface class AppNavigator {
 
   Future<T?> openWallpaper<T>(WallpaperDetailArgs args);
 
+  Future<T?> openFavoriteWallpapers<T>();
+
   Future<T?> openImagePreview<T>(ImageViewerRouteArgs args);
 
   Future<T?> openAnimeInfo<T>({

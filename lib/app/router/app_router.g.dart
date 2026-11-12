@@ -20,6 +20,7 @@ List<RouteBase> get $appRoutes => [
       $characterInfoRoute,
       $playRecordRoute,
       $downloadRoute,
+      $videoResourceDownloadRoute,
       $userSpaceRoute,
       $animePreviewPageRoute,
       $imageSearchRoute,
@@ -191,7 +192,7 @@ mixin $RegisterRoute on GoRouteData {
 }
 
 RouteBase get $forgotPasswordRoute => GoRouteData.$route(
-      path: '/forgot_password',
+      path: '/forgot-password',
       hasOverriddenOnExit: false,
       factory: $ForgotPasswordRoute._fromState,
     );
@@ -202,7 +203,7 @@ mixin $ForgotPasswordRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/forgot_password',
+        '/forgot-password',
       );
 
   @override
@@ -249,7 +250,7 @@ mixin $OauthCallbackRoute on GoRouteData {
 }
 
 RouteBase get $animeInfoRoute => GoRouteData.$route(
-      path: '/anime_info',
+      path: '/anime-info',
       hasOverriddenOnExit: false,
       factory: $AnimeInfoRoute._fromState,
     );
@@ -266,7 +267,7 @@ mixin $AnimeInfoRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/anime_info',
+        '/anime-info',
         queryParams: {
           'id': _self.id.toString(),
           'name': _self.name,
@@ -444,7 +445,7 @@ mixin $CharactersRoute on GoRouteData {
 }
 
 RouteBase get $characterInfoRoute => GoRouteData.$route(
-      path: '/character_info',
+      path: '/character-info',
       hasOverriddenOnExit: false,
       factory: $CharacterInfoRoute._fromState,
     );
@@ -462,7 +463,7 @@ mixin $CharacterInfoRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/character_info',
+        '/character-info',
         queryParams: {
           'id': _self.id.toString(),
           'name': _self.name,
@@ -487,7 +488,7 @@ mixin $CharacterInfoRoute on GoRouteData {
 }
 
 RouteBase get $playRecordRoute => GoRouteData.$route(
-      path: '/play_record',
+      path: '/play-record',
       hasOverriddenOnExit: false,
       factory: $PlayRecordRoute._fromState,
     );
@@ -498,7 +499,7 @@ mixin $PlayRecordRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/play_record',
+        '/play-record',
       );
 
   @override
@@ -543,8 +544,43 @@ mixin $DownloadRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
+RouteBase get $videoResourceDownloadRoute => GoRouteData.$route(
+      path: '/video-resource-download',
+      hasOverriddenOnExit: false,
+      factory: $VideoResourceDownloadRoute._fromState,
+    );
+
+mixin $VideoResourceDownloadRoute on GoRouteData {
+  static VideoResourceDownloadRoute _fromState(GoRouterState state) =>
+      VideoResourceDownloadRoute(
+        $extra: state.extra as VideoResourceDownloadRouteArgs?,
+      );
+
+  VideoResourceDownloadRoute get _self => this as VideoResourceDownloadRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+        '/video-resource-download',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
+}
+
 RouteBase get $userSpaceRoute => GoRouteData.$route(
-      path: '/user_space',
+      path: '/user-space',
       hasOverriddenOnExit: false,
       factory: $UserSpaceRoute._fromState,
     );
@@ -558,7 +594,7 @@ mixin $UserSpaceRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/user_space',
+        '/user-space',
         queryParams: {
           'name': _self.name,
         },
@@ -579,7 +615,7 @@ mixin $UserSpaceRoute on GoRouteData {
 }
 
 RouteBase get $animePreviewPageRoute => GoRouteData.$route(
-      path: '/anime_preview',
+      path: '/anime-preview',
       hasOverriddenOnExit: false,
       factory: $AnimePreviewPageRoute._fromState,
     );
@@ -597,7 +633,7 @@ mixin $AnimePreviewPageRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/anime_preview',
+        '/anime-preview',
         queryParams: {
           'images': _self.images.map((e) => e).toList(),
           if (_self.title != null) 'title': _self.title,
@@ -619,7 +655,7 @@ mixin $AnimePreviewPageRoute on GoRouteData {
 }
 
 RouteBase get $imageSearchRoute => GoRouteData.$route(
-      path: '/image_search',
+      path: '/image-search',
       hasOverriddenOnExit: false,
       factory: $ImageSearchRoute._fromState,
     );
@@ -630,7 +666,7 @@ mixin $ImageSearchRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/image_search',
+        '/image-search',
       );
 
   @override
@@ -779,12 +815,12 @@ RouteBase get $settingsShellRoute => ShellRouteData.$route(
               factory: $SettingPlaybackRoute._fromState,
             ),
             GoRouteData.$route(
-              path: 'playerShortcuts',
+              path: 'player-shortcuts',
               hasOverriddenOnExit: false,
               factory: $SettingPlayerShortcutsRoute._fromState,
             ),
             GoRouteData.$route(
-              path: 'downloadPlugins',
+              path: 'download-plugins',
               hasOverriddenOnExit: false,
               factory: $SettingDownloadPluginsRoute._fromState,
             ),
@@ -819,12 +855,12 @@ RouteBase get $settingsShellRoute => ShellRouteData.$route(
               factory: $SettingWebsiteRoute._fromState,
             ),
             GoRouteData.$route(
-              path: 'Plugins',
+              path: 'plugins',
               hasOverriddenOnExit: false,
               factory: $SettingPluginsRoute._fromState,
             ),
             GoRouteData.$route(
-              path: 'addPlugins',
+              path: 'add-plugins',
               hasOverriddenOnExit: false,
               factory: $SettingAddPluginsRoute._fromState,
             ),
@@ -1006,7 +1042,7 @@ mixin $SettingPlayerShortcutsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/settings/playerShortcuts',
+        '/settings/player-shortcuts',
       );
 
   @override
@@ -1029,7 +1065,7 @@ mixin $SettingDownloadPluginsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/settings/downloadPlugins',
+        '/settings/download-plugins',
       );
 
   @override
@@ -1190,7 +1226,7 @@ mixin $SettingPluginsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/settings/Plugins',
+        '/settings/plugins',
       );
 
   @override
@@ -1217,7 +1253,7 @@ mixin $SettingAddPluginsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/settings/addPlugins',
+        '/settings/add-plugins',
         queryParams: {
           if (_self.editPluginKey != null)
             'edit-plugin-key': _self.editPluginKey,

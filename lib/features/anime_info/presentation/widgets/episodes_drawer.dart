@@ -1,18 +1,18 @@
-import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/constants.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
-import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/video_resource_download_route_args.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class EpisodesDrawerView extends ConsumerStatefulWidget {
   final int subjectId;
+  final String subjectName;
   final ScrollController scrollController;
   final void Function(EpisodeData episode)? onEpisodeLongPress;
   final ValueChanged<int> onPlayEpisode;
@@ -20,6 +20,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
   const EpisodesDrawerView({
     super.key,
     required this.subjectId,
+    required this.subjectName,
     required this.scrollController,
     this.onEpisodeLongPress,
     required this.onPlayEpisode,
@@ -28,6 +29,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
   static void show(
     BuildContext context, {
     required int subjectId,
+    required String subjectName,
     void Function(EpisodeData episode)? onEpisodeLongPress,
     required ValueChanged<int> onPlayEpisode,
   }) {
@@ -50,6 +52,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
               return EpisodesDrawerView(
                 scrollController: scrollController,
                 subjectId: subjectId,
+                subjectName: subjectName,
                 onEpisodeLongPress: onEpisodeLongPress,
                 onPlayEpisode: onPlayEpisode,
               );
@@ -66,50 +69,6 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
 
 class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
   static const double _loadMoreTriggerDistance = 80;
-  bool _isMarkingAllWatched = false;
-
-  Future<void> _markAllEpisodesWatched() async {
-    if (_isMarkingAllWatched) return;
-    final l10n = AppLocalizations.of(context);
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.confirmAllWatched),
-        content: Text(l10n.confirmAllWatchedMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
-
-    setState(() => _isMarkingAllWatched = true);
-    try {
-      await ref
-          .read(subjectEpisodesProvider(widget.subjectId).notifier)
-          .markAllEpisodesWatched();
-      if (!mounted) return;
-      NotificationToast.show(l10n.markAllWatchedSuccess, title: l10n.tip);
-    } on AnimeFlowApiException catch (e) {
-      if (!mounted) return;
-      NotificationToast.show(e.message, title: l10n.updateFailed);
-    } catch (e) {
-      if (!mounted) return;
-      NotificationToast.show(e.toString(), title: l10n.updateFailed);
-    } finally {
-      if (mounted) {
-        setState(() => _isMarkingAllWatched = false);
-      }
-    }
-  }
 
   void _tryLoadMoreEpisodes(int subjectId) {
     final controller = widget.scrollController;
@@ -132,7 +91,6 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
   @override
   Widget build(BuildContext context) {
     final episodesAsync = ref.watch(subjectEpisodesProvider(widget.subjectId));
-    final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
     final l10n = AppLocalizations.of(context);
 
     return episodesAsync.when(
@@ -171,14 +129,12 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
           ),
         );
       },
-      data: (episodesState) =>
-          _buildEpisodesList(episodesState, isLoggedIn, l10n),
+      data: (episodesState) => _buildEpisodesList(episodesState, l10n),
     );
   }
 
   Widget _buildEpisodesList(
     SubjectEpisodesState episodesState,
-    bool isLoggedIn,
     AppLocalizations l10n,
   ) {
     if (episodesState.episodes.data.isEmpty) {
@@ -211,18 +167,19 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                   color: Theme.of(context).colorScheme.outline,
                 ),
               ),
-              if (isLoggedIn) ...[
+              if (!episodesState.hasMore && !episodesState.isLoadingMore) ...[
                 const Spacer(),
                 TextButton(
-                  onPressed:
-                      _isMarkingAllWatched ? null : _markAllEpisodesWatched,
-                  child: _isMarkingAllWatched
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.allWatched),
+                  onPressed: () {
+                    final navigator = appNavigatorOf(context);
+                    final args = VideoResourceDownloadRouteArgs(
+                      subjectName: widget.subjectName,
+                      episodes: sortedEpisodes,
+                    );
+                    Navigator.of(context).pop();
+                    navigator.openVideoResourceDownload<void>(args);
+                  },
+                  child: Text(l10n.downloadResources),
                 ),
               ],
             ],

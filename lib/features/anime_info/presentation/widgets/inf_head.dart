@@ -439,6 +439,7 @@ class InfoHeadView extends StatelessWidget {
                   onPressed: () => EpisodesDrawerView.show(
                     context,
                     subjectId: subjectItem.id,
+                    subjectName: name,
                     onPlayEpisode: onPlayEpisode,
                     onEpisodeLongPress: (episode) async {
                       try {

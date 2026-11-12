@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/play/domain/selected_video_source.dart';
+import 'package:anime_flow/core/video_source/domain/selected_video_source.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 
 class VideoSourceState {

@@ -1,47 +1,73 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/logger/app_log.dart';
-import 'package:anime_flow/features/play/application/episode_source_matcher.dart';
-import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/core/utils/source_url.dart';
-import 'package:anime_flow/features/play/presentation/widgets/captcha_view.dart';
+import 'package:anime_flow/core/video_source/domain/captcha_session.dart';
+import 'package:anime_flow/core/video_source/domain/episode_source_matcher.dart';
+import 'package:anime_flow/core/video_source/domain/selected_video_source.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
+
+import 'captcha_view.dart';
 
 enum _SourceEpisodeMode { matched, all }
 
-/// 当前正在播放的源：播放地址 + 线路名 + 资源标题。
-typedef _PlayingSource = ({String url, String lineName, String resourceTitle});
+typedef VideoSourceSelection = ({
+  ResourcesItem website,
+  EpisodeResourcesItem line,
+  Episode episode,
+  String url,
+});
 
-@Dependencies([Episodes, VideoSourceNotifier])
-class VideoSourceDialog extends ConsumerStatefulWidget {
-  final Function(String url)? onVideoUrlSelected;
-  final VideoSourceNotifier videoSourceNotifier;
+/// 展示调用方提供的资源列表，并将搜索、重试和选源操作交给调用方。
+class VideoSourceDialog extends StatefulWidget {
+  const VideoSourceDialog({
+    super.key,
+    required this.subjectName,
+    required this.resources,
+    required this.onSearch,
+    required this.onRetry,
+    required this.onSourceSelected,
+    this.searchKeyword = '',
+    this.initialSearchDraft,
+    this.selectedWebsiteIndex = 0,
+    this.selectedSource,
+    this.episodeNumber,
+    this.onSearchDraftChanged,
+    this.onWebsiteSelected,
+    this.createCaptchaSession,
+    this.onCaptchaVerified,
+    this.keyboardInsetHandled = false,
+    this.scrollController,
+  });
+
   final String subjectName;
+  final List<ResourcesItem> resources;
+  final String searchKeyword;
+  final String? initialSearchDraft;
+  final int selectedWebsiteIndex;
+  final SelectedVideoSource? selectedSource;
+
+  /// 省略集数时直接展示全部剧集。
+  final num? episodeNumber;
+  final ValueChanged<String> onSearch;
+  final void Function(String websiteName, {String? keyword}) onRetry;
+  final ValueChanged<VideoSourceSelection> onSourceSelected;
+  final ValueChanged<String>? onSearchDraftChanged;
+  final ValueChanged<int>? onWebsiteSelected;
+  final CaptchaSession Function()? createCaptchaSession;
+  final ValueChanged<String>? onCaptchaVerified;
   final bool keyboardInsetHandled;
   final ScrollController? scrollController;
 
-  const VideoSourceDialog({
-    super.key,
-    this.onVideoUrlSelected,
-    this.keyboardInsetHandled = false,
-    this.scrollController,
-    required this.videoSourceNotifier,
-    required this.subjectName,
-  });
-
   @override
-  ConsumerState<VideoSourceDialog> createState() => _VideoSourceDrawersState();
+  State<VideoSourceDialog> createState() => _VideoSourceDialogState();
 }
 
-class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
+class _VideoSourceDialogState extends State<VideoSourceDialog> {
   static const String _allLinesValue = '__all_lines__';
 
   _SourceEpisodeMode _sourceEpisodeMode = _SourceEpisodeMode.matched;
@@ -51,7 +77,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
   final Map<String, TextEditingController> _siteSearchControllers = {};
   int? _selectedWebsiteIndex;
 
-  /// 未手动切换数据源前跟随播放器自动选源
+  /// 未手动切换站点时优先展示调用方选中的资源。
   bool _followAutoSelectedWebsite = true;
   bool _sourceControlsCollapsed = false;
   late final ScrollController _fallbackScrollController;
@@ -64,8 +90,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
     super.initState();
     _fallbackScrollController = ScrollController();
     _scrollController.addListener(_handleSourceListScroll);
-    _searchController.text =
-        ref.read(videoSourceProvider).manualSearchDraft ?? widget.subjectName;
+    _searchController.text = widget.initialSearchDraft ?? widget.subjectName;
   }
 
   @override
@@ -77,8 +102,15 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
       _scrollController.addListener(_handleSourceListScroll);
     }
     if (oldWidget.subjectName != widget.subjectName) {
-      _searchController.text = widget.subjectName;
-      widget.videoSourceNotifier.setManualSearchDraft(widget.subjectName);
+      final subjectName = widget.subjectName;
+      _searchController.text = subjectName;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted &&
+            widget.subjectName == subjectName &&
+            _searchController.text == subjectName) {
+          widget.onSearchDraftChanged?.call(subjectName);
+        }
+      });
     }
   }
 
@@ -94,7 +126,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
   void _setSelectedWebsite(int index) {
     _followAutoSelectedWebsite = false;
     _selectedWebsiteIndex = index;
-    widget.videoSourceNotifier.setSelectedWebsiteIndex(index);
+    widget.onWebsiteSelected?.call(index);
     setState(_resetSourceViewState);
   }
 
@@ -104,23 +136,18 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
       text: keyword,
       selection: TextSelection.collapsed(offset: keyword.length),
     );
-    widget.videoSourceNotifier.setManualSearchDraft(keyword);
+    widget.onSearchDraftChanged?.call(keyword);
   }
 
   void _performSearch() {
     final searchQuery = _searchController.text;
     if (searchQuery.isEmpty) return;
     _disposeSiteSearchControllers();
-    final preserveCurrentPlayback =
-        ref.read(videoSourceProvider).videoUrl.isNotEmpty;
-    widget.videoSourceNotifier.setSelectedWebsiteIndex(0);
+    widget.onWebsiteSelected?.call(0);
     _followAutoSelectedWebsite = true;
     _selectedWebsiteIndex = 0;
     setState(_resetSourceViewState);
-    widget.videoSourceNotifier.initResources(
-      searchQuery,
-      preserveCurrentPlayback: preserveCurrentPlayback,
-    );
+    widget.onSearch(searchQuery);
   }
 
   /// 切换数据源 / 重新搜索后，线路、集数模式与排序都回到默认值。
@@ -134,7 +161,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
   TextEditingController _siteSearchControllerFor(ResourcesItem resource) {
     return _siteSearchControllers.putIfAbsent(
       resource.websiteName,
-      () => TextEditingController(text: ref.read(videoSourceProvider).keyword),
+      () => TextEditingController(text: widget.searchKeyword),
     );
   }
 
@@ -151,7 +178,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
   ) {
     final keyword = controller.text.trim();
     if (keyword.isEmpty) return;
-    widget.videoSourceNotifier.retryResources(
+    widget.onRetry(
       resource.websiteName,
       keyword: keyword,
     );
@@ -159,23 +186,23 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
 
   /// 当前应选中的数据源下标。
   ///
-  /// 用户手动切换前跟随播放器（自动选源）的结果，切换后保持本地选择。
+  /// 调用方选定站点前跟随建议的下标，之后保持本地选择。
   int _resolveSelectedWebsiteIndex(List<ResourcesItem> dataSource) {
-    if (dataSource.isEmpty) return 0;
-    final source = ref.read(videoSourceProvider);
-    final matchedIndex = source.webSiteTitle.isEmpty
+    final websiteName = widget.selectedSource?.websiteName ?? '';
+    final matchedIndex = websiteName.isEmpty
         ? -1
         : dataSource.indexWhere(
-            (resource) => resource.websiteName == source.webSiteTitle,
+            (resource) => resource.websiteName == websiteName,
           );
-    final providerIndex = source.selectedWebsiteIndex >= dataSource.length
-        ? 0
-        : source.selectedWebsiteIndex;
-    final autoIndex = matchedIndex >= 0 ? matchedIndex : providerIndex;
+    final suggestedIndex = widget.selectedWebsiteIndex;
+    final validIndex = suggestedIndex >= 0 && suggestedIndex < dataSource.length
+        ? suggestedIndex
+        : 0;
+    final autoIndex = matchedIndex >= 0 ? matchedIndex : validIndex;
 
     if (_followAutoSelectedWebsite) {
       _selectedWebsiteIndex = autoIndex;
-      if (source.webSiteTitle.isNotEmpty) {
+      if (websiteName.isNotEmpty) {
         _followAutoSelectedWebsite = false;
       }
       return _selectedWebsiteIndex!;
@@ -214,61 +241,23 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
 
   Widget _buildDrawerContent() {
     final l10n = AppLocalizations.of(context);
+    final resources = widget.resources;
+    final selectedIndex =
+        resources.isEmpty ? null : _resolveSelectedWebsiteIndex(resources);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeader(l10n),
         _buildManualSearch(l10n),
         const SizedBox(height: 16),
-        Expanded(
-          child: Consumer(
-            builder: (context, ref, child) {
-              final currentEpisodeIndex = ref.watch(
-                episodesProvider
-                    .select((state) => state.asData?.value.episodeIndex ?? 0),
-              );
-              final sourceState = ref.watch(
-                videoSourceProvider.select(
-                  (state) => (
-                    videoResources: state.videoResources,
-                    selectedWebsiteIndex: state.selectedWebsiteIndex,
-                    webSiteTitle: state.webSiteTitle,
-                    videoUrl: state.videoUrl,
-                    lineName: state.lineName,
-                    resourceTitle: state.resourceTitle,
-                  ),
-                ),
-              );
-              if (sourceState.videoResources.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              final selectedIndex =
-                  _resolveSelectedWebsiteIndex(sourceState.videoResources);
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildWebsiteSelector(
-                    dataSource: sourceState.videoResources,
-                    selectedIndex: selectedIndex,
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: _buildVideoSource(
-                      dataSource: sourceState.videoResources,
-                      selectedIndex: selectedIndex,
-                      currentEpisodeIndex: currentEpisodeIndex,
-                      playing: (
-                        url: sourceState.videoUrl,
-                        lineName: sourceState.lineName,
-                        resourceTitle: sourceState.resourceTitle,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
+        if (selectedIndex != null) ...[
+          _buildWebsiteSelector(
+            dataSource: resources,
+            selectedIndex: selectedIndex,
           ),
-        ),
+          const SizedBox(height: 16),
+          Expanded(child: _buildVideoSource(resources[selectedIndex])),
+        ],
       ],
     );
   }
@@ -311,7 +300,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
             child: Material(
               child: TextField(
                 controller: _searchController,
-                onChanged: widget.videoSourceNotifier.setManualSearchDraft,
+                onChanged: widget.onSearchDraftChanged,
                 decoration: InputDecoration(
                   hintText: l10n.manualSearchResource,
                   suffixIcon: IconButton(
@@ -372,13 +361,16 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        ClipOval(
-                          child: AnimationNetworkImage(
-                            width: 24,
-                            height: 24,
-                            url: data.websiteIcon,
+                        if (data.websiteIcon.trim().isEmpty)
+                          const Icon(Icons.public, size: 24)
+                        else
+                          ClipOval(
+                            child: AnimationNetworkImage(
+                              width: 24,
+                              height: 24,
+                              url: data.websiteIcon,
+                            ),
                           ),
-                        ),
                         _buildWebsiteStatusIcon(data, colorScheme),
                       ],
                     ),
@@ -427,28 +419,24 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
     );
   }
 
-  Widget _buildVideoSource({
-    required List<ResourcesItem> dataSource,
-    required int selectedIndex,
-    required int currentEpisodeIndex,
-    required _PlayingSource playing,
-  }) {
-    final videoSourceController = widget.videoSourceNotifier;
-    if (selectedIndex >= dataSource.length) {
-      return const SizedBox.shrink();
-    }
-
-    final selectedResource = dataSource[selectedIndex];
+  Widget _buildVideoSource(ResourcesItem selectedResource) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final episodeResources = selectedResource.episodeResources;
 
     if (selectedResource.needsCaptcha) {
+      final websiteName = selectedResource.websiteName;
+      final retry = widget.onRetry;
+      final onVerified = widget.onCaptchaVerified;
       return CaptchaView(
-        key: ValueKey(selectedResource.websiteName),
+        key: ValueKey(websiteName),
         resource: selectedResource,
-        dataSourceController: widget.videoSourceNotifier,
         subjectName: widget.subjectName,
+        createSession: widget.createCaptchaSession,
+        onVerified: onVerified == null
+            ? () => retry(websiteName)
+            : () => onVerified(websiteName),
+        onRetry: () => retry(websiteName),
         keyboardInsetHandled: widget.keyboardInsetHandled,
       );
     }
@@ -471,8 +459,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
         title: l10n.resourceRequestFailed(selectedResource.websiteName),
         message: selectedResource.errorMessage!,
         action: ElevatedButton(
-          onPressed: () => videoSourceController
-              .retryResources(selectedResource.websiteName),
+          onPressed: () => widget.onRetry(selectedResource.websiteName),
           child: Text(l10n.retry),
         ),
       );
@@ -492,7 +479,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
         ),
       );
     }
-    final episodeIndex = currentEpisodeIndex;
+    final episodeNumber = widget.episodeNumber;
     final lineNames = _buildLineNames(episodeResources);
     final selectedLineName =
         lineNames.contains(_selectedLineName) ? _selectedLineName : null;
@@ -501,17 +488,17 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
       selectedLineName,
     );
 
-    // 预过滤：只保留有匹配当前剧集的资源项
-    final matchedResources = filteredEpisodeResources
-        .where((item) =>
-            EpisodeSourceMatcher.findEpisode(item.episodes, episodeIndex) !=
-            null)
-        .toList();
-
-    final excludedEpisodesCount = filteredEpisodeResources
-        .expand((item) => item.episodes.where(
-            (ep) => !EpisodeSourceMatcher.matchesEpisode(ep, episodeIndex)))
-        .length;
+    final matchedResources = [
+      if (episodeNumber != null)
+        for (final item in filteredEpisodeResources)
+          if (EpisodeSourceMatcher.findEpisode(item.episodes, episodeNumber) !=
+              null)
+            item,
+    ];
+    final allCount = filteredEpisodeResources.fold<int>(
+      0,
+      (sum, item) => sum + item.episodes.length,
+    );
 
     return Material(
       child: Column(
@@ -531,12 +518,13 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
                       lineNames: lineNames,
                       selectedLineName: selectedLineName,
                     ),
-                    const SizedBox(height: 8),
-                    _buildEpisodeModeSelector(
-                      matchedCount: matchedResources.length,
-                      allCount: filteredEpisodeResources.fold<int>(
-                          0, (sum, item) => sum + item.episodes.length),
-                    ),
+                    if (episodeNumber != null) ...[
+                      const SizedBox(height: 8),
+                      _buildEpisodeModeSelector(
+                        matchedCount: matchedResources.length,
+                        allCount: allCount,
+                      ),
+                    ],
                     const SizedBox(height: 8),
                   ],
                 ),
@@ -544,20 +532,22 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
             ),
           ),
           Expanded(
-            child: _sourceEpisodeMode == _SourceEpisodeMode.all
+            child: episodeNumber == null ||
+                    _sourceEpisodeMode == _SourceEpisodeMode.all
                 ? _buildAllEpisodeSources(
                     episodeResources: filteredEpisodeResources,
                     selectedResource: selectedResource,
-                    currentEpisodeIndex: episodeIndex,
-                    sortDescending: _sortDescending,
-                    playing: playing,
+                    episodeNumber: episodeNumber,
                   )
                 : _buildMatchedEpisodeSources(
                     matchedResources: matchedResources,
                     selectedResource: selectedResource,
-                    episodeIndex: episodeIndex,
-                    excludedEpisodesCount: excludedEpisodesCount,
-                    playing: playing,
+                    episodeNumber: episodeNumber,
+                    hasExcludedEpisodes: filteredEpisodeResources.any(
+                      (item) => item.episodes.any((episode) =>
+                          !EpisodeSourceMatcher.matchesEpisode(
+                              episode, episodeNumber)),
+                    ),
                   ),
           ),
         ],
@@ -736,9 +726,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
   Widget _buildMatchedEpisodeSources({
     required List<EpisodeResourcesItem> matchedResources,
     required ResourcesItem selectedResource,
-    required int episodeIndex,
-    required int excludedEpisodesCount,
-    required _PlayingSource playing,
+    required num episodeNumber,
+    required bool hasExcludedEpisodes,
   }) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
@@ -750,7 +739,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
           color: colorScheme.onSurfaceVariant,
         ),
         title: l10n.noPlayableSourceForEpisode,
-        message: excludedEpisodesCount > 0
+        message: hasExcludedEpisodes
             ? l10n.episodeNotInResultsHint
             : l10n.episodeNoSourceHint,
       );
@@ -759,8 +748,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
     final selectedIndex = _resolveSelectedSourceIndex(
       length: matchedResources.length,
       baseUrl: selectedResource.baseUrl,
-      playing: playing,
-      episodeAt: (index) => _episodeOf(matchedResources[index], episodeIndex),
+      episodeAt: (index) => _episodeOf(matchedResources[index], episodeNumber),
       itemAt: (index) => matchedResources[index],
     );
 
@@ -771,11 +759,9 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
       itemBuilder: (context, index) {
         final resourceItem = matchedResources[index];
         return _buildSource(
-          _episodeOf(resourceItem, episodeIndex),
+          _episodeOf(resourceItem, episodeNumber),
           resourceItem,
-          baseUrl: selectedResource.baseUrl,
-          websiteName: selectedResource.websiteName,
-          websiteIcon: selectedResource.websiteIcon,
+          website: selectedResource,
           isSelected: index == selectedIndex,
         );
       },
@@ -785,9 +771,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
   Widget _buildAllEpisodeSources({
     required List<EpisodeResourcesItem> episodeResources,
     required ResourcesItem selectedResource,
-    required int currentEpisodeIndex,
-    required bool sortDescending,
-    required _PlayingSource playing,
+    required num? episodeNumber,
   }) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
@@ -798,7 +782,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
       final sortCompare =
           a.episode.episodeSort.compareTo(b.episode.episodeSort);
       if (sortCompare != 0) {
-        return sortDescending ? -sortCompare : sortCompare;
+        return _sortDescending ? -sortCompare : sortCompare;
       }
       final lineCompare = a.resource.lineNames.compareTo(b.resource.lineNames);
       if (lineCompare != 0) {
@@ -822,8 +806,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
     final selectedIndex = _resolveSelectedSourceIndex(
       length: expandedItems.length,
       baseUrl: selectedResource.baseUrl,
-      episodeSort: currentEpisodeIndex,
-      playing: playing,
+      episodeNumber: episodeNumber,
       episodeAt: (index) => expandedItems[index].episode,
       itemAt: (index) => expandedItems[index].resource,
     );
@@ -837,9 +820,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
         return _buildSource(
           entry.episode,
           entry.resource,
-          baseUrl: selectedResource.baseUrl,
-          websiteName: selectedResource.websiteName,
-          websiteIcon: selectedResource.websiteIcon,
+          website: selectedResource,
           isSelected: index == selectedIndex,
         );
       },
@@ -953,53 +934,48 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
     );
   }
 
-  /// 播放地址是否与当前正在播放的资源一致。
-  bool _isSameSourceUrl(
-      String baseUrl, Episode episode, _PlayingSource playing) {
-    if (playing.url.isEmpty) return false;
-    return resolveSourceUrl(baseUrl, episode.like) == playing.url;
-  }
-
-  /// 线路名与资源标题是否与当前正在播放的资源一致。
-  bool _isSameSourceMeta(EpisodeResourcesItem item, _PlayingSource playing) {
-    if (playing.lineName.isNotEmpty && playing.lineName != item.lineNames) {
+  /// 线路名与资源标题是否与已选资源一致。
+  bool _isSameSourceMeta(
+      EpisodeResourcesItem item, SelectedVideoSource source) {
+    if (source.lineName.isNotEmpty && source.lineName != item.lineNames) {
       return false;
     }
-    if (playing.resourceTitle.isNotEmpty &&
-        playing.resourceTitle != item.subjectsTitle) {
+    if (source.resourceTitle.isNotEmpty &&
+        source.resourceTitle != item.subjectsTitle) {
       return false;
     }
     return true;
   }
 
   /// 资源项中对应集数的剧集（调用方已按集数过滤，取首个匹配项即可）。
-  Episode _episodeOf(EpisodeResourcesItem item, int episodeIndex) {
-    return EpisodeSourceMatcher.findEpisode(item.episodes, episodeIndex)!;
+  Episode _episodeOf(EpisodeResourcesItem item, num episodeNumber) {
+    return EpisodeSourceMatcher.findEpisode(item.episodes, episodeNumber)!;
   }
 
-  /// 计算当前播放源在候选列表中的下标。
+  /// 计算已选资源在候选列表中的下标。
   int _resolveSelectedSourceIndex({
     required int length,
     required String baseUrl,
-    required _PlayingSource playing,
     required Episode Function(int index) episodeAt,
     required EpisodeResourcesItem Function(int index) itemAt,
-    int? episodeSort,
+    num? episodeNumber,
   }) {
+    final source = widget.selectedSource;
+    if (source == null || source.videoUrl.isEmpty) return -1;
     var fallbackIndex = -1;
     for (var index = 0; index < length; index++) {
       final episode = episodeAt(index);
-      if (episodeSort != null &&
-          !EpisodeSourceMatcher.matchesEpisode(episode, episodeSort)) {
+      if (episodeNumber != null &&
+          !EpisodeSourceMatcher.matchesEpisode(episode, episodeNumber)) {
         continue;
       }
-      if (!_isSameSourceUrl(baseUrl, episode, playing)) {
+      if (resolveSourceUrl(baseUrl, episode.like) != source.videoUrl) {
         continue;
       }
       if (fallbackIndex < 0) {
         fallbackIndex = index;
       }
-      if (_isSameSourceMeta(itemAt(index), playing)) {
+      if (_isSameSourceMeta(itemAt(index), source)) {
         return index;
       }
     }
@@ -1009,9 +985,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
   Widget _buildSource(
     Episode episode,
     EpisodeResourcesItem item, {
-    required String websiteName,
-    required String websiteIcon,
-    required String baseUrl,
+    required ResourcesItem website,
     required bool isSelected,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -1032,16 +1006,15 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDialog> {
         child: InkWell(
           onTap: () {
             try {
-              context.pop();
-              final videoUrl = resolveSourceUrl(baseUrl, episode.like);
-              widget.videoSourceNotifier.bindManualSourceForCurrentEpisode(
-                websiteName: websiteName,
-                websiteIcon: websiteIcon,
-                resourceTitle: item.subjectsTitle,
-                lineName: item.lineNames,
-                videoUrl: videoUrl,
+              final selection = (
+                website: website,
+                line: item,
+                episode: episode,
+                url: resolveSourceUrl(website.baseUrl, episode.like),
               );
-              widget.onVideoUrlSelected?.call(videoUrl);
+              final onSourceSelected = widget.onSourceSelected;
+              Navigator.of(context).pop();
+              onSourceSelected(selection);
             } catch (e) {
               logError('获取视频源失败', error: e);
               NotificationToast.show(

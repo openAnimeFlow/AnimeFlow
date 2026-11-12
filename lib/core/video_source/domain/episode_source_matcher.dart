@@ -3,12 +3,12 @@ import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 
 /// 剧集对应和候选排序的统一入口。
 class EpisodeSourceMatcher {
-  static bool matchesEpisode(Episode episode, int episodeIndex) =>
-      episode.episodeSort == episodeIndex;
+  static bool matchesEpisode(Episode episode, num episodeNumber) =>
+      episode.episodeSort == episodeNumber;
 
-  static Episode? findEpisode(List<Episode> episodes, int episodeIndex) {
+  static Episode? findEpisode(List<Episode> episodes, num episodeNumber) {
     for (final episode in episodes) {
-      if (matchesEpisode(episode, episodeIndex)) return episode;
+      if (matchesEpisode(episode, episodeNumber)) return episode;
     }
     return null;
   }

@@ -1,4 +1,4 @@
-/// 一个已选中的站点播放页，供自动选源和单集手动绑定共同使用。
+/// 已选中的站点、线路及其剧集页面。
 class SelectedVideoSource {
   const SelectedVideoSource({
     required this.websiteName,

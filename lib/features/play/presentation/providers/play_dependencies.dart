@@ -1,7 +1,7 @@
 import 'package:anime_flow/features/play/domain/danmaku_repository.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
-import 'package:anime_flow/features/play/domain/captcha_session.dart';
+import 'package:anime_flow/core/video_source/domain/captcha_session.dart';
 import 'package:anime_flow/features/play/domain/playback_device.dart';
 import 'package:anime_flow/features/play/domain/play_source_repository.dart';
 import 'package:anime_flow/features/play/domain/play_queries.dart';

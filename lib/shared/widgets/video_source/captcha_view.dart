@@ -1,36 +1,37 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:anime_flow/core/video_source/domain/captcha_session.dart';
 import 'package:anime_flow/shared/models/player/play/video/captcha_challenge.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
-import 'package:anime_flow/features/play/domain/captcha_session.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// 验证码 UI。
-class CaptchaView extends ConsumerStatefulWidget {
+class CaptchaView extends StatefulWidget {
   const CaptchaView({
     super.key,
     required this.resource,
-    required this.dataSourceController,
     required this.subjectName,
+    required this.onVerified,
+    required this.onRetry,
+    this.createSession,
     this.keyboardInsetHandled = false,
   });
 
   final ResourcesItem resource;
-  final VideoSourceNotifier dataSourceController;
   final String subjectName;
+  final VoidCallback onVerified;
+  final VoidCallback onRetry;
+  final CaptchaSession Function()? createSession;
   final bool keyboardInsetHandled;
 
   @override
-  ConsumerState<CaptchaView> createState() => _CaptchaViewState();
+  State<CaptchaView> createState() => _CaptchaViewState();
 }
 
-class _CaptchaViewState extends ConsumerState<CaptchaView> {
+class _CaptchaViewState extends State<CaptchaView> {
   CaptchaSession? _provider;
   Timer? _verifyTimer;
   StreamSubscription? _imageSub;
@@ -62,11 +63,12 @@ class _CaptchaViewState extends ConsumerState<CaptchaView> {
 
   void _startVerification() {
     final config = widget.resource.antiCrawlerConfig;
-    if (config == null) return;
+    final createSession = widget.createSession;
+    if (config == null || createSession == null) return;
     final keyword = widget.subjectName;
 
     _disposeSession();
-    _provider = ref.read(captchaSessionFactoryProvider)();
+    _provider = createSession();
     final name = widget.resource.websiteName;
     // API 规则没有搜索页，验证页地址来自规则的 captchaPageUrl
     // （见 CrawlConfigItem.captchaPageTemplate）。
@@ -81,7 +83,7 @@ class _CaptchaViewState extends ConsumerState<CaptchaView> {
         url: url,
         buttonXpath: config.captchaButton,
         pluginName: name,
-        onVerified: () => _onVerified(name),
+        onVerified: _onVerified,
       );
     } else {
       setState(() {
@@ -112,15 +114,10 @@ class _CaptchaViewState extends ConsumerState<CaptchaView> {
     }
   }
 
-  void _onVerified(String websiteName) {
+  void _onVerified() {
     if (!mounted) return;
-    final dataSourceController = widget.dataSourceController;
-    _disposeSession();
-    dataSourceController.markCaptchaVerified(websiteName);
-    setState(() {});
-    Future<void>.delayed(const Duration(seconds: 3), () {
-      dataSourceController.retryResources(websiteName);
-    });
+    setState(_disposeSession);
+    widget.onVerified();
   }
 
   Future<void> _submit() async {
@@ -139,7 +136,7 @@ class _CaptchaViewState extends ConsumerState<CaptchaView> {
       inputXpath: config.captchaInput,
       buttonXpath: config.captchaButton,
       pluginName: name,
-      onVerified: () => _onVerified(name),
+      onVerified: _onVerified,
     );
 
     if (_sessionActive && mounted) {
@@ -186,6 +183,7 @@ class _CaptchaViewState extends ConsumerState<CaptchaView> {
   void _cancel() {
     final name = widget.resource.websiteName;
     final provider = _provider;
+    final onRetry = widget.onRetry;
     _provider = null;
     _imageSub?.cancel();
     _imageSub = null;
@@ -200,7 +198,7 @@ class _CaptchaViewState extends ConsumerState<CaptchaView> {
     });
     provider?.saveAndUnload(name).then((_) {
       provider.dispose();
-      widget.dataSourceController.retryResources(name);
+      onRetry();
     });
   }
 
@@ -225,15 +223,17 @@ class _CaptchaViewState extends ConsumerState<CaptchaView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FilledButton.icon(
-                  onPressed: _startVerification,
-                  icon: const Icon(Icons.verified_user_outlined, size: 18),
-                  label: Text(l10n.verify),
-                ),
-                const SizedBox(width: 12),
+                if (widget.createSession != null &&
+                    resource.antiCrawlerConfig != null) ...[
+                  FilledButton.icon(
+                    onPressed: _startVerification,
+                    icon: const Icon(Icons.verified_user_outlined, size: 18),
+                    label: Text(l10n.verify),
+                  ),
+                  const SizedBox(width: 12),
+                ],
                 OutlinedButton.icon(
-                  onPressed: () => widget.dataSourceController
-                      .retryResources(resource.websiteName),
+                  onPressed: widget.onRetry,
                   icon: const Icon(Icons.refresh, size: 18),
                   label: Text(l10n.retry),
                 ),

@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:anime_flow/features/play/application/play_session.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/player_more_button.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
@@ -21,7 +18,7 @@ import 'package:anime_flow/shared/widgets/ios_battery_icon.dart';
 import 'package:anime_flow/shared/widgets/network_icon.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:anime_flow/features/play/presentation/widgets/dialog/video_source_dialog.dart';
+import 'package:anime_flow/features/play/presentation/widgets/dialog/play_video_source_dialog.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
@@ -49,16 +46,11 @@ class TopAreaControl extends ConsumerStatefulWidget {
 }
 
 class _TopAreaControlState extends ConsumerState<TopAreaControl> {
-  late final PlaySession playController;
   late int _skipDuration;
-
-  VideoSourceNotifier get videoSourceController =>
-      ref.read(videoSourceProvider.notifier);
 
   @override
   void initState() {
     super.initState();
-    playController = ref.read(playSessionProvider);
     _skipDuration = ref.read(playPreferencesProvider).skipDuration;
   }
 
@@ -320,17 +312,8 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                         forceSide: true,
                                         builder:
                                             (context, scrollController, _) =>
-                                                VideoSourceDialog(
+                                                PlayVideoSourceDialog(
                                           scrollController: scrollController,
-                                          onVideoUrlSelected: (url) {
-                                            unawaited(playController.stop());
-                                            videoSourceController
-                                                .loadVideoPage(url);
-                                            videoUiStateController
-                                                .showParsingIndicator();
-                                          },
-                                          videoSourceNotifier:
-                                              videoSourceController,
                                           subjectName: subjectName,
                                         ),
                                       ),

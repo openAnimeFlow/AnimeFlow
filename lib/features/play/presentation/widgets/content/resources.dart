@@ -1,16 +1,14 @@
-import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
-import 'dart:async';
-
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/download/presentation/widgets/download_episode_sheet.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:anime_flow/features/play/presentation/widgets/dialog/video_source_dialog.dart';
+import 'package:anime_flow/features/play/presentation/widgets/dialog/play_video_source_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,12 +19,11 @@ import 'package:riverpod_annotation/experimental/scope.dart';
 enum _SourceAction { downloadResources, openPageUrl, copyPageUrl }
 
 @Dependencies([
-  playSession,
-  VideoUiNotifier,
-  VideoSourceNotifier,
   Episodes,
   playExtra,
-  PlayStateNotifier
+  playSession,
+  VideoSourceNotifier,
+  VideoUiNotifier,
 ])
 class VideoResourcesView extends ConsumerStatefulWidget {
   const VideoResourcesView({super.key});
@@ -39,15 +36,6 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   bool _isSourceActionMenuOpen = false;
 
   void _showSourceDrawer() {
-    final playController = ref.read(playSessionProvider);
-    final videoUiStateController = ref.read(videoUiProvider.notifier);
-    final videoSourceController = ref.read(videoSourceProvider.notifier);
-    void onVideoUrlSelected(String url) {
-      unawaited(playController.stop());
-      videoSourceController.loadVideoPage(url);
-      videoUiStateController.showParsingIndicator();
-    }
-
     final subjectName = ref.read(playExtraProvider).playExtra.subjectName;
     showPlayerSettingsSheet(
       context: context,
@@ -58,11 +46,9 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
         snapSizes: const [0.3, 0.52, 0.95],
         closeOnMinExtent: true,
         builder: (context, scrollController, isBottomSheet) =>
-            VideoSourceDialog(
+            PlayVideoSourceDialog(
           keyboardInsetHandled: isBottomSheet,
           scrollController: scrollController,
-          onVideoUrlSelected: onVideoUrlSelected,
-          videoSourceNotifier: videoSourceController,
           subjectName: subjectName,
         ),
       ),

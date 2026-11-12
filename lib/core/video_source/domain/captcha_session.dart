@@ -1,3 +1,4 @@
+/// 一次站点验证码验证会话。
 abstract interface class CaptchaSession {
   Stream<String?> get onCaptchaImageUrl;
   Future<void> loadForCaptcha(String url, String captchaXpath,

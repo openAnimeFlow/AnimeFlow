@@ -1,6 +1,6 @@
-import 'package:anime_flow/features/play/domain/captcha_session.dart';
 import 'dart:async';
 
+import 'package:anime_flow/core/video_source/domain/captcha_session.dart';
 import 'package:anime_flow/core/webview/captcha/captcha_webview_factory.dart';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/core/webview/captcha/captcha_webview_controller.dart';

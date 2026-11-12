@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/play/infrastructure/source/webview_captcha_session.dart';
+import 'package:anime_flow/core/video_source/infrastructure/webview_captcha_session.dart';
 import 'package:anime_flow/features/play/infrastructure/player/native_playback_device.dart';
 import 'package:anime_flow/features/play/infrastructure/source/crawler_source_repository.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';

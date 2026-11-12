@@ -4,6 +4,8 @@ import 'dart:math' as math;
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/recommend/application/wallpaper_recommendations.dart';
+import 'package:anime_flow/features/recommend/application/wallpaper_favorites.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
@@ -49,6 +51,7 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage>
   bool _advancingSlide = false;
   bool _downloading = false;
   bool _sharing = false;
+  late final int _initialSessionRevision;
 
   SubjectWallpaper get _subject => widget.args.subject;
 
@@ -59,6 +62,7 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage>
   @override
   void initState() {
     super.initState();
+    _initialSessionRevision = ref.read(authSessionRevisionProvider);
     _images = {
       if (widget.args.initialUrl.trim().isNotEmpty) widget.args.initialUrl,
       ..._subject.coverImages,
@@ -198,6 +202,19 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage>
       _message(l10n.saveImageFailed(error.toString()));
     } finally {
       if (mounted) setState(() => _downloading = false);
+    }
+  }
+
+  Future<void> _toggleFavorite(bool favorite) async {
+    final revision = ref.read(authSessionRevisionProvider);
+    try {
+      await ref
+          .read(wallpaperFavoritesProvider.notifier)
+          .setFavorite(_subject.subjectId, !favorite);
+    } catch (_) {
+      if (mounted && revision == ref.read(authSessionRevisionProvider)) {
+        _message(AppLocalizations.of(context).wallpaperActionFailed);
+      }
     }
   }
 
@@ -501,51 +518,69 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage>
         ],
       );
 
-  Widget _actions(AppLocalizations l10n) =>
-      LayoutBuilder(builder: (context, constraints) {
-        final download = FilledButton.icon(
-          onPressed: _downloading ? null : _download,
-          icon: _downloading
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2))
-              : const Icon(Icons.file_download_outlined),
-          label: Text(_downloading ? l10n.loading : l10n.wallpaperDownload),
-          style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15))),
-        );
-        final share = Builder(
-            builder: (buttonContext) => FilledButton.tonalIcon(
-                  onPressed: _sharing ? null : () => _share(buttonContext),
-                  icon: Icon(SystemUtil.isDesktop
-                      ? Icons.link_rounded
-                      : Icons.ios_share_rounded),
-                  label: Text(SystemUtil.isDesktop
-                      ? l10n.wallpaperCopyLink
-                      : l10n.wallpaperShare),
-                  style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15))),
-                ));
-        if (constraints.maxWidth < 450) {
-          return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                download,
-                const SizedBox(height: 10),
-                share,
-              ]);
-        }
-        return Row(children: [
-          Expanded(flex: 2, child: download),
-          const SizedBox(width: 12),
-          Expanded(child: share),
+  Widget _actions(AppLocalizations l10n) {
+    final sessionRevision = ref.watch(authSessionRevisionProvider);
+    final isLoggedIn = ref.watch(isLoggedInProvider);
+    final showFavorite = isLoggedIn.asData?.value == true;
+    final favoriteChanges = ref.watch(wallpaperFavoritesProvider);
+    final changed = favoriteChanges.changes[_subject.subjectId];
+    final favorite = changed ??
+        (sessionRevision == _initialSessionRevision ? _subject.favorite : null);
+    final favoriteButton = FilledButton.tonalIcon(
+      onPressed: favoriteChanges.pending.contains(_subject.subjectId)
+          ? null
+          : favorite == null
+              ? null
+              : () => _toggleFavorite(favorite),
+      icon: Icon(favorite == true ? Icons.favorite : Icons.favorite_border),
+      label: Text(favorite == true ? l10n.cancelCollection : l10n.collection),
+      style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+    );
+    final download = FilledButton.icon(
+      onPressed: _downloading ? null : _download,
+      icon: _downloading
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2))
+          : const Icon(Icons.file_download_outlined),
+      label: Text(_downloading ? l10n.loading : l10n.wallpaperDownload),
+      style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+    );
+    final share = Builder(
+        builder: (buttonContext) => FilledButton.tonalIcon(
+              onPressed: _sharing ? null : () => _share(buttonContext),
+              icon: Icon(SystemUtil.isDesktop
+                  ? Icons.link_rounded
+                  : Icons.ios_share_rounded),
+              label: Text(SystemUtil.isDesktop
+                  ? l10n.wallpaperCopyLink
+                  : l10n.wallpaperShare),
+              style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15))),
+            ));
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 10,
+        children: [
+          download,
+          Row(
+            spacing: 8,
+            children: [
+              Expanded(child: share),
+              if (showFavorite) Expanded(child: favoriteButton),
+            ],
+          ),
         ]);
-      });
+  }
 
   Widget _recommendations(AppLocalizations l10n, ColorScheme colors) {
     final provider = wallpaperRecommendationsProvider(_subject.subjectId);

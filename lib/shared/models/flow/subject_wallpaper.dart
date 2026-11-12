@@ -27,6 +27,7 @@ class SubjectWallpaper {
     required this.nameCn,
     required this.posters,
     this.backdrops = const [],
+    this.favorite,
   });
 
   final int subjectId;
@@ -34,6 +35,7 @@ class SubjectWallpaper {
   final String nameCn;
   final List<String> posters;
   final List<String> backdrops;
+  final bool? favorite;
 
   /// 每张不同的图片作为一个随机候选，忽略空地址。
   List<String> get coverImages => {...backdrops, ...posters}
@@ -47,6 +49,7 @@ class SubjectWallpaper {
         subjectId: json['subjectId'] as int,
         name: json['name'] as String? ?? '',
         nameCn: json['nameCn'] as String? ?? '',
+        favorite: json['favorite'] as bool?,
         backdrops: (json['backdrops'] as List? ?? const [])
             .whereType<String>()
             .where((url) => url.trim().isNotEmpty)

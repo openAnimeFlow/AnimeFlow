@@ -1,4 +1,5 @@
 import 'package:anime_flow/shared/models/flow/subject_wallpaper.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:dio/dio.dart' show CancelToken;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,6 +17,7 @@ final wallpaperRecommendationsLoaderProvider =
 final wallpaperRecommendationsProvider =
     FutureProvider.autoDispose.family<List<SubjectWallpaper>, int>(
   (ref, subjectId) {
+    ref.watch(authSessionRevisionProvider);
     final cancelToken = CancelToken();
     ref.onDispose(cancelToken.cancel);
     return ref.watch(wallpaperRecommendationsLoaderProvider)(

@@ -498,6 +498,15 @@ class FlowApi {
         Map<String, dynamic>.from(response.data));
   }
 
+  static Future<void> setWallpaperFavorite(int subjectId, bool favorite) async {
+    final path = '${AnimeFlowApi.subjectWallpapers}/favorites/$subjectId';
+    if (favorite) {
+      await _client.put(path, requireFlowToken: true);
+    } else {
+      await _client.delete(path, requireFlowToken: true);
+    }
+  }
+
   /// 壁纸详情页的更多壁纸，固定获取第一页的 10 个番剧。
   static Future<SubjectWallpaperPage> getRecommendedWallpapersService(
     int subjectId, {

@@ -7,6 +7,7 @@ import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/features/recommend/application/wallpaper_wall.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_layout.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_grid.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_filter_dialog.dart';
@@ -125,6 +126,9 @@ class _WallpaperViewState extends ConsumerState<WallpaperView>
     super.build(context);
     final l10n = AppLocalizations.of(context);
     final wall = ref.watch(wallpaperWallProvider);
+    ref.listen(authSessionRevisionProvider, (previous, next) {
+      if (previous != null && previous != next) unawaited(_wall.refresh());
+    });
     // 列表长度变化后补满视口；滚动位置与图片比例属于界面状态，留在本层。
     ref.listen<WallpaperWallState>(wallpaperWallProvider, (previous, next) {
       if (previous?.items.length != next.items.length && !next.isLoading) {

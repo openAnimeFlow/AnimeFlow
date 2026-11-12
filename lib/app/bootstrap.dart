@@ -67,13 +67,16 @@ Future<void> bootstrap() async {
     });
   }
 
-  final container = ProviderContainer(overrides: [
-    ...videoSourceOverrides,
-    ...playerOverrides,
-    ...wallpaperFeatureOverrides,
-    ...downloadFeatureOverrides,
-    overrideAppNavigator(GoAppNavigator(appRouter)),
-  ]);
+  final container = ProviderContainer(
+      retry: (retryCount, error) =>
+          ProviderContainer.defaultRetry(retryCount, error, maxRetries: 2),
+      overrides: [
+        ...videoSourceOverrides,
+        ...playerOverrides,
+        ...wallpaperFeatureOverrides,
+        ...downloadFeatureOverrides,
+        overrideAppNavigator(GoAppNavigator(appRouter)),
+      ]);
   container.read(appInfoProvider);
   unawaited(container.read(shadersDirectoryProvider.future));
   unawaited(SourceConfigInitializer().initialize());

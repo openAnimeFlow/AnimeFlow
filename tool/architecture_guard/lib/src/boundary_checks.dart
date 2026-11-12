@@ -1,4 +1,4 @@
-import 'play_layer_checks.dart';
+import 'feature_layer_checks.dart';
 import 'model.dart';
 
 /// 检查业务/UI 和导航装配边界；追踪重导出，防止聚合文件绕过检查。
@@ -47,7 +47,7 @@ List<ArchitectureViolation> checkBoundaries(
       violations[violation.key] = violation;
     }
   }
-  for (final violation in checkPlayLayers(graph)) {
+  for (final violation in checkFeatureLayers(graph)) {
     violations[violation.key] = violation;
   }
   return violations.values.toList();

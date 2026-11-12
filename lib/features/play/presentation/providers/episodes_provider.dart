@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:anime_flow/features/play/domain/play_session_actions.dart';
 import 'package:anime_flow/features/play/domain/episodes_data.dart';
 import 'package:anime_flow/features/play/application/episode_selection.dart';
@@ -24,19 +23,8 @@ class Episodes extends _$Episodes implements EpisodeActions {
           requestedEpisodeId: requestedEpisodeId,
           offlineEpisodeUrl: extra.offlineEpisodeUrl,
           availableEpisodes: [
-            for (final row in extra.offlineEpisodes)
-              if (row.status == DownloadStatus.completed &&
-                  row.localMediaPath.trim().isNotEmpty)
-                (
-                  lineIndex: row.lineIndex,
-                  episodeIndex: row.episodeIndex,
-                  episodeSort: row.episodeSort,
-                  episodeUrl: row.episodeUrl,
-                  bangumiEpisodeId: row.bangumiEpisodeId,
-                  episodeTitle: row.episodeTitle,
-                  localMediaPath: row.localMediaPath,
-                  localDanmakuPath: row.localDanmakuPath
-                )
+            for (final episode in extra.offlineEpisodes)
+              if (episode.localMediaPath.trim().isNotEmpty) episode,
           ]);
     }
     selection.request(subjectId, requestedEpisodeId);

@@ -1,21 +1,23 @@
 import 'dart:async';
 
+import 'package:anime_flow/features/download/domain/download_repository.dart';
+import 'package:anime_flow/features/download/domain/download_danmaku.dart';
+import 'package:anime_flow/features/download/domain/download_directory_failure.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_factory.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
+import 'package:anime_flow/core/logger/app_log.dart';
 import 'package:anime_flow/app/localization/locale_provider.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/download/application/download_danmaku_service.dart';
 import 'package:anime_flow/features/download/infrastructure/download_foreground_service.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
-import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/video_source_resolver_pool.dart';
 import 'package:anime_flow/core/video_source/application/video_source_providers.dart';
-import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
 import 'package:anime_flow/core/video_source/domain/video_source.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_record.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/features/download/domain/download_episode.dart';
+import 'package:anime_flow/features/download/domain/download_record.dart';
+import 'package:anime_flow/features/download/domain/download_status.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -93,7 +95,7 @@ class StartDownloadParams {
 
 @Riverpod(keepAlive: true)
 IDownloadRepository downloadRepository(Ref ref) {
-  return DownloadRepository();
+  throw UnimplementedError('DownloadRepository must be provided at startup.');
 }
 
 @Riverpod(keepAlive: true)
@@ -267,7 +269,7 @@ class DownloadController extends _$DownloadController {
     final activeEpisodes = [
       for (final record in repository.getAllRecords())
         for (final episode in record.episodes.values)
-          if (_isIncompleteStatus(episode.status))
+          if (DownloadStatus.isActive(episode.status))
             (record.key, episode.episodeUrl),
     ];
     for (final (recordKey, episodeUrl) in activeEpisodes) {
@@ -349,14 +351,11 @@ class DownloadController extends _$DownloadController {
       return;
     }
 
+    final repository = ref.read(downloadRepositoryProvider);
     _runningDanmakuTasks.add(taskKey);
     try {
       final result = await ref.read(downloadDanmakuServiceProvider).download(
-            subjectId: ref
-                    .read(downloadRepositoryProvider)
-                    .getRecord(recordKey)
-                    ?.subjectId ??
-                0,
+            subjectId: repository.getRecord(recordKey)?.subjectId ?? 0,
             episode: episode,
           );
       episode.errorMessage = '';
@@ -379,14 +378,15 @@ class DownloadController extends _$DownloadController {
         ..localDanmakuPath = ''
         ..errorMessage = '';
     } finally {
-      _runningDanmakuTasks.remove(taskKey);
-      _downloadDanmakuByTask.remove(taskKey);
-      await ref.read(downloadRepositoryProvider).updateEpisode(
-            recordKey,
-            episodeUrl,
-            episode,
-          );
-      _refresh(speed: 0);
+      try {
+        await repository.persistEpisodeMetadata(recordKey, episodeUrl, episode);
+      } catch (error, stackTrace) {
+        logError('保存下载弹幕信息失败', error: error, stackTrace: stackTrace);
+      } finally {
+        _runningDanmakuTasks.remove(taskKey);
+        _downloadDanmakuByTask.remove(taskKey);
+        if (ref.mounted) _refresh(speed: 0);
+      }
     }
   }
 
@@ -448,7 +448,7 @@ class DownloadController extends _$DownloadController {
   Future<void> _syncForegroundService() {
     final episodes = state.records.expand((record) => record.episodes.values);
     final activeTasks = episodes.where((episode) {
-      return _isIncompleteStatus(episode.status);
+      return DownloadStatus.isActive(episode.status);
     }).length;
     String languageTag;
     try {
@@ -474,7 +474,7 @@ class DownloadController extends _$DownloadController {
       final episodes = Map<String, DownloadEpisode>.from(record.episodes);
       for (final entry in episodes.entries) {
         final episode = entry.value;
-        if (_isIncompleteStatus(episode.status)) {
+        if (DownloadStatus.isActive(episode.status)) {
           episode.status = DownloadStatus.paused;
           recordChanged = true;
           changed = true;
@@ -488,12 +488,6 @@ class DownloadController extends _$DownloadController {
     if (changed) {
       _refresh(speed: 0);
     }
-  }
-
-  bool _isIncompleteStatus(int status) {
-    return status == DownloadStatus.resolving ||
-        status == DownloadStatus.pending ||
-        status == DownloadStatus.downloading;
   }
 
   DownloadState _buildState(

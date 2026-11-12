@@ -1,17 +1,7 @@
+import 'package:anime_flow/shared/models/player/play/offline_episode.dart';
 import 'package:anime_flow/features/play/domain/episodes_data.dart';
 import 'package:anime_flow/features/subject_episodes/domain/subject_episodes_state.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
-
-typedef OfflineEpisode = ({
-  int lineIndex,
-  int episodeIndex,
-  double episodeSort,
-  String episodeUrl,
-  int bangumiEpisodeId,
-  String episodeTitle,
-  String localMediaPath,
-  String localDanmakuPath
-});
 
 class PlayEpisodeSelection {
   List<OfflineEpisode> _offlineEpisodes = const [];

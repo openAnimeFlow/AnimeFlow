@@ -1,29 +1,18 @@
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:hive_ce/hive.dart';
+import 'download_episode.dart';
 
-part 'download_record.g.dart';
-
-@HiveType(typeId: 10)
 class DownloadRecord {
-  @HiveField(0)
   int subjectId;
 
-  @HiveField(1)
   String subjectName;
 
-  @HiveField(2)
   String subjectCover;
 
-  @HiveField(3)
   String sourceName;
 
-  @HiveField(4)
   String sourceBaseUrl;
 
-  @HiveField(5)
   Map<String, DownloadEpisode> episodes;
 
-  @HiveField(6)
   DateTime createdAt;
 
   DownloadRecord({

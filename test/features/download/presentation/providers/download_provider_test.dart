@@ -1,16 +1,20 @@
 import 'dart:async';
+import 'dart:io';
 
-import 'package:anime_flow/features/download/application/download_danmaku_service.dart';
+import 'package:anime_flow/features/download/domain/download_repository.dart';
+import 'package:anime_flow/features/download/domain/download_danmaku.dart';
+import 'package:anime_flow/features/download/domain/download_directory_failure.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
-import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/core/video_source/domain/video_source.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_record.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/features/download/data/storage/download_hive_adapters.dart';
+import 'package:anime_flow/features/download/domain/download_episode.dart';
+import 'package:anime_flow/features/download/domain/download_record.dart';
+import 'package:anime_flow/features/download/domain/download_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce/hive.dart';
 
 void main() {
   group('DownloadController', () {
@@ -404,10 +408,17 @@ void main() {
       expect(episode.localDanmakuPath, isEmpty);
     });
 
-    test(
-        'downloads danmaku for a completed episode without redownloading video',
+    test('persists danmaku for a completed episode without redownloading video',
         () async {
-      final repository = _FakeDownloadRepository();
+      final directory = await Directory.systemTemp.createTemp('danmaku_test_');
+      Hive.init(directory.path);
+      Hive.registerDownloadAdapters();
+      addTearDown(() async {
+        await Hive.close();
+        await directory.delete(recursive: true);
+      });
+      final box = await Hive.openBox<DownloadRecord>('downloads_test');
+      final repository = DownloadRepository(storage: box);
       final manager = _FakeDownloadManager();
       final resolverPool = _FakeResolverPool();
       final danmakuService = _FakeDownloadDanmakuService(
@@ -445,9 +456,13 @@ void main() {
           .downloadDanmaku(record.key, 'ep1');
       await danmakuService.waitForDownload();
 
-      final episode = repository.getRecord(record.key)!.episodes['ep1']!;
+      await box.close();
+      final reopened = await Hive.openBox<DownloadRecord>('downloads_test');
+      final episode = reopened.get(record.key)!.episodes['ep1']!;
       expect(manager.requests, isEmpty);
       expect(danmakuService.requestedSubjectIds, [1]);
+      expect(episode.status, DownloadStatus.completed);
+      expect(episode.danDanBangumiID, 2026);
       expect(episode.danmakuDownloaded, isTrue);
       expect(episode.localDanmakuPath, 'downloads/ep1/danmaku.json');
     });
@@ -517,6 +532,13 @@ class _FakeDownloadRepository implements IDownloadRepository {
     record.episodes = Map<String, DownloadEpisode>.from(record.episodes)
       ..[episodeUrl] = episode;
   }
+
+  @override
+  Future<void> persistEpisodeMetadata(
+    String recordKey,
+    String episodeUrl,
+    DownloadEpisode episode,
+  ) async {}
 
   @override
   Future<void> deleteEpisode(String recordKey, String episodeUrl) async {

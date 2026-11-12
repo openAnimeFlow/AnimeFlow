@@ -6,8 +6,7 @@ import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/shared/models/player/play/offline_episode.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
@@ -60,7 +59,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  ProviderContainer route(int id, {List<DownloadEpisode> episodes = const []}) {
+  ProviderContainer route(int id, {List<OfflineEpisode> episodes = const []}) {
     final container = ProviderContainer(parent: root, overrides: [
       playExtraProvider.overrideWithValue(PlayRouteExtra(
         playExtra: PlayExtra(
@@ -123,16 +122,15 @@ void main() {
     Storage.playHistory = _EmptyHistory();
     final container = route(1, episodes: [
       for (final id in [101, 102])
-        DownloadEpisode(
+        (
           episodeUrl: 'ep$id',
           bangumiEpisodeId: id,
           episodeSort: (id - 100).toDouble(),
           episodeIndex: id - 100,
           episodeTitle: 'Episode $id',
           lineIndex: 0,
-          sourceName: 'local',
-          status: DownloadStatus.completed,
           localMediaPath: '/ep$id.mp4',
+          localDanmakuPath: '',
         ),
     ]);
     final session = container.listen(playSessionProvider, (_, __) {}).read();

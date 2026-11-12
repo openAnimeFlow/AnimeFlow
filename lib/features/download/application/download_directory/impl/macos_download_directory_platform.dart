@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/download/domain/download_directory_failure.dart';
 import 'package:flutter/services.dart';
 
 import '../download_directory_platform.dart';

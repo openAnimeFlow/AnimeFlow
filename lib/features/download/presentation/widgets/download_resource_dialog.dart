@@ -10,7 +10,7 @@ import 'package:anime_flow/core/video_source/infrastructure/webview_captcha_sess
 import 'package:anime_flow/features/download/application/download_resource_search.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/features/download/domain/download_status.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/shared/widgets/video_source/video_source_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -154,12 +154,8 @@ class _DownloadResourceDialogState
       final existing =
           repository.getRecord(params.recordKey)?.episodes[selection.url];
       if (existing != null &&
-          [
-            DownloadStatus.pending,
-            DownloadStatus.resolving,
-            DownloadStatus.downloading,
-            DownloadStatus.completed
-          ].contains(existing.status)) {
+          (DownloadStatus.isActive(existing.status) ||
+              existing.status == DownloadStatus.completed)) {
         if (mounted) Navigator.of(context).pop(false);
         return;
       }

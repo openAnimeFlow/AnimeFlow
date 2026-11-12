@@ -1,35 +1,9 @@
+import 'package:anime_flow/features/download/domain/download_repository.dart';
 import 'package:anime_flow/core/settings/storage.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_record.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/features/download/domain/download_episode.dart';
+import 'package:anime_flow/features/download/domain/download_record.dart';
+import 'package:anime_flow/features/download/domain/download_status.dart';
 import 'package:hive_ce/hive.dart';
-
-abstract interface class IDownloadRepository {
-  List<DownloadRecord> getAllRecords();
-
-  DownloadRecord? getRecord(String key);
-
-  Future<void> putRecord(DownloadRecord record);
-
-  Future<void> updateEpisode(
-    String recordKey,
-    String episodeUrl,
-    DownloadEpisode episode,
-  );
-
-  Future<void> deleteEpisode(String recordKey, String episodeUrl);
-
-  List<DownloadEpisode> getCompletedEpisodes(
-    int subjectId,
-    String sourceName,
-  );
-
-  DownloadEpisode? getEpisode(
-    int subjectId,
-    String sourceName,
-    String episodeUrl,
-  );
-}
 
 class DownloadRepository implements IDownloadRepository {
   DownloadRepository({Box<DownloadRecord>? storage})
@@ -89,6 +63,20 @@ class DownloadRepository implements IDownloadRepository {
       ..[episodeUrl] = episode;
     await _storage.put(recordKey, record);
     _lastPersistedStatus[statusKey] = episode.status;
+  }
+
+  @override
+  Future<void> persistEpisodeMetadata(
+    String recordKey,
+    String episodeUrl,
+    DownloadEpisode episode,
+  ) async {
+    final record = _storage.get(recordKey);
+    // An asynchronous metadata update may finish after the episode was deleted.
+    if (record == null || !identical(record.episodes[episodeUrl], episode)) {
+      return;
+    }
+    await _storage.put(recordKey, record);
   }
 
   @override

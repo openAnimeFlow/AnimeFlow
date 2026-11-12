@@ -165,6 +165,24 @@ void main() {
     },
   );
 
+  test('download domain excludes storage through local helpers', () {
+    const domain = 'lib/features/download/domain';
+    fixture = FixtureProject({
+      '$domain/record.dart': "import 'value.dart';",
+      '$domain/value.dart': "import 'package:hive_ce/hive.dart';",
+      '$domain/status.dart': 'class Status {}',
+    });
+    final spec = fixtureSpec();
+    final hits = checkBoundaries(collectDependencies(fixture.root, spec), spec)
+        .where((violation) => violation.rule == 'R11')
+        .map((violation) => (violation.source, violation.target))
+        .toSet();
+    expect(hits, {
+      ('$domain/record.dart', 'package:hive_ce/hive.dart'),
+      ('$domain/value.dart', 'package:hive_ce/hive.dart'),
+    });
+  });
+
   test(
     'play enforces inward dependencies through local helpers and barrels',
     () {

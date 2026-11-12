@@ -1,11 +1,11 @@
 import 'dart:io';
 
+import 'package:anime_flow/features/download/domain/download_directory_failure.dart';
 import 'package:anime_flow/features/download/application/download_danmaku_service.dart';
-import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/download_directory/impl/android_download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/download_directory/impl/desktop_download_directory_platform.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/features/download/domain/download_episode.dart';
+import 'package:anime_flow/features/download/domain/download_status.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/app/app.dart';
+import 'package:anime_flow/features/download/composition/download_bindings.dart';
 import 'package:anime_flow/features/recommend/composition/wallpaper_bindings.dart';
 import 'composition/player_bindings.dart';
 import 'composition/video_source_bindings.dart';
@@ -70,6 +71,7 @@ Future<void> bootstrap() async {
     ...videoSourceOverrides,
     ...playerOverrides,
     ...wallpaperFeatureOverrides,
+    ...downloadFeatureOverrides,
     overrideAppNavigator(GoAppNavigator(appRouter)),
   ]);
   container.read(appInfoProvider);

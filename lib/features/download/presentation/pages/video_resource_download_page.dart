@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/download/presentation/widgets/download_resource_dialog.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/features/download/domain/download_status.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -236,9 +236,7 @@ class _EpisodeDownloadButtonState
           episodeIndex: episode.episodeIndex,
           networkMediaUrl: episode.networkMediaUrl,
         ));
-      } else if (episode.status == DownloadStatus.downloading ||
-          episode.status == DownloadStatus.pending ||
-          episode.status == DownloadStatus.resolving) {
+      } else if (DownloadStatus.isActive(episode.status)) {
         await controller.pause(recordKey, episodeUrl);
       }
     } catch (error) {
@@ -299,11 +297,7 @@ class _EpisodeDownloadButtonState
               episodeUrl: episode.episodeUrl,
             );
           }
-          if ([
-                DownloadStatus.pending,
-                DownloadStatus.resolving,
-                DownloadStatus.downloading
-              ].contains(episode.status) ||
+          if (DownloadStatus.isActive(episode.status) ||
               (episode.status == DownloadStatus.paused &&
                   active.status == null)) {
             active = (

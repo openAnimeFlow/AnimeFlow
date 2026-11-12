@@ -1,6 +1,7 @@
 import 'model.dart';
 
 const _play = 'lib/features/play/';
+const _downloadDomain = 'lib/features/download/domain/';
 const _nativePackages = {
   'dio',
   'hive_ce',
@@ -66,13 +67,18 @@ bool _blocked(String layer, String target) {
 
 /// Check imports including conditional branches. Inner layers must remain pure
 /// through local helpers. For UI and adapters, follow exports to catch barrels.
-Iterable<ArchitectureViolation> checkPlayLayers(DependencyGraph graph) sync* {
+Iterable<ArchitectureViolation> checkFeatureLayers(
+  DependencyGraph graph,
+) sync* {
   final outgoing = <String, List<DependencyEdge>>{};
   for (final edge in graph.edges) {
     outgoing.putIfAbsent(edge.source, () => []).add(edge);
   }
-  for (final source in outgoing.keys.where((path) => path.startsWith(_play))) {
-    final layer = source.substring(_play.length).split('/').first;
+  for (final source in outgoing.keys.where(
+    (path) => path.startsWith(_play) || path.startsWith(_downloadDomain),
+  )) {
+    final feature = source.split('/')[2];
+    final layer = _featureLayer(source)!;
     if (!const {
       'domain',
       'application',
@@ -95,7 +101,7 @@ Iterable<ArchitectureViolation> checkPlayLayers(DependencyGraph graph) sync* {
             target,
             first.kind,
             first.line,
-            'play/$layer 越过依赖边界，经 ${first.target} 引入 $target。',
+            '$feature/$layer 越过依赖边界，经 ${first.target} 引入 $target。',
           );
           continue;
         }

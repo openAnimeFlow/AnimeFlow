@@ -5,4 +5,7 @@ abstract final class DownloadStatus {
   static const int completed = 3;
   static const int failed = 4;
   static const int paused = 5;
+
+  static bool isActive(int status) =>
+      status == pending || status == resolving || status == downloading;
 }

@@ -39,14 +39,14 @@ abstract class _$CurrentFlowToken extends $AsyncNotifier<FlowToken?> {
   FutureOr<FlowToken?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<FlowToken?>, FlowToken?>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<FlowToken?>, FlowToken?>,
         AsyncValue<FlowToken?>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

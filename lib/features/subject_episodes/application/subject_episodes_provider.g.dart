@@ -82,7 +82,7 @@ abstract class _$SubjectEpisodes extends $AsyncNotifier<SubjectEpisodesState> {
   );
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref
         as $Ref<AsyncValue<SubjectEpisodesState>, SubjectEpisodesState>;
     final element = ref.element as $ClassProviderElement<
@@ -90,7 +90,7 @@ abstract class _$SubjectEpisodes extends $AsyncNotifier<SubjectEpisodesState> {
         AsyncValue<SubjectEpisodesState>,
         Object?,
         Object?>;
-    element.handleCreate(
+    return element.handleCreate(
         ref,
         () => build(
               _$args,

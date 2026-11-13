@@ -10,10 +10,10 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_volume_controller
   fvp
   gal
-  media_kit_video
   screen_retriever_windows
-  share_plus
   url_launcher_windows
+  share_plus
+  media_kit_video
   webview_windows
   window_manager
 )

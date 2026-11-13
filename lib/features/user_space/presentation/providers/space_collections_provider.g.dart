@@ -106,7 +106,7 @@ abstract class _$SpaceCollections
   );
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Map<int, SpaceCollectionTabState>,
         Map<int, SpaceCollectionTabState>>;
     final element = ref.element as $ClassProviderElement<
@@ -115,7 +115,7 @@ abstract class _$SpaceCollections
         Map<int, SpaceCollectionTabState>,
         Object?,
         Object?>;
-    element.handleCreate(
+    return element.handleCreate(
         ref,
         () => build(
               _$args,

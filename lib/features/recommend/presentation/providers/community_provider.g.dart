@@ -34,14 +34,14 @@ final class CommunityWatchingSubjectsProvider extends $AsyncNotifierProvider<
 }
 
 String _$communityWatchingSubjectsHash() =>
-    r'ec1767d973616b63da522fabddafe9343c67ed66';
+    r'f802fa31c7d18c23e65180e782785a8a250f1253';
 
 abstract class _$CommunityWatchingSubjects
     extends $AsyncNotifier<List<WatchingSubject>> {
   FutureOr<List<WatchingSubject>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref
         as $Ref<AsyncValue<List<WatchingSubject>>, List<WatchingSubject>>;
     final element = ref.element as $ClassProviderElement<
@@ -49,7 +49,7 @@ abstract class _$CommunityWatchingSubjects
         AsyncValue<List<WatchingSubject>>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -78,19 +78,19 @@ final class CommunityOnlineCountProvider
 }
 
 String _$communityOnlineCountHash() =>
-    r'04de583ff5b7f4ba0d3f2a588c64309f69c960fe';
+    r'd04ec76c4f89b3378c39f7a17c76e822f39532e9';
 
 abstract class _$CommunityOnlineCount extends $AsyncNotifier<OnlineCount> {
   FutureOr<OnlineCount> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<OnlineCount>, OnlineCount>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<OnlineCount>, OnlineCount>,
         AsyncValue<OnlineCount>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

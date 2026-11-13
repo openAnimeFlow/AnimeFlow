@@ -48,13 +48,13 @@ abstract class _$SearchPageController extends $Notifier<SearchPageState> {
   SearchPageState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<SearchPageState, SearchPageState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<SearchPageState, SearchPageState>,
         SearchPageState,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

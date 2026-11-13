@@ -1,0 +1,10 @@
+targets:
+  $default:
+    sources:
+      include:
+        - $package$
+        - lib/**
+        - test/**
+        - tool/**
+      exclude:
+        - tool/architecture_guard/**

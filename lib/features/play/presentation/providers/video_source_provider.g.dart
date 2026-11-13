@@ -71,13 +71,13 @@ abstract class _$VideoSourceNotifier extends $Notifier<VideoSourceState> {
   VideoSourceState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<VideoSourceState, VideoSourceState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<VideoSourceState, VideoSourceState>,
         VideoSourceState,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

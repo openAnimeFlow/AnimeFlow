@@ -39,13 +39,13 @@ abstract class _$AnimeHot extends $AsyncNotifier<AnimeHotState> {
   FutureOr<AnimeHotState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<AnimeHotState>, AnimeHotState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<AnimeHotState>, AnimeHotState>,
         AsyncValue<AnimeHotState>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

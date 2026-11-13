@@ -96,10 +96,10 @@ abstract class _$PlayStateNotifier extends $Notifier<PlayState> {
   PlayState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<PlayState, PlayState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<PlayState, PlayState>, PlayState, Object?, Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

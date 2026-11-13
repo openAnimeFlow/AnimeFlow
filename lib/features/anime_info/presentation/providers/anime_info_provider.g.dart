@@ -43,7 +43,7 @@ abstract class _$AnimeInfo extends $StreamNotifier<SubjectsInfoItem> {
   Stream<SubjectsInfoItem> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<SubjectsInfoItem>, SubjectsInfoItem>;
     final element = ref.element as $ClassProviderElement<
@@ -51,7 +51,7 @@ abstract class _$AnimeInfo extends $StreamNotifier<SubjectsInfoItem> {
         AsyncValue<SubjectsInfoItem>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -89,14 +89,14 @@ abstract class _$SubjectStills extends $StreamNotifier<List<String>> {
   Stream<List<String>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<String>>, List<String>>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<List<String>>, List<String>>,
         AsyncValue<List<String>>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -135,7 +135,7 @@ abstract class _$SubjectComments
   FutureOr<SubjectCommentsViewState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref
         as $Ref<AsyncValue<SubjectCommentsViewState>, SubjectCommentsViewState>;
     final element = ref.element as $ClassProviderElement<
@@ -144,7 +144,7 @@ abstract class _$SubjectComments
         AsyncValue<SubjectCommentsViewState>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -188,7 +188,7 @@ abstract class _$SubjectRelated extends $AsyncNotifier<SubjectRelationItem> {
   FutureOr<SubjectRelationItem> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<SubjectRelationItem>, SubjectRelationItem>;
     final element = ref.element as $ClassProviderElement<
@@ -196,7 +196,7 @@ abstract class _$SubjectRelated extends $AsyncNotifier<SubjectRelationItem> {
         AsyncValue<SubjectRelationItem>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -240,14 +240,14 @@ abstract class _$SubjectCharacters extends $AsyncNotifier<CharactersItem> {
   FutureOr<CharactersItem> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<CharactersItem>, CharactersItem>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<CharactersItem>, CharactersItem>,
         AsyncValue<CharactersItem>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -291,13 +291,13 @@ abstract class _$SubjectProducers extends $AsyncNotifier<ProducersItem> {
   FutureOr<ProducersItem> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<ProducersItem>, ProducersItem>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<ProducersItem>, ProducersItem>,
         AsyncValue<ProducersItem>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

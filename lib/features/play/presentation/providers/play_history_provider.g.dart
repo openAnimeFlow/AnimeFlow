@@ -57,7 +57,7 @@ abstract class _$PlayHistoryNotifier extends $AsyncNotifier<PlayHistoryState> {
   FutureOr<PlayHistoryState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<PlayHistoryState>, PlayHistoryState>;
     final element = ref.element as $ClassProviderElement<
@@ -65,6 +65,6 @@ abstract class _$PlayHistoryNotifier extends $AsyncNotifier<PlayHistoryState> {
         AsyncValue<PlayHistoryState>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

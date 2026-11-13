@@ -47,13 +47,13 @@ abstract class _$UserCollections extends $Notifier<UserCollectionsState> {
   UserCollectionsState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<UserCollectionsState, UserCollectionsState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<UserCollectionsState, UserCollectionsState>,
         UserCollectionsState,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

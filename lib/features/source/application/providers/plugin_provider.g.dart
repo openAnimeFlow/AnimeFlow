@@ -33,13 +33,13 @@ final class PluginCatalogProvider
   PluginCatalog create() => PluginCatalog();
 }
 
-String _$pluginCatalogHash() => r'b4d448a19f434cf5704d6b958cf93add57f1c154';
+String _$pluginCatalogHash() => r'06194d626c366811e6f3a63027ee04fecd69fa2f';
 
 abstract class _$PluginCatalog extends $AsyncNotifier<List<PluginCatalogItem>> {
   FutureOr<List<PluginCatalogItem>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref
         as $Ref<AsyncValue<List<PluginCatalogItem>>, List<PluginCatalogItem>>;
     final element = ref.element as $ClassProviderElement<
@@ -48,6 +48,6 @@ abstract class _$PluginCatalog extends $AsyncNotifier<List<PluginCatalogItem>> {
         AsyncValue<List<PluginCatalogItem>>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

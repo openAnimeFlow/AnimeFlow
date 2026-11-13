@@ -52,14 +52,14 @@ abstract class _$DanmakuStateNotifier extends $Notifier<DanmakuState> {
   DanmakuState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<DanmakuState, DanmakuState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<DanmakuState, DanmakuState>,
         DanmakuState,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -103,13 +103,13 @@ abstract class _$DanmakuChineseModeNotifier
   DanmakuChineseMode build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<DanmakuChineseMode, DanmakuChineseMode>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<DanmakuChineseMode, DanmakuChineseMode>,
         DanmakuChineseMode,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

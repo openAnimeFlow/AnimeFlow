@@ -44,13 +44,13 @@ abstract class _$Releases extends $AsyncNotifier<ReleasesState> {
   FutureOr<ReleasesState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<ReleasesState>, ReleasesState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<ReleasesState>, ReleasesState>,
         AsyncValue<ReleasesState>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

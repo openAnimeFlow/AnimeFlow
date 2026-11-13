@@ -2,7 +2,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/localization/app_localizations_delegates.dart';
 import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoLocalizations;
 import 'package:flutter/widgets.dart';
-import 'package:flutter/cupertino.dart' as flutter_cupertino;
+import 'package:cupertino_ui/cupertino_ui.dart' as flutter_cupertino;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' show MaterialLocalizations;
 

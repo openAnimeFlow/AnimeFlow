@@ -133,7 +133,7 @@ dependencies:
   # 文本与图像处理
   flutter_markdown_plus: ^1.0.12 # 将 Markdown 文本解析并渲染为 Flutter widget。
   image_picker: ^1.2.1 # 从设备相册选择图片或通过相机采集图片。
-  crop_your_image: ^2.0.0 # 在 Flutter 中对图片进行交互式裁剪。
+  crop_your_image: ^2.0.1 # 在 Flutter 中对图片进行交互式裁剪。
 
 dependency_overrides:
   wakelock_plus: 1.8.0

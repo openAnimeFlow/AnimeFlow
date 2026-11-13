@@ -84,7 +84,7 @@ class PlaySession {
 
   String? localDanmakuPath;
 
-  /// 当前播放会话使用的统一播放源，用于重新加载和播放器内核切换时恢复上下文。
+  /// 当前播放会话使用的统一播放源
   PlaybackSource? _currentSource;
 
   /// 记录原始倍速
@@ -206,11 +206,9 @@ class PlaySession {
     }
     if (!force && playbackCoordinator.kernel == target) return true;
 
-    final source = _currentSource;
-
     final state = _readPlayState();
     final snapshot = PlayerSnapshot(
-      source: source,
+      source: _currentSource,
       position: state.position,
       // 系统音量已控制输出响度，重建时不能再叠加到播放器内部音量。
       volume: platform.supportsSystemVolumeSync ? 100.0 : state.volume,
@@ -347,6 +345,10 @@ class PlaySession {
     await _serializePlaybackChange(() async {
       if (_isDisposed) return;
       cancelScheduledStop();
+      if (_currentSource != null) {
+        await playbackProgressManager.save();
+        if (_isDisposed) return;
+      }
       _currentSource = null;
       await playbackCoordinator.stop();
       if (_isDisposed) return;

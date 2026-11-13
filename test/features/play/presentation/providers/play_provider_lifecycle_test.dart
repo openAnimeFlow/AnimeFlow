@@ -101,18 +101,18 @@ void main() {
     // 视频源选择器暂时移除后，页面仍可继续持有播放会话。
     sourceOwner.close();
     await container.pump();
-    expect(container.exists(videoSourceProvider), isFalse);
+    expect(container.read(videoSourceProvider.exists), isFalse);
     expect(engines.single.disposed.isCompleted, isFalse);
 
     sessionOwner.close();
     await container.pump();
     await engines.single.disposed.future;
     await container.pump();
-    expect(container.exists(playSessionProvider), isFalse);
-    expect(container.exists(playStateProvider), isFalse);
-    expect(container.exists(danmakuStateProvider), isFalse);
-    expect(container.exists(videoUiProvider), isFalse);
-    expect(container.exists(episodesProvider), isFalse);
+    expect(container.read(playSessionProvider.exists), isFalse);
+    expect(container.read(playStateProvider.exists), isFalse);
+    expect(container.read(danmakuStateProvider.exists), isFalse);
+    expect(container.read(videoUiProvider.exists), isFalse);
+    expect(container.read(episodesProvider.exists), isFalse);
     expect(engines.single.disposeCount, 1);
   });
 

@@ -192,7 +192,7 @@ void main() {
 
     expect(container.read(animeInfoProvider).requireValue.name, 'updated');
     expect(Storage.subjectCommentsCache.get('42:20:0'), 'cached comments');
-    expect(container.exists(subjectCommentsProvider), isFalse);
+    expect(container.read(subjectCommentsProvider.exists), isFalse);
     expect(remote.requests, hasLength(1));
   });
 

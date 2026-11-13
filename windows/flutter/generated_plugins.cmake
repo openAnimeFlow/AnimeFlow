@@ -7,12 +7,12 @@ list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   file_selector_windows
   flutter_secure_storage_windows
-  flutter_volume_controller
   fvp
   gal
   screen_retriever_windows
   url_launcher_windows
   share_plus
+  volume_controller
   media_kit_video
   webview_windows
   window_manager

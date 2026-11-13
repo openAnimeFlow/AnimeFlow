@@ -6,11 +6,11 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   file_selector_linux
   flutter_secure_storage_linux
-  flutter_volume_controller
   fvp
   open_file_linux
   screen_retriever_linux
   url_launcher_linux
+  volume_controller
   media_kit_video
   window_manager
 )

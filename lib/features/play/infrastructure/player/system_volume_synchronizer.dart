@@ -15,6 +15,8 @@ class SystemVolumeSynchronizer implements PlaybackVolume {
   double? _pendingVolume;
   double? _lastKnownVolume;
   DateTime? _ignoreEventsUntil;
+  StreamSubscription<double>? _volumeSubscription;
+  bool _disposed = false;
 
   bool get isSupported => SystemUtil.supportsSystemVolumeSync;
 
@@ -23,17 +25,21 @@ class SystemVolumeSynchronizer implements PlaybackVolume {
     if (!isSupported) return;
 
     await SystemUtil.configureSystemVolumeSync();
+    if (_disposed) return;
     final systemVolume = await SystemUtil.getSystemVolume();
+    if (_disposed) return;
     if (systemVolume != null) {
       _lastKnownVolume = systemVolume;
       onSystemVolumeChanged(systemVolume * 100);
     }
-    SystemUtil.addSystemVolumeListener(_handleSystemVolumeChanged);
+    if (_disposed) return;
+    _volumeSubscription =
+        SystemUtil.addSystemVolumeListener(_handleSystemVolumeChanged);
   }
 
   @override
   void scheduleSync(double normalizedVolume) {
-    if (!isSupported) return;
+    if (!isSupported || _disposed) return;
 
     _pendingVolume = normalizedVolume.clamp(0.0, 1.0).toDouble();
     if (_syncTimer?.isActive ?? false) return;
@@ -51,13 +57,16 @@ class SystemVolumeSynchronizer implements PlaybackVolume {
 
   @override
   void dispose() {
-    SystemUtil.removeSystemVolumeListener();
+    _disposed = true;
+    unawaited(_volumeSubscription?.cancel());
+    _volumeSubscription = null;
     _syncTimer?.cancel();
     _syncTimer = null;
     _pendingVolume = null;
   }
 
   void _handleSystemVolumeChanged(double volume) {
+    if (_disposed) return;
     final normalized = volume.clamp(0.0, 1.0).toDouble();
     final ignoreUntil = _ignoreEventsUntil;
     if (ignoreUntil != null &&

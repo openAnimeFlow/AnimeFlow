@@ -70,7 +70,11 @@ class _IntroduceViewState extends State<IntroduceView>
         child: PlayerSettingsSheet(
           closeOnMinExtent: true,
           builder: (context, scrollController, isBottomSheet) =>
-              PlayDetailsSheet(scrollController: scrollController),
+              MediaQuery.removePadding(
+                  context: context,
+                  removeLeft: true,
+                  removeTop: true,
+                  child: PlayDetailsSheet(scrollController: scrollController)),
         ),
       );
     } finally {

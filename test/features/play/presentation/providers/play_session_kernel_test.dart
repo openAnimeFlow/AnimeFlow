@@ -179,7 +179,10 @@ void main() {
 
   for (final platform in [
     TargetPlatform.windows,
+    TargetPlatform.macOS,
+    TargetPlatform.linux,
     TargetPlatform.android,
+    TargetPlatform.iOS,
     TargetPlatform.fuchsia,
   ]) {
     test('rebuilding preserves the correct engine volume on $platform',
@@ -196,13 +199,55 @@ void main() {
 
       for (final enabled in [false, true, false]) {
         expect(await session.setHardwareDecoder(enabled), isTrue);
-        expect(factory.engines.last.volume,
-            platform == TargetPlatform.fuchsia ? 35 : 100);
+        expect(
+            factory.engines.last.volume,
+            platform == TargetPlatform.android || platform == TargetPlatform.iOS
+                ? 100
+                : 35);
         expect(state._value.volume, 35);
       }
       expect(await session.switchKernel(PlayerKernel.fvp), isTrue);
-      expect(factory.engines.last.volume,
-          platform == TargetPlatform.fuchsia ? 35 : 100);
+      expect(
+          factory.engines.last.volume,
+          platform == TargetPlatform.android || platform == TargetPlatform.iOS
+              ? 100
+              : 35);
+    });
+  }
+
+  for (final platform in [
+    TargetPlatform.windows,
+    TargetPlatform.macOS,
+    TargetPlatform.linux,
+  ]) {
+    test('volume adjustments do not change system volume on $platform',
+        () async {
+      debugDefaultTargetPlatformOverride = platform;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      const channel = MethodChannel('com.kurenai7968.volume_controller.method');
+      var systemCalls = 0;
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(channel, (_) async {
+        systemCalls++;
+        return 0.5;
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+      final factory = _Factory();
+      final state = _State().._value = const PlayState(volume: 35);
+      final session = _Session(factory, state: state);
+      session.systemVolumeSynchronizer = session.platform.createVolume((_) {});
+      await session.playbackCoordinator.initialize();
+      addTearDown(session.playbackCoordinator.dispose);
+      addTearDown(session.systemVolumeSynchronizer.dispose);
+      await session.systemVolumeSynchronizer.initialize();
+      session.adjustVolumeByWheel(10);
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+
+      expect(state._value.volume, 45);
+      expect(factory.engines.last.volume, 45);
+      expect(systemCalls, 0);
     });
   }
 
@@ -572,6 +617,11 @@ class _Settings implements Box<dynamic> {
 
 class _State implements PlayStateActions {
   PlayState _value = const PlayState(playing: true);
+  @override
+  void setVolume(double volume) {
+    _value = _value.copyWith(volume: volume);
+  }
+
   @override
   void setUpscalePreset(UpscalePreset preset) {
     _value = _value.copyWith(upscalePreset: preset);

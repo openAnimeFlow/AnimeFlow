@@ -101,8 +101,7 @@ class SystemUtil {
   }
 
   /// 是否支持系统音量同步
-  static bool get supportsSystemVolumeSync =>
-      !kIsWeb && (isMobile || isDesktop);
+  static bool get supportsSystemVolumeSync => !kIsWeb && isMobile;
 
   ///判断系统是否深色主题
   static bool isDarkTheme(BuildContext context) {

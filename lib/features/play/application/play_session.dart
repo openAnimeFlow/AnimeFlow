@@ -115,6 +115,8 @@ class PlaySession {
   /// 拖动进度条前的播放状态，空表示当前没有进行中的拖动。
   bool? _resumeAfterManualSeek;
 
+  int _playRequestId = 0;
+
   bool _isPlayerBuffering = false;
   StreamSubscription<PlayerEvent>? _playerSubscription;
   bool _isDisposed = false;
@@ -333,28 +335,8 @@ class PlaySession {
     unawaited(playbackCoordinator.pause());
   }
 
-  int _playRequestId = 0;
   bool _isCurrentPlayRequest(int requestId) =>
       !_isDisposed && requestId == _playRequestId;
-
-  Future<void> stopCurrentMedia() async {
-    _playRequestId++;
-    _clearPendingSeek();
-    _resumeAfterManualSeek = null;
-    danmaku.beginPlaybackChange();
-    await _serializePlaybackChange(() async {
-      if (_isDisposed) return;
-      cancelScheduledStop();
-      if (_currentSource != null) {
-        await playbackProgressManager.save();
-        if (_isDisposed) return;
-      }
-      _currentSource = null;
-      await playbackCoordinator.stop();
-      if (_isDisposed) return;
-      danmaku.clearCanvas();
-    });
-  }
 
   /// 初始化播放状态
   Future<void> initPlayState(PlayRequest state) async {
@@ -696,5 +678,20 @@ class PlaySession {
 
   Future<Uint8List?> takeScreenshot() => playbackCoordinator.screenshot();
 
-  Future<void> stop() => stopCurrentMedia();
+  Future<void> stop() async {
+    _playRequestId++;
+    _clearPendingSeek();
+    _resumeAfterManualSeek = null;
+    danmaku.beginPlaybackChange();
+    await _serializePlaybackChange(() async {
+      if (_isDisposed) return;
+      cancelScheduledStop();
+      final savingProgress =
+          _currentSource != null ? playbackProgressManager.save() : null;
+      _currentSource = null;
+      await playbackCoordinator.stop();
+      if (!_isDisposed) danmaku.clearCanvas();
+      await savingProgress;
+    });
+  }
 }

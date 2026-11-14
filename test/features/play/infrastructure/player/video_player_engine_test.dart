@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/infrastructure/player/video_player/video_player_engine.dart';
-import 'package:anime_flow/features/play/infrastructure/player/video_player/android_upscale_shaders.dart';
+import 'package:anime_flow/features/play/infrastructure/player/video_player/video_player_upscale_shaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -77,25 +77,43 @@ void main() {
         VideoEffectType.shaderBundle);
   });
 
-  test('iOS retains normal playback and does not expose Android effects',
+  test('iOS opts in and supplies Metal shaders across player replacement',
       () async {
     await engine.dispose();
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     engine = VideoPlayerEngine();
     await engine.initialize();
-    expect(engine.capabilities.supportsUpscaling, isFalse);
+    expect(engine.capabilities.supportsUpscaling, isTrue);
+    await engine.setUpscalePreset(UpscalePreset.efficiency);
+    await engine.open(source);
+    await engine.open(source);
+    for (final creation in platform.created) {
+      final effect = creation.videoPlayerOptions!.videoEffects!;
+      expect(effect.effect, VideoEffectType.shaderBundle);
+      expect(effect.shaderBundle!.encoded, contains('videoFragment'));
+      expect(effect.shaderBundle!.encoded, isNot(contains('#version 300 es')));
+    }
     await engine.setUpscalePreset(UpscalePreset.off);
+    expect(platform.effects.last, VideoEffectType.none);
+  });
+
+  test('macOS retains normal playback without exposing native effects',
+      () async {
+    await engine.dispose();
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    engine = VideoPlayerEngine();
+    await engine.initialize();
+    expect(engine.capabilities.supportsUpscaling, isFalse);
     await engine.open(source);
     expect(platform.created.single.videoPlayerOptions?.videoEffects, isNull);
     await expectLater(engine.setUpscalePreset(UpscalePreset.efficiency),
         throwsUnsupportedError);
-    expect(platform.effects, isEmpty);
   });
 
   testWidgets(
       'physical fitted output survives toggles and follows layout changes',
       (tester) async {
-    await tester.runAsync(AndroidUpscaleShaders.loadEfficiency);
+    await tester.runAsync(VideoPlayerUpscaleShaders.loadEfficiency);
     await engine.open(source);
     Widget view(double width) => MediaQuery(
           data: const MediaQueryData(devicePixelRatio: 3),

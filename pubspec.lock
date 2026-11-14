@@ -1918,12 +1918,11 @@ packages:
     source: path
     version: "2.12.2"
   video_player_avfoundation:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: video_player_avfoundation
-      sha256: "436fd029bd1c1e303b2d95ebd76948893f3c28dab286e7235ba9dd7b22533bf0"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/video_player_avfoundation"
+      relative: true
+    source: path
     version: "2.11.1"
   video_player_platform_interface:
     dependency: "direct dev"

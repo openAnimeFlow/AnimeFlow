@@ -593,9 +593,12 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   Future<void> initialize() async {
     if (videoPlayerOptions?.videoEffects != null &&
         (kIsWeb ||
-            defaultTargetPlatform != TargetPlatform.android ||
+            (defaultTargetPlatform != TargetPlatform.android &&
+                defaultTargetPlatform != TargetPlatform.iOS) ||
             viewType != platform_interface.VideoViewType.textureView)) {
-      throw UnsupportedError('Video effects require Android texture playback');
+      throw UnsupportedError(
+        'Video effects require Android or iOS texture playback',
+      );
     }
     final bool allowBackgroundPlayback =
         videoPlayerOptions?.allowBackgroundPlayback ?? false;
@@ -901,7 +904,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     _updatePosition(position);
   }
 
-  /// Updates an Android texture player's GPU effect without recreating playback.
+  /// Updates an Android/iOS texture player's GPU effect without recreating playback.
   ///
   /// Opt in using VideoPlayerOptions.videoEffects before initialize(). This
   /// future acknowledges configuration submission, not GPU rendering completion;

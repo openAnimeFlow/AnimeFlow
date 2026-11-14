@@ -97,11 +97,24 @@ void main() {
   test(
     'unsupported platforms reject opt-in before allocating a player',
     () async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
       final player = controller(initial: gray);
       await expectLater(player.initialize(), throwsUnsupportedError);
       await player.dispose();
       expect(platform.videoPlayerOptions, isEmpty);
+    },
+  );
+
+  test(
+    'iOS passes initial configuration and permits runtime effects',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final player = controller();
+      addTearDown(player.dispose);
+      await player.initialize();
+      await player.setVideoEffectConfiguration(gray);
+      expect(platform.videoPlayerOptions.single!.videoEffects, off);
+      expect(platform.effects[player.playerId], gray);
     },
   );
 }

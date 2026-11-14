@@ -100,7 +100,7 @@ abstract class VideoPlayerPlatform extends PlatformInterface {
   /// Updates an opted-in player's GPU effect configuration.
   ///
   /// Backends without effect support reject updates instead of silently ignoring
-  /// them. Initial support is limited to Android texture playback.
+  /// them. Support is limited to Android and iOS texture playback.
   Future<void> setVideoEffectConfiguration(
     int playerId,
     VideoEffectConfiguration configuration,
@@ -488,15 +488,16 @@ enum VideoEffectType {
   none,
   debugGrayscale,
 
-  /// An application-supplied GLES 3 multi-pass bundle (SDR only).
+  /// An application-supplied multi-pass bundle (SDR only).
   shaderBundle,
 }
 
 /// Immutable, self-contained shader bundle. No native filesystem paths are used.
 ///
 /// [manifest] is a JSON array of pass descriptors; [shaders] maps each pass's
-/// `asset` identifier to GLES 3 fragment source. See SHADER_BUNDLES.md in the
-/// Android implementation for the version 1 execution contract.
+/// `asset` identifier to platform-specific fragment source: GLES 3 on Android,
+/// Metal on iOS. The application selects the matching bundle for its backend.
+/// See the AVFoundation fork's SHADER_BUNDLES.md for the Metal binding contract.
 @immutable
 class VideoShaderBundle {
   VideoShaderBundle({
@@ -632,7 +633,7 @@ class VideoPlayerOptions {
   /// Ignored on platforms that do not support controlling the back buffer.
   final int? backBufferDurationMs;
 
-  /// Initial Android texture GPU effects, applied before prepare.
+  /// Initial Android/iOS texture GPU effects, applied during player creation.
   ///
   /// Null disables the effect pipeline for this player. A non-null configuration
   /// requires a supporting backend and allows later runtime updates.

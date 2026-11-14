@@ -136,11 +136,13 @@ dependencies:
   crop_your_image: ^2.0.1 # 在 Flutter 中对图片进行交互式裁剪。
 
 dependency_overrides:
-  # Local video effect bridge; keep these three packages in sync.
+  # Local video effect bridge; keep these packages in sync.
   video_player:
     path: packages/video_player
   video_player_android:
     path: packages/video_player_android
+  video_player_avfoundation:
+    path: packages/video_player_avfoundation
   video_player_platform_interface:
     path: packages/video_player_platform_interface
   wakelock_plus: 1.8.0
@@ -209,8 +211,9 @@ flutter:
     - LICENSE.txt
     - assets/icons/
     - assets/plugins/
-    - assets/shaders/
-    - assets/shaders/android/
+    - assets/shaders/media_kit/common/
+    - assets/shaders/video_player/android/
+    - assets/shaders/video_player/ios/
     - assets/animation/
     - assets/image/
     - assets/network/ligg-candidates.txt

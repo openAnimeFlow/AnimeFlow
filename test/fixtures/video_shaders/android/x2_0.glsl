@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// Generated from assets/shaders/Anime4K_Upscale_CNN_x2_S.glsl. Do not edit.
+// Generated from assets/shaders/media_kit/common/Anime4K_Upscale_CNN_x2_S.glsl. Do not edit.
 // Anime4K-v3.2-Upscale-CNN-x2-(S)-Conv-4x3x3x3
 precision highp float;
 in vec2 vTexCoord;

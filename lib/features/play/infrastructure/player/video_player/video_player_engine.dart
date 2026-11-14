@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'android_upscale_shaders.dart';
+import 'video_player_upscale_shaders.dart';
 import 'package:anime_flow/core/async/serial_operation_queue.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
@@ -15,11 +15,14 @@ import 'package:video_player/video_player.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 
 class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
-  /// Android 默认启用 GPU 管线，超分效果由 [setUpscalePreset] 控制。
+  /// Android/iOS 默认启用 GPU 管线，超分效果由 [setUpscalePreset] 控制。
   VideoPlayerEngine()
-      : _videoEffects = defaultTargetPlatform == TargetPlatform.android
-            ? const VideoEffectConfiguration()
-            : null;
+      : _videoEffects =
+            _supportsVideoEffects ? const VideoEffectConfiguration() : null;
+
+  static bool get _supportsVideoEffects =>
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS;
 
   VideoEffectConfiguration? _videoEffects;
   VideoPlayerController? _pendingSurfaceController;
@@ -43,9 +46,8 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
   PlayerKernel get kernel => PlayerKernel.videoPlayer;
   @override
   PlayerCapabilities get capabilities => PlayerCapabilities(
-        supportedUpscalePresets: defaultTargetPlatform == TargetPlatform.android
-            ? const {UpscalePreset.efficiency}
-            : const {},
+        supportedUpscalePresets:
+            _supportsVideoEffects ? const {UpscalePreset.efficiency} : const {},
       );
   @override
   Stream<PlayerEvent> get events => _events.stream;
@@ -217,8 +219,8 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
   Future<void> setVideoEffectConfiguration(
           VideoEffectConfiguration configuration) =>
       _operations.run(() async {
-        if (defaultTargetPlatform != TargetPlatform.android) {
-          throw UnsupportedError('Video effects require Android');
+        if (!_supportsVideoEffects) {
+          throw UnsupportedError('Video effects require Android or iOS');
         }
         final controller = _controller.value;
         if (controller != null) {
@@ -235,13 +237,13 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
           throw UnsupportedError(
               'Video Player does not support this upscale preset');
         }
-        if (defaultTargetPlatform != TargetPlatform.android) return;
+        if (!_supportsVideoEffects) return;
         final configuration = VideoEffectConfiguration(
           effect: preset == UpscalePreset.efficiency
               ? VideoEffectType.shaderBundle
               : VideoEffectType.none,
           shaderBundle: preset == UpscalePreset.efficiency
-              ? await AndroidUpscaleShaders.loadEfficiency()
+              ? await VideoPlayerUpscaleShaders.loadEfficiency()
               : null,
           outputWidth: _videoEffects?.outputWidth,
           outputHeight: _videoEffects?.outputHeight,

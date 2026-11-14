@@ -13,8 +13,14 @@ should add it to your `pubspec.yaml` as usual.
 
 ## Local GPU extension
 
-This fork supports [application-supplied shader bundles](SHADER_BUNDLES.md) for
+This fork supports application-supplied shader bundles for
 Android texture playback. Algorithms and preset resources belong to the caller.
+
+Native shader tests use synthetic fixtures in `android/src/testSupport`,
+`android/src/test` and `android/src/androidTest`. They require no host application
+assets. Run `:video_player_android:testDebugUnitTest` and
+`:video_player_android:connectedDebugAndroidTest` from a Flutter Android host that
+depends on this package. Preset-specific integration tests belong to that host.
 
 ## Known issues
 

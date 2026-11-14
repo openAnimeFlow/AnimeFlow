@@ -9,8 +9,9 @@ void main(List<String> arguments) {
 }
 
 void generateEfficiency(bool check, {bool x2 = false}) {
-  final output =
-      x2 ? 'test/fixtures/video_shaders/android' : 'assets/shaders/android';
+  final output = x2
+      ? 'test/fixtures/video_shaders/android'
+      : 'assets/shaders/video_player/android';
   // Read the MPV preset itself so its file order cannot silently diverge.
   final preset = File(
           'lib/features/play/infrastructure/player/media_kit/mpv_upscale_shaders.dart')
@@ -30,7 +31,7 @@ void generateEfficiency(bool check, {bool x2 = false}) {
   final prefix = x2 ? 'x2' : 'efficiency';
   final passes = <Map<String, Object>>[];
   for (final name in names) {
-    final source = File('assets/shaders/$name')
+    final source = File('assets/shaders/media_kit/common/$name')
         .readAsStringSync()
         .replaceAll('\r\n', '\n');
     final sections = source.split('//!DESC ');
@@ -88,7 +89,7 @@ void generateEfficiency(bool check, {bool x2 = false}) {
           '''#version 300 es
 $license
 
-// Generated from assets/shaders/$name. Do not edit.
+// Generated from assets/shaders/media_kit/common/$name. Do not edit.
 // ${lines.first}
 precision highp float;
 in vec2 vTexCoord;
@@ -129,7 +130,7 @@ void writeGenerated(String path, String contents, bool check) {
   if (check) {
     if (!file.existsSync() ||
         file.readAsStringSync().replaceAll('\r\n', '\n') != contents) {
-      throw StateError('$path is stale; regenerate Android Anime4K assets');
+      throw StateError('$path is stale; rerun its shader asset generator');
     }
   } else {
     file.parent.createSync(recursive: true);

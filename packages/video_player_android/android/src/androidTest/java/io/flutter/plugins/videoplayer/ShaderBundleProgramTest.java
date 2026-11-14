@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-/** Real-GL regressions for external shaders, independent of the Anime4K preset. */
+/** Real-GL regressions for external shaders, using only package-owned synthetic fixtures. */
 @RunWith(AndroidJUnit4.class)
 public class ShaderBundleProgramTest {
   private EGLDisplay display;

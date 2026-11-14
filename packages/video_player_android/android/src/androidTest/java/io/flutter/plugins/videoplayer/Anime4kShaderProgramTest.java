@@ -29,9 +29,53 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class Anime4kShaderProgramTest {
   @Test
+  public void externalSourceReplacementAndSkippedPassesUseCurrentBundle() throws Exception {
+    Context context = InstrumentationRegistry.getInstrumentation().getContext();
+    EGLDisplay display = GlUtil.getDefaultEglDisplay();
+    EGLContext eglContext = GlUtil.createEglContext(EGL14.EGL_NO_CONTEXT, display, 3, GlUtil.EGL_CONFIG_ATTRIBUTES_RGBA_8888);
+    EGLSurface surface = GlUtil.createFocusedPlaceholderEglSurface(eglContext, display);
+    SwitchableVideoEffect effect = new SwitchableVideoEffect(PlatformVideoEffect.NONE);
+    GlShaderProgram program = effect.toGlShaderProgram(context, false);
+    GlObjectsProvider provider = new DefaultGlObjectsProvider();
+    GlTextureInfo input = provider.createBuffersForTexture(GlUtil.createTexture(2, 2, false), 2, 2);
+    GlTextureInfo[] frame = {null};
+    program.setOutputListener(new GlShaderProgram.OutputListener() {
+      @Override public void onOutputFrameAvailable(GlTextureInfo output, long timeUs) { frame[0] = output; }
+    });
+    program.setErrorListener(Runnable::run, error -> { throw new AssertionError(error); });
+    try {
+      GlUtil.focusFramebufferUsingCurrentContext(input.fboId, 2, 2);
+      GLES20.glClearColor(0, 0, 1, 1);
+      GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+      for (int mode = 0; mode < 4; mode++) {
+        org.json.JSONObject json = new org.json.JSONObject(ShaderFixtures.copy());
+        json.getJSONObject("shaders").put("copy", json.getJSONObject("shaders").getString("copy")
+            .replace("vec4(1.0)", mode == 0 ? "vec4(1.0,0.0,0.0,1.0)" : "vec4(0.0,1.0,0.0,1.0)"));
+        if (mode == 2) json.getJSONArray("passes").getJSONObject(0).put("when", "0");
+        effect.setConfiguration(mode == 3 ? PlatformVideoEffect.NONE : PlatformVideoEffect.SHADER_BUNDLE,
+            2, 2, mode == 3 ? null : new ShaderBundle(json.toString()));
+        program.queueInputFrame(provider, input, mode);
+        assertNotNull(frame[0]);
+        GlUtil.focusFramebufferUsingCurrentContext(frame[0].fboId, 2, 2);
+        ByteBuffer pixels = ByteBuffer.allocateDirect(16);
+        GLES20.glReadPixels(0, 0, 2, 2, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, pixels);
+        for (int c = 0; c < 3; c++) assertEquals(c == Math.min(mode, 2) ? 255 : 0, pixels.get(c) & 255);
+        program.releaseOutputFrame(frame[0]);
+        frame[0] = null;
+      }
+    } finally {
+      program.release();
+      input.release();
+      GlUtil.destroyEglSurface(display, surface);
+      GlUtil.destroyEglContext(display, eglContext);
+      EGL14.eglTerminate(display);
+    }
+  }
+
+  @Test
   public void frameBoundarySwitchesPreservePixelsAndBackpressureAcrossFlushAndResize()
       throws Exception {
-    Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+    Context context = InstrumentationRegistry.getInstrumentation().getContext();
     EGLDisplay display = GlUtil.getDefaultEglDisplay();
     EGLContext eglContext =
         GlUtil.createEglContext(
@@ -89,7 +133,7 @@ public class Anime4kShaderProgramTest {
           features =
               convolve(
                   features,
-                  Util.loadAsset(context, "animeflow/anime4k/cnn_x2_s_" + pass + ".glsl"),
+                  Util.loadAsset(context, "x2_" + pass + ".glsl"),
                   pass == 0);
         int texture = GlUtil.createTexture(width, height, false);
         GlTextureInfo inputTexture = provider.createBuffersForTexture(texture, width, height);
@@ -110,9 +154,9 @@ public class Anime4kShaderProgramTest {
                 i % 3 == 0
                     ? PlatformVideoEffect.NONE
                     : i % 3 == 1
-                        ? PlatformVideoEffect.ANIME4K_X2S
+                        ? PlatformVideoEffect.SHADER_BUNDLE
                         : PlatformVideoEffect.DEBUG_GRAYSCALE;
-            effect.setEffect(selected);
+            effect.setConfiguration(selected, selected == PlatformVideoEffect.SHADER_BUNDLE ? width * 2 : width, selected == PlatformVideoEffect.SHADER_BUNDLE ? height * 2 : height, selected == PlatformVideoEffect.SHADER_BUNDLE ? ShaderFixtures.load(context, "x2") : null);
             int available = ready[0];
             int consumed = processed[0];
             frame[0] = null;
@@ -120,7 +164,7 @@ public class Anime4kShaderProgramTest {
             assertEquals(consumed + 1, processed[0]);
             assertEquals("No new input while the output is in use", available, ready[0]);
             assertNotNull(frame[0]);
-            boolean upscale = selected == PlatformVideoEffect.ANIME4K_X2S;
+            boolean upscale = selected == PlatformVideoEffect.SHADER_BUNDLE;
             int outWidth = width * (upscale ? 2 : 1);
             int outHeight = height * (upscale ? 2 : 1);
             assertEquals(outWidth, frame[0].width);
@@ -173,7 +217,7 @@ public class Anime4kShaderProgramTest {
 
   @Test
   public void gpuMatchesCpuModelAcrossResizeAndFreshProgram() throws Exception {
-    Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+    Context context = InstrumentationRegistry.getInstrumentation().getContext();
     EGLDisplay display = GlUtil.getDefaultEglDisplay();
     EGLContext eglContext =
         GlUtil.createEglContext(
@@ -181,7 +225,7 @@ public class Anime4kShaderProgramTest {
     EGLSurface surface = GlUtil.createFocusedPlaceholderEglSurface(eglContext, display);
     try {
       for (int instance = 0; instance < 2; instance++) {
-        Anime4kShaderProgram program = new Anime4kShaderProgram(context);
+        ShaderBundleProgram program = new ShaderBundleProgram(ShaderFixtures.load(context, "x2"));
         try {
           checkPixels(context, program, 8, 6);
           checkPixels(context, program, 7, 5);
@@ -196,7 +240,7 @@ public class Anime4kShaderProgramTest {
     }
   }
 
-  private void checkPixels(Context context, Anime4kShaderProgram program, int width, int height)
+  private void checkPixels(Context context, ShaderBundleProgram program, int width, int height)
       throws Exception {
     float[][][] input = new float[height][width][4];
     ByteBuffer bytes = ByteBuffer.allocateDirect(width * height * 4);
@@ -217,7 +261,7 @@ public class Anime4kShaderProgramTest {
       features =
           convolve(
               features,
-              Util.loadAsset(context, "animeflow/anime4k/cnn_x2_s_" + pass + ".glsl"),
+              Util.loadAsset(context, "x2_" + pass + ".glsl"),
               pass == 0);
     }
 
@@ -236,11 +280,11 @@ public class Anime4kShaderProgramTest {
           GLES20.GL_RGBA,
           GLES20.GL_UNSIGNED_BYTE,
           bytes);
-      assertEquals(new Size(width * 2, height * 2), program.configure(width, height));
+
       outputTexture = GlUtil.createTexture(width * 2, height * 2, false);
       outputFbo = GlUtil.createFboForTexture(outputTexture);
       GlUtil.focusFramebufferUsingCurrentContext(outputFbo, width * 2, height * 2);
-      program.drawFrame(inputTexture, 0);
+      program.draw(inputTexture, width, height, width * 2, height * 2, 0);
       ByteBuffer output = ByteBuffer.allocateDirect(width * height * 16);
       GLES20.glReadPixels(
           0, 0, width * 2, height * 2, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, output);

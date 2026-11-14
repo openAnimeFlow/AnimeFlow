@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-
+import 'android_upscale_shaders.dart';
 import 'package:anime_flow/core/async/serial_operation_queue.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
@@ -128,6 +128,7 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
         if (target != _controller.value || _videoEffects == null) return;
         final configuration = VideoEffectConfiguration(
           effect: _videoEffects!.effect,
+          shaderBundle: _videoEffects!.shaderBundle,
           outputWidth: output.width.toInt(),
           outputHeight: output.height.toInt(),
         );
@@ -237,8 +238,11 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
         if (defaultTargetPlatform != TargetPlatform.android) return;
         final configuration = VideoEffectConfiguration(
           effect: preset == UpscalePreset.efficiency
-              ? VideoEffectType.anime4kEfficiency
+              ? VideoEffectType.shaderBundle
               : VideoEffectType.none,
+          shaderBundle: preset == UpscalePreset.efficiency
+              ? await AndroidUpscaleShaders.loadEfficiency()
+              : null,
           outputWidth: _videoEffects?.outputWidth,
           outputHeight: _videoEffects?.outputHeight,
         );

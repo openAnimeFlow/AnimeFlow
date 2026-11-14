@@ -11,6 +11,11 @@ so you do not need to add it to your `pubspec.yaml`.
 However, if you `import` this package to use any of its APIs directly, you
 should add it to your `pubspec.yaml` as usual.
 
+## Local GPU extension
+
+This fork supports [application-supplied shader bundles](SHADER_BUNDLES.md) for
+Android texture playback. Algorithms and preset resources belong to the caller.
+
 ## Known issues
 
 Using `VideoViewType.platformView` is not currently recommended on Android due to a known [issue][3] affecting platform views on Android.

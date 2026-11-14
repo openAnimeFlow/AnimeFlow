@@ -210,6 +210,7 @@ flutter:
     - assets/icons/
     - assets/plugins/
     - assets/shaders/
+    - assets/shaders/android/
     - assets/animation/
     - assets/image/
     - assets/network/ligg-candidates.txt

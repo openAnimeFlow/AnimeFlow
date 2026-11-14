@@ -93,6 +93,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi {
     VideoPlayerOptions playerOptions = new VideoPlayerOptions(sharedOptions);
     playerOptions.backBufferDurationMs = options.getBackBufferDurationMs();
     playerOptions.videoEffect = options.getVideoEffect();
+    playerOptions.videoShaderBundle = options.getVideoShaderBundle();
 
     VideoPlayer videoPlayer =
         PlatformViewVideoPlayer.create(
@@ -116,6 +117,7 @@ public class VideoPlayerPlugin implements FlutterPlugin, AndroidVideoPlayerApi {
     VideoPlayerOptions playerOptions = new VideoPlayerOptions(sharedOptions);
     playerOptions.backBufferDurationMs = options.getBackBufferDurationMs();
     playerOptions.videoEffect = options.getVideoEffect();
+    playerOptions.videoShaderBundle = options.getVideoShaderBundle();
     playerOptions.videoEffectOutputWidth = options.getVideoEffectOutputWidth();
     playerOptions.videoEffectOutputHeight = options.getVideoEffectOutputHeight();
 

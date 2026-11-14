@@ -157,33 +157,35 @@ public class VideoEffectPipelineTest {
   }
 
   @Test
-  public void anime4kDoublesOutputAndOffRestoresOriginalSize() {
+  public void bundleUsesExplicitOutputAndClearingSizeRestoresOriginal() {
     VideoEffectPipeline pipeline =
         new VideoEffectPipeline(player, surface, PlatformVideoEffect.NONE);
     pipeline.onSurfaceAvailable();
     inputSize(pipeline, 640, 360, 0);
     clearInvocations(surface, message, player);
-    pipeline.setEffect(PlatformVideoEffect.ANIME4K_X2S);
+    pipeline.setEffect(PlatformVideoEffect.SHADER_BUNDLE, 1280L, 720L, ShaderFixtures.copy());
     verify(player, never()).setVideoEffects(anyList());
     verify(surface).setSize(1280, 720);
     verify(message).setPayload(new Size(1280, 720));
     clearInvocations(surface, message);
-    pipeline.setEffect(PlatformVideoEffect.NONE);
+    pipeline.setEffect(PlatformVideoEffect.NONE, null, null);
     verify(surface).setSize(640, 360);
     verify(message).setPayload(new Size(640, 360));
     pipeline.dispose();
   }
 
   @Test
-  public void anime4kKeepsScaledRotatedSizeAcrossSurfaceRecreationAndFormatChanges() {
+  public void bundleKeepsRequestedSizeAcrossSurfaceRecreationAndFormatChanges() {
     VideoEffectPipeline pipeline =
-        new VideoEffectPipeline(player, surface, PlatformVideoEffect.ANIME4K_X2S);
+        new VideoEffectPipeline(player, surface, PlatformVideoEffect.NONE);
+    pipeline.setEffect(PlatformVideoEffect.SHADER_BUNDLE, 720L, 1280L, ShaderFixtures.copy());
     pipeline.onSurfaceAvailable();
     inputSize(pipeline, 640, 360, 90);
     verify(surface).setSize(720, 1280);
     pipeline.onSurfaceCleanup();
     clearInvocations(surface, message);
     inputSize(pipeline, 1280, 720, 90);
+    pipeline.setEffect(PlatformVideoEffect.SHADER_BUNDLE, 1440L, 2560L, ShaderFixtures.copy());
     verifyNoInteractions(surface, message);
     pipeline.onSurfaceAvailable();
     verify(surface).setSize(1440, 2560);
@@ -201,7 +203,7 @@ public class VideoEffectPipelineTest {
     pipeline.setEffect(PlatformVideoEffect.NONE);
     verifyNoInteractions(player, surface, message);
     for (int i = 0; i < 40; i++) {
-      pipeline.setEffect(i % 2 == 0 ? PlatformVideoEffect.ANIME4K_X2S : PlatformVideoEffect.NONE);
+      pipeline.setEffect(i % 2 == 0 ? PlatformVideoEffect.SHADER_BUNDLE : PlatformVideoEffect.NONE, null, null, i % 2 == 0 ? ShaderFixtures.copy() : null);
     }
     verify(player, never()).setVideoEffects(anyList());
     assertEquals(
@@ -211,7 +213,7 @@ public class VideoEffectPipelineTest {
   }
 
   @Test
-  public void hdrRejectsAnime4kWithoutChangingTheExistingPipeline() {
+  public void hdrRejectsCustomBundleWithoutChangingTheExistingPipeline() {
     VideoEffectPipeline pipeline =
         new VideoEffectPipeline(player, surface, PlatformVideoEffect.NONE);
     pipeline.onSurfaceAvailable();
@@ -230,7 +232,7 @@ public class VideoEffectPipelineTest {
         null);
     clearInvocations(player, surface, message);
     assertThrows(
-        IllegalArgumentException.class, () -> pipeline.setEffect(PlatformVideoEffect.ANIME4K_X2S));
+        IllegalArgumentException.class, () -> pipeline.setEffect(PlatformVideoEffect.SHADER_BUNDLE, null, null, ShaderFixtures.copy()));
     verifyNoInteractions(player, surface, message);
     pipeline.dispose();
   }
@@ -250,17 +252,17 @@ public class VideoEffectPipelineTest {
   }
 
   @Test
-  public void efficiencyAndOffShareThePhysicalViewportWithoutReplacingSurface() {
+  public void bundleAndOffShareThePhysicalViewportWithoutReplacingSurface() {
     VideoEffectPipeline pipeline =
         new VideoEffectPipeline(player, surface, PlatformVideoEffect.NONE);
     pipeline.onSurfaceAvailable();
     inputSize(pipeline, 640, 360, 0);
     pipeline.setEffect(PlatformVideoEffect.NONE, 1080L, 608L);
     clearInvocations(player, surface, message);
-    pipeline.setEffect(PlatformVideoEffect.ANIME4K_EFFICIENCY, 1080L, 608L);
+    pipeline.setEffect(PlatformVideoEffect.SHADER_BUNDLE, 1080L, 608L, ShaderFixtures.copy());
     pipeline.setEffect(PlatformVideoEffect.NONE, 1080L, 608L);
     verifyNoInteractions(player, surface, message);
-    pipeline.setEffect(PlatformVideoEffect.ANIME4K_EFFICIENCY, 1920L, 1080L);
+    pipeline.setEffect(PlatformVideoEffect.SHADER_BUNDLE, 1920L, 1080L, ShaderFixtures.copy());
     verify(surface).setSize(1920, 1080);
     verify(player, never()).setVideoEffects(anyList());
     pipeline.dispose();
@@ -273,10 +275,10 @@ public class VideoEffectPipelineTest {
     clearInvocations(player, surface, message);
     assertThrows(
         IllegalArgumentException.class,
-        () -> pipeline.setEffect(PlatformVideoEffect.ANIME4K_EFFICIENCY, 100L, null));
+        () -> pipeline.setEffect(PlatformVideoEffect.SHADER_BUNDLE, 100L, null, ShaderFixtures.copy()));
     assertThrows(
         IllegalArgumentException.class,
-        () -> pipeline.setEffect(PlatformVideoEffect.ANIME4K_EFFICIENCY, -1L, 100L));
+        () -> pipeline.setEffect(PlatformVideoEffect.SHADER_BUNDLE, -1L, 100L, ShaderFixtures.copy()));
     verifyNoInteractions(player, surface, message);
     pipeline.dispose();
   }

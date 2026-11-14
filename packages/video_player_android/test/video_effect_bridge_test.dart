@@ -55,9 +55,14 @@ void main() {
       ]);
       await player.setVideoEffectConfiguration(2, gray);
       verify(
-        apis[2]!.setVideoEffect(PlatformVideoEffect.debugGrayscale, null, null),
+        apis[2]!.setVideoEffect(
+          PlatformVideoEffect.debugGrayscale,
+          null,
+          null,
+          null,
+        ),
       ).called(1);
-      verifyNever(apis[1]!.setVideoEffect(any, any, any));
+      verifyNever(apis[1]!.setVideoEffect(any, any, any, any));
       await player.dispose(1);
       await player.dispose(2);
       for (final stream in streams.values) {

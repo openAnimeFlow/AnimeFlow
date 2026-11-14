@@ -69,6 +69,12 @@ android {
         androidTestImplementation("androidx.test.ext:junit:1.3.0")
     }
 
+    sourceSets.getByName("test").resources.srcDir("../../../assets/shaders/android")
+    sourceSets.getByName("androidTest").assets.srcDir("../../../assets/shaders/android")
+    sourceSets.getByName("androidTest").assets.srcDir("../../../test/fixtures/video_shaders/android")
+    sourceSets.getByName("test").java.srcDir("src/testSupport/java")
+    sourceSets.getByName("androidTest").java.srcDir("src/testSupport/java")
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true

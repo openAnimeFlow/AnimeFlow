@@ -118,6 +118,8 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
       videoEffect: options.videoPlayerOptions?.videoEffects == null
           ? null
           : _platformVideoEffect(options.videoPlayerOptions!.videoEffects!),
+      videoShaderBundle:
+          options.videoPlayerOptions?.videoEffects?.shaderBundle?.encoded,
       videoEffectOutputWidth:
           options.videoPlayerOptions?.videoEffects?.outputWidth,
       videoEffectOutputHeight:
@@ -208,17 +210,25 @@ class AndroidVideoPlayer extends VideoPlayerPlatform {
       _platformVideoEffect(configuration),
       configuration.outputWidth,
       configuration.outputHeight,
+      configuration.shaderBundle?.encoded,
     );
   }
 
   PlatformVideoEffect _platformVideoEffect(
     VideoEffectConfiguration configuration,
-  ) => switch (configuration.effect) {
-    VideoEffectType.none => PlatformVideoEffect.none,
-    VideoEffectType.debugGrayscale => PlatformVideoEffect.debugGrayscale,
-    VideoEffectType.anime4kX2S => PlatformVideoEffect.anime4kX2S,
-    VideoEffectType.anime4kEfficiency => PlatformVideoEffect.anime4kEfficiency,
-  };
+  ) {
+    if ((configuration.effect == VideoEffectType.shaderBundle) !=
+        (configuration.shaderBundle != null)) {
+      throw ArgumentError(
+        "shaderBundle must be provided exactly for the shaderBundle effect",
+      );
+    }
+    return switch (configuration.effect) {
+      VideoEffectType.none => PlatformVideoEffect.none,
+      VideoEffectType.debugGrayscale => PlatformVideoEffect.debugGrayscale,
+      VideoEffectType.shaderBundle => PlatformVideoEffect.shaderBundle,
+    };
+  }
 
   @override
   Future<void> seekTo(int playerId, Duration position) {
@@ -423,7 +433,8 @@ class _PlayerInstance {
     PlatformVideoEffect effect,
     int? outputWidth,
     int? outputHeight,
-  ) => _api.setVideoEffect(effect, outputWidth, outputHeight);
+    String? shaderBundle,
+  ) => _api.setVideoEffect(effect, outputWidth, outputHeight, shaderBundle);
 
   Future<void> seekTo(Duration position) {
     return _api.seekTo(position.inMilliseconds);

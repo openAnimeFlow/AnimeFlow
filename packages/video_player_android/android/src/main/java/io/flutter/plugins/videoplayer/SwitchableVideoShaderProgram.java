@@ -24,12 +24,10 @@ final class SwitchableVideoShaderProgram implements GlShaderProgram {
   private final boolean useHdr;
   private final SwitchableVideoEffect configuration;
   private final GlProgram copyProgram;
-  @Nullable private Anime4kShaderProgram anime4k;
-  @Nullable private Anime4kEfficiencyProgram efficiency;
+  @Nullable private ShaderBundleProgram bundleProgram;
   @Nullable private GlTextureInfo output;
   private boolean outputInUse;
-  private int cnnWidth;
-  private int cnnHeight;
+  @Nullable private String activeBundle;
   private InputListener inputListener = new InputListener() {};
   private OutputListener outputListener = new OutputListener() {};
   private Executor errorExecutor = Runnable::run;
@@ -77,31 +75,22 @@ final class SwitchableVideoShaderProgram implements GlShaderProgram {
     if (outputInUse) throw new IllegalStateException("Output frame has not been released");
     SwitchableVideoEffect.Configuration settings = configuration.getConfiguration();
     PlatformVideoEffect effect = settings.effect;
-    boolean upscale = effect == PlatformVideoEffect.ANIME4K_X2S;
-    boolean fullChain = effect == PlatformVideoEffect.ANIME4K_EFFICIENCY;
+    boolean custom = effect == PlatformVideoEffect.SHADER_BUNDLE;
     try {
-      if (fullChain && useHdr)
-        throw new VideoFrameProcessingException(
-            "Anime4K efficiency currently supports SDR video only");
-      if (fullChain && efficiency == null) efficiency = new Anime4kEfficiencyProgram(context);
-      if (upscale) {
-        if (useHdr)
-          throw new VideoFrameProcessingException(
-              "Anime4K CNN x2 S currently supports SDR video only");
-        if (anime4k == null) anime4k = new Anime4kShaderProgram(context);
-        if (cnnWidth != input.width || cnnHeight != input.height) {
-          anime4k.configure(input.width, input.height);
-          cnnWidth = input.width;
-          cnnHeight = input.height;
+      if (custom && useHdr) throw new VideoFrameProcessingException("Shader bundles currently support SDR video only");
+      String nextBundle = settings.bundle == null ? null : settings.bundle.encoded;
+      if (!java.util.Objects.equals(activeBundle, nextBundle)) {
+        ShaderBundleProgram previous = bundleProgram;
+        bundleProgram = null;
+        activeBundle = null;
+        if (previous != null) previous.release();
+        if (custom) {
+          bundleProgram = new ShaderBundleProgram(settings.bundle);
+          activeBundle = nextBundle;
         }
       }
-      int width = input.width * (upscale ? 2 : 1);
-      int height = input.height * (upscale ? 2 : 1);
-      // Keep the output stable across off/efficiency changes when the viewport is known.
-      if (!upscale && settings.outputWidth > 0) {
-        width = settings.outputWidth;
-        height = settings.outputHeight;
-      }
+      int width = settings.outputWidth > 0 ? settings.outputWidth : input.width;
+      int height = settings.outputHeight > 0 ? settings.outputHeight : input.height;
       if (output == null || output.width != width || output.height != height) {
         if (output != null) {
           output.release();
@@ -116,10 +105,8 @@ final class SwitchableVideoShaderProgram implements GlShaderProgram {
         }
       }
       GlUtil.focusFramebufferUsingCurrentContext(output.fboId, width, height);
-      if (fullChain) {
-        efficiency.draw(input.texId, input.width, input.height, width, height, timeUs);
-      } else if (upscale) {
-        anime4k.drawFrame(input.texId, timeUs);
+      if (custom) {
+        bundleProgram.draw(input.texId, input.width, input.height, width, height, timeUs);
       } else {
         copyProgram.use();
         copyProgram.setSamplerTexIdUniform("uInput", input.texId, 0);
@@ -132,7 +119,7 @@ final class SwitchableVideoShaderProgram implements GlShaderProgram {
       outputInUse = true;
       inputListener.onInputFrameProcessed(input);
       outputListener.onOutputFrameAvailable(output, timeUs);
-    } catch (VideoFrameProcessingException | GlUtil.GlException e) {
+    } catch (VideoFrameProcessingException | GlUtil.GlException | IllegalArgumentException e) {
       errorExecutor.execute(() -> errorListener.onError(VideoFrameProcessingException.from(e)));
     }
   }
@@ -168,23 +155,16 @@ final class SwitchableVideoShaderProgram implements GlShaderProgram {
       outputInUse = false;
     }
     try {
-      if (anime4k != null) anime4k.release();
-    } catch (VideoFrameProcessingException e) {
-      failure = e;
-    } finally {
-      anime4k = null;
-    }
-    try {
       copyProgram.delete();
     } catch (GlUtil.GlException e) {
       failure = new VideoFrameProcessingException(e);
     }
     try {
-      if (efficiency != null) efficiency.release();
+      if (bundleProgram != null) bundleProgram.release();
     } catch (VideoFrameProcessingException e) {
       failure = e;
     } finally {
-      efficiency = null;
+      bundleProgram = null;
     }
     if (failure != null) throw failure;
   }

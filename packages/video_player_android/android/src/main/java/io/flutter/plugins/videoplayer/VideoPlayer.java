@@ -90,7 +90,7 @@ public abstract class VideoPlayer implements VideoPlayerInstanceApi {
         videoEffectPipeline =
             new VideoEffectPipeline(exoPlayer, surfaceProducer, options.videoEffect);
         videoEffectPipeline.setEffect(
-            options.videoEffect, options.videoEffectOutputWidth, options.videoEffectOutputHeight);
+            options.videoEffect, options.videoEffectOutputWidth, options.videoEffectOutputHeight, options.videoShaderBundle);
       }
       exoPlayer.setMediaItem(mediaItem);
       exoPlayer.prepare();
@@ -146,16 +146,16 @@ public abstract class VideoPlayer implements VideoPlayerInstanceApi {
   public void setVideoEffect(
       @NonNull PlatformVideoEffect effect,
       @Nullable Long outputWidth,
-      @Nullable Long outputHeight) {
+      @Nullable Long outputHeight, @Nullable String shaderBundle) {
     if (isDisposed) throw new IllegalStateException("Video player is disposed");
     if (videoEffectPipeline == null) {
       throw new IllegalStateException("Video effects must be enabled before prepare");
     }
-    videoEffectPipeline.setEffect(effect, outputWidth, outputHeight);
+    videoEffectPipeline.setEffect(effect, outputWidth, outputHeight, shaderBundle);
   }
 
   public void setVideoEffect(@NonNull PlatformVideoEffect effect) {
-    setVideoEffect(effect, null, null);
+    setVideoEffect(effect, null, null, null);
   }
 
   @Override

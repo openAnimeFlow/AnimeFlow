@@ -166,12 +166,14 @@ class MockVideoPlayerInstanceApi extends _i1.Mock
     _i2.PlatformVideoEffect? effect,
     int? outputWidth,
     int? outputHeight,
+    String? shaderBundle,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#setVideoEffect, [
               effect,
               outputWidth,
               outputHeight,
+              shaderBundle,
             ]),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),

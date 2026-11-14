@@ -14,9 +14,11 @@ final class SwitchableVideoEffect implements GlEffect {
   static final class Configuration {
     final PlatformVideoEffect effect;
     final int outputWidth, outputHeight;
+    final ShaderBundle bundle;
 
-    Configuration(PlatformVideoEffect effect, int outputWidth, int outputHeight) {
+    Configuration(PlatformVideoEffect effect, int outputWidth, int outputHeight, ShaderBundle bundle) {
       this.effect = effect;
+      this.bundle = bundle;
       this.outputWidth = outputWidth;
       this.outputHeight = outputHeight;
     }
@@ -25,7 +27,7 @@ final class SwitchableVideoEffect implements GlEffect {
   private volatile Configuration configuration;
 
   SwitchableVideoEffect(PlatformVideoEffect effect) {
-    configuration = new Configuration(effect, 0, 0);
+    configuration = new Configuration(effect, 0, 0, null);
   }
 
   PlatformVideoEffect getEffect() {
@@ -41,7 +43,12 @@ final class SwitchableVideoEffect implements GlEffect {
   }
 
   void setConfiguration(PlatformVideoEffect effect, int width, int height) {
-    configuration = new Configuration(effect, width, height);
+    setConfiguration(effect, width, height, null);
+  }
+
+  void setConfiguration(PlatformVideoEffect effect, int width, int height, ShaderBundle bundle) {
+    if ((effect == PlatformVideoEffect.SHADER_BUNDLE) != (bundle != null)) throw new IllegalArgumentException("Shader bundle configuration mismatch");
+    configuration = new Configuration(effect, width, height, bundle);
   }
 
   @Override

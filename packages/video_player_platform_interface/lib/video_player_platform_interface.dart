@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -486,11 +488,56 @@ enum VideoEffectType {
   none,
   debugGrayscale,
 
-  /// Anime4K v3.2 CNN x2 S for SDR video. Requires OpenGL ES 3 and RGBA16F rendering.
-  anime4kX2S,
+  /// An application-supplied GLES 3 multi-pass bundle (SDR only).
+  shaderBundle,
+}
 
-  /// The complete AnimeFlow MPV efficiency shader chain for SDR video.
-  anime4kEfficiency,
+/// Immutable, self-contained shader bundle. No native filesystem paths are used.
+///
+/// [manifest] is a JSON array of pass descriptors; [shaders] maps each pass's
+/// `asset` identifier to GLES 3 fragment source. See SHADER_BUNDLES.md in the
+/// Android implementation for the version 1 execution contract.
+@immutable
+class VideoShaderBundle {
+  VideoShaderBundle({
+    required String manifest,
+    required Map<String, String> shaders,
+  }) : encoded = _encode(manifest, shaders);
+
+  static String _encode(String manifest, Map<String, String> shaders) {
+    final passes = jsonDecode(manifest);
+    if (passes is! List || passes.isEmpty) {
+      throw ArgumentError.value(
+        manifest,
+        'manifest',
+        'Expected non-empty pass array',
+      );
+    }
+    for (final pass in passes) {
+      if (pass is! Map ||
+          pass['asset'] is! String ||
+          (shaders[pass['asset']]?.trim().isEmpty ?? true)) {
+        throw ArgumentError(
+          'Every pass must reference a supplied shader source',
+        );
+      }
+    }
+    final keys = shaders.keys.toList()..sort();
+    return jsonEncode({
+      'version': 1,
+      'passes': passes,
+      'shaders': {for (final key in keys) key: shaders[key]},
+    });
+  }
+
+  /// Versioned wire representation, captured at construction time.
+  final String encoded;
+
+  @override
+  bool operator ==(Object other) =>
+      other is VideoShaderBundle && encoded == other.encoded;
+  @override
+  int get hashCode => encoded.hashCode;
 }
 
 /// Configuration for a per-player GPU effects pipeline.
@@ -501,9 +548,13 @@ enum VideoEffectType {
 class VideoEffectConfiguration {
   const VideoEffectConfiguration({
     this.effect = VideoEffectType.none,
+    this.shaderBundle,
     this.outputWidth,
     this.outputHeight,
   }) : assert(
+         (effect == VideoEffectType.shaderBundle) == (shaderBundle != null),
+       ),
+       assert(
          (outputWidth == null && outputHeight == null) ||
              (outputWidth != null &&
                  outputWidth > 0 &&
@@ -512,6 +563,9 @@ class VideoEffectConfiguration {
        );
 
   final VideoEffectType effect;
+
+  /// Required exactly when [effect] is [VideoEffectType.shaderBundle].
+  final VideoShaderBundle? shaderBundle;
 
   /// Fitted video destination in physical pixels, used as MPV's OUTPUT size.
   /// Both must be null or positive. Null uses the source size until layout is known.
@@ -522,11 +576,13 @@ class VideoEffectConfiguration {
   bool operator ==(Object other) =>
       other is VideoEffectConfiguration &&
       other.effect == effect &&
+      other.shaderBundle == shaderBundle &&
       other.outputWidth == outputWidth &&
       other.outputHeight == outputHeight;
 
   @override
-  int get hashCode => Object.hash(effect, outputWidth, outputHeight);
+  int get hashCode =>
+      Object.hash(effect, shaderBundle, outputWidth, outputHeight);
 }
 
 /// [VideoPlayerOptions] can be optionally used to set additional player settings

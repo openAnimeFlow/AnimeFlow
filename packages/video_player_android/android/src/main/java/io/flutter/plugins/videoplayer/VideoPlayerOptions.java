@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 public class VideoPlayerOptions {
   public boolean mixWithOthers;
   @Nullable public PlatformVideoEffect videoEffect;
+  @Nullable public String videoShaderBundle;
   @Nullable public Long videoEffectOutputWidth;
   @Nullable public Long videoEffectOutputHeight;
 
@@ -24,6 +25,7 @@ public class VideoPlayerOptions {
   public VideoPlayerOptions(@NonNull VideoPlayerOptions other) {
     this.mixWithOthers = other.mixWithOthers;
     this.videoEffect = other.videoEffect;
+    this.videoShaderBundle = other.videoShaderBundle;
     this.videoEffectOutputWidth = other.videoEffectOutputWidth;
     this.videoEffectOutputHeight = other.videoEffectOutputHeight;
     this.backBufferDurationMs = other.backBufferDurationMs;

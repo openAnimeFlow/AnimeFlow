@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
 public class Anime4kEfficiencyProgramTest {
   @Test
   public void completePresetMatchesCpuAcrossScaleBranchesAndRuntimeSwitches() throws Exception {
-    Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+    Context context = InstrumentationRegistry.getInstrumentation().getContext();
     EGLDisplay display = GlUtil.getDefaultEglDisplay();
     EGLContext eglContext =
         GlUtil.createEglContext(
@@ -58,9 +58,9 @@ public class Anime4kEfficiencyProgramTest {
         error -> {
           throw new AssertionError(error);
         });
-    List<Anime4kEfficiencyPlan.Pass> passes =
-        Anime4kEfficiencyPlan.parse(
-            Util.loadAsset(context, Anime4kEfficiencyProgram.ASSETS + "efficiency.json"));
+    List<ShaderPassPlan.Pass> passes =
+        ShaderPassPlan.parse(
+            Util.loadAsset(context, "efficiency.json"));
     try {
       for (int[] source : new int[][] {{8, 6}, {7, 5}}) {
         int width = source[0], height = source[1];
@@ -96,15 +96,15 @@ public class Anime4kEfficiencyProgramTest {
             int w = target[0], h = target[1];
             float[][][] reference =
                 reference(
-                    context, new Anime4kEfficiencyPlan(passes, width, height, w, h), input, w, h);
+                    context, new ShaderPassPlan(passes, width, height, w, h), input, w, h);
             for (PlatformVideoEffect mode :
                 new PlatformVideoEffect[] {
                   PlatformVideoEffect.NONE,
-                  PlatformVideoEffect.ANIME4K_EFFICIENCY,
+                  PlatformVideoEffect.SHADER_BUNDLE,
                   PlatformVideoEffect.NONE,
-                  PlatformVideoEffect.ANIME4K_EFFICIENCY
+                  PlatformVideoEffect.SHADER_BUNDLE
                 }) {
-              config.setConfiguration(mode, w, h);
+              config.setConfiguration(mode, w, h, mode == PlatformVideoEffect.SHADER_BUNDLE ? ShaderFixtures.load(context, "efficiency") : null);
               output[0] = null;
               program.queueInputFrame(provider, inputTexture, 0);
               assertNotNull(output[0]);
@@ -146,7 +146,7 @@ public class Anime4kEfficiencyProgramTest {
                       + " max error="
                       + maxError,
                   maxError <= 4);
-              if (mode == PlatformVideoEffect.ANIME4K_EFFICIENCY)
+              if (mode == PlatformVideoEffect.SHADER_BUNDLE)
                 assertTrue("Restore must affect even non-upscaled output", changed > 5);
               program.releaseOutputFrame(output[0]);
             }
@@ -165,16 +165,16 @@ public class Anime4kEfficiencyProgramTest {
   }
 
   private static float[][][] reference(
-      Context context, Anime4kEfficiencyPlan plan, float[][][] original, int width, int height)
+      Context context, ShaderPassPlan plan, float[][][] original, int width, int height)
       throws Exception {
-    Map<Anime4kEfficiencyPlan.Node, float[][][]> values = new IdentityHashMap<>();
-    for (Anime4kEfficiencyPlan.Step step : plan.steps) {
+    Map<ShaderPassPlan.Node, float[][][]> values = new IdentityHashMap<>();
+    for (ShaderPassPlan.Step step : plan.steps) {
       Map<String, float[][][]> inputs = new HashMap<>();
       for (int i = 0; i < step.inputs.length; i++)
         inputs.put(
             step.pass.bindings.get(i).name,
             step.inputs[i].slot < 0 ? original : values.get(step.inputs[i]));
-      String code = Util.loadAsset(context, Anime4kEfficiencyProgram.ASSETS + step.pass.asset);
+      String code = Util.loadAsset(context, step.pass.asset);
       float[][][] pixels = evaluatePass(step, inputs, code);
       // Every production intermediate is RGBA16F. Preserve its rounding between passes.
       for (float[][] row : pixels)
@@ -200,7 +200,7 @@ public class Anime4kEfficiencyProgramTest {
   }
 
   private static float[][][] evaluatePass(
-      Anime4kEfficiencyPlan.Step step, Map<String, float[][][]> inputs, String code) {
+      ShaderPassPlan.Step step, Map<String, float[][][]> inputs, String code) {
     int w = step.output.width, h = step.output.height;
     float[][][] result = new float[h][w][4];
     if (step.pass.source.contains("Clamp_Highlights")) {

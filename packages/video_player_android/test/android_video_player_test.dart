@@ -16,6 +16,11 @@ import 'package:video_player_platform_interface/video_player_platform_interface.
 
 import 'android_video_player_test.mocks.dart';
 
+final testBundle = VideoShaderBundle(
+  manifest: '[{"asset":"copy.glsl","hook":"MAIN","save":"MAIN","width":"MAIN.w","height":"MAIN.h","when":"1","bindings":[]}]',
+  shaders: {'copy.glsl': '#version 300 es\nprecision highp float; out vec4 outColor; void main(){outColor=vec4(1.0);}'},
+);
+
 @GenerateNiceMocks(<MockSpec<Object>>[
   MockSpec<AndroidVideoPlayerApi>(),
   MockSpec<VideoPlayerInstanceApi>(),
@@ -157,12 +162,12 @@ void main() {
       expect(player.buildViewWithOptions(VideoViewOptions(playerId: playerId!)), isA<Texture>());
     });
 
-    test('Anime4K is encoded during creation and runtime updates', () async {
+    test('External bundle is encoded during creation and runtime updates', () async {
       final (player, api, instanceApi) = setUpMockPlayer(playerId: 1, textureId: 100);
       when(
         api.createForTextureView(any),
       ).thenAnswer((_) async => TexturePlayerIds(playerId: 2, textureId: 101));
-      const configuration = VideoEffectConfiguration(effect: VideoEffectType.anime4kX2S);
+      final configuration = VideoEffectConfiguration(shaderBundle: testBundle, effect: VideoEffectType.shaderBundle);
       await player.createWithOptions(
         VideoCreationOptions(
           viewType: VideoViewType.textureView,
@@ -175,20 +180,21 @@ void main() {
       );
       final options =
           verify(api.createForTextureView(captureAny)).captured.single as CreationOptions;
-      expect(options.videoEffect, PlatformVideoEffect.anime4kX2S);
+      expect(options.videoEffect, PlatformVideoEffect.shaderBundle);
+      expect(options.videoShaderBundle, testBundle.encoded);
       await player.setVideoEffectConfiguration(1, configuration);
-      verify(instanceApi.setVideoEffect(PlatformVideoEffect.anime4kX2S, null, null));
+      verify(instanceApi.setVideoEffect(PlatformVideoEffect.shaderBundle, null, null, testBundle.encoded));
       await player.setVideoEffectConfiguration(1, const VideoEffectConfiguration());
-      verify(instanceApi.setVideoEffect(PlatformVideoEffect.none, null, null));
+      verify(instanceApi.setVideoEffect(PlatformVideoEffect.none, null, null, null));
     });
 
-    test('complete efficiency carries physical output dimensions through the bridge', () async {
+    test('shader bundle carries physical output dimensions through the bridge', () async {
       final (player, api, instanceApi) = setUpMockPlayer(playerId: 1, textureId: 100);
       when(
         api.createForTextureView(any),
       ).thenAnswer((_) async => TexturePlayerIds(playerId: 2, textureId: 101));
-      const configuration = VideoEffectConfiguration(
-        effect: VideoEffectType.anime4kEfficiency,
+      final configuration = VideoEffectConfiguration(
+        shaderBundle: testBundle, effect: VideoEffectType.shaderBundle,
         outputWidth: 1920,
         outputHeight: 1080,
       );
@@ -204,11 +210,12 @@ void main() {
       );
       final options =
           verify(api.createForTextureView(captureAny)).captured.single as CreationOptions;
-      expect(options.videoEffect, PlatformVideoEffect.anime4kEfficiency);
+      expect(options.videoEffect, PlatformVideoEffect.shaderBundle);
+      expect(options.videoShaderBundle, testBundle.encoded);
       expect(options.videoEffectOutputWidth, 1920);
       expect(options.videoEffectOutputHeight, 1080);
       await player.setVideoEffectConfiguration(1, configuration);
-      verify(instanceApi.setVideoEffect(PlatformVideoEffect.anime4kEfficiency, 1920, 1080));
+      verify(instanceApi.setVideoEffect(PlatformVideoEffect.shaderBundle, 1920, 1080, testBundle.encoded));
     });
 
     test('create with network passes headers', () async {

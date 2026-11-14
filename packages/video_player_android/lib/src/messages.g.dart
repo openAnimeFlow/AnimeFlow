@@ -111,8 +111,7 @@ enum PlatformVideoFormat {
 enum PlatformVideoEffect {
   none,
   debugGrayscale,
-  anime4kX2S,
-  anime4kEfficiency,
+  shaderBundle,
 }
 
 /// Pigeon equivalent of Player's playback state.
@@ -444,6 +443,7 @@ class CreationOptions {
     this.userAgent,
     this.backBufferDurationMs,
     this.videoEffect,
+    this.videoShaderBundle,
     this.videoEffectOutputWidth,
     this.videoEffectOutputHeight,
   });
@@ -460,6 +460,8 @@ class CreationOptions {
 
   PlatformVideoEffect? videoEffect;
 
+  String? videoShaderBundle;
+
   int? videoEffectOutputWidth;
 
   int? videoEffectOutputHeight;
@@ -472,6 +474,7 @@ class CreationOptions {
       userAgent,
       backBufferDurationMs,
       videoEffect,
+      videoShaderBundle,
       videoEffectOutputWidth,
       videoEffectOutputHeight,
     ];
@@ -489,8 +492,9 @@ class CreationOptions {
       userAgent: result[3] as String?,
       backBufferDurationMs: result[4] as int?,
       videoEffect: result[5] as PlatformVideoEffect?,
-      videoEffectOutputWidth: result[6] as int?,
-      videoEffectOutputHeight: result[7] as int?,
+      videoShaderBundle: result[6] as String?,
+      videoEffectOutputWidth: result[7] as int?,
+      videoEffectOutputHeight: result[8] as int?,
     );
   }
 
@@ -503,7 +507,7 @@ class CreationOptions {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(uri, other.uri) && _deepEquals(formatHint, other.formatHint) && _deepEquals(httpHeaders, other.httpHeaders) && _deepEquals(userAgent, other.userAgent) && _deepEquals(backBufferDurationMs, other.backBufferDurationMs) && _deepEquals(videoEffect, other.videoEffect) && _deepEquals(videoEffectOutputWidth, other.videoEffectOutputWidth) && _deepEquals(videoEffectOutputHeight, other.videoEffectOutputHeight);
+    return _deepEquals(uri, other.uri) && _deepEquals(formatHint, other.formatHint) && _deepEquals(httpHeaders, other.httpHeaders) && _deepEquals(userAgent, other.userAgent) && _deepEquals(backBufferDurationMs, other.backBufferDurationMs) && _deepEquals(videoEffect, other.videoEffect) && _deepEquals(videoShaderBundle, other.videoShaderBundle) && _deepEquals(videoEffectOutputWidth, other.videoEffectOutputWidth) && _deepEquals(videoEffectOutputHeight, other.videoEffectOutputHeight);
   }
 
   @override
@@ -512,7 +516,7 @@ class CreationOptions {
 
   @override
   String toString() {
-    return 'CreationOptions(uri: $uri, formatHint: $formatHint, httpHeaders: $httpHeaders, userAgent: $userAgent, backBufferDurationMs: $backBufferDurationMs, videoEffect: $videoEffect, videoEffectOutputWidth: $videoEffectOutputWidth, videoEffectOutputHeight: $videoEffectOutputHeight)';
+    return 'CreationOptions(uri: $uri, formatHint: $formatHint, httpHeaders: $httpHeaders, userAgent: $userAgent, backBufferDurationMs: $backBufferDurationMs, videoEffect: $videoEffect, videoShaderBundle: $videoShaderBundle, videoEffectOutputWidth: $videoEffectOutputWidth, videoEffectOutputHeight: $videoEffectOutputHeight)';
   }
 }
 
@@ -1216,14 +1220,14 @@ class VideoPlayerInstanceApi {
   final String pigeonVar_messageChannelSuffix;
 
   /// Updates a pipeline opted in at creation time.
-  Future<void> setVideoEffect(PlatformVideoEffect effect, int? outputWidth, int? outputHeight) async {
+  Future<void> setVideoEffect(PlatformVideoEffect effect, int? outputWidth, int? outputHeight, String? shaderBundle) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.video_player_android.VideoPlayerInstanceApi.setVideoEffect$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[effect, outputWidth, outputHeight]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[effect, outputWidth, outputHeight, shaderBundle]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(

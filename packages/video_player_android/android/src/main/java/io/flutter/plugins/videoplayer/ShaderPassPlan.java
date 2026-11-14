@@ -10,8 +10,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/** Restricted MPV hook planner for the bundled preset; independent of GL and playback timing. */
-final class Anime4kEfficiencyPlan {
+/** Version 1 shader graph planner; independent of GL and playback timing. */
+final class ShaderPassPlan {
   static final class Binding {
     final String name;
     final boolean sampler;
@@ -30,7 +30,7 @@ final class Anime4kEfficiencyPlan {
 
     Pass(JSONObject json) throws JSONException {
       asset = json.getString("asset");
-      source = json.getString("source");
+      source = json.optString("source", asset);
       hook = json.getString("hook");
       save = json.getString("save");
       width = json.getString("width");
@@ -75,7 +75,7 @@ final class Anime4kEfficiencyPlan {
     return passes;
   }
 
-  Anime4kEfficiencyPlan(
+  ShaderPassPlan(
       List<Pass> passes, int width, int height, int outputWidth, int outputHeight) {
     if (width <= 0 || height <= 0 || outputWidth <= 0 || outputHeight <= 0) {
       throw new IllegalArgumentException("Video and output dimensions must be positive");
@@ -138,6 +138,7 @@ final class Anime4kEfficiencyPlan {
     List<Float> stack = new ArrayList<>();
     for (String token : expression.trim().split("\\s+")) {
       if ("+-*/><".contains(token) && token.length() == 1) {
+        if (stack.size() < 2) throw new IllegalArgumentException("Invalid shader expression: " + expression);
         float b = stack.remove(stack.size() - 1), a = stack.remove(stack.size() - 1);
         switch (token) {
           case "+":

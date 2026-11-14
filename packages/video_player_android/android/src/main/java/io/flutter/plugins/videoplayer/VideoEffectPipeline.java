@@ -28,6 +28,7 @@ public final class VideoEffectPipeline implements AnalyticsListener {
   private int height;
   private int outputWidth, outputHeight;
   private PlatformVideoEffect effect;
+  @Nullable private ShaderBundle bundle;
   private final SwitchableVideoEffect switchableEffect;
   @Nullable private Format inputFormat;
 
@@ -52,6 +53,10 @@ public final class VideoEffectPipeline implements AnalyticsListener {
 
   public void setEffect(
       PlatformVideoEffect effect, @Nullable Long targetWidth, @Nullable Long targetHeight) {
+    setEffect(effect, targetWidth, targetHeight, null);
+  }
+
+  public void setEffect(PlatformVideoEffect effect, @Nullable Long targetWidth, @Nullable Long targetHeight, @Nullable String encodedBundle) {
     if (disposed) throw new IllegalStateException("Video effect pipeline is disposed");
     if ((targetWidth == null) != (targetHeight == null)
         || (targetWidth != null
@@ -63,14 +68,17 @@ public final class VideoEffectPipeline implements AnalyticsListener {
     }
     int nextWidth = targetWidth == null ? 0 : targetWidth.intValue();
     int nextHeight = targetHeight == null ? 0 : targetHeight.intValue();
-    if (this.effect == effect && outputWidth == nextWidth && outputHeight == nextHeight) return;
-    if ((effect == PlatformVideoEffect.ANIME4K_X2S
-            || effect == PlatformVideoEffect.ANIME4K_EFFICIENCY)
+    if ((effect == PlatformVideoEffect.SHADER_BUNDLE) != (encodedBundle != null)) throw new IllegalArgumentException("Shader bundle configuration mismatch");
+    ShaderBundle nextBundle = encodedBundle == null ? null :
+        (bundle != null && bundle.encoded.equals(encodedBundle) ? bundle : new ShaderBundle(encodedBundle));
+    if (this.effect == effect && bundle == nextBundle && outputWidth == nextWidth && outputHeight == nextHeight) return;
+    if (effect == PlatformVideoEffect.SHADER_BUNDLE
         && inputFormat != null
         && ColorInfo.isTransferHdr(inputFormat.colorInfo)) {
-      throw new IllegalArgumentException("Anime4K currently supports SDR video only");
+      throw new IllegalArgumentException("Shader bundles currently supports SDR video only");
     }
-    switchableEffect.setConfiguration(effect, nextWidth, nextHeight);
+    switchableEffect.setConfiguration(effect, nextWidth, nextHeight, nextBundle);
+    bundle = nextBundle;
     this.effect = effect;
     outputWidth = nextWidth;
     outputHeight = nextHeight;
@@ -106,13 +114,11 @@ public final class VideoEffectPipeline implements AnalyticsListener {
 
   /** Expected texture dimensions, including the currently selected effect. */
   public Size getOutputSize(Format format) {
-    if (outputWidth > 0 && effect != PlatformVideoEffect.ANIME4K_X2S) {
+    if (outputWidth > 0) {
       return new Size(outputWidth, outputHeight);
     }
     Size size = outputSizeForFormat(format);
-    return effect == PlatformVideoEffect.ANIME4K_X2S
-        ? new Size(size.getWidth() * 2, size.getHeight() * 2)
-        : size;
+    return size;
   }
 
   /** Initial output dimensions shared by the surface and Flutter initialization. */

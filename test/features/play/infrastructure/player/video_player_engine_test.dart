@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/infrastructure/player/video_player/video_player_engine.dart';
+import 'package:anime_flow/features/play/infrastructure/player/video_player/android_upscale_shaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,7 +37,7 @@ void main() {
     expect(platform.created.single.videoPlayerOptions?.videoEffects?.effect,
         VideoEffectType.none);
     await engine.setUpscalePreset(UpscalePreset.efficiency);
-    expect(platform.effects.last, VideoEffectType.anime4kEfficiency);
+    expect(platform.effects.last, VideoEffectType.shaderBundle);
     await engine.setUpscalePreset(UpscalePreset.off);
     expect(platform.effects.last, VideoEffectType.none);
   });
@@ -48,7 +49,7 @@ void main() {
     await engine.open(source);
     expect(
         platform.created.map((c) => c.videoPlayerOptions?.videoEffects?.effect),
-        everyElement(VideoEffectType.anime4kEfficiency));
+        everyElement(VideoEffectType.shaderBundle));
     expect(platform.disposed, [1]);
   });
 
@@ -73,7 +74,7 @@ void main() {
         engine.setUpscalePreset(UpscalePreset.quality), throwsUnsupportedError);
     await engine.open(source);
     expect(platform.created.single.videoPlayerOptions?.videoEffects?.effect,
-        VideoEffectType.anime4kEfficiency);
+        VideoEffectType.shaderBundle);
   });
 
   test('iOS retains normal playback and does not expose Android effects',
@@ -94,6 +95,7 @@ void main() {
   testWidgets(
       'physical fitted output survives toggles and follows layout changes',
       (tester) async {
+    await tester.runAsync(AndroidUpscaleShaders.loadEfficiency);
     await engine.open(source);
     Widget view(double width) => MediaQuery(
           data: const MediaQueryData(devicePixelRatio: 3),
@@ -110,12 +112,10 @@ void main() {
     expect(platform.configurations.last.outputWidth, 960);
     expect(platform.configurations.last.outputHeight, 540);
     await engine.setUpscalePreset(UpscalePreset.efficiency);
-    expect(
-        platform.configurations.last,
-        const VideoEffectConfiguration(
-            effect: VideoEffectType.anime4kEfficiency,
-            outputWidth: 960,
-            outputHeight: 540));
+    expect(platform.configurations.last.effect, VideoEffectType.shaderBundle);
+    expect(platform.configurations.last.shaderBundle, isNotNull);
+    expect(platform.configurations.last.outputWidth, 960);
+    expect(platform.configurations.last.outputHeight, 540);
     await engine.setUpscalePreset(UpscalePreset.off);
     expect(platform.configurations.last.outputWidth, 960);
     await tester.pumpWidget(view(400));

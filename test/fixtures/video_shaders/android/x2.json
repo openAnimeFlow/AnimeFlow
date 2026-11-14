@@ -1,0 +1,97 @@
+[
+  {
+    "asset": "x2_0.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_S.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(S)-Conv-4x3x3x3",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "MAIN",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_tf",
+    "width": "MAIN.w",
+    "height": "MAIN.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "x2_1.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_S.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(S)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_1_tf",
+    "width": "conv2d_tf.w",
+    "height": "conv2d_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "x2_2.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_S.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(S)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_1_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_2_tf",
+    "width": "conv2d_1_tf.w",
+    "height": "conv2d_1_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "x2_3.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_S.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(S)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_2_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_last_tf",
+    "width": "conv2d_2_tf.w",
+    "height": "conv2d_2_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "x2_4.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_S.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(S)-Depth-to-Space",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_last_tf",
+        "sampler": true,
+        "dimensions": true
+      },
+      {
+        "name": "MAIN",
+        "sampler": true,
+        "dimensions": false
+      }
+    ],
+    "save": "MAIN",
+    "width": "conv2d_last_tf.w 2 *",
+    "height": "conv2d_last_tf.h 2 *",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  }
+]

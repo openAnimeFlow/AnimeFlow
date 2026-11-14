@@ -13,6 +13,45 @@ permissions:
   contents: read
 
 jobs:
+  metal-gpu:
+    name: Apple Metal GPU
+    # XLarge Apple silicon runners expose hardware GPU acceleration.
+    # The repository must have access to this larger runner in its organization.
+    runs-on: macos-15-xlarge
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+      - name: Verify source commit
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ inputs.source_sha || github.sha }}
+        run: |
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3'
+      - name: Install Metal compiler
+        run: xcodebuild -downloadComponent metalToolchain
+      - name: Require GPU rendering tests and iOS shader compilation
+        shell: bash
+        env:
+          MTL_DEBUG_LAYER: '1'
+        run: |
+          set -euo pipefail
+          mkdir -p build/ios-video-shaders
+          bash tool/ci/test_ios_video_shaders.sh 2>&1 | tee build/ios-video-shaders/tests.log
+      - name: Upload shader test log
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: metal-gpu-test-log
+          path: build/ios-video-shaders/tests.log
+          if-no-files-found: warn
+
   architecture:
     name: architecture (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -39,11 +78,31 @@ jobs:
           cache: true
       - name: Install application dependencies
         run: flutter pub get --enforce-lockfile
+      - name: Install video player dependencies
+        working-directory: packages/video_player
+        run: flutter pub get
+      - name: Install Android video player dependencies
+        working-directory: packages/video_player_android
+        run: flutter pub get
+      - name: Install AVFoundation video player dependencies
+        working-directory: packages/video_player_avfoundation
+        run: flutter pub get
+      - name: Test AVFoundation bridge
+        working-directory: packages/video_player_avfoundation
+        run: flutter test --no-pub
+      - name: Install video player platform interface dependencies
+        working-directory: packages/video_player_platform_interface
+        run: flutter pub get
       - name: Install isolated architecture dependencies
         working-directory: tool/architecture_guard
         run: dart pub get --enforce-lockfile
       - name: Check architecture formatting
         run: dart format --output=none --set-exit-if-changed test/architecture tool/architecture_guard
+      - name: Verify Android Anime4K shader assets
+        # Use the isolated tool context to avoid app native build hooks.
+        run: dart --packages=tool/architecture_guard/.dart_tool/package_config.json tool/generate_android_anime4k.dart --check
+      - name: Verify iOS Anime4K shader assets
+        run: dart --packages=tool/architecture_guard/.dart_tool/package_config.json tool/generate_ios_anime4k.dart --check
       - name: Static analysis including Riverpod plugin
         run: flutter analyze --no-pub --no-fatal-infos
       - name: Analyze architecture tool

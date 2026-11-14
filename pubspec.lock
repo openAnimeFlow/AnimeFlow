@@ -1906,34 +1906,30 @@ packages:
   video_player:
     dependency: "direct main"
     description:
-      name: video_player
-      sha256: "07ae1e03f2d4c8e2e9a75ee678f90acbc4506d4458a9c628512d119a1eee5754"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/video_player"
+      relative: true
+    source: path
     version: "2.14.1"
   video_player_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: video_player_android
-      sha256: d27054dea34d748a44f06d433a57005d2aac69944485b0abbaed3303dbcfa3f1
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/video_player_android"
+      relative: true
+    source: path
     version: "2.12.2"
   video_player_avfoundation:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: video_player_avfoundation
-      sha256: "436fd029bd1c1e303b2d95ebd76948893f3c28dab286e7235ba9dd7b22533bf0"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/video_player_avfoundation"
+      relative: true
+    source: path
     version: "2.11.1"
   video_player_platform_interface:
     dependency: "direct dev"
     description:
-      name: video_player_platform_interface
-      sha256: "92c0fbabe20c788e71fd10d26cea998d0d253282e65d145aed0818731cf593ce"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/video_player_platform_interface"
+      relative: true
+    source: path
     version: "6.9.0"
   video_player_web:
     dependency: transitive

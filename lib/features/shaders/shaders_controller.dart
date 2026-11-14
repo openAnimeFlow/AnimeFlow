@@ -23,7 +23,8 @@ Future<Directory> shadersDirectory(Ref ref) async {
   }
 
   final shaderFiles = assets.where((String asset) =>
-      asset.startsWith('assets/shaders/') && asset.endsWith('.glsl'));
+      asset.startsWith('assets/shaders/media_kit/common/') &&
+      asset.endsWith('.glsl'));
 
   int copiedFilesCount = 0;
 

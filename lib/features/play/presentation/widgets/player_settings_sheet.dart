@@ -51,8 +51,8 @@ Future<void> showPlayerSettingsSheet({
 }
 
 @Dependencies([VideoUiNotifier])
-class PlayerSettingsSheet extends ConsumerStatefulWidget {
-  const PlayerSettingsSheet({
+class PlayerSheet extends ConsumerStatefulWidget {
+  const PlayerSheet({
     super.key,
     this.child,
     this.builder,
@@ -73,11 +73,11 @@ class PlayerSettingsSheet extends ConsumerStatefulWidget {
   final bool closeOnMinExtent;
 
   @override
-  ConsumerState<PlayerSettingsSheet> createState() =>
+  ConsumerState<PlayerSheet> createState() =>
       _PlayerSettingsSheetState();
 }
 
-class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
+class _PlayerSettingsSheetState extends ConsumerState<PlayerSheet> {
   static const _snapDuration = Duration(milliseconds: 250);
 
   final _sheetController = DraggableScrollableController();
@@ -143,7 +143,7 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
             child: Column(
               children: [
                 SizedBox(
-                  height: isWideScreen ? 0 : 24,
+                  height: isWideScreen ? 0 : 30,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onVerticalDragUpdate: isWideScreen

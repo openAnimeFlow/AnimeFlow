@@ -67,7 +67,7 @@ class _IntroduceViewState extends State<IntroduceView>
       await showPlayerSettingsSheet(
         context: context,
         label: AppLocalizations.of(context).detailsTitle,
-        child: PlayerSettingsSheet(
+        child: PlayerSheet(
           closeOnMinExtent: true,
           builder: (context, scrollController, isBottomSheet) =>
               MediaQuery.removePadding(
@@ -124,7 +124,7 @@ class _IntroduceViewState extends State<IntroduceView>
     showPlayerSettingsSheet(
       context: context,
       label: AppLocalizations.of(context).videoSource,
-      child: PlayerSettingsSheet(
+      child: PlayerSheet(
         avoidKeyboard: true,
         initialSize: 0.60,
         snapSizes: const [0.3, 0.52, 0.95],

@@ -2,7 +2,6 @@
 library;
 
 import 'package:test/test.dart';
-import 'package:anime_flow_architecture_guard/architecture_spec.dart';
 import 'package:anime_flow_architecture_guard/src/boundary_checks.dart';
 import 'package:anime_flow_architecture_guard/src/dependency_graph.dart';
 import 'package:anime_flow_architecture_guard/src/model.dart';
@@ -166,33 +165,69 @@ void main() {
     },
   );
 
+  test('download domain excludes storage through local helpers', () {
+    const domain = 'lib/features/download/domain';
+    fixture = FixtureProject({
+      '$domain/record.dart': "import 'value.dart';",
+      '$domain/value.dart': "import 'package:hive_ce/hive.dart';",
+      '$domain/status.dart': 'class Status {}',
+    });
+    final spec = fixtureSpec();
+    final hits = checkBoundaries(collectDependencies(fixture.root, spec), spec)
+        .where((violation) => violation.rule == 'R11')
+        .map((violation) => (violation.source, violation.target))
+        .toSet();
+    expect(hits, {
+      ('$domain/record.dart', 'package:hive_ce/hive.dart'),
+      ('$domain/value.dart', 'package:hive_ce/hive.dart'),
+    });
+  });
+
   test(
-    'UI providers and composition bindings have precise classifications',
+    'play enforces inward dependencies through local helpers and barrels',
     () {
-      const ui =
-          'lib/features/play/presentation/providers/video_ui_provider.dart';
-      const source =
-          'lib/features/play/presentation/providers/play_provider.dart';
+      const root = 'lib/features/play';
       fixture = FixtureProject({
-        ui: "import 'package:flutter/widgets.dart';",
-        source: "import 'video_ui_provider.dart';",
-        'lib/features/play/application/player_bindings.dart':
-            "import '../presentation/providers/video_ui_provider.dart';",
+        '$root/application/session.dart': "import '../../../core/helper.dart';",
+        'lib/core/helper.dart': "import 'dart:io';",
+        '$root/domain/model.dart': "import '../application/session.dart';",
+        '$root/presentation/providers/page.dart':
+            "import '../../../shared/barrel.dart';",
+        'lib/features/shared/barrel.dart':
+            "export '../play/infrastructure/store.dart';",
+        '$root/infrastructure/store.dart': "import '../domain/contract.dart';",
+        '$root/domain/contract.dart': "import 'dart:async';",
+        '$root/infrastructure/bad.dart':
+            "import '../presentation/providers/page.dart';",
       });
       final spec = fixtureSpec();
-      final violations = checkBoundaries(
+      final hits = checkBoundaries(
         collectDependencies(fixture.root, spec),
         spec,
-      );
-      expect(violations.single.source, source);
-      expect(violations.single.target, ui);
+      ).where((v) => v.rule == 'R11').map((v) => (v.source, v.target)).toSet();
       expect(
-        projectArchitecture().roleOf(
-          'lib/features/play/presentation/providers/new_provider.dart',
-        ),
-        Responsibility.business,
+        hits,
+        containsAll([
+          ('$root/application/session.dart', 'dart:io'),
+          ('$root/domain/model.dart', '$root/application/session.dart'),
+          (
+            '$root/presentation/providers/page.dart',
+            '$root/infrastructure/store.dart',
+          ),
+          (
+            '$root/infrastructure/bad.dart',
+            '$root/presentation/providers/page.dart',
+          ),
+        ]),
       );
-      expect(ArchitectureSpec.rules, {'R03', 'R07', 'R10'});
+      expect(
+        hits.any((edge) => edge.$1 == '$root/infrastructure/store.dart'),
+        isFalse,
+      );
+      expect(
+        spec.roleOf('$root/presentation/providers/page.dart'),
+        Responsibility.ui,
+      );
     },
   );
 

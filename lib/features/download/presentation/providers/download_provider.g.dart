@@ -51,7 +51,7 @@ final class DownloadRepositoryProvider extends $FunctionalProvider<
 }
 
 String _$downloadRepositoryHash() =>
-    r'4182d281170f49a4a5052444a5ed186a4219661b';
+    r'6c42770d2ddb4ad5b57d9e49e4fe15cce3433c52';
 
 @ProviderFor(downloadManager)
 final downloadManagerProvider = DownloadManagerProvider._();
@@ -216,19 +216,19 @@ final class DownloadControllerProvider
 }
 
 String _$downloadControllerHash() =>
-    r'4d60f018209ca4dbc29ecaf453312bbf0825b156';
+    r'a7de59d15c8b51f73bb365839315603849aaf860';
 
 abstract class _$DownloadController extends $Notifier<DownloadState> {
   DownloadState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<DownloadState, DownloadState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<DownloadState, DownloadState>,
         DownloadState,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

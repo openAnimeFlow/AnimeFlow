@@ -150,7 +150,7 @@ class _SettingsMenu extends ConsumerWidget {
         items: [
           _SettingsMenuItem(
             title: l10n.sourceManagement,
-            icon: Icons.smart_display_outlined,
+            icon: Icons.extension_outlined,
             destination: SettingsDestination.plugins,
           ),
           _SettingsMenuItem(

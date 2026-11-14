@@ -1,6 +1,6 @@
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
-import 'package:anime_flow/shared/models/download/download_record.dart';
+import 'package:anime_flow/features/download/domain/download_record.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:path/path.dart' as p;
 

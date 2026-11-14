@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/app/app.dart';
+import 'package:anime_flow/features/download/composition/download_bindings.dart';
+import 'package:anime_flow/features/recommend/composition/wallpaper_bindings.dart';
+import 'composition/player_bindings.dart';
 import 'composition/video_source_bindings.dart';
 import 'package:anime_flow/app/router/go_app_navigator.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -19,7 +22,6 @@ import 'package:anime_flow/core/network/image/image_cache_manager.dart';
 import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/settings/storage.dart';
-import 'package:anime_flow/app/composition/player_bindings.dart';
 import 'package:anime_flow/features/source/data/services/source_config_initializer.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,11 +67,16 @@ Future<void> bootstrap() async {
     });
   }
 
-  final container = ProviderContainer(overrides: [
-    ...videoSourceOverrides,
-    ...playerOverrides,
-    overrideAppNavigator(GoAppNavigator(appRouter)),
-  ]);
+  final container = ProviderContainer(
+      retry: (retryCount, error) =>
+          ProviderContainer.defaultRetry(retryCount, error, maxRetries: 2),
+      overrides: [
+        ...videoSourceOverrides,
+        ...playerOverrides,
+        ...wallpaperFeatureOverrides,
+        ...downloadFeatureOverrides,
+        overrideAppNavigator(GoAppNavigator(appRouter)),
+      ]);
   container.read(appInfoProvider);
   unawaited(container.read(shadersDirectoryProvider.future));
   unawaited(SourceConfigInitializer().initialize());

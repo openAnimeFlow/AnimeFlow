@@ -1,11 +1,12 @@
+import 'package:anime_flow/core/logger/app_log.dart';
 import 'package:anime_flow/features/play/application/play_session.dart';
 import 'package:anime_flow/features/play/presentation/widgets/dialog/episodes_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/core/network/clients/flow_client.dart';
+import 'package:anime_flow/core/network/core/flow_response.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -19,14 +20,11 @@ import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_p
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_time_display.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/user/user_api.dart';
-import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/danmaku_text_field.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/play/presentation/widgets/loading_animation.dart';
 import 'package:anime_flow/features/play/presentation/widgets/play_pause_icon.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -52,7 +50,7 @@ class BottomAreaControl extends ConsumerWidget {
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
-        if (AppSettings.showMiniProgressBar)
+        if (ref.read(playPreferencesProvider).showMiniProgressBar)
           _MiniProgressBarVisibility(visible: !isShowControlsUi),
         // Keep menus, input drafts and subscriptions alive across auto-hide.
         TweenAnimationBuilder<double>(
@@ -164,7 +162,7 @@ class _BottomControlsContent extends ConsumerWidget {
           title: AppLocalizations.of(dialogContext).updateFailed);
     } catch (e) {
       if (!dialogContext.mounted) return;
-      LiggLogger().e(e);
+      logError(e);
       NotificationToast.show(e.toString(),
           title: AppLocalizations.of(dialogContext).updateFailed);
     }
@@ -236,13 +234,12 @@ class _BottomControlsContent extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final playController = ref.read(playSessionProvider);
     final videoUiStateController = ref.read(videoUiProvider.notifier);
-    final fullscreen =
-        ref.watch(playStateProvider.select((s) => s.isFullscreen));
+    final fullscreen = ref.watch(videoUiProvider.select((s) => s.isFullscreen));
     final isWideScreen =
-        ref.watch(playStateProvider.select((s) => s.isWideScreen));
+        ref.watch(videoUiProvider.select((s) => s.isWideScreen));
     final leftPadding = MediaQuery.of(context).padding.left;
     // 全屏 + 不随键盘压缩 body 时，用 viewInsets 把底部控件顶到键盘上方
-    final keyboardLift = fullscreen && SystemUtil.isMobile
+    final keyboardLift = fullscreen && ref.read(playbackDeviceProvider).isMobile
         ? MediaQuery.viewInsetsOf(context).bottom
         : 0.0;
 
@@ -257,7 +254,7 @@ class _BottomControlsContent extends ConsumerWidget {
         padding: EdgeInsets.only(
             left: leftPadding <= 0 ? 5 : leftPadding,
             right: 5,
-            bottom: (SystemUtil.isDesktop
+            bottom: (ref.read(playbackDeviceProvider).isDesktop
                     ? 10
                     : isWideScreen
                         ? MediaQuery.of(context).padding.bottom
@@ -351,7 +348,7 @@ class _BottomControlsContent extends ConsumerWidget {
                 //选集
                 Consumer(builder: (context, ref, _) {
                   final showEpisodeSelection = ref.watch(
-                    playStateProvider.select((state) =>
+                    videoUiProvider.select((state) =>
                         state.isFullscreen || !state.isContentExpanded),
                   );
                   if (!showEpisodeSelection) return const SizedBox.shrink();
@@ -513,7 +510,7 @@ class _BottomControlsContent extends ConsumerWidget {
   }
 }
 
-@Dependencies([PlayStateNotifier])
+@Dependencies([VideoUiNotifier, PlayStateNotifier])
 class _MiniProgressBarVisibility extends ConsumerWidget {
   const _MiniProgressBarVisibility({required this.visible});
 
@@ -522,7 +519,7 @@ class _MiniProgressBarVisibility extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final useWideOffset = ref.watch(
-      playStateProvider
+      videoUiProvider
           .select((state) => state.isFullscreen || state.isWideScreen),
     );
     final offset = useWideOffset ? 50.0 : 30.0;

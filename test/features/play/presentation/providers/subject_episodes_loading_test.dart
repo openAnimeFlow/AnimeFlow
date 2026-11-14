@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';

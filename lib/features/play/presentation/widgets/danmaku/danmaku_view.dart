@@ -1,6 +1,6 @@
 import 'package:anime_flow/features/play/application/play_session.dart';
-import 'package:anime_flow/features/play/application/player_bindings.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
 import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/core/settings/danmaku_font_provider.dart';
@@ -45,17 +45,17 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     playSession = ref.read(playSessionProvider);
 
     // 初始化弹幕配置
-    _strokeWidth = AppSettings.danmakuStrokeWidth;
-    _opacity = AppSettings.danmakuOpacity;
-    _fontSize = AppSettings.danmakuFontSize;
-    _danmakuArea = AppSettings.danmakuArea;
-    _hideTop = AppSettings.danmakuHideTop;
-    _hideBottom = AppSettings.danmakuHideBottom;
-    _hideScroll = AppSettings.danmakuHideScroll;
-    _massiveMode = AppSettings.danmakuMassiveMode;
-    _danmakuDuration = AppSettings.danmakuDuration;
-    _danmakuLineHeight = AppSettings.danmakuLineHeight;
-    _danmakuFontWeight = AppSettings.danmakuFontWeight;
+    _strokeWidth = ref.read(playPreferencesProvider).danmakuStrokeWidth;
+    _opacity = ref.read(playPreferencesProvider).danmakuOpacity;
+    _fontSize = ref.read(playPreferencesProvider).danmakuFontSize;
+    _danmakuArea = ref.read(playPreferencesProvider).danmakuArea;
+    _hideTop = ref.read(playPreferencesProvider).danmakuHideTop;
+    _hideBottom = ref.read(playPreferencesProvider).danmakuHideBottom;
+    _hideScroll = ref.read(playPreferencesProvider).danmakuHideScroll;
+    _massiveMode = ref.read(playPreferencesProvider).danmakuMassiveMode;
+    _danmakuDuration = ref.read(playPreferencesProvider).danmakuDuration;
+    _danmakuLineHeight = ref.read(playPreferencesProvider).danmakuLineHeight;
+    _danmakuFontWeight = ref.read(playPreferencesProvider).danmakuFontWeight;
   }
 
   @override

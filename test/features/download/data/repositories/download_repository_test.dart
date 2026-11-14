@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
-import 'package:anime_flow/hive_registrar.g.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_record.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/features/download/data/storage/download_hive_adapters.dart';
+import 'package:anime_flow/features/download/domain/download_episode.dart';
+import 'package:anime_flow/features/download/domain/download_record.dart';
+import 'package:anime_flow/features/download/domain/download_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
 
@@ -16,7 +16,7 @@ void main() {
   setUpAll(() {
     tempDir = Directory.systemTemp.createTempSync('anime_flow_download_test_');
     Hive.init(tempDir.path);
-    Hive.registerAdapters();
+    Hive.registerDownloadAdapters();
   });
 
   setUp(() async {
@@ -75,7 +75,7 @@ void main() {
       expect(repository.getRecord(record.key), isNull);
     });
 
-    test('exposes same-status progress through repository cache', () async {
+    test('caches same-status progress without writing to disk', () async {
       final record = _record(
         subjectId: 1,
         sourceName: 'source',
@@ -96,6 +96,15 @@ void main() {
             ?.progressPercent,
         42,
       );
+
+      await box.close();
+      box = await Hive.openBox<DownloadRecord>('downloads_test');
+      expect(
+          box
+              .get(record.key)
+              ?.episodes['https://example.com/1']
+              ?.progressPercent,
+          0);
     });
 
     test('persists episode when status changes', () async {

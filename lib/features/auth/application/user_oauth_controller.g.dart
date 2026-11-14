@@ -48,13 +48,13 @@ abstract class _$UserOAuthController extends $Notifier<UserOAuthState> {
   UserOAuthState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<UserOAuthState, UserOAuthState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<UserOAuthState, UserOAuthState>,
         UserOAuthState,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

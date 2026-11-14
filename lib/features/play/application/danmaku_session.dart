@@ -1,12 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/features/play/domain/danmaku_repository.dart';
+import 'package:anime_flow/core/logger/app_log.dart';
 import 'package:anime_flow/features/play/application/danmaku_canvas.dart';
-import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
-import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/domain/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/application/danmaku_dispatch_scheduler.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
@@ -28,6 +23,9 @@ class DanmakuSession {
   DanmakuSession({
     required DanmakuStore store,
     required this.converter,
+    required this.repository,
+    required this.useDanmakuColor,
+    required this.saveEnabled,
     required DanmakuChineseMode initialChineseMode,
     required this.readPlayback,
     required this.currentUserId,
@@ -35,7 +33,10 @@ class DanmakuSession {
         _chineseMode = initialChineseMode;
 
   final DanmakuStore _store;
-  final DanmakuChineseConverter converter;
+  final DanmakuConverter converter;
+  final DanmakuRepository repository;
+  final bool Function() useDanmakuColor;
+  final void Function(bool) saveEnabled;
   final DanmakuPlaybackSnapshot Function() readPlayback;
   final int? Function() currentUserId;
   DanmakuChineseMode _chineseMode;
@@ -76,7 +77,7 @@ class DanmakuSession {
     _canvas?.addDanmaku(
       danmaku,
       currentUserId(),
-      color: AppSettings.danmakuColor ? null : 0xffffffff,
+      color: useDanmakuColor() ? null : 0xffffffff,
     );
   }
 
@@ -129,9 +130,9 @@ class DanmakuSession {
     try {
       final List<Danmaku> danmakus;
       if (isLocalPlayback) {
-        danmakus = await _loadLocal(localPath);
+        danmakus = await repository.loadLocal(localPath);
       } else {
-        danmakus = await FlowApi.getDanmaku(
+        danmakus = await repository.loadEpisode(
           subjectId: subjectId,
           episodeId: episodeId,
         );
@@ -148,7 +149,7 @@ class DanmakuSession {
       }
     } catch (error) {
       failed = true;
-      LiggLogger().e(error);
+      logError(error);
     } finally {
       if (isCurrent()) {
         _store.setLoadStatus(
@@ -163,7 +164,7 @@ class DanmakuSession {
     bool isCurrent() => !_disposed && requestId == _requestId;
     _store.setLoadStatus(DanmakuLoadStatus.switching);
     try {
-      final items = await FlowApi.getDanDanmakuByEpisodeID(episodeId);
+      final items = await repository.loadAlternative(episodeId);
       while (isCurrent()) {
         final revision = _chineseModeRevision;
         final converted = await converter.convertDanmakus(items, _chineseMode);
@@ -175,7 +176,7 @@ class DanmakuSession {
         return true;
       }
     } catch (error) {
-      LiggLogger().e(error);
+      logError(error);
       if (isCurrent()) _store.setLoadStatus(DanmakuLoadStatus.failed);
     }
     return false;
@@ -222,38 +223,8 @@ class DanmakuSession {
       source: '[AnimeFlow]',
     );
     _canvas?.addDanmaku(item, userId);
-    await FlowApi.sendDanmaku(
-      subjectId: _subjectId,
-      episodeId: _episodeId,
-      message: item.message,
-      time: item.time,
-      type: item.type,
-      color: item.color,
-    );
+    await repository.send(_subjectId, _episodeId, item);
     return true;
-  }
-
-  Future<List<Danmaku>> _loadLocal(String? path) async {
-    final trimmed = path?.trim();
-    if (trimmed == null || trimmed.isEmpty) return const [];
-    final file = File(trimmed);
-    if (!await file.exists()) return const [];
-    try {
-      final decoded = jsonDecode(await file.readAsString());
-      final items = switch (decoded) {
-        List<dynamic> value => value,
-        {'data': final List<dynamic> value} => value,
-        {'comments': final List<dynamic> value} => value,
-        _ => const <dynamic>[],
-      };
-      return items
-          .whereType<Map<String, dynamic>>()
-          .map(Danmaku.fromJson)
-          .toList();
-    } catch (error) {
-      LiggLogger().e('加载本地弹幕失败: $error');
-      return const [];
-    }
   }
 
   void clear() {
@@ -267,7 +238,7 @@ class DanmakuSession {
 
   void toggleEnabled() {
     _store.toggleEnabled();
-    AppSettings.setDanmakuOn(_store.value.enabled);
+    saveEnabled(_store.value.enabled);
     if (!_store.value.enabled) clearCanvas();
   }
 

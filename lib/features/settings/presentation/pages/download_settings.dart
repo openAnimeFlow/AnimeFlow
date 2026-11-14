@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/download/domain/download_directory_failure.dart';
 import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_factory.dart';

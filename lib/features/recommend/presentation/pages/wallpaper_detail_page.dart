@@ -1,0 +1,763 @@
+import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/features/recommend/application/wallpaper_recommendations.dart';
+import 'package:anime_flow/features/recommend/application/wallpaper_favorites.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
+import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
+import 'package:anime_flow/core/network/api/api.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
+import 'package:anime_flow/shared/models/flow/subject_wallpaper.dart';
+import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:share_plus/share_plus.dart';
+
+class WallpaperDetailPage extends ConsumerStatefulWidget {
+  const WallpaperDetailPage(
+      {super.key, required this.args, this.onClose, this.onOpenRelated});
+
+  final WallpaperDetailArgs args;
+  final VoidCallback? onClose;
+  final ValueChanged<WallpaperDetailArgs>? onOpenRelated;
+
+  @override
+  ConsumerState<WallpaperDetailPage> createState() =>
+      _WallpaperDetailPageState();
+}
+
+class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
+  final _sizes = <String, Size>{};
+  final _thumbnails = ScrollController();
+  double _thumbnailItemExtent = 104;
+  double _thumbnailSpacing = 8;
+  int? _selectionTarget;
+  late final List<String> _images;
+  late final PageController _pages;
+  late int _index;
+  late final AnimationController _slideshowProgress;
+  bool _slideshowEnabled = false;
+  bool _slideshowVisible = true;
+  bool _advancingSlide = false;
+  bool _downloading = false;
+  bool _sharing = false;
+  late final int _initialSessionRevision;
+
+  SubjectWallpaper get _subject => widget.args.subject;
+
+  String get _url => _images[_index];
+
+  bool get _isBackdrop => _subject.backdrops.contains(_url);
+
+  @override
+  void initState() {
+    super.initState();
+    _initialSessionRevision = ref.read(authSessionRevisionProvider);
+    _images = {
+      if (widget.args.initialUrl.trim().isNotEmpty) widget.args.initialUrl,
+      ..._subject.coverImages,
+    }.toList(growable: false);
+    _index = 0;
+    _pages = PageController();
+    _slideshowEnabled = _images.length > 1;
+    _slideshowProgress = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+      animationBehavior: AnimationBehavior.preserve,
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          unawaited(_advanceSlideshow());
+        }
+      });
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _slideshowVisible = TickerMode.valuesOf(context).enabled &&
+        (ModalRoute.isCurrentOf(context) ?? true);
+    _syncSlideshow();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _syncSlideshow();
+  }
+
+  void _syncSlideshow() {
+    if (_slideshowEnabled &&
+        _slideshowVisible &&
+        !_advancingSlide &&
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+      _slideshowProgress.forward();
+    } else {
+      _slideshowProgress.stop();
+    }
+  }
+
+  Future<void> _advanceSlideshow() async {
+    if (!_slideshowEnabled || _advancingSlide) return;
+    _advancingSlide = true;
+    _slideshowProgress.reset();
+    try {
+      if (_pages.hasClients) {
+        await _select((_index + 1) % _images.length, manual: false);
+      }
+    } finally {
+      if (mounted) {
+        _advancingSlide = false;
+        _syncSlideshow();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _slideshowProgress.dispose();
+    _pages.dispose();
+    _thumbnails.dispose();
+    super.dispose();
+  }
+
+  void _message(String message) {
+    if (!mounted) return;
+    NotificationToast.show(message);
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      _index = index;
+    });
+    // 跨多页的点击动画会经过中间页，不让中间页拉动缩略图列表。
+    if (_selectionTarget == null) _scrollToThumbnail();
+  }
+
+  void _scrollToThumbnail({bool animate = true}) {
+    if (!mounted || !_thumbnails.hasClients) return;
+    final position = _thumbnails.position;
+    if (!position.hasContentDimensions) return;
+    final start = _index * _thumbnailItemExtent;
+    final end = start + _thumbnailItemExtent - _thumbnailSpacing;
+    final visibleStart = position.pixels;
+    final visibleEnd = visibleStart + position.viewportDimension;
+    if (start >= visibleStart - 0.5 && end <= visibleEnd + 0.5) return;
+    // 只补足被遮挡的部分，已完整可见时保留用户手动滚动的位置。
+    final offset =
+        (start < visibleStart ? start : end - position.viewportDimension)
+            .clamp(0.0, position.maxScrollExtent);
+    if ((offset - position.pixels).abs() < 0.5) return;
+    if (animate) {
+      unawaited(_thumbnails.animateTo(
+        offset,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+      ));
+    } else {
+      _thumbnails.jumpTo(offset);
+    }
+  }
+
+  void _stopSlideshow() {
+    if (!_slideshowEnabled) return;
+    _slideshowProgress.stop();
+    setState(() => _slideshowEnabled = false);
+  }
+
+  Future<void> _select(int index, {bool manual = true}) async {
+    if (manual) _stopSlideshow();
+    if (index < 0 || index >= _images.length || index == _index) return;
+    _selectionTarget = index;
+    try {
+      await _pages.animateToPage(index,
+          duration: const Duration(milliseconds: 260),
+          curve: Curves.easeOutCubic);
+    } finally {
+      if (mounted && _selectionTarget == index) {
+        _selectionTarget = null;
+        _scrollToThumbnail();
+      }
+    }
+  }
+
+  Future<void> _download() async {
+    final l10n = AppLocalizations.of(context);
+    final url = _url;
+    final filename = 'wallpaper_${_subject.subjectId}_${_index + 1}';
+    setState(() => _downloading = true);
+    try {
+      _message(await Api.downloadImage(url, filename));
+    } catch (error) {
+      _message(l10n.saveImageFailed(error.toString()));
+    } finally {
+      if (mounted) setState(() => _downloading = false);
+    }
+  }
+
+  Future<void> _toggleFavorite(bool favorite) async {
+    final revision = ref.read(authSessionRevisionProvider);
+    try {
+      await ref
+          .read(wallpaperFavoritesProvider.notifier)
+          .setFavorite(_subject.subjectId, !favorite);
+    } catch (_) {
+      if (mounted && revision == ref.read(authSessionRevisionProvider)) {
+        _message(AppLocalizations.of(context).wallpaperActionFailed);
+      }
+    }
+  }
+
+  Future<void> _share(BuildContext buttonContext) async {
+    final l10n = AppLocalizations.of(context);
+    final text = '${_subject.displayName}\n$_url';
+    setState(() => _sharing = true);
+    try {
+      if (SystemUtil.isDesktop) {
+        await Clipboard.setData(ClipboardData(text: text));
+        _message(l10n.copied);
+      } else {
+        final box = buttonContext.findRenderObject() as RenderBox?;
+        await SharePlus.instance.share(ShareParams(
+          text: text,
+          sharePositionOrigin:
+              box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+        ));
+      }
+    } catch (_) {
+      _message(l10n.wallpaperActionFailed);
+    } finally {
+      if (mounted) setState(() => _sharing = false);
+    }
+  }
+
+  void _reportSize(String url, Size size) {
+    if (!mounted || _sizes[url] == size) return;
+    setState(() => _sizes[url] = size);
+  }
+
+  void _preview() =>
+      appNavigatorOf(context).openImagePreview<void>(ImageViewerRouteArgs(
+        imageUrls: _images,
+        initialIndex: _index,
+      ));
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<bool>(
+        stream: _glassNavigationStyle,
+        initialData: AppSettings.glassNavigationStyle,
+        builder: (context, snapshot) =>
+            _buildPage(context, snapshot.data ?? false),
+      );
+
+  Widget _buildPage(BuildContext context, bool glassStyle) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
+    if (_images.isEmpty) {
+      return Scaffold(
+          appBar: AdaptiveAppBar(
+              glassStyle: glassStyle,
+              leading: widget.onClose == null
+                  ? null
+                  : CloseButton(onPressed: widget.onClose),
+              title: Text(l10n.wallpapers)),
+          body: Center(child: Text(l10n.noData)));
+    }
+    return Scaffold(
+      extendBodyBehindAppBar: glassStyle,
+      appBar: AdaptiveAppBar(
+        glassStyle: glassStyle,
+        leading: widget.onClose == null
+            ? null
+            : CloseButton(onPressed: widget.onClose),
+        title: Text(_subject.nameCn.isEmpty ? _subject.name : _subject.nameCn),
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          top: glassStyle
+              ? MediaQuery.paddingOf(context).top + kToolbarHeight
+              : 0,
+        ),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1800),
+            child: SafeArea(
+              top: false,
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _gallery(l10n),
+                    const SizedBox(height: 12),
+                    _thumbnailStrip(colors),
+                    const SizedBox(height: 24),
+                    _information(l10n, colors),
+                    const SizedBox(height: 24),
+                    Divider(
+                        color: colors.outlineVariant.withValues(alpha: 0.5)),
+                    const SizedBox(height: 16),
+                    Text(l10n.wallpaperImageSize,
+                        style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 12),
+                    Wrap(spacing: 10, runSpacing: 10, children: [
+                      _InfoPill(
+                        label: _sizes[_url] == null
+                            ? l10n.loading
+                            : '${_sizes[_url]!.width.toInt()} × ${_sizes[_url]!.height.toInt()}',
+                        highlighted: true,
+                      ),
+                      _InfoPill(
+                          label: _isBackdrop
+                              ? l10n.wallpaperBackdrop
+                              : l10n.wallpaperPoster),
+                      _InfoPill(
+                          label: l10n.wallpaperImageCount(_images.length)),
+                    ]),
+                    const SizedBox(height: 22),
+                    _actions(l10n),
+                    _recommendations(l10n, colors),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _gallery(AppLocalizations l10n) => AspectRatio(
+        aspectRatio: 16 / 9,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: ColoredBox(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Stack(fit: StackFit.expand, children: [
+              NotificationListener<UserScrollNotification>(
+                onNotification: (notification) {
+                  if (notification.depth == 0 &&
+                      notification.direction != ScrollDirection.idle) {
+                    _stopSlideshow();
+                  }
+                  return false;
+                },
+                child: PageView.builder(
+                  controller: _pages,
+                  itemCount: _images.length,
+                  onPageChanged: _onPageChanged,
+                  itemBuilder: (context, index) => GestureDetector(
+                    onTap: _preview,
+                    child: AnimationNetworkImage(
+                      url: _images[index],
+                      fit: BoxFit.contain,
+                      width: double.infinity,
+                      height: double.infinity,
+                      placeholderWidth: double.infinity,
+                      placeholderHeight: double.infinity,
+                      onImageSize: (size) => _reportSize(_images[index], size),
+                    ),
+                  ),
+                ),
+              ),
+              if (_images.length > 1) ...[
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: _GalleryButton(
+                        icon: Icons.chevron_left_rounded,
+                        tooltip: l10n.wallpaperPrevious,
+                        onPressed:
+                            _index > 0 ? () => _select(_index - 1) : null,
+                      ),
+                    )),
+                Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: _GalleryButton(
+                        icon: Icons.chevron_right_rounded,
+                        tooltip: l10n.wallpaperNext,
+                        onPressed: _index + 1 < _images.length
+                            ? () => _select(_index + 1)
+                            : null,
+                      ),
+                    )),
+              ],
+              Positioned(
+                  bottom: 12,
+                  right: 14,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.48),
+                        borderRadius: BorderRadius.circular(20)),
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 5),
+                        child: Text('${_index + 1} / ${_images.length}',
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 12))),
+                  )),
+            ]),
+          ),
+        ),
+      );
+
+  Widget _thumbnailStrip(ColorScheme colors) =>
+      LayoutBuilder(builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final tileWidth = math.min(
+            width,
+            width < 600
+                ? 96.0
+                : width < 1024
+                    ? 136.0
+                    : 176.0);
+        final spacing = width < 600 ? 3.0 : 6.0;
+        _thumbnailSpacing = spacing;
+        // 边框 2 + 内边距 3，两侧共占 10；图片区域保持 16:9。
+        final imageWidth = math.max(0.0, tileWidth - 10);
+        final imageHeight = imageWidth * 9 / 16;
+        final itemExtent = tileWidth + spacing;
+        if (_thumbnailItemExtent != itemExtent) {
+          _thumbnailItemExtent = itemExtent;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollToThumbnail(animate: false);
+          });
+        }
+        return SizedBox(
+          height: imageHeight + 10,
+          child: ListView.builder(
+            controller: _thumbnails,
+            scrollDirection: Axis.horizontal,
+            itemCount: _images.length,
+            itemExtent: itemExtent,
+            itemBuilder: (context, index) => Padding(
+              padding: EdgeInsets.only(right: spacing),
+              child: Semantics(
+                button: true,
+                selected: _index == index,
+                label:
+                    AppLocalizations.of(context).wallpaperThumbnail(index + 1),
+                child: InkWell(
+                  onTap: () => _select(index),
+                  borderRadius: BorderRadius.circular(12),
+                  child: CustomPaint(
+                    foregroundPainter: _index == index
+                        ? _ThumbnailCountdownPainter(
+                            progress: _slideshowProgress,
+                            color: colors.primary,
+                            countingDown: _slideshowEnabled,
+                          )
+                        : null,
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: AnimationNetworkImage(
+                        url: _images[index],
+                        fit: BoxFit.cover,
+                        width: imageWidth,
+                        height: imageHeight,
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      });
+
+  Widget _information(AppLocalizations l10n, ColorScheme colors) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(_subject.displayName,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 14),
+          Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                Text('Bangumi #${_subject.subjectId}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(color: colors.onSurfaceVariant)),
+                FilledButton(
+                    onPressed: () => appNavigatorOf(context)
+                        .openAnimeInfo<void>(
+                            id: _subject.subjectId,
+                            name: _subject.displayName,
+                            image: _url),
+                    child: Text(l10n.wallpaperViewAnime)),
+              ]),
+          if (_subject.name != _subject.displayName) ...[
+            const SizedBox(height: 10),
+            Text(_subject.name,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: colors.onSurfaceVariant)),
+          ],
+        ],
+      );
+
+  Widget _actions(AppLocalizations l10n) {
+    final sessionRevision = ref.watch(authSessionRevisionProvider);
+    final isLoggedIn = ref.watch(isLoggedInProvider);
+    final showFavorite = isLoggedIn.asData?.value == true;
+    final favoriteChanges = ref.watch(wallpaperFavoritesProvider);
+    final changed = favoriteChanges.changes[_subject.subjectId];
+    final favorite = changed ??
+        (sessionRevision == _initialSessionRevision ? _subject.favorite : null);
+    final favoriteButton = FilledButton.tonalIcon(
+      onPressed: favoriteChanges.pending.contains(_subject.subjectId)
+          ? null
+          : favorite == null
+              ? null
+              : () => _toggleFavorite(favorite),
+      icon: Icon(favorite == true ? Icons.favorite : Icons.favorite_border),
+      label: Text(favorite == true ? l10n.cancelCollection : l10n.collection),
+      style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+    );
+    final download = FilledButton.icon(
+      onPressed: _downloading ? null : _download,
+      icon: _downloading
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2))
+          : const Icon(Icons.file_download_outlined),
+      label: Text(_downloading ? l10n.loading : l10n.wallpaperDownload),
+      style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+    );
+    final share = Builder(
+        builder: (buttonContext) => FilledButton.tonalIcon(
+              onPressed: _sharing ? null : () => _share(buttonContext),
+              icon: Icon(SystemUtil.isDesktop
+                  ? Icons.link_rounded
+                  : Icons.ios_share_rounded),
+              label: Text(SystemUtil.isDesktop
+                  ? l10n.wallpaperCopyLink
+                  : l10n.wallpaperShare),
+              style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15))),
+            ));
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 10,
+        children: [
+          download,
+          Row(
+            spacing: 8,
+            children: [
+              Expanded(child: share),
+              if (showFavorite) Expanded(child: favoriteButton),
+            ],
+          ),
+        ]);
+  }
+
+  Widget _recommendations(AppLocalizations l10n, ColorScheme colors) {
+    final provider = wallpaperRecommendationsProvider(_subject.subjectId);
+    final recommendations = ref.watch(provider);
+    if (recommendations.asData?.value.isEmpty ?? false) {
+      return const SizedBox.shrink();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 28),
+        Divider(color: colors.outlineVariant.withValues(alpha: 0.5)),
+        const SizedBox(height: 16),
+        Text(l10n.wallpaperMore,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 14),
+        recommendations.when(
+          skipLoadingOnRefresh: false,
+          data: _relatedWallpapers,
+          loading: () => const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (_, __) => Column(children: [
+            Text(l10n.loadFailed),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => ref.invalidate(provider),
+              child: Text(l10n.retry),
+            ),
+          ]),
+        ),
+      ],
+    );
+  }
+
+  Widget _relatedWallpapers(List<SubjectWallpaper> subjects) =>
+      LayoutBuilder(builder: (context, constraints) {
+        final width =
+            math.max(130.0, math.min(220.0, (constraints.maxWidth - 24) / 3));
+        return SizedBox(
+          height: width * 9 / 16 + 52,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: subjects.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final subject = subjects[index];
+              final url = subject.coverImages.first;
+              return SizedBox(
+                  width: width,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      final args = WallpaperDetailArgs(
+                        subject: subject,
+                        initialUrl: url,
+                      );
+                      if (widget.onOpenRelated != null) {
+                        widget.onOpenRelated!(args);
+                      } else {
+                        appNavigatorOf(context).openWallpaper<void>(args);
+                      }
+                    },
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          AnimationNetworkImage(
+                              url: url,
+                              width: width,
+                              height: width * 9 / 16,
+                              fit: BoxFit.cover,
+                              borderRadius: BorderRadius.circular(12)),
+                          const SizedBox(height: 8),
+                          Text(subject.displayName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodySmall),
+                        ]),
+                  ));
+            },
+          ),
+        );
+      });
+}
+
+class _ThumbnailCountdownPainter extends CustomPainter {
+  _ThumbnailCountdownPainter({
+    required this.progress,
+    required this.color,
+    required this.countingDown,
+  }) : super(repaint: progress);
+
+  final Animation<double> progress;
+  final Color color;
+  final bool countingDown;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const strokeWidth = 3.0;
+    final rect = (Offset.zero & size).deflate(strokeWidth / 2);
+    const radius = Radius.circular(12 - strokeWidth / 2);
+    // 从左上角的顶部切点开始，沿圆角边框顺时针显示倒计时进度。
+    final path = Path()
+      ..moveTo(rect.left + radius.x, rect.top)
+      ..lineTo(rect.right - radius.x, rect.top)
+      ..arcToPoint(Offset(rect.right, rect.top + radius.y), radius: radius)
+      ..lineTo(rect.right, rect.bottom - radius.y)
+      ..arcToPoint(Offset(rect.right - radius.x, rect.bottom), radius: radius)
+      ..lineTo(rect.left + radius.x, rect.bottom)
+      ..arcToPoint(Offset(rect.left, rect.bottom - radius.y), radius: radius)
+      ..lineTo(rect.left, rect.top + radius.y)
+      ..arcToPoint(Offset(rect.left + radius.x, rect.top), radius: radius)
+      ..close();
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..color = countingDown ? color.withValues(alpha: 0.2) : color;
+    canvas.drawPath(path, paint);
+    if (countingDown) {
+      final metric = path.computeMetrics().first;
+      final length = metric.length * progress.value;
+      if (length <= 0) return;
+      paint.color = color;
+      canvas.drawPath(metric.extractPath(0, length), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ThumbnailCountdownPainter oldDelegate) =>
+      oldDelegate.progress != progress ||
+      oldDelegate.color != color ||
+      oldDelegate.countingDown != countingDown;
+}
+
+class _GalleryButton extends StatelessWidget {
+  const _GalleryButton(
+      {required this.icon, required this.tooltip, required this.onPressed});
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+        tooltip: tooltip,
+        onPressed: onPressed,
+        icon: Icon(icon),
+        style: IconButton.styleFrom(
+          backgroundColor: Colors.black.withValues(alpha: 0.38),
+          foregroundColor: Colors.white,
+          disabledForegroundColor: Colors.white38,
+        ),
+      );
+}
+
+class _InfoPill extends StatelessWidget {
+  const _InfoPill({required this.label, this.highlighted = false});
+
+  final String label;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+      decoration: BoxDecoration(
+          color: highlighted ? colors.primary : colors.surfaceContainer,
+          borderRadius: BorderRadius.circular(12)),
+      child: Text(label,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: highlighted ? colors.onPrimary : colors.onSurfaceVariant)),
+    );
+  }
+}

@@ -40,7 +40,7 @@ abstract class _$BgmCollectionSync
   FutureOr<BgmCollectionSyncStatusItem?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<BgmCollectionSyncStatusItem?>,
         BgmCollectionSyncStatusItem?>;
     final element = ref.element as $ClassProviderElement<
@@ -49,6 +49,6 @@ abstract class _$BgmCollectionSync
         AsyncValue<BgmCollectionSyncStatusItem?>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

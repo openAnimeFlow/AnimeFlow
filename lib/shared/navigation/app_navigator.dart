@@ -3,6 +3,7 @@ import 'args/wallpaper_detail_args.dart';
 import 'args/info_route_extra.dart';
 import 'args/character_info_extra.dart';
 import 'args/play_route_extra.dart';
+import 'args/video_resource_download_route_args.dart';
 import 'settings_destination.dart';
 
 /// UI 层的导航接口，由应用层提供具体实现。
@@ -18,6 +19,8 @@ abstract interface class AppNavigator {
   void goToUser();
 
   Future<T?> openWallpaper<T>(WallpaperDetailArgs args);
+
+  Future<T?> openFavoriteWallpapers<T>();
 
   Future<T?> openImagePreview<T>(ImageViewerRouteArgs args);
 
@@ -46,6 +49,7 @@ abstract interface class AppNavigator {
   Future<String?> openImageSearch();
   Future<T?> openCalendar<T>();
   Future<T?> openDownload<T>();
+  Future<T?> openVideoResourceDownload<T>(VideoResourceDownloadRouteArgs args);
   Future<T?> openPlayRecord<T>();
   void goToRecommend();
 

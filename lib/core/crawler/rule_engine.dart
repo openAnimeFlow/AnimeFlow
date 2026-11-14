@@ -6,9 +6,10 @@ import 'package:anime_flow/core/crawler/rule_exceptions.dart';
 import 'package:anime_flow/core/crawler/rule_request.dart';
 import 'package:anime_flow/core/crawler/rule_template.dart';
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/utils.dart' show resolveSourceUrl;
+import 'package:anime_flow/core/utils/source_url.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/search_resources_item.dart';
+import 'package:dio/dio.dart';
 
 export 'rule_exceptions.dart';
 
@@ -156,11 +157,13 @@ class RuleEngine {
   Future<List<SearchResourcesItem>> search({
     required String keyword,
     required CrawlConfigItem config,
+    CancelToken? cancelToken,
   }) async {
     final usesApi = config.usesApiSearch;
     final items = await _execute<List<SearchResourcesItem>>(
       config: config,
       phase: 'search',
+      cancelToken: cancelToken,
       prepare: () => usesApi
           ? _api.prepareSearchRequest(config, keyword)
           : _xpath.prepareSearchRequest(config, keyword),
@@ -180,11 +183,13 @@ class RuleEngine {
   Future<List<CrawlerEpisodeResourcesItem>> fetchEpisodeResources({
     required String sourceUrl,
     required CrawlConfigItem config,
+    CancelToken? cancelToken,
   }) {
     final usesApi = config.usesApiChapter;
     return _execute<List<CrawlerEpisodeResourcesItem>>(
       config: config,
       phase: 'chapter',
+      cancelToken: cancelToken,
       prepare: () => usesApi
           ? _api.prepareChapterRequest(config, sourceUrl)
           : _xpath.prepareChapterRequest(config, sourceUrl),
@@ -203,10 +208,18 @@ class RuleEngine {
     required PreparedRuleRequest Function() prepare,
     required Future<T> Function(String raw) parse,
     required Object Function(Object cause) wrapError,
+    CancelToken? cancelToken,
   }) async {
+    void checkCancellation() {
+      if (cancelToken?.isCancelled == true) {
+        throw const RuleRequestCancelledException();
+      }
+    }
+
+    checkCancellation();
     final PreparedRuleRequest request;
     try {
-      request = prepare();
+      request = prepare().withCancelToken(cancelToken);
     } catch (error, stackTrace) {
       _logFailure(config, '$phase request preparation', error, stackTrace);
       throw wrapError(error);
@@ -215,18 +228,28 @@ class RuleEngine {
     final String response;
     try {
       response = await _transport(request, config);
+      checkCancellation();
+    } on RuleRequestCancelledException {
+      rethrow;
     } on CaptchaRequiredException {
       rethrow;
     } catch (error, stackTrace) {
+      checkCancellation();
       _logFailure(config, '$phase request', error, stackTrace);
       throw wrapError(error);
     }
 
     try {
-      return await parse(response);
+      checkCancellation();
+      final result = await parse(response);
+      checkCancellation();
+      return result;
+    } on RuleRequestCancelledException {
+      rethrow;
     } on CaptchaRequiredException {
       rethrow;
     } catch (error, stackTrace) {
+      checkCancellation();
       _logFailure(config, '$phase response parsing', error, stackTrace);
       throw wrapError(error);
     }

@@ -1,12 +1,14 @@
+import 'package:anime_flow/features/download/domain/download_directory_failure.dart';
+import 'package:anime_flow/shared/models/player/play/offline_episode.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/core/utils/playback_format.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
-import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/download/presentation/widgets/download_danmaku_icon.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_record.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/features/download/domain/download_episode.dart';
+import 'package:anime_flow/features/download/domain/download_record.dart';
+import 'package:anime_flow/features/download/domain/download_status.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/core/utils/utils.dart';
@@ -443,9 +445,20 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
     final localMediaPath =
         ref.read(downloadManagerProvider).getLocalMediaPath(episode);
     if (localMediaPath == null) return;
-    final completedEpisodes = record.episodes.values
-        .where((item) => item.status == DownloadStatus.completed)
-        .toList();
+    final completedEpisodes = <OfflineEpisode>[
+      for (final item in record.episodes.values)
+        if (item.status == DownloadStatus.completed)
+          (
+            lineIndex: item.lineIndex,
+            episodeIndex: item.episodeIndex,
+            episodeSort: item.episodeSort,
+            episodeUrl: item.episodeUrl,
+            bangumiEpisodeId: item.bangumiEpisodeId,
+            episodeTitle: item.episodeTitle,
+            localMediaPath: item.localMediaPath,
+            localDanmakuPath: item.localDanmakuPath,
+          ),
+    ];
     appNavigatorOf(context).openPlay<void>(PlayRouteExtra(
       playExtra: PlayExtra(
         subjectId: record.subjectId,
@@ -515,7 +528,7 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
       return detail.isEmpty ? status : '$status - $detail';
     }
     final speedSuffix = episode.status == DownloadStatus.downloading
-        ? ' - ${Utils.formatBytesPerSec(speed)}'
+        ? ' - ${formatBytesPerSec(speed)}'
         : '';
     if (episode.totalSizeBytes > 0) {
       return '$status - ${l10n.downloadSizeProgress(Utils.formatBytes(episode.totalBytes, fractionDigits: 0), Utils.formatBytes(episode.totalSizeBytes, fractionDigits: 0))}$speedSuffix';

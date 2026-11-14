@@ -1,4 +1,4 @@
-import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
+import 'captcha_challenge.dart';
 
 import 'episode_resources_item.dart';
 
@@ -13,7 +13,7 @@ class ResourcesItem {
   final bool isLoading;
   final String? errorMessage;
   final bool needsCaptcha;
-  final AntiCrawlerConfig? antiCrawlerConfig;
+  final CaptchaChallenge? antiCrawlerConfig;
 
   ResourcesItem({
     required this.websiteName,
@@ -51,7 +51,7 @@ class ResourcesItem {
       needsCaptcha: needsCaptcha ?? this.needsCaptcha,
       antiCrawlerConfig: identical(antiCrawlerConfig, _unset)
           ? this.antiCrawlerConfig
-          : antiCrawlerConfig as AntiCrawlerConfig?,
+          : antiCrawlerConfig as CaptchaChallenge?,
     );
   }
 }

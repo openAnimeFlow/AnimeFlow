@@ -2,11 +2,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/core/network/flow/flow_endpoint_probe.dart';
+import 'package:anime_flow/core/network/flow/flow_doh_resolver.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'tls_fixture.dart';
 
 void main() {
+  FlowDohResolver resolver() {
+    final value = FlowDohResolver();
+    addTearDown(value.close);
+    return value;
+  }
+
   for (final scenario in [
     'valid',
     'tls12',
@@ -39,7 +46,9 @@ void main() {
         await request.response.close();
       });
       final probe = FlowEndpointProbe(
-          endpoint: endpoint, securityContext: trustedTestContext());
+          endpoint: endpoint,
+          securityContext: trustedTestContext(),
+          hostResolver: resolver().resolve);
       addTearDown(probe.cancel);
       final result = await HttpOverrides.runZoned(
         () => probe.probe('127.0.0.1'),
@@ -60,7 +69,9 @@ void main() {
       // Leave both responses pending so cancellation happens after TLS/HTTP.
     });
     final probe = FlowEndpointProbe(
-        endpoint: endpoint, securityContext: trustedTestContext());
+        endpoint: endpoint,
+        securityContext: trustedTestContext(),
+        hostResolver: resolver().resolve);
     addTearDown(probe.cancel);
     final pending = HttpOverrides.runZoned(
       () => Future.wait([
@@ -76,7 +87,9 @@ void main() {
 
   test('explicit proxy skips direct IP probes without opening a client',
       () async {
-    final probe = FlowEndpointProbe(endpoint: Uri.parse('https://ligg.test'));
+    final probe = FlowEndpointProbe(
+        endpoint: Uri.parse('https://ligg.test'),
+        hostResolver: resolver().resolve);
     addTearDown(probe.cancel);
     final result = await HttpOverrides.runZoned(
       () => probe.probe('104.19.52.165'),

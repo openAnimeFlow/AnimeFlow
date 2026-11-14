@@ -26,7 +26,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'collection_filter_dialog.dart';
 import 'user_collection_tabs.dart';
 
-enum _LoginOverflowAction { settings, playRecord, downloads, logout }
+enum _LoginOverflowAction {
+  favoriteWallpapers,
+  settings,
+  playRecord,
+  downloads,
+  logout
+}
 
 class UserCenterView extends ConsumerStatefulWidget {
   final FlowUsers user;
@@ -441,6 +447,10 @@ class _UserViewState extends ConsumerState<UserCenterView>
             ),
             itemBuilder: (context, action, _) {
               final (icon, label) = switch (action) {
+                _LoginOverflowAction.favoriteWallpapers => (
+                    Icons.image_outlined,
+                    l10n.favoriteWallpapers
+                  ),
                 _LoginOverflowAction.settings => (
                     Icons.settings_outlined,
                     l10n.settings
@@ -458,19 +468,18 @@ class _UserViewState extends ConsumerState<UserCenterView>
                     l10n.logout
                   ),
               };
-              return SizedBox(
-                width: 120,
-                child: Row(
-                  children: [
-                    Icon(icon, size: 20),
-                    const SizedBox(width: 8),
-                    Text(label),
-                  ],
-                ),
+              return Row(
+                children: [
+                  Icon(icon, size: 20),
+                  const SizedBox(width: 8),
+                  Text(label),
+                ],
               );
             },
             onSelected: (action) {
               switch (action) {
+                case _LoginOverflowAction.favoriteWallpapers:
+                  appNavigatorOf(context).openFavoriteWallpapers<void>();
                 case _LoginOverflowAction.settings:
                   appNavigatorOf(context).openSettings<void>(
                       destination: SettingsDestination.menu);

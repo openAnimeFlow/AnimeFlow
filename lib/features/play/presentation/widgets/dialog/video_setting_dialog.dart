@@ -1,19 +1,20 @@
 import 'package:anime_flow/features/play/application/play_session.dart';
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/play/presentation/extensions/player_kernel_localization.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
-@Dependencies([playSession, PlayStateNotifier])
+@Dependencies([playSession, PlayStateNotifier, VideoUiNotifier])
 class VideoSettingDialog extends ConsumerStatefulWidget {
   const VideoSettingDialog({super.key});
 
@@ -46,7 +47,7 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
   void initState() {
     super.initState();
     playController = ref.read(playSessionProvider);
-    _hardwareDecoder = AppSettings.hardwareDecoder;
+    _hardwareDecoder = ref.read(playPreferencesProvider).hardwareDecoder;
   }
 
   @override
@@ -414,7 +415,7 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                   )
                 : DropDownMenu<PlayerKernel>(
                     key: const ValueKey('select-player-kernel'),
-                    items: PlayerKernel.available,
+                    items: ref.read(playbackPlatformProvider).availableKernels,
                     selectedItem: currentKernel,
                     tooltip: l10n.selectPlayerKernel,
                     offset: const Offset(0, 44),

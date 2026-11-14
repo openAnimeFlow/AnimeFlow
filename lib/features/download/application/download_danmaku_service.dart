@@ -1,32 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:anime_flow/features/download/domain/download_danmaku.dart';
+import 'package:anime_flow/features/download/domain/download_directory_failure.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_factory.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/download_directory/restore_download_directory_access.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
+import 'package:anime_flow/features/download/domain/download_episode.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:path/path.dart' as p;
-
-class DownloadDanmakuResult {
-  const DownloadDanmakuResult({
-    required this.danDanBangumiId,
-    required this.localPath,
-    required this.hasDanmaku,
-  });
-
-  final int danDanBangumiId;
-  final String localPath;
-  final bool hasDanmaku;
-}
-
-abstract interface class IDownloadDanmakuService {
-  Future<DownloadDanmakuResult?> download({
-    required int subjectId,
-    required DownloadEpisode episode,
-  });
-}
 
 class DownloadDanmakuService implements IDownloadDanmakuService {
   DownloadDanmakuService({DownloadDirectoryPlatform? directoryPlatform})

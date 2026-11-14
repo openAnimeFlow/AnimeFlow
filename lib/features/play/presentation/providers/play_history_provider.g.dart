@@ -46,7 +46,7 @@ final class PlayHistoryNotifierProvider
 }
 
 String _$playHistoryNotifierHash() =>
-    r'fb8d6355223e9293a5b862cc59e39102702d5d12';
+    r'889393cd6b5e9c4ffc024c78e51806c9c5353aa6';
 
 /// 播放记录列表状态与同步入口。
 ///
@@ -57,7 +57,7 @@ abstract class _$PlayHistoryNotifier extends $AsyncNotifier<PlayHistoryState> {
   FutureOr<PlayHistoryState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<PlayHistoryState>, PlayHistoryState>;
     final element = ref.element as $ClassProviderElement<
@@ -65,6 +65,6 @@ abstract class _$PlayHistoryNotifier extends $AsyncNotifier<PlayHistoryState> {
         AsyncValue<PlayHistoryState>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

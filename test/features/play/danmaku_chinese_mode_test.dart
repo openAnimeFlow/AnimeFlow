@@ -1,4 +1,5 @@
-import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/infrastructure/danmaku/opencc_converter.dart';
+import 'package:anime_flow/features/play/domain/danmaku_chinese_mode.dart';
 import 'package:flutter_opencc_plus/flutter_opencc_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 

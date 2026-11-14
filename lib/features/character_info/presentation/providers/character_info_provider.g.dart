@@ -45,7 +45,7 @@ abstract class _$CharacterInfoDetail
   FutureOr<CharacterDetailItem> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<CharacterDetailItem>, CharacterDetailItem>;
     final element = ref.element as $ClassProviderElement<
@@ -53,7 +53,7 @@ abstract class _$CharacterInfoDetail
         AsyncValue<CharacterDetailItem>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -91,7 +91,7 @@ abstract class _$CharacterWorks extends $AsyncNotifier<CharacterCastsItem> {
   FutureOr<CharacterCastsItem> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<CharacterCastsItem>, CharacterCastsItem>;
     final element = ref.element as $ClassProviderElement<
@@ -99,7 +99,7 @@ abstract class _$CharacterWorks extends $AsyncNotifier<CharacterCastsItem> {
         AsyncValue<CharacterCastsItem>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -138,7 +138,7 @@ abstract class _$CharacterComments
   FutureOr<List<CharacterCommentItem>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<CharacterCommentItem>>,
         List<CharacterCommentItem>>;
     final element = ref.element as $ClassProviderElement<
@@ -147,6 +147,6 @@ abstract class _$CharacterComments
         AsyncValue<List<CharacterCommentItem>>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

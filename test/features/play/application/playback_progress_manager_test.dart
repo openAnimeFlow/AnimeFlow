@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/infrastructure/history/hive_play_history_repository.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
@@ -24,6 +25,8 @@ class _Settings implements Box<dynamic> {
 /// 构造一个把「标记已看」替换成记录到 [marked] 的管理器。
 PlaybackProgressManager _manager(List<int> marked) {
   return PlaybackProgressManager(
+    history: HivePlayHistoryRepository(),
+    autoMarkEnabled: () => AppSettings.episodesProgress,
     onEpisodeWatched: ({
       required int subjectId,
       required int episodeId,

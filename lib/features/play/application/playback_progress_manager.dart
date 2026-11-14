@@ -1,10 +1,7 @@
+import 'package:anime_flow/features/play/domain/play_history_repository.dart';
 import 'dart:async';
 
-import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/features/play/application/play_history_service.dart';
-import 'package:anime_flow/shared/models/player/play/play_history.dart';
+import 'package:anime_flow/core/logger/app_log.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 
 typedef SetEpisodeWatchedCallback = void Function({
@@ -19,8 +16,10 @@ typedef MarkEpisodeWatched = Future<void> Function(int episodeId);
 class PlaybackProgressManager {
   PlaybackProgressManager({
     required this.onEpisodeWatched,
-    MarkEpisodeWatched? markEpisodeWatched,
-  }) : _markEpisodeWatched = markEpisodeWatched ?? _markRemotely;
+    required MarkEpisodeWatched markEpisodeWatched,
+    required this.history,
+    required this.autoMarkEnabled,
+  }) : _markEpisodeWatched = markEpisodeWatched;
 
   static const watchedProgressThreshold = 0.90;
   static const saveDebounce = Duration(seconds: 3);
@@ -32,6 +31,8 @@ class PlaybackProgressManager {
 
   final SetEpisodeWatchedCallback onEpisodeWatched;
   final MarkEpisodeWatched _markEpisodeWatched;
+  final PlayHistoryRepository history;
+  final bool Function() autoMarkEnabled;
   Future<void> _saveQueue = Future<void>.value();
   final Set<int> _autoWatchedEpisodeIds = {};
   final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
@@ -79,7 +80,7 @@ class PlaybackProgressManager {
     if (duration < minDurationForAutoWatched) return;
     if (isLocalPlayback || subjectId <= 0 || episodeId <= 0) return;
     if (subjectName == null || subjectCover == null) return;
-    if (!AppSettings.episodesProgress) {
+    if (!autoMarkEnabled()) {
       return;
     }
 
@@ -136,7 +137,7 @@ class PlaybackProgressManager {
             eventType == PlayHistoryEventType.defaults
         ? PlayHistoryEventType.forceOverwrite
         : eventType;
-    final playHistory = PlayHistory(
+    final playHistory = PlaybackRecord(
       subjectId: subjectId,
       subjectName: subjectName!,
       episodeId: episodeId,
@@ -149,12 +150,12 @@ class PlaybackProgressManager {
     );
     _saveQueue = _saveQueue.then((_) async {
       try {
-        await PlayHistoryService.save(
+        await history.save(
           playHistory,
           eventType: effectiveEventType,
         );
       } catch (e) {
-        LiggLogger().e('保存播放进度失败: $e');
+        logError('保存播放进度失败: $e');
       }
     });
     await _saveQueue;
@@ -178,13 +179,9 @@ class PlaybackProgressManager {
         watched: true,
       );
     } catch (e) {
-      LiggLogger().e('自动更新观看进度失败: $e');
+      logError('自动更新观看进度失败: $e');
     } finally {
       _autoWatchedEpisodeUpdatesInFlight.remove(targetEpisodeId);
     }
-  }
-
-  static Future<void> _markRemotely(int episodeId) {
-    return FlowApi.updateEpisodeWatchedService(episodeId, watched: true);
   }
 }

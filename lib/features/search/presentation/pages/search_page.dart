@@ -75,7 +75,7 @@ class _SearchPageState extends ConsumerState<SearchPage>
     if (_suppressSuggestions) return;
     suggestionDebounce?.cancel();
     final keyword = searchController.text;
-    suggestionDebounce = Timer(const Duration(seconds: 2), () {
+    suggestionDebounce = Timer(const Duration(seconds: 1), () {
       if (keyword.trim().isEmpty) {
         ref
             .read(searchPageControllerProvider.notifier)
@@ -485,7 +485,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
   // 搜索框区域高度
   static const double _searchBarHeight = 64;
   static const double _horizontalPadding = 16;
-  static const double _collapsedSearchLeft = 104;
+  static const double _collapsedSearchLeft = 56;
 
   _StickySearchHeaderDelegate({
     required this.searchController,
@@ -559,11 +559,14 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () => context.pop(),
                     ),
-                    Text(
-                      l10n.search,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
+                    Opacity(
+                      opacity: 1 - collapseProgress,
+                      child: Text(
+                        l10n.search,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],

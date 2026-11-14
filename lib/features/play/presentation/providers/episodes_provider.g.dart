@@ -37,19 +37,19 @@ final class EpisodesProvider
   Episodes create() => Episodes();
 }
 
-String _$episodesHash() => r'cd6c01f10ad5f51814fc803acb59b7aedcbf3e08';
+String _$episodesHash() => r'829be5c907e161821c934cd21abda0efd2a29c08';
 
 abstract class _$Episodes extends $AsyncNotifier<EpisodesData> {
   FutureOr<EpisodesData> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<EpisodesData>, EpisodesData>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<EpisodesData>, EpisodesData>,
         AsyncValue<EpisodesData>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="550" viewBox="0 0 800 550" role="img" aria-labelledby="title description">
+  <title id="title">Feature 各层的源码依赖关系</title>
+  <desc id="description">Presentation 依赖 Application 和 Domain，Application 依赖 Domain，Data 实现并依赖 Domain 的接口。Composition 仅用于装配，可以依赖各层。</desc>
+  <style>
+    text { font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif; }
+    .heading { font-size: 24px; font-weight: 700; fill: #f5f5f5; }
+    .layer { font-size: 16px; font-weight: 650; fill: #f5f6f7; }
+    .detail { font-size: 13px; fill: #bfc2c6; }
+    .note { font-size: 12px; fill: #bfc2c6; }
+    .arrow { fill: none; stroke: #a9a9a9; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+    .assembly { stroke: #b59ad6; stroke-dasharray: 5 4; marker-end: url(#assembly-arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a9a9a9"/></marker>
+    <marker id="assembly-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b59ad6"/></marker>
+  </defs>
+  <rect width="800" height="550" fill="#181818"/>
+  <text class="heading" x="30" y="37">各层之间的依赖关系</text>
+  <rect x="31.5" y="57.5" width="737" height="475" rx="16" fill="none" stroke="#303030"/>
+  <g text-anchor="middle">
+    <rect x="100" y="78" width="420" height="64" rx="12" fill="#1d242e" stroke="#2a425e"/>
+    <text class="layer" x="310" y="104">Presentation</text>
+    <text class="detail" x="310" y="126">界面、交互与界面状态</text>
+    <rect x="100" y="180" width="420" height="64" rx="12" fill="#1d242e" stroke="#2a425e"/>
+    <text class="layer" x="310" y="206">Application</text>
+    <text class="detail" x="310" y="228">用例与业务流程</text>
+    <rect x="100" y="282" width="420" height="64" rx="12" fill="#192620" stroke="#24503b"/>
+    <text class="layer" x="310" y="308">Domain</text>
+    <text class="detail" x="310" y="330">业务模型、规则与接口</text>
+    <rect x="100" y="384" width="420" height="64" rx="12" fill="#202020" stroke="#454545"/>
+    <text class="layer" x="310" y="410">Data</text>
+    <text class="detail" x="310" y="432">接口实现、数据源与模型转换</text>
+    <rect x="590" y="219" width="150" height="70" rx="12" fill="#292131" stroke="#58436d"/>
+    <text class="layer" x="665" y="246">Composition</text>
+    <text class="detail" x="665" y="268">仅用于装配</text>
+    <path class="arrow" d="M310 142 V180"/><path class="arrow" d="M310 244 V282"/><path class="arrow" d="M310 384 V346"/>
+    <path class="arrow" d="M100 110 H70 V314 H100"/>
+    <path class="arrow assembly" d="M590 235 H560 V110 H520"/>
+    <path class="arrow assembly" d="M590 246 H545 V212 H520"/>
+    <path class="arrow assembly" d="M590 262 H545 V314 H520"/>
+    <path class="arrow assembly" d="M590 273 H560 V416 H520"/>
+    <text class="note" x="400" y="485">实线表示源码依赖；虚线表示装配时的依赖。</text>
+    <text class="note" x="400" y="507">运行时，用例通过领域接口调用 Data 的具体实现。</text>
+  </g>
+</svg>

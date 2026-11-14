@@ -2,7 +2,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CardSkeleton extends StatelessWidget {
-  const CardSkeleton({super.key});
+  const CardSkeleton({super.key, this.borderRadius = 8.0});
+
+  final double borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,7 @@ class CardSkeleton extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: baseColor,
-                borderRadius: BorderRadius.circular(8.0),
+                borderRadius: BorderRadius.circular(borderRadius),
               ),
             ),
           ),

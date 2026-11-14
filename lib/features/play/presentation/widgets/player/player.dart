@@ -1,11 +1,9 @@
-import 'dart:io';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
 import 'dart:async';
 
 import 'package:anime_flow/features/play/application/play_session.dart';
-import 'package:anime_flow/features/play/application/player_bindings.dart';
-import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/play/presentation/extensions/video_fit_presentation.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/player_cache_speed_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -14,8 +12,6 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:anime_flow/features/play/presentation/widgets/danmaku/danmaku_view.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:window_manager/window_manager.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'gesture/desktop_gesture_detector.dart';
 import 'gesture/mobile_gesture_detector.dart';
 import 'ui/control/bottom_area_control.dart';
@@ -25,7 +21,7 @@ import 'ui/control/top_area_control.dart';
 import 'ui/screenshot_preview.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_query_providers.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 
 @Dependencies([
@@ -47,54 +43,30 @@ class PlayerView extends ConsumerStatefulWidget {
   ConsumerState<PlayerView> createState() => _PlayerViewState();
 }
 
-class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
+class _PlayerViewState extends ConsumerState<PlayerView> {
   late final PlaySession playController;
-  late final PlayStateNotifier playStateController;
   late final VideoUiNotifier videoUiStateController;
   late final VideoSourceNotifier videoSourceController;
+  late final void Function() stopObservingWindow;
   int lastEpisodeIndex = 0;
 
   @override
   void initState() {
     super.initState();
     playController = ref.read(playSessionProvider);
-    playStateController = ref.read(playStateProvider.notifier);
     videoUiStateController = ref.read(videoUiProvider.notifier);
     videoSourceController = ref.read(videoSourceProvider.notifier);
 
-    // 监听窗口状态变化，
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      windowManager.addListener(this);
-      // 检测桌面端全屏状态
-      videoUiStateController.checkDesktopFullscreen();
-    }
+    stopObservingWindow = ref.read(playbackDeviceProvider).observeWindow(
+          onRestore: videoUiStateController.checkDesktopFullscreen,
+          onFullscreen: videoUiStateController.setIsFullscreen,
+        );
   }
 
   @override
   void dispose() {
-    // 移除窗口监听器
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      windowManager.removeListener(this);
-    }
+    stopObservingWindow();
     super.dispose();
-  }
-
-  /// 窗口恢复时处理
-  @override
-  void onWindowRestore() {
-    videoUiStateController.checkDesktopFullscreen();
-  }
-
-  /// 窗口进入全屏时处理
-  @override
-  void onWindowEnterFullScreen() {
-    playStateController.setIsFullscreen(true);
-  }
-
-  /// 窗口退出全屏时处理
-  @override
-  void onWindowLeaveFullScreen() {
-    playStateController.setIsFullscreen(false);
   }
 
   /// 请求自动选择资源。
@@ -139,9 +111,8 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
             return Positioned.fill(
               child: KeyedSubtree(
                 key: ValueKey((kernel, switching)),
-                child: (playController.playbackCoordinator.engine
-                        as PlayerVideoSurface)
-                    .buildVideoSurface(fit: videoFit.boxFit),
+                child: ref.watch(playerSurfaceProvider)(
+                    playController.playbackCoordinator.engine, videoFit.boxFit),
               ),
             );
           },
@@ -157,7 +128,7 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
           child: Stack(
             children: [
               Positioned.fill(
-                child: SystemUtil.isMobile
+                child: ref.read(playbackDeviceProvider).isMobile
                     ? const MobileGestureDetector(child: MiddleAreaControl())
                     : const DesktopGestureDetector(child: MiddleAreaControl()),
               ),

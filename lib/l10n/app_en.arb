@@ -10,6 +10,14 @@
   "wallpaperBackdrop": "Backdrop",
   "wallpaperPoster": "Poster",
   "wallpaperImageCount": "{count} images",
+  "favoriteWallpapers": "Favorite wallpapers",
+  "favoriteWallpapersSubtitle": "Keep your favorite scenes close.",
+  "favoriteWallpapersCount": "{count} anime",
+  "favoriteWallpapersEmpty": "No favorite wallpapers yet",
+  "favoriteWallpapersRemoveConfirm": "Remove {name} from your favorites?",
+  "favoriteWallpapersEmptyHint": "Save your favorite scenes from wallpaper details.",
+  "favoriteWallpapersExplore": "Explore",
+  "favoriteWallpapersLoadMore": "Load more",
   "wallpaperDownload": "Download wallpaper",
   "wallpaperShare": "Share",
   "wallpaperCopyLink": "Copy link",
@@ -157,6 +165,11 @@
   "sortRank": "Rank",
   "sortTrends": "Trending",
   "sortDate": "Date",
+  "filter": "Filter",
+  "resetFilters": "Reset",
+  "filterWallpapers": "Filter wallpapers",
+  "wallpaperSortLabel": "Sort by",
+  "wallpaperKeywordHint": "Enter anime keywords",
   "rankingEnd": "End of list",
   "rankingLoadFailed": "Failed to load: {error}",
   "@rankingLoadFailed": {"placeholders": {"error": {}}},
@@ -654,6 +667,7 @@
   ,"selectedEpisodesCount": "{count} selected"
   ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
   ,"startDownload": "Start download"
+  ,"resumeDownload": "Resume download"
   ,"deleteDownloadTask": "Delete download task"
   ,"deleteDownloadTaskConfirmation": "Delete the downloaded resource for “{episode}”?"
   ,"@deleteDownloadTaskConfirmation": {"placeholders": {"episode": {}}}
@@ -871,5 +885,17 @@
   "rulesMirrorSubtitle": "Used for rule lists, downloads and updates",
   "updateDownloadRoute": "Download route",
   "updateDownloadRouteHint": "You can choose a download route below.",
-  "startUpdateDownload": "Start download"
+  "startUpdateDownload": "Start download",
+  "updatesHeroTitle": "Every update makes\nthe experience better.",
+  "updatesHeroSubtitle": "Explore AnimeFlow releases and improvements",
+  "updatesLatest": "Latest",
+  "updatesHistory": "Previous releases",
+  "updatesScrollHint": "Scroll to see more",
+  "updatesErrorTitle": "Unable to load updates",
+  "updatesErrorHint": "Check your connection and try again",
+  "updatesEmptyTitle": "No releases yet",
+  "updatesEmptyHint": "New release notes will appear here",
+  "updatesReload": "Reload",
+  "updatesNoNotes": "No release notes",
+  "updatesViewGithub": "View on GitHub"
 }

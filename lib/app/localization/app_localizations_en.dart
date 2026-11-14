@@ -47,6 +47,35 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get favoriteWallpapers => 'Favorite wallpapers';
+
+  @override
+  String get favoriteWallpapersSubtitle => 'Keep your favorite scenes close.';
+
+  @override
+  String favoriteWallpapersCount(int count) {
+    return '$count anime';
+  }
+
+  @override
+  String get favoriteWallpapersEmpty => 'No favorite wallpapers yet';
+
+  @override
+  String favoriteWallpapersRemoveConfirm(String name) {
+    return 'Remove $name from your favorites?';
+  }
+
+  @override
+  String get favoriteWallpapersEmptyHint =>
+      'Save your favorite scenes from wallpaper details.';
+
+  @override
+  String get favoriteWallpapersExplore => 'Explore';
+
+  @override
+  String get favoriteWallpapersLoadMore => 'Load more';
+
+  @override
   String get wallpaperDownload => 'Download wallpaper';
 
   @override
@@ -440,6 +469,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sortDate => 'Date';
+
+  @override
+  String get filter => 'Filter';
+
+  @override
+  String get resetFilters => 'Reset';
+
+  @override
+  String get filterWallpapers => 'Filter wallpapers';
+
+  @override
+  String get wallpaperSortLabel => 'Sort by';
+
+  @override
+  String get wallpaperKeywordHint => 'Enter anime keywords';
 
   @override
   String get rankingEnd => 'End of list';
@@ -2196,6 +2240,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startDownload => 'Start download';
 
   @override
+  String get resumeDownload => 'Resume download';
+
+  @override
   String get deleteDownloadTask => 'Delete download task';
 
   @override
@@ -2643,4 +2690,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get startUpdateDownload => 'Start download';
+
+  @override
+  String get updatesHeroTitle => 'Every update makes\nthe experience better.';
+
+  @override
+  String get updatesHeroSubtitle =>
+      'Explore AnimeFlow releases and improvements';
+
+  @override
+  String get updatesLatest => 'Latest';
+
+  @override
+  String get updatesHistory => 'Previous releases';
+
+  @override
+  String get updatesScrollHint => 'Scroll to see more';
+
+  @override
+  String get updatesErrorTitle => 'Unable to load updates';
+
+  @override
+  String get updatesErrorHint => 'Check your connection and try again';
+
+  @override
+  String get updatesEmptyTitle => 'No releases yet';
+
+  @override
+  String get updatesEmptyHint => 'New release notes will appear here';
+
+  @override
+  String get updatesReload => 'Reload';
+
+  @override
+  String get updatesNoNotes => 'No release notes';
+
+  @override
+  String get updatesViewGithub => 'View on GitHub';
 }

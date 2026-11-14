@@ -1,21 +1,26 @@
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
+import 'package:anime_flow/features/play/composition/play_overrides.dart';
 import 'dart:async';
 
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/core/settings/storage.dart';
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
+import 'package:anime_flow/shared/models/player/play/offline_episode.dart';
+import 'package:anime_flow/shared/models/player/play/play_history.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -39,6 +44,7 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
     engines = [];
     root = ProviderContainer(overrides: [
+      ...playFeatureOverrides,
       playerEngineFactoryProvider.overrideWithValue((kernel,
           {required adBlocker, required hardwareDecoder}) {
         final engine = _Engine(kernel);
@@ -53,7 +59,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  ProviderContainer route(int id) {
+  ProviderContainer route(int id, {List<OfflineEpisode> episodes = const []}) {
     final container = ProviderContainer(parent: root, overrides: [
       playExtraProvider.overrideWithValue(PlayRouteExtra(
         playExtra: PlayExtra(
@@ -63,6 +69,7 @@ void main() {
           subjectAliases: const [],
         ),
         isOfflineMode: true,
+        offlineEpisodes: episodes,
       )),
     ]);
     addTearDown(container.dispose);
@@ -94,19 +101,60 @@ void main() {
     // 视频源选择器暂时移除后，页面仍可继续持有播放会话。
     sourceOwner.close();
     await container.pump();
-    expect(container.exists(videoSourceProvider), isFalse);
+    expect(container.read(videoSourceProvider.exists), isFalse);
     expect(engines.single.disposed.isCompleted, isFalse);
 
     sessionOwner.close();
     await container.pump();
     await engines.single.disposed.future;
     await container.pump();
-    expect(container.exists(playSessionProvider), isFalse);
-    expect(container.exists(playStateProvider), isFalse);
-    expect(container.exists(danmakuStateProvider), isFalse);
-    expect(container.exists(videoUiProvider), isFalse);
-    expect(container.exists(episodesProvider), isFalse);
+    expect(container.read(playSessionProvider.exists), isFalse);
+    expect(container.read(playStateProvider.exists), isFalse);
+    expect(container.read(danmakuStateProvider.exists), isFalse);
+    expect(container.read(videoUiProvider.exists), isFalse);
+    expect(container.read(episodesProvider.exists), isFalse);
     expect(engines.single.disposeCount, 1);
+  });
+
+  test('completion advances an offline episode and stops at the last one',
+      () async {
+    FlutterSecureStorage.setMockInitialValues({});
+    Storage.playHistory = _EmptyHistory();
+    final container = route(1, episodes: [
+      for (final id in [101, 102])
+        (
+          episodeUrl: 'ep$id',
+          bangumiEpisodeId: id,
+          episodeSort: (id - 100).toDouble(),
+          episodeIndex: id - 100,
+          episodeTitle: 'Episode $id',
+          lineIndex: 0,
+          localMediaPath: '/ep$id.mp4',
+          localDanmakuPath: '',
+        ),
+    ]);
+    final session = container.listen(playSessionProvider, (_, __) {}).read();
+    session.subjectId = 1;
+    await session.playbackCoordinator.initialize();
+    expect((await container.read(episodesProvider.future)).episodeId, 101);
+    // 播放完成会清除续播记录，模拟安全存储需要受支持的平台。
+    final originalPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
+    addTearDown(() => debugDefaultTargetPlatformOverride = originalPlatform);
+
+    Future<void> completeEpisode() async {
+      final completed = session.playbackCoordinator.events
+          .firstWhere((event) => event is PlayerCompleted);
+      engines.single.eventController.add(const PlayerCompleted());
+      await completed;
+      await container.pump();
+    }
+
+    await completeEpisode();
+    expect(container.read(playStateProvider).phase, PlaybackPhase.completed);
+    expect(container.read(episodesProvider).requireValue.episodeId, 102);
+    await completeEpisode();
+    expect(container.read(episodesProvider).requireValue.episodeId, 102);
   });
 
   test('disposing an old playback route preserves the next route session',
@@ -142,15 +190,17 @@ class _Engine implements PlayerEngine {
   @override
   final PlayerKernel kernel;
   final disposed = Completer<void>();
+  final eventController = StreamController<PlayerEvent>.broadcast();
   int disposeCount = 0;
   @override
   PlayerCapabilities get capabilities => const PlayerCapabilities();
   @override
-  Stream<PlayerEvent> get events => const Stream.empty();
+  Stream<PlayerEvent> get events => eventController.stream;
   @override
   Future<void> initialize() async {}
   @override
   Future<void> dispose() async {
+    await eventController.close();
     disposeCount++;
     disposed.complete();
   }
@@ -162,6 +212,14 @@ class _Engine implements PlayerEngine {
 class _Settings implements Box<dynamic> {
   @override
   dynamic get(dynamic key, {dynamic defaultValue}) => defaultValue;
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _EmptyHistory implements Box<PlayHistory> {
+  @override
+  PlayHistory? get(dynamic key, {PlayHistory? defaultValue}) => defaultValue;
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

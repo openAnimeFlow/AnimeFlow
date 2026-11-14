@@ -1,10 +1,10 @@
+import 'package:anime_flow/core/logger/app_log.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_history_provider.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
-import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/core/utils/playback_format.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
@@ -49,7 +49,7 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
                   : l10n.syncedItems(result.synced);
       NotificationToast.show(message, title: '提示');
     } catch (e) {
-      LiggLogger().e('手动同步播放记录失败: $e');
+      logError('手动同步播放记录失败: $e');
       if (mounted) {
         NotificationToast.show(AppLocalizations.of(context).syncStatusFailed,
             title: '提示');
@@ -101,7 +101,7 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
             title: '提示');
       }
     } catch (e) {
-      LiggLogger().e('清理本地播放记录失败: $e');
+      logError('清理本地播放记录失败: $e');
       if (mounted) {
         NotificationToast.show(AppLocalizations.of(context).deleteFailed,
             title: '提示');
@@ -247,7 +247,7 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
                                               fontWeight: FontWeight.bold)),
                                       Text(
                                         l10n.watchedLabel(
-                                          Utils.calculatePercentage(
+                                          calculatePercentage(
                                             playHistory.position,
                                             playHistory.duration,
                                           ),

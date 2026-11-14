@@ -1,15 +1,13 @@
+import 'package:anime_flow/core/logger/app_log.dart';
+import 'package:anime_flow/features/play/application/offline_playback.dart';
 import 'dart:async';
 
-import 'package:anime_flow/features/play/application/play_request.dart';
 import 'package:anime_flow/features/play/application/play_session.dart';
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
-import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/features/play/data/repository/play_repository.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -20,23 +18,17 @@ import 'package:anime_flow/features/play/presentation/widgets/player/player.dart
 import 'package:anime_flow/features/play/presentation/utils/playback_screen_awake.dart';
 import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/navigation/app_route_observer.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:anime_flow/shared/widgets/danmaku_text_field.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
-import 'package:anime_flow/features/play/presentation/providers/episode_comments_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_query_providers.dart';
 
 import '../widgets/content/comments_view.dart';
-import '../widgets/content/play_content_navigator.dart';
+import '../widgets/content/introduce_view.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
 
 @Dependencies([
   playSession,
@@ -77,8 +69,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
   final GlobalKey _contentKey = GlobalKey();
 
   bool _hasInitResources = false;
-  int? _lastOfflineEpisodeId;
-  int _offlineRequestId = 0;
+  late final OfflinePlayback _offlinePlayback;
   bool? _lastReportedIsWideScreen;
   bool _subscribedRouteObserver = false;
   bool _resumeWhenRouteVisible = false;
@@ -89,11 +80,14 @@ class _PlayPageState extends ConsumerState<PlayPage>
     videoSourceController =
         ref.listenManual(videoSourceProvider.notifier, (_, __) {}).read();
     playSession = ref.listenManual(playSessionProvider, (_, __) {}).read();
-    _screenAwake = PlaybackScreenAwake(playSession.playbackCoordinator.events);
+    _offlinePlayback = OfflinePlayback(
+        ref.read(playHistoryServiceProvider), playSession.initPlayState);
+    _screenAwake = PlaybackScreenAwake(playSession.playbackCoordinator.events,
+        ref.read(playbackDeviceProvider).keepScreenOn);
     _contentAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
-      value: ref.read(playStateProvider).isContentExpanded ? 1 : 0,
+      value: ref.read(videoUiProvider).isContentExpanded ? 1 : 0,
     );
     _contentSizeFactor = CurvedAnimation(
       parent: _contentAnimationController,
@@ -107,8 +101,9 @@ class _PlayPageState extends ConsumerState<PlayPage>
 
   @override
   void dispose() {
+    _offlinePlayback.dispose();
     unawaited(_screenAwake.dispose());
-    PresenceService.instance.clearPlaybackContext();
+    playSession.clearPresence();
     if (_subscribedRouteObserver) {
       appRouteObserver.unsubscribe(this);
     }
@@ -157,86 +152,27 @@ class _PlayPageState extends ConsumerState<PlayPage>
 
   Future<void> _initOfflinePlayback(EpisodesData episodesState) async {
     final extra = ref.read(playExtraProvider);
-    if (!extra.isOfflineMode) {
-      return;
-    }
-    if (episodesState.episodes == null || episodesState.episodeIndex <= 0) {
-      return;
-    }
-    if (_lastOfflineEpisodeId == episodesState.episodeId) {
-      return;
-    }
-    final episode = _findOfflineEpisode(extra, episodesState);
-    final mediaPath = episode?.localMediaPath.trim().isNotEmpty == true
-        ? episode!.localMediaPath
-        : extra.offlineMediaPath;
-    if (mediaPath == null || mediaPath.isEmpty) {
-      return;
-    }
-    _lastOfflineEpisodeId = episodesState.episodeId;
-    final requestId = ++_offlineRequestId;
-
+    if (!extra.isOfflineMode) return;
+    final file = ref
+        .read(episodesProvider.notifier)
+        .selection
+        .offlineMediaFor(episodesState);
     try {
-      var offset = 0;
-      final history =
-          await PlayRepository.getPlayHistory(extra.playExtra.subjectId);
-      // 读历史记录期间可能已经选中另一集，旧请求不能重新开始播放。
-      if (!mounted || requestId != _offlineRequestId) return;
-      if (history != null &&
-          history.position > 0 &&
-          history.episodeId == episodesState.episodeId) {
-        offset = history.position;
-      }
-
-      await playSession.initPlayState(
-        PlayRequest(
-          videoUrl: mediaPath,
-          offset: offset,
-          subjectId: extra.playExtra.subjectId,
-          subjectName: extra.playExtra.subjectName,
-          subjectCover: extra.playExtra.subjectCover,
-          episodeIndex: episodesState.episodeIndex,
-          episodeSort: episodesState.episodeSort.toInt(),
-          episodeId: episodesState.episodeId,
-          alias: extra.playExtra.subjectAliases,
-          localDanmakuPath: episode?.localDanmakuPath.trim().isNotEmpty == true
-              ? episode!.localDanmakuPath
+      await _offlinePlayback.select(
+          episodes: episodesState,
+          path: file?.localMediaPath ?? extra.offlineMediaPath,
+          danmakuPath: file?.localDanmakuPath.trim().isNotEmpty == true
+              ? file!.localDanmakuPath
               : extra.offlineDanmakuPath,
-          isLocalPlayback: true,
-        ),
-      );
+          subjectId: extra.playExtra.subjectId,
+          name: extra.playExtra.subjectName,
+          cover: extra.playExtra.subjectCover,
+          aliases: extra.playExtra.subjectAliases);
     } catch (error, stackTrace) {
-      LiggLogger().e('本地视频打开失败', error: error, stackTrace: stackTrace);
-      if (!mounted || requestId != _offlineRequestId) return;
-      // 允许用户重新选择同一集重试，旧请求失败不能清除新请求的标记。
-      _lastOfflineEpisodeId = null;
+      if (!mounted) return;
+      logError('本地视频打开失败', error: error, stackTrace: stackTrace);
       NotificationToast.show(AppLocalizations.of(context).openFailed);
     }
-  }
-
-  DownloadEpisode? _findOfflineEpisode(
-    PlayRouteExtra extra,
-    EpisodesData episodesState,
-  ) {
-    final completedEpisodes = extra.offlineEpisodes
-        .where((episode) => episode.status == DownloadStatus.completed)
-        .where((episode) => episode.localMediaPath.trim().isNotEmpty)
-        .toList()
-      ..sort(_compareDownloadEpisodes);
-    if (completedEpisodes.isEmpty) {
-      return null;
-    }
-    final byId = completedEpisodes.indexWhere(
-      (episode) => episode.bangumiEpisodeId == episodesState.episodeId,
-    );
-    if (byId >= 0) {
-      return completedEpisodes[byId];
-    }
-    final byIndex = episodesState.episodeIndex - 1;
-    if (byIndex >= 0 && byIndex < completedEpisodes.length) {
-      return completedEpisodes[byIndex];
-    }
-    return null;
   }
 
   void _syncIsWideScreenAfterBuild(bool isWideScreen) {
@@ -244,7 +180,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
     _lastReportedIsWideScreen = isWideScreen;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      playSession.updateIsWideScreen(isWideScreen);
+      ref.read(videoUiProvider.notifier).setIsWideScreen(isWideScreen);
     });
   }
 
@@ -263,7 +199,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
       }
     });
     ref.listen<bool>(
-      playStateProvider.select((state) => state.isContentExpanded),
+      videoUiProvider.select((state) => state.isContentExpanded),
       (_, isExpanded) {
         if (isExpanded) {
           _contentAnimationController.forward();
@@ -277,13 +213,13 @@ class _PlayPageState extends ConsumerState<PlayPage>
       _syncIsWideScreenAfterBuild(isWideScreen);
 
       final isFullscreen = ref.watch(
-        playStateProvider.select((state) => state.isFullscreen),
+        videoUiProvider.select((state) => state.isFullscreen),
       );
       Widget content;
       if (isFullscreen) {
         content = Scaffold(
           backgroundColor: Colors.black,
-          resizeToAvoidBottomInset: !SystemUtil.isMobile,
+          resizeToAvoidBottomInset: !ref.read(playbackDeviceProvider).isMobile,
           body: Stack(
             fit: StackFit.expand,
             children: [
@@ -347,7 +283,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
               );
       }
 
-      if (SystemUtil.isMobile) {
+      if (ref.read(playbackDeviceProvider).isMobile) {
         return PopScope(
           canPop: !isFullscreen,
           onPopInvokedWithResult: (bool didPop, dynamic result) {
@@ -361,18 +297,6 @@ class _PlayPageState extends ConsumerState<PlayPage>
       return content;
     });
   }
-}
-
-int _compareDownloadEpisodes(DownloadEpisode a, DownloadEpisode b) {
-  final lineComparison = a.lineIndex.compareTo(b.lineIndex);
-  if (lineComparison != 0) {
-    return lineComparison;
-  }
-  final sortComparison = a.episodeSort.compareTo(b.episodeSort);
-  if (sortComparison != 0) {
-    return sortComparison;
-  }
-  return a.episodeUrl.compareTo(b.episodeUrl);
 }
 
 @Dependencies([
@@ -438,11 +362,9 @@ class _ContentViewState extends ConsumerState<_ContentView>
 
   @override
   Widget build(BuildContext context) {
-    final (isFullscreen, isWideScreen, isContentExpanded) = ref.watch(
-        playStateProvider.select((state) =>
-            (state.isFullscreen, state.isWideScreen, state.isContentExpanded)));
-    final isContentVisible =
-        !isFullscreen && (!isWideScreen || isContentExpanded);
+    final isWideScreen = ref.watch(
+      videoUiProvider.select((state) => state.isWideScreen),
+    );
     return MediaQuery.removePadding(
       context: context,
       removeLeft: isWideScreen,
@@ -497,17 +419,12 @@ class _ContentViewState extends ConsumerState<_ContentView>
               ),
               const Divider(height: 1),
               Expanded(
-                child: AnimatedBuilder(
-                  animation: tabController,
-                  builder: (context, _) => TabBarView(
-                    controller: tabController,
-                    children: [
-                      PlayContentNavigator(
-                        isActive: tabController.index == 0 && isContentVisible,
-                      ),
-                      const CommentsView(),
-                    ],
-                  ),
+                child: TabBarView(
+                  controller: tabController,
+                  children: const [
+                    IntroduceView(),
+                    CommentsView(),
+                  ],
                 ),
               ),
             ],

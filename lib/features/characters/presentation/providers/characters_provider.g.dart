@@ -43,7 +43,7 @@ abstract class _$CharactersList extends $AsyncNotifier<CharactersViewState> {
   FutureOr<CharactersViewState> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<CharactersViewState>, CharactersViewState>;
     final element = ref.element as $ClassProviderElement<
@@ -51,6 +51,6 @@ abstract class _$CharactersList extends $AsyncNotifier<CharactersViewState> {
         AsyncValue<CharactersViewState>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

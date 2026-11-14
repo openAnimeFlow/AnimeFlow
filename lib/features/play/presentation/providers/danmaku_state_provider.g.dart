@@ -46,19 +46,70 @@ final class DanmakuStateNotifierProvider
 }
 
 String _$danmakuStateNotifierHash() =>
-    r'6b53205e87ba3181fb2d684d20f0eafd09815547';
+    r'14fff3157250bbb7f16eded408e3eff4fcba791d';
 
 abstract class _$DanmakuStateNotifier extends $Notifier<DanmakuState> {
   DanmakuState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<DanmakuState, DanmakuState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<DanmakuState, DanmakuState>,
         DanmakuState,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(DanmakuChineseModeNotifier)
+final danmakuChineseModeProvider = DanmakuChineseModeNotifierProvider._();
+
+final class DanmakuChineseModeNotifierProvider
+    extends $NotifierProvider<DanmakuChineseModeNotifier, DanmakuChineseMode> {
+  DanmakuChineseModeNotifierProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'danmakuChineseModeProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$danmakuChineseModeNotifierHash();
+
+  @$internal
+  @override
+  DanmakuChineseModeNotifier create() => DanmakuChineseModeNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DanmakuChineseMode value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DanmakuChineseMode>(value),
+    );
+  }
+}
+
+String _$danmakuChineseModeNotifierHash() =>
+    r'ceae3504a434982f2f6aba6eab6ddc82de3ecc79';
+
+abstract class _$DanmakuChineseModeNotifier
+    extends $Notifier<DanmakuChineseMode> {
+  DanmakuChineseMode build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<DanmakuChineseMode, DanmakuChineseMode>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<DanmakuChineseMode, DanmakuChineseMode>,
+        DanmakuChineseMode,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
   }
 }

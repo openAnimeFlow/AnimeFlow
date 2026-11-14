@@ -6,6 +6,7 @@ import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
+import 'package:anime_flow/shared/navigation/args/video_resource_download_route_args.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
@@ -13,7 +14,6 @@ import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/episodes_drawer.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -213,12 +213,18 @@ class InfoHeadView extends StatelessWidget {
   }
 
   Widget _skeletonView(BuildContext context) {
-    final isDark = SystemUtil.isDarkTheme(context);
-    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-    final containerColor = isDark
-        ? Theme.of(context).colorScheme.surfaceContainerHighest
-        : Theme.of(context).colorScheme.surface;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = colorScheme.brightness == Brightness.dark;
+    final baseColor = colorScheme.surfaceContainerHighest;
+    final highlightColor = Color.lerp(
+      baseColor,
+      isDark ? colorScheme.onSurface : colorScheme.surface,
+      isDark ? 0.08 : 0.65,
+    )!;
+    final boxDecoration = BoxDecoration(
+      color: baseColor,
+      borderRadius: BorderRadius.circular(8.0),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.max,
@@ -229,10 +235,7 @@ class InfoHeadView extends StatelessWidget {
           child: Container(
             height: 30,
             width: 250,
-            decoration: BoxDecoration(
-              color: containerColor,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
+            decoration: boxDecoration,
           ),
         ),
         Shimmer.fromColors(
@@ -245,10 +248,7 @@ class InfoHeadView extends StatelessWidget {
                 margin: const EdgeInsets.only(top: 5),
                 height: 20,
                 width: 180,
-                decoration: BoxDecoration(
-                  color: containerColor,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
+                decoration: boxDecoration,
               );
             }),
           ),
@@ -260,10 +260,7 @@ class InfoHeadView extends StatelessWidget {
           child: Container(
             height: 30,
             width: 100,
-            decoration: BoxDecoration(
-              color: containerColor,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
+            decoration: boxDecoration,
           ),
         ),
       ],
@@ -440,6 +437,15 @@ class InfoHeadView extends StatelessWidget {
                     context,
                     subjectId: subjectItem.id,
                     onPlayEpisode: onPlayEpisode,
+                    onDownloadEpisodes: (episodes) {
+                      appNavigatorOf(context).openVideoResourceDownload<void>(
+                        VideoResourceDownloadRouteArgs(
+                          subjectName: name,
+                          subjectCover: ref.read(animeInfoArgsProvider).image,
+                          episodes: episodes,
+                        ),
+                      );
+                    },
                     onEpisodeLongPress: (episode) async {
                       try {
                         await ref

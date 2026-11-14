@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/utils/player_screenshot.dart';
@@ -14,11 +14,10 @@ class RightAreaControl extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isShowControlsUi =
         ref.watch(videoUiProvider.select((state) => state.isShowControlsUi));
-    final fullscreen =
-        ref.watch(playStateProvider.select((s) => s.isFullscreen));
+    final fullscreen = ref.watch(videoUiProvider.select((s) => s.isFullscreen));
     final position = ref.watch(playStateProvider.select((s) => s.position));
     final isWideScreen =
-        ref.watch(playStateProvider.select((s) => s.isWideScreen));
+        ref.watch(videoUiProvider.select((s) => s.isWideScreen));
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
       transitionBuilder: (child, animation) {

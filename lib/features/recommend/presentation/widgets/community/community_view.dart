@@ -1,0 +1,874 @@
+import 'dart:math' as math;
+
+import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
+import 'package:anime_flow/core/constants/assets_path_constants.dart';
+import 'package:anime_flow/core/constants/layout_constant.dart';
+import 'package:anime_flow/core/network/sse/sse_connection_status.dart';
+import 'package:anime_flow/features/recommend/presentation/providers/community_provider.dart';
+import 'package:anime_flow/shared/models/flow/online_count.dart';
+import 'package:anime_flow/shared/models/flow/watching_subject.dart';
+import 'package:anime_flow/shared/widgets/subject_card.dart';
+import 'package:anime_flow/shared/widgets/top_occlusion.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+class CommunityView extends ConsumerStatefulWidget {
+  const CommunityView({super.key, required this.active});
+
+  final bool active;
+
+  @override
+  ConsumerState<CommunityView> createState() => _CommunityPageState();
+}
+
+class _CommunityPageState extends ConsumerState<CommunityView>
+    with AutomaticKeepAliveClientMixin {
+  AsyncValue<List<WatchingSubject>> _watching = const AsyncLoading();
+  AsyncValue<OnlineCount> _onlineCount = const AsyncLoading();
+  ProviderSubscription<AsyncValue<List<WatchingSubject>>>? _watchingListener;
+  ProviderSubscription<AsyncValue<OnlineCount>>? _onlineListener;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.active) _listen();
+  }
+
+  @override
+  void didUpdateWidget(CommunityView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.active == widget.active) return;
+    if (widget.active) {
+      _listen();
+    } else {
+      _watchingListener?.close();
+      _onlineListener?.close();
+    }
+  }
+
+  void _listen() {
+    _watchingListener =
+        ref.listenManual(communityWatchingSubjectsProvider, (_, next) {
+      if (next.isLoading && _watching.hasValue) return;
+      setState(() => _watching = next);
+    }, fireImmediately: true);
+    _onlineListener = ref.listenManual(communityOnlineCountProvider, (_, next) {
+      if (next.isLoading && _onlineCount.hasValue) return;
+      setState(() => _onlineCount = next);
+    }, fireImmediately: true);
+  }
+
+  Future<void> _refresh() async {
+    if (!widget.active) return;
+    await Future.wait([
+      ref.refresh(communityWatchingSubjectsProvider.future),
+      ref.refresh(communityOnlineCountProvider.future),
+    ]);
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final topOcclusion = TopOcclusionScope.of(context);
+
+    return Stack(
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: IgnorePointer(
+            child: SizedBox(
+              height: 360,
+              child: ShaderMask(
+                blendMode: BlendMode.dstIn,
+                shaderCallback: (bounds) => const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white,
+                    Colors.white,
+                    Colors.transparent,
+                  ],
+                  stops: [0, 0.62, 1],
+                ).createShader(bounds),
+                child: SvgPicture.asset(
+                  AssetsPathConstants.ambientWaveBackground,
+                  alignment: Alignment.topCenter,
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    colorScheme.primary.withValues(alpha: 0.42),
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        RefreshIndicator(
+          color: colorScheme.primary,
+          edgeOffset: topOcclusion,
+          displacement: 10,
+          onRefresh: _refresh,
+          child: Consumer(
+            builder: (context, ref, _) {
+              final connection = ref.watch(communityConnectionProvider);
+
+              return _CommunityContent(
+                subjects: _watching.value ?? const <WatchingSubject>[],
+                isWatchingLoading: _watching.isLoading && !_watching.hasValue,
+                onlineCount: _onlineCount,
+                connection: connection,
+                connectionError: _watching.error ?? _onlineCount.error,
+                retryLabel: l10n.retry,
+                sectionTitle: l10n.watchingAnimeTitle,
+                sectionSummary: (count, viewers) =>
+                    l10n.watchingAnimeSummary(count, viewers),
+                watchingPeopleLabel: l10n.watchingPeople,
+                emptyMessage: l10n.noUsersWatchingAnime,
+                onlineSummary: (count) => l10n.communityOnlineSummary(
+                  count.onlineUsers ?? '--',
+                  count.anonymousUsers ?? '--',
+                  count.loggedInUsers ?? '--',
+                ),
+                onRetry: _refresh,
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CommunityContent extends StatelessWidget {
+  const _CommunityContent({
+    required this.subjects,
+    required this.isWatchingLoading,
+    required this.onlineCount,
+    required this.connection,
+    required this.connectionError,
+    required this.retryLabel,
+    required this.sectionTitle,
+    required this.sectionSummary,
+    required this.watchingPeopleLabel,
+    required this.emptyMessage,
+    required this.onlineSummary,
+    required this.onRetry,
+  });
+
+  final List<WatchingSubject> subjects;
+  final bool isWatchingLoading;
+  final AsyncValue<OnlineCount> onlineCount;
+  final CommunityConnectionState connection;
+  final Object? connectionError;
+  final String retryLabel;
+  final String sectionTitle;
+  final String Function(int count, Object viewers) sectionSummary;
+  final String Function(Object count) watchingPeopleLabel;
+  final String emptyMessage;
+  final String Function(OnlineCount count) onlineSummary;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalWatching =
+        (subjects.any((subject) => subject.online.onlineUsers == null))
+            ? null
+            : subjects.fold<int>(
+                0,
+                (total, subject) => total + subject.online.onlineUsers!,
+              );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 600;
+        final horizontalPadding = math.max(
+          10.0,
+          (constraints.maxWidth - LayoutConstant.maxWidth) / 2 + 10,
+        );
+        final gridWidth = constraints.maxWidth - horizontalPadding * 2;
+        final spacing = compact ? 10.0 : 15.0;
+        final minCardWidth = compact ? 120.0 : 200.0;
+        final crossAxisCount =
+            ((gridWidth + spacing) / (minCardWidth + spacing))
+                .floor()
+                .clamp(3, 7);
+        final cardWidth =
+            (gridWidth - spacing * (crossAxisCount - 1)) / crossAxisCount;
+        final textScaler = MediaQuery.textScalerOf(context);
+        final viewerLabelHeight = textScaler.scale(13) * 1.4;
+        final footerHeight = viewerLabelHeight + (compact ? 8 : 12);
+        return OcclusionAwareCustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                5,
+                horizontalPadding,
+                5,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: _CommunityHero(
+                  onlineCount: onlineCount,
+                  connection: connection,
+                  connectionError: connectionError,
+                  onRetry: onRetry,
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                10,
+                horizontalPadding,
+                10,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: _SectionHeader(
+                  title: sectionTitle,
+                  subtitle: subjects.isEmpty
+                      ? null
+                      : sectionSummary(subjects.length, totalWatching ?? '--'),
+                  icon: Icons.ondemand_video_outlined,
+                ),
+              ),
+            ),
+            if (isWatchingLoading)
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  8,
+                  horizontalPadding,
+                  32,
+                ),
+                sliver: const SliverToBoxAdapter(
+                  child: SizedBox(height: 180, child: _LoadingIndicator()),
+                ),
+              )
+            else if (subjects.isEmpty)
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  8,
+                  horizontalPadding,
+                  32,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: _EmptyCommunityCard(
+                    onlineCount: onlineCount,
+                    retryLabel: retryLabel,
+                    emptyMessage: emptyMessage,
+                    onlineSummary: onlineSummary,
+                    onRetry: onRetry,
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  8,
+                  horizontalPadding,
+                  32,
+                ),
+                sliver: SliverGrid(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _WatchingSubjectCard(
+                      subject: subjects[index],
+                      watchingPeopleLabel: watchingPeopleLabel,
+                    ),
+                    childCount: subjects.length,
+                  ),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    mainAxisSpacing: spacing,
+                    crossAxisSpacing: spacing,
+                    mainAxisExtent: cardWidth * 1.5 + footerHeight,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _CommunityHero extends StatelessWidget {
+  const _CommunityHero({
+    required this.onlineCount,
+    required this.connection,
+    required this.connectionError,
+    required this.onRetry,
+  });
+
+  final AsyncValue<OnlineCount> onlineCount;
+  final CommunityConnectionState connection;
+  final Object? connectionError;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              l10n.communityOnlineTitle,
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1,
+              ),
+            ),
+            const Spacer(),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _ConnectionIndicator(
+                  status: connection.overall,
+                  l10n: AppLocalizations.of(context),
+                  detail: connectionError?.toString(),
+                ),
+                if (connection.overall == SseConnectionStatus.error)
+                  IconButton(
+                    tooltip:
+                        AppLocalizations.of(context).communityConnectionRetry,
+                    onPressed: onRetry,
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                  ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          l10n.communityOnlineSubtitle,
+          style: const TextStyle(fontSize: 14),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          l10n.communityOnlineVersionNotice,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 22),
+        onlineCount.when(
+          loading: () => _StatsCard.loading(
+            totalLabel: l10n.totalOnlineUsers,
+            anonymousLabel: l10n.anonymousUsers,
+            loggedInLabel: l10n.loggedInUsers,
+          ),
+          error: (error, __) => _StatsCard.error(
+            error: error,
+            totalLabel: l10n.totalOnlineUsers,
+            anonymousLabel: l10n.anonymousUsers,
+            loggedInLabel: l10n.loggedInUsers,
+          ),
+          data: (count) => _StatsCard(
+            count: count,
+            totalLabel: l10n.totalOnlineUsers,
+            anonymousLabel: l10n.anonymousUsers,
+            loggedInLabel: l10n.loggedInUsers,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ConnectionIndicator extends StatefulWidget {
+  const _ConnectionIndicator({
+    required this.status,
+    required this.l10n,
+    this.detail,
+  });
+
+  final SseConnectionStatus status;
+  final AppLocalizations l10n;
+  final String? detail;
+
+  @override
+  State<_ConnectionIndicator> createState() => _ConnectionIndicatorState();
+}
+
+class _ConnectionIndicatorState extends State<_ConnectionIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _rotationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    _updateRotation();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ConnectionIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.status != widget.status) {
+      _updateRotation();
+    }
+  }
+
+  void _updateRotation() {
+    switch (widget.status) {
+      case SseConnectionStatus.reconnecting:
+      case SseConnectionStatus.connecting:
+        if (!_rotationController.isAnimating) {
+          _rotationController.repeat();
+        }
+      case SseConnectionStatus.connected:
+      case SseConnectionStatus.error:
+      case SseConnectionStatus.disconnected:
+        _rotationController.stop();
+        _rotationController.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final (label, color, icon) = switch (widget.status) {
+      SseConnectionStatus.connected => (
+          widget.l10n.communityConnectionConnected,
+          Colors.green,
+          const Icon(Icons.wifi_tethering_rounded, size: 15),
+        ),
+      SseConnectionStatus.reconnecting => (
+          widget.l10n.communityConnectionReconnecting,
+          colorScheme.tertiary,
+          _buildRotatingIcon(colorScheme.tertiary),
+        ),
+      SseConnectionStatus.error => (
+          widget.l10n.communityConnectionError,
+          colorScheme.error,
+          const Icon(Icons.wifi_off_rounded, size: 15),
+        ),
+      SseConnectionStatus.disconnected => (
+          widget.l10n.communityConnectionDisconnected,
+          colorScheme.outline,
+          const Icon(Icons.cloud_off_rounded, size: 15),
+        ),
+      SseConnectionStatus.connecting => (
+          widget.l10n.communityConnectionConnecting,
+          colorScheme.primary,
+          _buildRotatingIcon(colorScheme.primary),
+        ),
+    };
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            icon,
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        if (widget.detail != null && widget.status == SseConnectionStatus.error)
+          SizedBox(
+            width: 180,
+            child: Text(
+              widget.detail!,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: colorScheme.error,
+                fontSize: 10,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildRotatingIcon(Color color) {
+    return RotationTransition(
+      turns: ReverseAnimation(_rotationController),
+      child: Icon(Icons.sync_rounded, size: 15, color: color),
+    );
+  }
+}
+
+class _StatsCard extends StatelessWidget {
+  const _StatsCard({
+    required this.count,
+    required this.totalLabel,
+    required this.anonymousLabel,
+    required this.loggedInLabel,
+  })  : loading = false,
+        error = null;
+
+  const _StatsCard.loading({
+    required this.totalLabel,
+    required this.anonymousLabel,
+    required this.loggedInLabel,
+  })  : count = null,
+        loading = true,
+        error = null;
+
+  const _StatsCard.error({
+    required this.error,
+    required this.totalLabel,
+    required this.anonymousLabel,
+    required this.loggedInLabel,
+  })  : count = null,
+        loading = false;
+
+  final OnlineCount? count;
+  final String totalLabel;
+  final String anonymousLabel;
+  final String loggedInLabel;
+  final bool loading;
+  final Object? error;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (error != null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: colorScheme.error.withValues(alpha: .45)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.error_outline_rounded, color: colorScheme.error),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                error.toString(),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final values = [
+      count?.onlineUsers,
+      count?.anonymousUsers,
+      count?.loggedInUsers
+    ];
+    final items = [
+      (Icons.groups_rounded, totalLabel, values[0], colorScheme.primary),
+      (
+        Icons.visibility_off_rounded,
+        anonymousLabel,
+        values[1],
+        colorScheme.secondary
+      ),
+      (Icons.person_rounded, loggedInLabel, values[2], colorScheme.tertiary),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          for (var index = 0; index < items.length; index++) ...[
+            Expanded(child: _StatItem(item: items[index], loading: loading)),
+            if (index != items.length - 1)
+              Container(
+                height: 45,
+                width: 1,
+                color: colorScheme.outlineVariant,
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  const _StatItem({required this.item, required this.loading});
+
+  final (IconData, String, int?, Color) item;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: item.$4.withValues(alpha: .20),
+            child: Icon(item.$1, color: item.$4, size: 23),
+          ),
+          const SizedBox(width: 9),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.$2,
+                  style: TextStyle(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  loading ? '--' : (item.$3?.toString() ?? '--'),
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader(
+      {required this.title, required this.icon, this.subtitle});
+
+  final String title;
+  final String? subtitle;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = ColorScheme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: colorScheme.onSurface,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        if (subtitle != null)
+          Text(
+            subtitle!,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: colorScheme.onSurfaceVariant,
+              fontSize: 12,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _WatchingSubjectCard extends StatelessWidget {
+  const _WatchingSubjectCard(
+      {required this.subject, required this.watchingPeopleLabel});
+
+  final WatchingSubject subject;
+  final String Function(Object count) watchingPeopleLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final imageUrl = subject.images?.common ?? subject.images?.medium ?? '';
+    return InkWell(
+      borderRadius: BorderRadius.circular(15),
+      onTap: () => appNavigatorOf(context).openAnimeInfo<void>(
+          id: subject.subjectId, name: subject.displayName, image: imageUrl),
+      child: Column(
+        children: [
+          AspectRatio(
+            aspectRatio: 2 / 3,
+            child: SubjectCard(image: imageUrl, title: subject.displayName),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.visibility_rounded,
+                    size: 16,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      watchingPeopleLabel(subject.online.onlineUsers ?? '--'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyCommunityCard extends StatelessWidget {
+  const _EmptyCommunityCard({
+    required this.onlineCount,
+    required this.retryLabel,
+    required this.emptyMessage,
+    required this.onlineSummary,
+    required this.onRetry,
+  });
+
+  final AsyncValue<OnlineCount> onlineCount;
+  final String retryLabel;
+  final String emptyMessage;
+  final String Function(OnlineCount count) onlineSummary;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: onlineCount.when(
+        loading: () => const SizedBox(height: 130, child: _LoadingIndicator()),
+        error: (_, __) =>
+            _EmptyMessage(retryLabel: retryLabel, onRetry: onRetry),
+        data: (count) => Row(
+          children: [
+            SizedBox(
+              width: 130,
+              height: 110,
+              child: Image.asset(AssetsPathConstants.logo),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    emptyMessage,
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    onlineSummary(count),
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyMessage extends StatelessWidget {
+  const _EmptyMessage({required this.retryLabel, required this.onRetry});
+
+  final String retryLabel;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        Icon(
+          Icons.cloud_off_outlined,
+          color: colorScheme.outline,
+          size: 38,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '在线人数暂时无法获取',
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 10),
+        OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
+      ],
+    );
+  }
+}
+
+class _LoadingIndicator extends StatelessWidget {
+  const _LoadingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: CircularProgressIndicator(
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+}

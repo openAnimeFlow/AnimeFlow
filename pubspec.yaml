@@ -16,11 +16,11 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.6.7
+version: 2.6.8
 
 environment:
   sdk: ">=3.3.4 <4.0.0"
-  flutter: 3.47.9
+  flutter: 3.50.0
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -52,12 +52,12 @@ dependencies:
   media_kit: # 提供跨平台音视频播放与播放控制能力。
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 83b7ca63772856e1ea0158916177e136f7b7b0be
+      ref: cd75bcfe94ba45ebb6f6b940c68e072d079aee14
       path: ./media_kit
   media_kit_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 83b7ca63772856e1ea0158916177e136f7b7b0be
+      ref: cd75bcfe94ba45ebb6f6b940c68e072d079aee14
       path: ./media_kit_video
   fvp: ^0.39.1 # 基于 libmdk 的跨平台视频播放插件。
   video_player: ^2.14.1 # 使用平台原生播放器播放视频。
@@ -65,7 +65,7 @@ dependencies:
   screen_brightness_platform_interface: ^2.1.0 # 定义屏幕亮度插件的跨平台接口契约。
   screen_brightness_android: ^2.1.3 # 提供 Android 平台的屏幕亮度插件实现。
   screen_brightness_ios: ^2.1.2 # 提供 iOS 平台的屏幕亮度插件实现。
-  flutter_volume_controller: ^2.0.2 # 读取、监听和设置设备系统音量。
+  volume_controller: ^3.7.1 # 读取、监听和设置设备系统音量。
 
   # WebView 与网页容器
   webview_flutter: ^4.13.0 # 在 Flutter 中嵌入并控制原生 WebView。
@@ -92,7 +92,7 @@ dependencies:
   crypto: ^3.0.6 # 提供常用密码学哈希、摘要和 HMAC 算法。
   uuid: ^4.5.1 # 生成标准格式的 UUID 标识符。
   flutter_cache_manager: ^3.4.1 # 下载、缓存和管理网络文件。
-  ech_http: ^0.2.3 # 提供支持加密客户端问候（ECH）的 HTTP 客户端。
+  ech_http: ^0.2.4 # 提供支持加密客户端问候（ECH）的 HTTP 客户端。
   http: ^1.6.0 # 提供用于发送 HTTP 请求的客户端及流式响应接口。
   html: ^0.15.6 # 将 HTML 文本解析为可遍历和操作的文档树。
   xpath_selector: ^3.0.2 # 使用 XPath 表达式查询 XML 或 HTML 文档节点。
@@ -133,7 +133,7 @@ dependencies:
   # 文本与图像处理
   flutter_markdown_plus: ^1.0.12 # 将 Markdown 文本解析并渲染为 Flutter widget。
   image_picker: ^1.2.1 # 从设备相册选择图片或通过相机采集图片。
-  crop_your_image: ^2.0.0 # 在 Flutter 中对图片进行交互式裁剪。
+  crop_your_image: ^2.0.1 # 在 Flutter 中对图片进行交互式裁剪。
 
 dependency_overrides:
   # Local video effect bridge; keep these three packages in sync.
@@ -181,7 +181,7 @@ dev_dependencies:
 
   # 代码生成
   build_runner: ^2.13.1 # 管理 Dart 构建脚本并运行代码生成任务。
-  hive_ce_generator: 1.11.0 # 根据 Hive 模型注解生成 TypeAdapter 代码。
+  hive_ce_generator: ^1.12.0 # 根据 Hive 模型注解生成 TypeAdapter 代码。
   riverpod_generator: ^4.0.3 # 根据 Riverpod 注解生成 Provider 代码。
   go_router_builder: ^4.3.0 # 根据路由定义生成类型安全的 go_router 代码。
 

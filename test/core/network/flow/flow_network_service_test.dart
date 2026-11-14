@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:anime_flow/core/network/flow/flow_endpoint_cache_repository.dart';
 import 'package:anime_flow/core/network/flow/flow_endpoint_pool.dart';
 import 'package:anime_flow/core/network/flow/flow_network_service.dart';
 import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
@@ -22,23 +21,56 @@ class _TestConnectivity extends ConnectivityPlatform {
   Future<List<ConnectivityResult>> checkConnectivity() => read();
 }
 
+// Verify service scheduling independently of endpoint selection.
+class _ServicePool extends Fake implements FlowEndpointPool {
+  _ServicePool(this.address, this.onProbe);
+  final String Function() address;
+  final void Function() onProbe;
+  final _requests = StreamController<void>.broadcast(sync: true);
+  @override
+  List<String> preferredAddresses = [];
+  @override
+  bool needsProbe = true;
+  @override
+  int networkGeneration = 0;
+  @override
+  Stream<void> get revalidationRequests => _requests.stream;
+  @override
+  Future<void> initialize() async {}
+  @override
+  Future<void> probe() async {
+    onProbe();
+    preferredAddresses = [address()];
+    needsProbe = false;
+  }
+
+  @override
+  void networkChanged() {
+    networkGeneration++;
+    preferredAddresses = [];
+    needsProbe = true;
+  }
+
+  @override
+  void requestRevalidation() {
+    needsProbe = true;
+    _requests.add(null);
+  }
+
+  @override
+  void expireRoute() {}
+  @override
+  void cancelProbe() {}
+  @override
+  void dispose() => unawaited(_requests.close());
+}
+
 class _ServiceHarness {
   _ServiceHarness(
       FakeAsync clock, Future<List<ConnectivityResult>> Function() read,
       {bool platformEvents = false}) {
     DateTime now() => DateTime.utc(2026, 10, 15).add(clock.elapsed);
-    pool = FlowEndpointPool(
-      now: now,
-      assetBundle: TextAssetBundle('$ipA\n$ipB'),
-      cacheRepository: FlowEndpointCacheRepository(now: now),
-      probeFactory: (_) {
-        rounds++;
-        return FixedProbe({
-          null: const Duration(milliseconds: 500),
-          fastest: const Duration(milliseconds: 50),
-        });
-      },
-    );
+    pool = _ServicePool(() => fastest, () => rounds++);
     if (platformEvents) {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
@@ -53,7 +85,7 @@ class _ServiceHarness {
 
   final events =
       StreamController<List<ConnectivityResult>>.broadcast(sync: true);
-  late final FlowEndpointPool pool;
+  late final _ServicePool pool;
   late final FlowNetworkService service;
   int rounds = 0;
   String fastest = ipA;
@@ -67,7 +99,6 @@ class _ServiceHarness {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  setUpFlowSettings();
   final connectivity = ConnectivityPlatform.instance;
   tearDown(() {
     ConnectivityPlatform.instance = connectivity;
@@ -79,22 +110,13 @@ void main() {
 
   for (final eventBeforeRead in [false, true]) {
     test(
-        'restart preserves cache across initial snapshots: event first $eventBeforeRead',
+        'initial snapshots preserve an existing route: event first $eventBeforeRead',
         () {
       fakeAsync((clock) {
-        final previous =
-            _ServiceHarness(clock, () async => [ConnectivityResult.wifi]);
-        unawaited(previous.pool.probe());
-        clock.elapse(Duration.zero);
-        expect(previous.pool.preferredAddresses, [ipA]);
-        unawaited(previous.dispose());
-        clock.flushMicrotasks();
-
         final read = Completer<List<ConnectivityResult>>();
         final restarted = _ServiceHarness(clock, () => read.future);
-        unawaited(restarted.pool.initialize());
-        clock.flushMicrotasks();
-        expect(restarted.pool.preferredAddresses, [ipA]);
+        restarted.pool.preferredAddresses = [ipA];
+        restarted.pool.needsProbe = false;
         unawaited(restarted.service.start());
         if (eventBeforeRead) restarted.events.add([ConnectivityResult.wifi]);
         read.complete([ConnectivityResult.wifi]);
@@ -102,10 +124,10 @@ void main() {
         if (!eventBeforeRead) restarted.events.add([ConnectivityResult.wifi]);
         expect(restarted.pool.preferredAddresses, [ipA]);
         expect(restarted.rounds, 0);
-        clock.elapse(const Duration(milliseconds: 9999));
+        // 有效缓存命中时启动阶段跳过探测，路由保持到过期或网络变化。
+        clock.elapse(const Duration(seconds: 10));
         expect(restarted.rounds, 0);
-        clock.elapse(const Duration(milliseconds: 1));
-        expect(restarted.rounds, 1);
+        expect(restarted.pool.needsProbe, isFalse);
 
         restarted.fastest = ipB;
         restarted.events.add([ConnectivityResult.wifi]);

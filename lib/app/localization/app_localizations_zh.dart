@@ -44,6 +44,34 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get favoriteWallpapers => '收藏桌布';
+
+  @override
+  String get favoriteWallpapersSubtitle => '把喜歡的畫面，留在這裡。';
+
+  @override
+  String favoriteWallpapersCount(int count) {
+    return '$count 個番劇';
+  }
+
+  @override
+  String get favoriteWallpapersEmpty => '還沒有收藏的桌布';
+
+  @override
+  String favoriteWallpapersRemoveConfirm(String name) {
+    return '確定取消收藏「$name」嗎？';
+  }
+
+  @override
+  String get favoriteWallpapersEmptyHint => '在桌布詳情中收藏喜歡的畫面';
+
+  @override
+  String get favoriteWallpapersExplore => '去探索';
+
+  @override
+  String get favoriteWallpapersLoadMore => '載入更多';
+
+  @override
   String get wallpaperDownload => '下載桌布';
 
   @override
@@ -428,6 +456,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sortDate => '日期';
+
+  @override
+  String get filter => '筛选';
+
+  @override
+  String get resetFilters => '重置';
+
+  @override
+  String get filterWallpapers => '筛选壁纸';
+
+  @override
+  String get wallpaperSortLabel => '排序方式';
+
+  @override
+  String get wallpaperKeywordHint => '输入番剧关键词';
 
   @override
   String get rankingEnd => '到底了';
@@ -2126,6 +2169,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get startDownload => '開始下載';
 
   @override
+  String get resumeDownload => '繼續下載';
+
+  @override
   String get deleteDownloadTask => '刪除下載任務';
 
   @override
@@ -2554,6 +2600,42 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get startUpdateDownload => '开始下载';
+
+  @override
+  String get updatesHeroTitle => '每一次更新，\n都讓體驗更進一步。';
+
+  @override
+  String get updatesHeroSubtitle => '查看 AnimeFlow 的版本記錄與改進';
+
+  @override
+  String get updatesLatest => '最新';
+
+  @override
+  String get updatesHistory => '歷史版本';
+
+  @override
+  String get updatesScrollHint => '向下捲動查看更多';
+
+  @override
+  String get updatesErrorTitle => '暫時無法取得更新';
+
+  @override
+  String get updatesErrorHint => '請檢查網路連線，然後重試';
+
+  @override
+  String get updatesEmptyTitle => '還沒有更新記錄';
+
+  @override
+  String get updatesEmptyHint => '有新版本時，更新資訊會顯示在這裡';
+
+  @override
+  String get updatesReload => '重新載入';
+
+  @override
+  String get updatesNoNotes => '暫無更新說明';
+
+  @override
+  String get updatesViewGithub => '查看 GitHub 版本';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2594,6 +2676,34 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String wallpaperImageCount(int count) {
     return '共 $count 张图片';
   }
+
+  @override
+  String get favoriteWallpapers => '收藏壁纸';
+
+  @override
+  String get favoriteWallpapersSubtitle => '把喜欢的画面，留在这里。';
+
+  @override
+  String favoriteWallpapersCount(int count) {
+    return '$count 个番剧';
+  }
+
+  @override
+  String get favoriteWallpapersEmpty => '还没有收藏的壁纸';
+
+  @override
+  String favoriteWallpapersRemoveConfirm(String name) {
+    return '确定取消收藏「$name」吗？';
+  }
+
+  @override
+  String get favoriteWallpapersEmptyHint => '在壁纸详情中收藏喜欢的画面';
+
+  @override
+  String get favoriteWallpapersExplore => '去发现';
+
+  @override
+  String get favoriteWallpapersLoadMore => '加载更多';
 
   @override
   String get wallpaperDownload => '下载壁纸';
@@ -2980,6 +3090,21 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get sortDate => '日期';
+
+  @override
+  String get filter => '筛选';
+
+  @override
+  String get resetFilters => '重置';
+
+  @override
+  String get filterWallpapers => '筛选壁纸';
+
+  @override
+  String get wallpaperSortLabel => '排序方式';
+
+  @override
+  String get wallpaperKeywordHint => '输入番剧关键词';
 
   @override
   String get rankingEnd => '到底了';
@@ -4677,6 +4802,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get startDownload => '开始下载';
 
   @override
+  String get resumeDownload => '继续下载';
+
+  @override
   String get deleteDownloadTask => '删除下载任务';
 
   @override
@@ -5105,6 +5233,42 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get startUpdateDownload => '开始下载';
+
+  @override
+  String get updatesHeroTitle => '每一次更新，\n都让体验更进一步。';
+
+  @override
+  String get updatesHeroSubtitle => '查看 AnimeFlow 的版本记录与改进';
+
+  @override
+  String get updatesLatest => '最新';
+
+  @override
+  String get updatesHistory => '历史版本';
+
+  @override
+  String get updatesScrollHint => '向下滚动查看更多';
+
+  @override
+  String get updatesErrorTitle => '暂时无法获取更新';
+
+  @override
+  String get updatesErrorHint => '请检查网络连接，然后重试';
+
+  @override
+  String get updatesEmptyTitle => '还没有更新记录';
+
+  @override
+  String get updatesEmptyHint => '有新版本时，更新信息会显示在这里';
+
+  @override
+  String get updatesReload => '重新加载';
+
+  @override
+  String get updatesNoNotes => '暂无更新说明';
+
+  @override
+  String get updatesViewGithub => '查看 GitHub 版本';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -5145,6 +5309,34 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String wallpaperImageCount(int count) {
     return '共 $count 張圖片';
   }
+
+  @override
+  String get favoriteWallpapers => '收藏桌布';
+
+  @override
+  String get favoriteWallpapersSubtitle => '把喜歡的畫面，留在這裡。';
+
+  @override
+  String favoriteWallpapersCount(int count) {
+    return '$count 個番劇';
+  }
+
+  @override
+  String get favoriteWallpapersEmpty => '還沒有收藏的桌布';
+
+  @override
+  String favoriteWallpapersRemoveConfirm(String name) {
+    return '確定取消收藏「$name」嗎？';
+  }
+
+  @override
+  String get favoriteWallpapersEmptyHint => '在桌布詳情中收藏喜歡的畫面';
+
+  @override
+  String get favoriteWallpapersExplore => '去探索';
+
+  @override
+  String get favoriteWallpapersLoadMore => '載入更多';
 
   @override
   String get wallpaperDownload => '下載桌布';
@@ -5531,6 +5723,21 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get sortDate => '日期';
+
+  @override
+  String get filter => '篩選';
+
+  @override
+  String get resetFilters => '重設';
+
+  @override
+  String get filterWallpapers => '篩選壁紙';
+
+  @override
+  String get wallpaperSortLabel => '排序方式';
+
+  @override
+  String get wallpaperKeywordHint => '輸入番劇關鍵詞';
 
   @override
   String get rankingEnd => '到底了';
@@ -7229,6 +7436,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get startDownload => '開始下載';
 
   @override
+  String get resumeDownload => '繼續下載';
+
+  @override
   String get deleteDownloadTask => '刪除下載任務';
 
   @override
@@ -7657,6 +7867,42 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get startUpdateDownload => '開始下載';
+
+  @override
+  String get updatesHeroTitle => '每一次更新，\n都讓體驗更進一步。';
+
+  @override
+  String get updatesHeroSubtitle => '查看 AnimeFlow 的版本記錄與改進';
+
+  @override
+  String get updatesLatest => '最新';
+
+  @override
+  String get updatesHistory => '歷史版本';
+
+  @override
+  String get updatesScrollHint => '向下捲動查看更多';
+
+  @override
+  String get updatesErrorTitle => '暫時無法取得更新';
+
+  @override
+  String get updatesErrorHint => '請檢查網絡連線，然後重試';
+
+  @override
+  String get updatesEmptyTitle => '還沒有更新記錄';
+
+  @override
+  String get updatesEmptyHint => '有新版本時，更新資訊會顯示在這裡';
+
+  @override
+  String get updatesReload => '重新載入';
+
+  @override
+  String get updatesNoNotes => '暫無更新說明';
+
+  @override
+  String get updatesViewGithub => '查看 GitHub 版本';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -7697,6 +7943,34 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String wallpaperImageCount(int count) {
     return '共 $count 張圖片';
   }
+
+  @override
+  String get favoriteWallpapers => '收藏桌布';
+
+  @override
+  String get favoriteWallpapersSubtitle => '把喜歡的畫面，留在這裡。';
+
+  @override
+  String favoriteWallpapersCount(int count) {
+    return '$count 個番劇';
+  }
+
+  @override
+  String get favoriteWallpapersEmpty => '還沒有收藏的桌布';
+
+  @override
+  String favoriteWallpapersRemoveConfirm(String name) {
+    return '確定取消收藏「$name」嗎？';
+  }
+
+  @override
+  String get favoriteWallpapersEmptyHint => '在桌布詳情中收藏喜歡的畫面';
+
+  @override
+  String get favoriteWallpapersExplore => '去探索';
+
+  @override
+  String get favoriteWallpapersLoadMore => '載入更多';
 
   @override
   String get wallpaperDownload => '下載桌布';
@@ -8083,6 +8357,21 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get sortDate => '日期';
+
+  @override
+  String get filter => '篩選';
+
+  @override
+  String get resetFilters => '重設';
+
+  @override
+  String get filterWallpapers => '篩選壁紙';
+
+  @override
+  String get wallpaperSortLabel => '排序方式';
+
+  @override
+  String get wallpaperKeywordHint => '輸入番劇關鍵詞';
 
   @override
   String get rankingEnd => '到底了';
@@ -9782,6 +10071,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get startDownload => '開始下載';
 
   @override
+  String get resumeDownload => '繼續下載';
+
+  @override
   String get deleteDownloadTask => '刪除下載任務';
 
   @override
@@ -10210,4 +10502,40 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get startUpdateDownload => '開始下載';
+
+  @override
+  String get updatesHeroTitle => '每一次更新，\n都讓體驗更進一步。';
+
+  @override
+  String get updatesHeroSubtitle => '查看 AnimeFlow 的版本記錄與改進';
+
+  @override
+  String get updatesLatest => '最新';
+
+  @override
+  String get updatesHistory => '歷史版本';
+
+  @override
+  String get updatesScrollHint => '向下捲動查看更多';
+
+  @override
+  String get updatesErrorTitle => '暫時無法取得更新';
+
+  @override
+  String get updatesErrorHint => '請檢查網路連線，然後重試';
+
+  @override
+  String get updatesEmptyTitle => '還沒有更新記錄';
+
+  @override
+  String get updatesEmptyHint => '有新版本時，更新資訊會顯示在這裡';
+
+  @override
+  String get updatesReload => '重新載入';
+
+  @override
+  String get updatesNoNotes => '暫無更新說明';
+
+  @override
+  String get updatesViewGithub => '查看 GitHub 版本';
 }

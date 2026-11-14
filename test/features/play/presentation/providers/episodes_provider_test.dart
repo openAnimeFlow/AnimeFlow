@@ -1,8 +1,7 @@
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/shared/models/player/play/offline_episode.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
@@ -10,7 +9,7 @@ import 'package:riverpod_annotation/experimental/scope.dart';
 @Dependencies([Episodes])
 void main() {
   group('Episodes offline mode', () {
-    test('builds episodes from completed download snapshot', () async {
+    test('builds episodes from playable offline snapshots', () async {
       final container = ProviderContainer(
         overrides: [
           playExtraProvider.overrideWithValue(
@@ -33,7 +32,6 @@ void main() {
                   episodeIndex: 2,
                   episodeTitle: 'Episode 2',
                   localMediaPath: '/tmp/ep2.m3u8',
-                  status: DownloadStatus.completed,
                 ),
                 _episode(
                   episodeUrl: 'ep1',
@@ -42,7 +40,6 @@ void main() {
                   episodeIndex: 1,
                   episodeTitle: 'Episode 1',
                   localMediaPath: '/tmp/ep1.m3u8',
-                  status: DownloadStatus.completed,
                 ),
                 _episode(
                   episodeUrl: 'ep3',
@@ -50,8 +47,7 @@ void main() {
                   episodeSort: 3,
                   episodeIndex: 3,
                   episodeTitle: 'Episode 3',
-                  localMediaPath: '/tmp/ep3.m3u8',
-                  status: DownloadStatus.downloading,
+                  localMediaPath: '',
                 ),
               ],
             ),
@@ -76,24 +72,22 @@ void main() {
   });
 }
 
-DownloadEpisode _episode({
+OfflineEpisode _episode({
   required String episodeUrl,
   required int bangumiEpisodeId,
   required double episodeSort,
   required int episodeIndex,
   required String episodeTitle,
   required String localMediaPath,
-  required int status,
 }) {
-  return DownloadEpisode(
+  return (
     episodeUrl: episodeUrl,
     bangumiEpisodeId: bangumiEpisodeId,
     episodeSort: episodeSort,
     episodeIndex: episodeIndex,
     episodeTitle: episodeTitle,
     lineIndex: 0,
-    sourceName: 'source',
-    status: status,
     localMediaPath: localMediaPath,
+    localDanmakuPath: '',
   );
 }

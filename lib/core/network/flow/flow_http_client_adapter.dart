@@ -26,6 +26,7 @@ class FlowHttpClientAdapter implements HttpClientAdapter {
           endpoint: pool.endpoint,
           addresses: List.of(pool.preferredAddresses),
           isAddressAvailable: pool.isAddressAvailable,
+          hostResolver: pool.dohResolver.resolve,
           onAddressFailure: _failureCallback(pool.networkGeneration),
         ).createClient),
       );

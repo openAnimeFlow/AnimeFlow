@@ -10,6 +10,14 @@
   "wallpaperBackdrop": "橫向劇照",
   "wallpaperPoster": "直向海報",
   "wallpaperImageCount": "共 {count} 張圖片",
+  "favoriteWallpapers": "收藏桌布",
+  "favoriteWallpapersSubtitle": "把喜歡的畫面，留在這裡。",
+  "favoriteWallpapersCount": "{count} 個番劇",
+  "favoriteWallpapersEmpty": "還沒有收藏的桌布",
+  "favoriteWallpapersRemoveConfirm": "確定取消收藏「{name}」嗎？",
+  "favoriteWallpapersEmptyHint": "在桌布詳情中收藏喜歡的畫面",
+  "favoriteWallpapersExplore": "去探索",
+  "favoriteWallpapersLoadMore": "載入更多",
   "wallpaperDownload": "下載桌布",
   "wallpaperShare": "分享",
   "wallpaperCopyLink": "複製連結",
@@ -157,6 +165,11 @@
   "sortRank": "排名",
   "sortTrends": "热门",
   "sortDate": "日期",
+  "filter": "筛选",
+  "resetFilters": "重置",
+  "filterWallpapers": "筛选壁纸",
+  "wallpaperSortLabel": "排序方式",
+  "wallpaperKeywordHint": "输入番剧关键词",
   "rankingEnd": "到底了",
   "rankingLoadFailed": "加载失败: {error}",
   "@rankingLoadFailed": {"placeholders": {"error": {}}},
@@ -675,6 +688,7 @@
   ,"selectedEpisodesCount": "已選 {count} 集"
   ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
   ,"startDownload": "開始下載"
+  ,"resumeDownload": "繼續下載"
   ,"deleteDownloadTask": "刪除下載任務"
   ,"deleteDownloadTaskConfirmation": "確定刪除「{episode}」的下載資源嗎？"
   ,"@deleteDownloadTaskConfirmation": {"placeholders": {"episode": {}}}
@@ -871,5 +885,17 @@
   "rulesMirrorSubtitle": "用于规则列表、下载与更新",
   "updateDownloadRoute": "下载线路",
   "updateDownloadRouteHint": "您可以在下方选择下载线路",
-  "startUpdateDownload": "开始下载"
+  "startUpdateDownload": "开始下载",
+  "updatesHeroTitle": "每一次更新，\n都讓體驗更進一步。",
+  "updatesHeroSubtitle": "查看 AnimeFlow 的版本記錄與改進",
+  "updatesLatest": "最新",
+  "updatesHistory": "歷史版本",
+  "updatesScrollHint": "向下捲動查看更多",
+  "updatesErrorTitle": "暫時無法取得更新",
+  "updatesErrorHint": "請檢查網路連線，然後重試",
+  "updatesEmptyTitle": "還沒有更新記錄",
+  "updatesEmptyHint": "有新版本時，更新資訊會顯示在這裡",
+  "updatesReload": "重新載入",
+  "updatesNoNotes": "暫無更新說明",
+  "updatesViewGithub": "查看 GitHub 版本"
 }

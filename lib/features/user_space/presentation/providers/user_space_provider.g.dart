@@ -82,14 +82,14 @@ abstract class _$UserSpace extends $AsyncNotifier<UserInfoItem> {
   );
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<UserInfoItem>, UserInfoItem>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<UserInfoItem>, UserInfoItem>,
         AsyncValue<UserInfoItem>,
         Object?,
         Object?>;
-    element.handleCreate(
+    return element.handleCreate(
         ref,
         () => build(
               _$args,
@@ -177,7 +177,7 @@ abstract class _$UserSpaceStatistics
   );
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref
         as $Ref<AsyncValue<BgmUserStatisticsItem>, BgmUserStatisticsItem>;
     final element = ref.element as $ClassProviderElement<
@@ -185,7 +185,7 @@ abstract class _$UserSpaceStatistics
         AsyncValue<BgmUserStatisticsItem>,
         Object?,
         Object?>;
-    element.handleCreate(
+    return element.handleCreate(
         ref,
         () => build(
               _$args,

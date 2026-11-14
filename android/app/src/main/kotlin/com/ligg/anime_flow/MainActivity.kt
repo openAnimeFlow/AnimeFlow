@@ -1,6 +1,7 @@
 package com.ligg.anime_flow
 
 import android.content.Intent
+import android.media.AudioManager
 import android.os.Build
 import android.os.Process
 import io.flutter.embedding.android.FlutterActivity
@@ -28,6 +29,16 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, NetworkSpeedHandler.CHANNEL)
             .setMethodCallHandler(networkSpeedHandler)
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "anime_flow/system_volume")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "useMediaVolumeStream") {
+                    volumeControlStream = AudioManager.STREAM_MUSIC
+                    result.success(null)
+                } else {
+                    result.notImplemented()
+                }
+            }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

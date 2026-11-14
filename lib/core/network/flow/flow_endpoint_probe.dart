@@ -5,37 +5,46 @@ import 'dart:io';
 import 'package:anime_flow/core/logger/logger.dart';
 
 import 'flow_connection_connector.dart';
+import 'transport/flow_pinned_connection.dart';
 
 /// 每次测量新建连接的耗时，均使用独立且不携带凭据的客户端。
 class FlowEndpointProbe {
-  FlowEndpointProbe({required this.endpoint, this.securityContext});
+  FlowEndpointProbe(
+      {required this.endpoint,
+      this.securityContext,
+      required FlowHostResolve hostResolver})
+      : _hostResolver = hostResolver;
 
   static const _timeout = Duration(seconds: 3);
+  static const _dnsTimeout = Duration(seconds: 4);
   static const _maxBodyBytes = 8192;
 
   final Uri endpoint;
   final SecurityContext? securityContext;
+  final FlowHostResolve _hostResolver;
   final Set<HttpClient> _clients = {};
   final Set<FlowConnectionContext> _contexts = {};
   final Completer<void> _cancelled = Completer<void>();
 
   Future<Duration?> probe(String? address) async {
     if (_cancelled.isCompleted) return null;
+    final timeout = address == null ? _dnsTimeout : _timeout;
     final uri =
         endpoint.replace(path: '/cdn-cgi/trace', query: null, fragment: null);
     // 显式代理沿用正常连接路径；此时直连 IP 的测量结果不能反映实际请求路径。
     const findProxy = HttpClient.findProxyFromEnvironment;
     if (findProxy(uri) != 'DIRECT') return null;
-    final context = FlowConnectionContext(budget: _timeout);
+    final context = FlowConnectionContext(budget: timeout);
     final connector = FlowConnectionConnector(
         endpoint: endpoint,
         addresses: address == null ? const [] : [address],
-        allowDnsFallback: false,
-        candidateTimeout: _timeout,
+        allowDnsFallback: address == null,
+        candidateTimeout: timeout,
+        hostResolver: address == null ? _hostResolver : null,
         securityContext: securityContext);
     final client = connector.createClient()
       ..findProxy = findProxy
-      ..connectionTimeout = _timeout;
+      ..connectionTimeout = timeout;
     _clients.add(client);
     _contexts.add(context);
     final watch = Stopwatch()..start();
@@ -72,7 +81,7 @@ class FlowEndpointProbe {
       return await Future.any<Duration?>([
         operation,
         _cancelled.future.then<Duration?>((_) => null),
-      ]).timeout(_timeout);
+      ]).timeout(timeout);
     } catch (error) {
       if (!_cancelled.isCompleted) {
         LiggLogger()

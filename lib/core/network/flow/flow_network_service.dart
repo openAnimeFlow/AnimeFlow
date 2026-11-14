@@ -51,11 +51,10 @@ class FlowNetworkService with WidgetsBindingObserver {
           ConnectivityPlatform.instance.onConnectivityChanged.listen(
         (results) {
           _events++;
-          // 启动复验前，首个同状态推送视为初始快照，保留恢复的缓存路由。
+          // 首个同状态推送是平台初始快照，保留恢复的缓存路由；
+          // 有效缓存命中时启动阶段不再复验，此处也不能提前作废缓存路由。
           final initialSnapshot = _lastConnectivity == null ||
-              (_events == 1 &&
-                  _pool.needsProbe &&
-                  setEquals(_lastConnectivity, results.toSet()));
+              (_events == 1 && setEquals(_lastConnectivity, results.toSet()));
           _networkChanged(results, invalidateRoute: !initialSnapshot);
         },
         onError: (Object error) =>
@@ -69,9 +68,10 @@ class FlowNetworkService with WidgetsBindingObserver {
     await _pool.initialize();
     if (!_started || !identical(_scheduler, scheduler)) return;
     final addresses = _pool.preferredAddresses;
+    final probeStatus = _pool.needsProbe ? '启动探测至少延迟 10 秒' : '本次启动跳过探测';
     LiggLogger().d('Flow IP 网络服务启动，当前路由策略：'
-        '${addresses.isEmpty ? '系统 DNS（优选 IP 待验证）' : addresses.join(', ')}，'
-        '启动探测至少延迟 10 秒');
+        '${addresses.isEmpty ? 'Cloudflare DoH（优选 IP 待验证，失败时回退系统 DNS）' : addresses.join(', ')}，'
+        '$probeStatus');
     _startPeriodic();
   }
 

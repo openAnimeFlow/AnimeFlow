@@ -34,6 +34,7 @@ class PreparedRuleRequest {
     this.bodyType = ApiBodyType.none,
     this.body,
     this.includeCookies = false,
+    this.cancelToken,
   });
 
   /// 仅 GET / POST。
@@ -54,6 +55,20 @@ class PreparedRuleRequest {
   ///
   /// 搜索与 API 请求附带；XPath 章节请求沿用既有行为，不附带。
   final bool includeCookies;
+
+  final CancelToken? cancelToken;
+
+  PreparedRuleRequest withCancelToken(CancelToken? token) =>
+      PreparedRuleRequest(
+        method: method,
+        url: url,
+        headers: headers,
+        query: query,
+        bodyType: bodyType,
+        body: body,
+        includeCookies: includeCookies,
+        cancelToken: token,
+      );
 }
 
 /// 规则请求的传输实现。
@@ -74,8 +89,10 @@ Future<String> sendRuleRequest(
   StackTrace? lastStackTrace;
 
   for (var attempt = 1; attempt <= _maxAttempts; attempt++) {
+    _checkCancellation(request.cancelToken);
     try {
       final response = await _send(request, crawlConfig);
+      _checkCancellation(request.cancelToken);
       if (response.trim().isEmpty) {
         throw StateError('empty response');
       }
@@ -85,6 +102,13 @@ Future<String> sendRuleRequest(
     } on CaptchaRequiredException {
       rethrow;
     } catch (error, stackTrace) {
+      if (error is RuleRequestCancelledException ||
+          request.cancelToken?.isCancelled == true ||
+          (error is NetworkException &&
+              error.type == NetworkExceptionType.cancel) ||
+          (error is DioException && CancelToken.isCancel(error))) {
+        throw const RuleRequestCancelledException();
+      }
       if (_isCaptchaChallengeResponse(error, crawlConfig)) {
         _logger.w(
           'RuleRequest: ${crawlConfig.name} '
@@ -100,12 +124,37 @@ Future<String> sendRuleRequest(
         error: error,
       );
       if (attempt < _maxAttempts) {
-        await Future<void>.delayed(Duration(milliseconds: 300 * attempt));
+        await _waitForRetry(
+            Duration(milliseconds: 300 * attempt), request.cancelToken);
       }
     }
   }
 
   Error.throwWithStackTrace(lastError!, lastStackTrace!);
+}
+
+void _checkCancellation(CancelToken? token) {
+  if (token?.isCancelled == true) throw const RuleRequestCancelledException();
+}
+
+Future<void> _waitForRetry(Duration delay, CancelToken? token) async {
+  _checkCancellation(token);
+  if (token == null) {
+    await Future<void>.delayed(delay);
+    return;
+  }
+  final elapsed = Completer<void>();
+  final timer = Timer(delay, elapsed.complete);
+  try {
+    await Future.any<void>([
+      elapsed.future,
+      token.whenCancel
+          .then<void>((_) => throw const RuleRequestCancelledException()),
+    ]);
+    _checkCancellation(token);
+  } finally {
+    timer.cancel();
+  }
 }
 
 Future<String> _send(
@@ -115,6 +164,7 @@ Future<String> _send(
   final cookie = request.includeCookies
       ? await _cookieHeaderFor(request.url, crawlConfig.name)
       : '';
+  _checkCancellation(request.cancelToken);
 
   // 规则自定义头最后合并，key 统一小写，便于覆盖上面的默认值。
   final headers = <String, dynamic>{
@@ -144,6 +194,7 @@ Future<String> _send(
     headers: headers,
     queryParameters: request.query,
     data: request.method == 'POST' ? request.body : null,
+    cancelToken: request.cancelToken,
   );
 }
 

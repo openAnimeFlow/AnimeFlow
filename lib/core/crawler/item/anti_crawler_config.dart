@@ -1,17 +1,9 @@
+import 'package:anime_flow/shared/models/player/play/video/captcha_challenge.dart';
+export 'package:anime_flow/shared/models/player/play/video/captcha_challenge.dart'
+    show CaptchaType;
 import 'package:hive_ce/hive.dart';
 
 part 'anti_crawler_config.g.dart';
-
-/// 反反爬虫验证类型
-///
-/// - [imageCaptcha] (1): WebView 抓取验证码图片，引导用户手动输入后提交
-/// - [autoClickButton] (2): WebView 检测到验证按钮后自动点击，无需用户交互
-///
-/// 保留整数表示以便将来新增第三种及更多验证方式时向后兼容。
-class CaptchaType {
-  static const int imageCaptcha = 1;
-  static const int autoClickButton = 2;
-}
 
 /// 验证页检测方式
 class CaptchaDetectType {
@@ -30,8 +22,9 @@ class CaptchaDetectType {
 /// 当网站对搜索请求返回验证码时，使用 WebView 加载搜索页，
 /// 根据 [captchaType] 采用不同策略完成验证，之后保存 Cookie 用于后续请求。
 @HiveType(typeId: 13)
-class AntiCrawlerConfig {
+class AntiCrawlerConfig implements CaptchaChallenge {
   /// 是否启用反反爬虫功能
+  @override
   @HiveField(0)
   bool enabled;
 
@@ -39,16 +32,19 @@ class AntiCrawlerConfig {
   ///
   /// - [CaptchaType.imageCaptcha] (1)：图片验证码，需要用户手动输入
   /// - [CaptchaType.autoClickButton] (2)：自动点击验证按钮，无需用户交互
+  @override
   @HiveField(1)
   int captchaType;
 
   /// 验证码图片元素的 XPath 选择器（仅 captchaType == 1 时使用）
   /// 用于在 WebView 页面中定位验证码图片，通过 Canvas 抓取其像素
+  @override
   @HiveField(2)
   String captchaImage;
 
   /// 验证码输入框元素的 XPath 选择器（仅 captchaType == 1 时使用）
   /// 用于在 WebView 页面中定位供用户输入验证码的 input 元素
+  @override
   @HiveField(3)
   String captchaInput;
 
@@ -56,6 +52,7 @@ class AntiCrawlerConfig {
   ///
   /// - captchaType == 1：提交验证码的按钮，模拟点击提交
   /// - captchaType == 2：目标验证按钮（如"我不是机器人"），检测到后自动点击
+  @override
   @HiveField(4)
   String captchaButton;
 

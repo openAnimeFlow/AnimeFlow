@@ -1,0 +1,51 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'anime_provider.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(AnimeHot)
+final animeHotProvider = AnimeHotProvider._();
+
+final class AnimeHotProvider
+    extends $AsyncNotifierProvider<AnimeHot, AnimeHotState> {
+  AnimeHotProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'animeHotProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$animeHotHash();
+
+  @$internal
+  @override
+  AnimeHot create() => AnimeHot();
+}
+
+String _$animeHotHash() => r'da1e02a8af8b0617fba709ea31a34c35efa350b8';
+
+abstract class _$AnimeHot extends $AsyncNotifier<AnimeHotState> {
+  FutureOr<AnimeHotState> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<AnimeHotState>, AnimeHotState>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<AnimeHotState>, AnimeHotState>,
+        AsyncValue<AnimeHotState>,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}

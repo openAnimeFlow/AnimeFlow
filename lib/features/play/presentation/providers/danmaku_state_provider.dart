@@ -1,6 +1,7 @@
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
+import 'package:anime_flow/features/play/domain/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -13,8 +14,14 @@ class DanmakuStateNotifier extends _$DanmakuStateNotifier
   DanmakuState build() {
     ref.watch(playExtraProvider);
     return DanmakuState(
-      enabled: AppSettings.danmakuOn,
-      hiddenPlatforms: loadHiddenPlatformsFromStorage(),
+      enabled: ref.read(playPreferencesProvider).danmakuOn,
+      hiddenPlatforms: {
+        if (!ref.read(playPreferencesProvider).danmakuPlatformBilibili)
+          'BiliBili',
+        if (!ref.read(playPreferencesProvider).danmakuPlatformGamer) 'Gamer',
+        if (!ref.read(playPreferencesProvider).danmakuPlatformDanDanPlay)
+          '弹弹Play',
+      },
     );
   }
 
@@ -59,8 +66,17 @@ class DanmakuStateNotifier extends _$DanmakuStateNotifier
   }
 }
 
-Set<String> loadHiddenPlatformsFromStorage() => {
-      if (!AppSettings.danmakuPlatformBilibili) 'BiliBili',
-      if (!AppSettings.danmakuPlatformGamer) 'Gamer',
-      if (!AppSettings.danmakuPlatformDanDanPlay) '弹弹Play',
-    };
+@Riverpod(keepAlive: true)
+class DanmakuChineseModeNotifier extends _$DanmakuChineseModeNotifier {
+  @override
+  DanmakuChineseMode build() {
+    return DanmakuChineseMode.fromName(
+      ref.read(playPreferencesProvider).danmakuChineseMode,
+    );
+  }
+
+  void setMode(DanmakuChineseMode mode) {
+    state = mode;
+    ref.read(playPreferencesProvider).setDanmakuChineseMode(mode.name);
+  }
+}

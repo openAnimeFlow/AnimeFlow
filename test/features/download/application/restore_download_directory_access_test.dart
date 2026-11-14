@@ -4,10 +4,10 @@ import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/download/application/download_directory/restore_download_directory_access.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
-import 'package:anime_flow/hive_registrar.g.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_record.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/features/download/data/storage/download_hive_adapters.dart';
+import 'package:anime_flow/features/download/domain/download_episode.dart';
+import 'package:anime_flow/features/download/domain/download_record.dart';
+import 'package:anime_flow/features/download/domain/download_status.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,7 +25,7 @@ void main() {
   setUpAll(() async {
     temp = await Directory.systemTemp.createTemp('download_bookmarks_test_');
     Hive.init(temp.path);
-    Hive.registerAdapters();
+    Hive.registerDownloadAdapters();
     Storage.setting = await Hive.openBox<dynamic>('settings');
     Storage.downloads = await Hive.openBox<DownloadRecord>('downloads');
   });

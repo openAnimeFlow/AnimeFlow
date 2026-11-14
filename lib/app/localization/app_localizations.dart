@@ -169,6 +169,54 @@ abstract class AppLocalizations {
   /// **'共 {count} 张图片'**
   String wallpaperImageCount(int count);
 
+  /// No description provided for @favoriteWallpapers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏壁纸'**
+  String get favoriteWallpapers;
+
+  /// No description provided for @favoriteWallpapersSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'把喜欢的画面，留在这里。'**
+  String get favoriteWallpapersSubtitle;
+
+  /// No description provided for @favoriteWallpapersCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{count} 个番剧'**
+  String favoriteWallpapersCount(int count);
+
+  /// No description provided for @favoriteWallpapersEmpty.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'还没有收藏的壁纸'**
+  String get favoriteWallpapersEmpty;
+
+  /// No description provided for @favoriteWallpapersRemoveConfirm.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定取消收藏「{name}」吗？'**
+  String favoriteWallpapersRemoveConfirm(String name);
+
+  /// No description provided for @favoriteWallpapersEmptyHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'在壁纸详情中收藏喜欢的画面'**
+  String get favoriteWallpapersEmptyHint;
+
+  /// No description provided for @favoriteWallpapersExplore.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'去发现'**
+  String get favoriteWallpapersExplore;
+
+  /// No description provided for @favoriteWallpapersLoadMore.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载更多'**
+  String get favoriteWallpapersLoadMore;
+
   /// No description provided for @wallpaperDownload.
   ///
   /// In zh_Hans, this message translates to:
@@ -889,6 +937,36 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'日期'**
   String get sortDate;
+
+  /// No description provided for @filter.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'筛选'**
+  String get filter;
+
+  /// No description provided for @resetFilters.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重置'**
+  String get resetFilters;
+
+  /// No description provided for @filterWallpapers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'筛选壁纸'**
+  String get filterWallpapers;
+
+  /// No description provided for @wallpaperSortLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'排序方式'**
+  String get wallpaperSortLabel;
+
+  /// No description provided for @wallpaperKeywordHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'输入番剧关键词'**
+  String get wallpaperKeywordHint;
 
   /// No description provided for @rankingEnd.
   ///
@@ -4040,6 +4118,12 @@ abstract class AppLocalizations {
   /// **'开始下载'**
   String get startDownload;
 
+  /// No description provided for @resumeDownload.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'继续下载'**
+  String get resumeDownload;
+
   /// No description provided for @deleteDownloadTask.
   ///
   /// In zh_Hans, this message translates to:
@@ -4856,6 +4940,78 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'开始下载'**
   String get startUpdateDownload;
+
+  /// No description provided for @updatesHeroTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'每一次更新，\n都让体验更进一步。'**
+  String get updatesHeroTitle;
+
+  /// No description provided for @updatesHeroSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'查看 AnimeFlow 的版本记录与改进'**
+  String get updatesHeroSubtitle;
+
+  /// No description provided for @updatesLatest.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'最新'**
+  String get updatesLatest;
+
+  /// No description provided for @updatesHistory.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'历史版本'**
+  String get updatesHistory;
+
+  /// No description provided for @updatesScrollHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'向下滚动查看更多'**
+  String get updatesScrollHint;
+
+  /// No description provided for @updatesErrorTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂时无法获取更新'**
+  String get updatesErrorTitle;
+
+  /// No description provided for @updatesErrorHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请检查网络连接，然后重试'**
+  String get updatesErrorHint;
+
+  /// No description provided for @updatesEmptyTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'还没有更新记录'**
+  String get updatesEmptyTitle;
+
+  /// No description provided for @updatesEmptyHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'有新版本时，更新信息会显示在这里'**
+  String get updatesEmptyHint;
+
+  /// No description provided for @updatesReload.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重新加载'**
+  String get updatesReload;
+
+  /// No description provided for @updatesNoNotes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无更新说明'**
+  String get updatesNoNotes;
+
+  /// No description provided for @updatesViewGithub.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'查看 GitHub 版本'**
+  String get updatesViewGithub;
 }
 
 class _AppLocalizationsDelegate

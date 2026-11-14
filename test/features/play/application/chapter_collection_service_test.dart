@@ -1,24 +1,7 @@
-import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/rule_exceptions.dart';
-import 'package:anime_flow/features/play/application/chapter_collection_service.dart';
+import 'package:anime_flow/core/video_source/application/chapter_collection_service.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-CrawlConfigItem _config() {
-  return CrawlConfigItem(
-    version: '1.0.0',
-    name: '测试源',
-    iconUrl: '',
-    baseUrl: 'https://example.com',
-    searchUrl: '',
-    searchList: '',
-    searchName: '',
-    searchLink: '',
-    lineNames: '',
-    lineList: '',
-    episode: '',
-  );
-}
 
 ChapterCandidate _candidate(String name, String link) {
   return ChapterCandidate(name: name, link: link, matchRatio: 0.5);
@@ -37,12 +20,12 @@ void main() {
   group('ChapterCollectionService', () {
     test('汇总所有候选的线路', () async {
       final service = ChapterCollectionService(
-        fetcher: (link, config) async => _chapters('线路$link', link),
+        fetcher: (link) async => _chapters('线路$link', link),
       );
 
       final result = await service.collect(
         candidates: [_candidate('A', '/a'), _candidate('B', '/b')],
-        config: _config(),
+        websiteName: '测试源',
       );
 
       expect(result.resources.map((item) => item.lineNames).toList(), [
@@ -59,7 +42,7 @@ void main() {
 
     test('单个候选失败不影响其它候选', () async {
       final service = ChapterCollectionService(
-        fetcher: (link, config) async {
+        fetcher: (link) async {
           if (link == '/bad') {
             throw const ChapterErrorException('测试源');
           }
@@ -73,7 +56,7 @@ void main() {
           _candidate('B', '/bad'),
           _candidate('C', '/c'),
         ],
-        config: _config(),
+        websiteName: '测试源',
       );
 
       expect(result.resources.map((item) => item.subjectsTitle).toList(), [
@@ -86,13 +69,12 @@ void main() {
 
     test('全部候选失败时把错误交回调用方', () async {
       final service = ChapterCollectionService(
-        fetcher: (link, config) async =>
-            throw const ChapterErrorException('测试源'),
+        fetcher: (link) async => throw const ChapterErrorException('测试源'),
       );
 
       final result = await service.collect(
         candidates: [_candidate('A', '/a'), _candidate('B', '/b')],
-        config: _config(),
+        websiteName: '测试源',
       );
 
       expect(result.resources, isEmpty);
@@ -104,7 +86,7 @@ void main() {
     test('验证码异常直接上抛并中断，不当作单条失败', () async {
       var calls = 0;
       final service = ChapterCollectionService(
-        fetcher: (link, config) async {
+        fetcher: (link) async {
           calls++;
           throw const CaptchaRequiredException('测试源');
         },
@@ -113,7 +95,7 @@ void main() {
       await expectLater(
         service.collect(
           candidates: [_candidate('A', '/a'), _candidate('B', '/b')],
-          config: _config(),
+          websiteName: '测试源',
         ),
         throwsA(isA<CaptchaRequiredException>()),
       );
@@ -123,7 +105,7 @@ void main() {
     test('isActive 变 false 后停止抓取并丢弃失效结果', () async {
       var calls = 0;
       final service = ChapterCollectionService(
-        fetcher: (link, config) async {
+        fetcher: (link) async {
           calls++;
           return _chapters('线路', link);
         },
@@ -135,7 +117,7 @@ void main() {
           _candidate('B', '/b'),
           _candidate('C', '/c'),
         ],
-        config: _config(),
+        websiteName: '测试源',
         // 抓完第 2 个候选后会话已失效。
         isActive: () => calls < 2,
       );
@@ -148,7 +130,7 @@ void main() {
     test('一开始就失效时不发起任何请求', () async {
       var calls = 0;
       final service = ChapterCollectionService(
-        fetcher: (link, config) async {
+        fetcher: (link) async {
           calls++;
           return _chapters('线路', link);
         },
@@ -156,7 +138,7 @@ void main() {
 
       final result = await service.collect(
         candidates: [_candidate('A', '/a')],
-        config: _config(),
+        websiteName: '测试源',
         isActive: () => false,
       );
 
@@ -167,12 +149,12 @@ void main() {
 
     test('没有候选时返回空结果而不是全部失败', () async {
       final service = ChapterCollectionService(
-        fetcher: (link, config) async => const [],
+        fetcher: (link) async => const [],
       );
 
       final result = await service.collect(
         candidates: const [],
-        config: _config(),
+        websiteName: '测试源',
       );
 
       expect(result.resources, isEmpty);

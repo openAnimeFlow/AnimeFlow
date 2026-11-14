@@ -1,6 +1,5 @@
 import 'dart:async';
-
-import 'package:anime_flow/features/play/application/player_bindings.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -17,7 +16,7 @@ Stream<double?> playerCacheSpeed(Ref ref) {
     videoUiProvider.select((state) => state.centerIndicator),
   );
   final playback = ref.watch(playStateProvider.select(
-        (state) => (kernel: state.kernel, switching: state.switchingKernel),
+    (state) => (kernel: state.kernel, switching: state.switchingKernel),
   ));
   if (indicator != VideoControlsIndicatorType.bufferingIndicator ||
       playback.kernel != PlayerKernel.mediaKit ||

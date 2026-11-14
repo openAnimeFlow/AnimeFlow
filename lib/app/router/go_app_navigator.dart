@@ -4,6 +4,7 @@ import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/shared/navigation/args/character_info_extra.dart';
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
+import 'package:anime_flow/shared/navigation/args/video_resource_download_route_args.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:go_router/go_router.dart';
 
@@ -32,6 +33,10 @@ class GoAppNavigator implements AppNavigator {
   @override
   Future<T?> openWallpaper<T>(WallpaperDetailArgs args) =>
       _router.push<T>(WallpaperDetailRoute($extra: args).location, extra: args);
+
+  @override
+  Future<T?> openFavoriteWallpapers<T>() =>
+      _router.push<T>(const FavoriteWallpapersRoute().location);
 
   @override
   Future<T?> openImagePreview<T>(ImageViewerRouteArgs args) =>
@@ -99,6 +104,10 @@ class GoAppNavigator implements AppNavigator {
   @override
   Future<T?> openDownload<T>() =>
       _router.push<T>(const DownloadRoute().location);
+  @override
+  Future<T?> openVideoResourceDownload<T>(VideoResourceDownloadRouteArgs args) =>
+      _router.push<T>(VideoResourceDownloadRoute($extra: args).location,
+          extra: args);
   @override
   Future<T?> openPlayRecord<T>() =>
       _router.push<T>(const PlayRecordRoute().location);

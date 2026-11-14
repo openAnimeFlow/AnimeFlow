@@ -1,36 +1,44 @@
-import 'package:anime_flow/features/play/data/repository/play_repository.dart';
-import 'package:anime_flow/shared/models/player/play/play_history.dart';
-import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
-import 'package:flutter/foundation.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:anime_flow/core/async/serial_operation_queue.dart';
+import 'package:anime_flow/features/play/domain/play_history_repository.dart';
 
-/// 播放历史的业务入口，供 player 内外的页面使用。
 class PlayHistoryService {
-  const PlayHistoryService._();
+  PlayHistoryService(this.repository);
+  final PlayHistoryRepository repository;
 
-  static ValueListenable<Box<PlayHistory>> listenable() =>
-      PlayRepository.playHistoryStorage.listenable();
+  final _queue = SerialOperationQueue(ensureReady: () {});
+  Future<void>? _synchronizing;
+  Future<PlayHistorySyncResult> syncPending() =>
+      _queue.run(repository.syncPending);
+  Future<void> clearLocal() => _queue.run(repository.clearLocal);
+  Future<List<PlaybackRecord>> records() async => (await repository.getAll())
+    ..sort((a, b) => b.updateAt.compareTo(a.updateAt));
+  Stream<void> get changes => repository.changes;
 
-  static Future<List<PlayHistory>> getAll() =>
-      PlayRepository.getPlayHistoryList();
+  Future<int> resumePosition(int subjectId, int episodeId) async {
+    final record = await repository.getBySubjectId(subjectId);
+    return record != null &&
+            record.episodeId == episodeId &&
+            record.position > 0
+        ? record.position
+        : 0;
+  }
 
-  static Future<PlayHistory?> getBySubjectId(int subjectId) =>
-      PlayRepository.getPlayHistory(subjectId);
+  Future<void> synchronize({required bool Function() active}) =>
+      _synchronizing ??= _queue
+          .run(() => _synchronize(active))
+          .whenComplete(() => _synchronizing = null);
 
-  static Future<void> save(
-    PlayHistory history, {
-    PlayHistoryEventType eventType = PlayHistoryEventType.defaults,
-  }) =>
-      PlayRepository.savePlayHistory(history, eventType: eventType);
-
-  static Future<void> clearPosition(int subjectId) =>
-      PlayRepository.deletePlayHistoryByPosition(subjectId);
-
-  static Future<PlayHistorySyncResult> syncPending() =>
-      PlayRepository.syncPendingPlayHistories();
-
-  static Future<PlayHistoryPullResult> syncFromServer() =>
-      PlayRepository.syncPlayHistoriesFromServer();
-
-  static Future<void> clearLocal() => PlayRepository.clearLocalPlayHistories();
+  Future<void> _synchronize(bool Function() active) async {
+    for (var attempt = 1; attempt <= 3 && active(); attempt++) {
+      try {
+        await repository.syncPending();
+        if (active()) await repository.syncFromServer();
+        return;
+      } catch (_) {
+        if (!active()) return;
+        if (attempt == 3) rethrow;
+        await Future<void>.delayed(Duration(seconds: attempt * 2));
+      }
+    }
+  }
 }

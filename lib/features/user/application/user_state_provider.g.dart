@@ -75,13 +75,13 @@ abstract class _$CurrentUserInfo extends $AsyncNotifier<FlowUsers?> {
   FutureOr<FlowUsers?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<FlowUsers?>, FlowUsers?>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<FlowUsers?>, FlowUsers?>,
         AsyncValue<FlowUsers?>,
         Object?,
         Object?>;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

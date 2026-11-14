@@ -1,10 +1,10 @@
+import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
-@Dependencies([PlayStateNotifier])
+@Dependencies([VideoUiNotifier])
 Future<void> showPlayerSettingsSheet({
   required BuildContext context,
   required String label,
@@ -29,7 +29,7 @@ Future<void> showPlayerSettingsSheet({
           builder: (context, ref, _) {
             final isWideScreen = forceSide ||
                 ref.watch(
-                  playStateProvider.select((state) => state.isWideScreen),
+                  videoUiProvider.select((state) => state.isWideScreen),
                 );
             return SlideTransition(
               position: Tween<Offset>(
@@ -50,7 +50,7 @@ Future<void> showPlayerSettingsSheet({
   }
 }
 
-@Dependencies([PlayStateNotifier])
+@Dependencies([VideoUiNotifier])
 class PlayerSettingsSheet extends ConsumerStatefulWidget {
   const PlayerSettingsSheet({
     super.key,
@@ -86,7 +86,7 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
 
   void _snapToNearestSize() {
     if (!_sheetController.isAttached ||
-        (widget.forceSide || ref.read(playStateProvider).isWideScreen)) {
+        (widget.forceSide || ref.read(videoUiProvider).isWideScreen)) {
       return;
     }
     final size = _sheetController.size;
@@ -110,7 +110,7 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
   Widget build(BuildContext context) {
     final isWideScreen = widget.forceSide ||
         ref.watch(
-          playStateProvider.select((state) => state.isWideScreen),
+          videoUiProvider.select((state) => state.isWideScreen),
         );
     final size = MediaQuery.sizeOf(context);
     final keyboardInset = widget.avoidKeyboard && !isWideScreen

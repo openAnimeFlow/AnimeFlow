@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:anime_flow/features/download/domain/download_directory_failure.dart';
 import 'package:anime_flow/features/download/application/download_http_client.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/features/download/domain/download_episode.dart';
+import 'package:anime_flow/features/download/domain/download_status.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';

@@ -3,6 +3,14 @@
 // 调用方据此区分「需要验证」「没有结果」与「请求/解析失败」三种状态，
 // 而不是把所有问题都当成一种错误展示。
 
+/// 调用方主动取消请求，不应重试、记录失败或继续抓取章节。
+class RuleRequestCancelledException implements Exception {
+  const RuleRequestCancelledException();
+
+  @override
+  String toString() => 'RuleRequestCancelledException: request cancelled';
+}
+
 /// 响应中检测到验证码质询，需要走 WebView 验证流程。
 class CaptchaRequiredException implements Exception {
   const CaptchaRequiredException(this.configName);

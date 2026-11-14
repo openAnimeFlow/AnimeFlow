@@ -10,31 +10,19 @@ import 'flow_endpoint_cache.dart';
 import 'flow_endpoint_cache_repository.dart';
 import 'flow_endpoint_candidates.dart';
 import 'flow_endpoint_probe.dart';
+import 'flow_doh_resolver.dart';
 
 class FlowEndpointPool extends ChangeNotifier {
-  FlowEndpointPool({
-    AssetBundle? assetBundle,
-    FlowEndpointCacheRepository? cacheRepository,
-    DateTime Function()? now,
-    FlowEndpointProbe Function(Uri)? probeFactory,
-  })  : _assetBundle = assetBundle ?? rootBundle,
-        _cacheRepository = cacheRepository ?? FlowEndpointCacheRepository(),
-        _now = now ?? DateTime.now,
-        _probeFactory =
-            probeFactory ?? ((uri) => FlowEndpointProbe(endpoint: uri));
-
   static final instance = FlowEndpointPool();
   static const assetPath = 'assets/network/ligg-candidates.txt';
   static const _roundTimeout = Duration(seconds: 15);
 
   final Uri endpoint = Uri.parse(AnimeFlowApi.animeFlowApi);
-  final AssetBundle _assetBundle;
-  final FlowEndpointCacheRepository _cacheRepository;
+  final _cacheRepository = FlowEndpointCacheRepository();
   FlowEndpointCandidates _candidates = FlowEndpointCandidates.parse('');
   FlowEndpointCache? _cachedForRevalidation;
   Future<void>? _initialization;
-  final DateTime Function() _now;
-  final FlowEndpointProbe Function(Uri) _probeFactory;
+  final dohResolver = FlowDohResolver();
   final _revalidationRequests = StreamController<void>.broadcast(sync: true);
   final Map<String?, _EndpointStats> _stats = {};
   final Map<String, (int, DateTime)> _cooldowns = {};
@@ -68,7 +56,7 @@ class FlowEndpointPool extends ChangeNotifier {
         return;
       }
       _candidates = FlowEndpointCandidates.parse(
-        await _assetBundle.loadString(assetPath),
+        await rootBundle.loadString(assetPath),
       );
       if (_candidates.rejectedLines.isNotEmpty) {
         LiggLogger().w('Flow IP 资源已忽略无效行: '
@@ -91,7 +79,8 @@ class FlowEndpointPool extends ChangeNotifier {
       // 加载期间若已切换网络，不得用旧缓存重新覆盖刚清空的路由。
       if (!_disposed && generation == _networkGeneration && cache != null) {
         _routeExpiresAt = cache.verifiedAt.add(FlowEndpointCache.lifetime);
-        _needsRevalidation = true;
+        // 有效缓存直接用于当前进程；等过期、网络变化或连接失败再复验。
+        _needsRevalidation = false;
         if (!cache.preferDns) {
           _setRoute(cache.measurements.map((item) => item.address).toList());
         }
@@ -106,7 +95,7 @@ class FlowEndpointPool extends ChangeNotifier {
   bool isAddressAvailable(String address) {
     final cooldown = _cooldowns[address];
     return _candidates.contains(address) &&
-        (cooldown == null || !_now().isBefore(cooldown.$2));
+        (cooldown == null || !DateTime.now().isBefore(cooldown.$2));
   }
 
   void requestRevalidation() {
@@ -125,14 +114,15 @@ class FlowEndpointPool extends ChangeNotifier {
     final failures = (_cooldowns[address]?.$1 ?? 0) + 1;
     _failureVersions[address] = (_failureVersions[address] ?? 0) + 1;
     final minutes = min(10, 1 << min(failures - 1, 4));
-    _cooldowns[address] = (failures, _now().add(Duration(minutes: minutes)));
+    _cooldowns[address] =
+        (failures, DateTime.now().add(Duration(minutes: minutes)));
     _stats.remove(address);
     _setRoute(_preferredAddresses.where((ip) => ip != address).toList());
     requestRevalidation();
   }
 
   void expireRoute() {
-    if (_routeExpiresAt != null && !_now().isBefore(_routeExpiresAt!)) {
+    if (_routeExpiresAt != null && !DateTime.now().isBefore(_routeExpiresAt!)) {
       _stats.clear();
       _setRoute(const [], force: true);
       _routeExpiresAt = null;
@@ -174,7 +164,10 @@ class FlowEndpointPool extends ChangeNotifier {
     final token = ++_roundToken;
     final generation = _networkGeneration;
     final failureVersions = Map<String, int>.of(_failureVersions);
-    final session = _activeProbe = _probeFactory(endpoint);
+    final session = _activeProbe = FlowEndpointProbe(
+      endpoint: endpoint,
+      hostResolver: dohResolver.resolve,
+    );
     final samples = <String?, _EndpointStats>{};
     var deadlineReached = false;
     final timer = Timer(_roundTimeout, () {
@@ -251,7 +244,7 @@ class FlowEndpointPool extends ChangeNotifier {
           host: endpoint.host,
           port: endpoint.port,
           candidateHash: _candidates.hash,
-          verifiedAt: _now(),
+          verifiedAt: DateTime.now(),
           preferDns: _preferredAddresses.isEmpty,
           measurements: ordered
               .map((ip) => FlowEndpointMeasurement(
@@ -298,7 +291,7 @@ class FlowEndpointPool extends ChangeNotifier {
       _setRoute(const []);
       // DNS 本身可用时无需为寻找优选 IP 持续扫描；全部失败则保留后续重试。
       _routeExpiresAt = (_stats[null]?.lastSucceeded ?? false)
-          ? _now().add(FlowEndpointCache.lifetime)
+          ? DateTime.now().add(FlowEndpointCache.lifetime)
           : null;
       return;
     }
@@ -332,7 +325,7 @@ class FlowEndpointPool extends ChangeNotifier {
     _setRoute(best == null
         ? const []
         : [best, ...eligible.where((ip) => ip != best).take(2)]);
-    _routeExpiresAt = _now().add(FlowEndpointCache.lifetime);
+    _routeExpiresAt = DateTime.now().add(FlowEndpointCache.lifetime);
   }
 
   void _setRoute(List<String> addresses, {bool force = false}) {
@@ -348,6 +341,7 @@ class FlowEndpointPool extends ChangeNotifier {
     if (_disposed) return;
     cancelProbe();
     _disposed = true;
+    dohResolver.close();
     unawaited(_revalidationRequests.close());
     super.dispose();
   }

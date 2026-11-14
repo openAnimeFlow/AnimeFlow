@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:anime_flow/features/download/domain/download_repository.dart';
+import 'package:anime_flow/features/download/domain/download_directory_failure.dart';
 import 'package:crypto/crypto.dart';
 import 'package:anime_flow/features/download/application/download_http_client.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_factory.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/download_directory/restore_download_directory_access.dart';
 import 'package:anime_flow/features/download/application/m3u8_parser.dart';
-import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
-import 'package:anime_flow/shared/models/download/download_episode.dart';
-import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/features/download/domain/download_episode.dart';
+import 'package:anime_flow/features/download/domain/download_status.dart';
 import 'package:dio/dio.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';

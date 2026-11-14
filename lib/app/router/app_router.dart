@@ -10,14 +10,16 @@ import 'package:anime_flow/features/characters/presentation/pages/characters_pag
 import 'package:anime_flow/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
 import 'package:anime_flow/features/download/presentation/pages/download_page.dart';
+import 'package:anime_flow/features/download/presentation/pages/video_resource_download_page.dart';
 import 'package:anime_flow/features/play/presentation/pages/play_page.dart';
 import 'package:anime_flow/features/play/presentation/pages/play_record_page.dart';
 import 'package:anime_flow/features/shell/presentation/pages/app_shell_page.dart';
 import 'package:anime_flow/features/user/presentation/pages/user_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/oauth_callback_page.dart';
 import 'package:anime_flow/features/ranking/presentation/pages/ranking_page.dart';
-import 'package:anime_flow/features/home/presentation/pages/home_page.dart';
-import 'package:anime_flow/features/home/presentation/pages/wallpaper_detail_page.dart';
+import 'package:anime_flow/features/recommend/presentation/pages/recommend.dart';
+import 'package:anime_flow/features/recommend/presentation/pages/wallpaper_detail_page.dart';
+import 'package:anime_flow/features/recommend/presentation/pages/favorite_wallpapers_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/register_page.dart';
 import 'package:anime_flow/features/search/presentation/pages/image_search_page.dart';
 import 'package:anime_flow/features/search/presentation/pages/search_page.dart';
@@ -48,17 +50,17 @@ import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/features/characters/presentation/providers/characters_args_provider.dart';
 import 'package:anime_flow/features/character_info/presentation/providers/character_info_args_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_args_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/shared/navigation/app_route_observer.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:anime_flow/shared/navigation/args/character_info_extra.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/shared/navigation/args/wallpaper_detail_args.dart';
 import 'package:anime_flow/shared/navigation/args/play_route_extra.dart';
+import 'package:anime_flow/shared/navigation/args/video_resource_download_route_args.dart';
 
 part 'app_router.g.dart';
 
@@ -106,8 +108,15 @@ class RecommendRoute extends GoRouteData with $RecommendRoute {
   const RecommendRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const RecommendPage();
+  Widget build(BuildContext context, GoRouterState state) {
+    final delegate = GoRouter.of(context).routerDelegate;
+    return ListenableBuilder(
+      listenable: delegate,
+      builder: (context, _) => RecommendPage(
+        active: delegate.state.matchedLocation == state.matchedLocation,
+      ),
+    );
+  }
 }
 
 class RankingRoute extends GoRouteData with $RankingRoute {
@@ -142,7 +151,7 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
       const RegisterPage();
 }
 
-@TypedGoRoute<ForgotPasswordRoute>(path: '/forgot_password')
+@TypedGoRoute<ForgotPasswordRoute>(path: '/forgot-password')
 class ForgotPasswordRoute extends GoRouteData with $ForgotPasswordRoute {
   const ForgotPasswordRoute();
 
@@ -160,7 +169,7 @@ class OauthCallbackRoute extends GoRouteData with $OauthCallbackRoute {
       OAuthCallbackPage(callbackUri: state.uri);
 }
 
-@TypedGoRoute<AnimeInfoRoute>(path: '/anime_info')
+@TypedGoRoute<AnimeInfoRoute>(path: '/anime-info')
 class AnimeInfoRoute extends GoRouteData with $AnimeInfoRoute {
   const AnimeInfoRoute({
     required this.id,
@@ -286,7 +295,7 @@ class CharactersRoute extends GoRouteData with $CharactersRoute {
   }
 }
 
-@TypedGoRoute<CharacterInfoRoute>(path: '/character_info')
+@TypedGoRoute<CharacterInfoRoute>(path: '/character-info')
 class CharacterInfoRoute extends GoRouteData with $CharacterInfoRoute {
   const CharacterInfoRoute({
     required this.id,
@@ -325,7 +334,7 @@ class CharacterInfoRoute extends GoRouteData with $CharacterInfoRoute {
   }
 }
 
-@TypedGoRoute<PlayRecordRoute>(path: '/play_record')
+@TypedGoRoute<PlayRecordRoute>(path: '/play-record')
 class PlayRecordRoute extends GoRouteData with $PlayRecordRoute {
   const PlayRecordRoute();
 
@@ -343,7 +352,29 @@ class DownloadRoute extends GoRouteData with $DownloadRoute {
       const DownloadPage();
 }
 
-@TypedGoRoute<UserSpaceRoute>(path: '/user_space')
+@TypedGoRoute<VideoResourceDownloadRoute>(path: '/video-resource-download')
+class VideoResourceDownloadRoute extends GoRouteData
+    with $VideoResourceDownloadRoute {
+  const VideoResourceDownloadRoute({this.$extra});
+
+  final VideoResourceDownloadRouteArgs? $extra;
+
+  @override
+  String? redirect(BuildContext context, GoRouterState state) =>
+      $extra == null ? const DownloadRoute().location : null;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    final args = $extra!;
+    return VideoResourceDownloadPage(
+      subjectName: args.subjectName,
+      subjectCover: args.subjectCover,
+      episodes: args.episodes,
+    );
+  }
+}
+
+@TypedGoRoute<UserSpaceRoute>(path: '/user-space')
 class UserSpaceRoute extends GoRouteData with $UserSpaceRoute {
   const UserSpaceRoute({required this.name});
 
@@ -354,7 +385,7 @@ class UserSpaceRoute extends GoRouteData with $UserSpaceRoute {
       UserSpacePage(username: name);
 }
 
-@TypedGoRoute<AnimePreviewPageRoute>(path: '/anime_preview')
+@TypedGoRoute<AnimePreviewPageRoute>(path: '/anime-preview')
 class AnimePreviewPageRoute extends GoRouteData with $AnimePreviewPageRoute {
   final List<String> images;
   final String? title;
@@ -370,7 +401,7 @@ class AnimePreviewPageRoute extends GoRouteData with $AnimePreviewPageRoute {
   }
 }
 
-@TypedGoRoute<ImageSearchRoute>(path: '/image_search')
+@TypedGoRoute<ImageSearchRoute>(path: '/image-search')
 class ImageSearchRoute extends GoRouteData with $ImageSearchRoute {
   const ImageSearchRoute();
 
@@ -388,6 +419,16 @@ class WallpaperDetailRoute extends GoRouteData with $WallpaperDetailRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       WallpaperDetailPage(args: $extra);
+}
+
+@TypedGoRoute<FavoriteWallpapersRoute>(path: '/favorite-wallpapers')
+class FavoriteWallpapersRoute extends GoRouteData
+    with $FavoriteWallpapersRoute {
+  const FavoriteWallpapersRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const FavoriteWallpapersPage();
 }
 
 @TypedGoRoute<ImagePreviewRoute>(path: '/image-preview')
@@ -424,16 +465,16 @@ class ImagePreviewRoute extends GoRouteData with $ImagePreviewRoute {
       TypedGoRoute<SettingGeneralRoute>(path: 'general'),
       TypedGoRoute<SettingPageRoute>(path: 'page'),
       TypedGoRoute<SettingPlaybackRoute>(path: 'playback'),
-      TypedGoRoute<SettingPlayerShortcutsRoute>(path: 'playerShortcuts'),
-      TypedGoRoute<SettingDownloadPluginsRoute>(path: 'downloadPlugins'),
+      TypedGoRoute<SettingPlayerShortcutsRoute>(path: 'player-shortcuts'),
+      TypedGoRoute<SettingDownloadPluginsRoute>(path: 'download-plugins'),
       TypedGoRoute<SettingDanmakuRoute>(path: 'danmaku'),
       TypedGoRoute<SettingDownloadRoute>(path: 'download'),
       TypedGoRoute<SettingAboutRoute>(path: 'about'),
       TypedGoRoute<SettingAuthorRoute>(path: 'author'),
       TypedGoRoute<SettingUpdatesRoute>(path: 'updates'),
       TypedGoRoute<SettingWebsiteRoute>(path: 'website'),
-      TypedGoRoute<SettingPluginsRoute>(path: 'Plugins'),
-      TypedGoRoute<SettingAddPluginsRoute>(path: 'addPlugins'),
+      TypedGoRoute<SettingPluginsRoute>(path: 'plugins'),
+      TypedGoRoute<SettingAddPluginsRoute>(path: 'add-plugins'),
       TypedGoRoute<SettingThemeRoute>(path: 'theme'),
       TypedGoRoute<SettingFontRoute>(path: 'font'),
       TypedGoRoute<SettingThanksRoute>(path: 'thanks'),

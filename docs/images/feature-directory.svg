@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="590" viewBox="0 0 800 590" role="img" aria-labelledby="title description">
+  <title id="title">Feature 推荐目录结构</title>
+  <desc id="description">IDE 风格的目录树：lib/features 下是 feature 目录；feature 包含公开入口、presentation、application、domain、data 和 composition。presentation 和 data 各自包含三个子目录。</desc>
+  <defs>
+    <g id="folder"><path d="M2 4.5V15a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 18 15V6.5A1.5 1.5 0 0 0 16.5 5H9L7.3 3.3H3.5A1.5 1.5 0 0 0 2 4.5Z" fill="#353b42" stroke="#aeb6c0" stroke-width="1.25" stroke-linejoin="round"/></g>
+    <g id="file"><path d="M4 2.5h7l4 4V17H4z" fill="#353b42" stroke="#aeb6c0" stroke-width="1.2" stroke-linejoin="round"/><path d="M11 2.5v4h4" fill="none" stroke="#aeb6c0" stroke-width="1.2"/></g>
+    <g id="open"><path d="m3 6 4 4 4-4" fill="none" stroke="#aeb6c0" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></g>
+  </defs>
+  <style>
+    text { font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif; }
+    .heading { font-size: 22px; font-weight: 700; fill: #f5f5f5; }
+    .name { font-family: Consolas, "Cascadia Mono", monospace; font-size: 15px; font-weight: 600; fill: #e1e6ed; }
+    .detail { font-size: 13px; fill: #aeb6c0; }
+    .indent { stroke: #41464d; stroke-width: 1; }
+  </style>
+  <rect width="800" height="590" rx="12" fill="#242629"/>
+  <text class="heading" x="28" y="36">Feature 推荐目录</text>
+  <path d="M24 53H776" stroke="#41464d"/>
+  <g class="indent"><path d="M52 102V550 M76 132V550 M100 192V252 M100 372V432"/></g>
+  <g>
+    <use href="#open" x="27" y="69"/><use href="#folder" x="45" y="67"/><text class="name" x="70" y="82">lib/features</text>
+    <use href="#open" x="51" y="99"/><use href="#folder" x="69" y="97"/><text class="name" x="94" y="112">&lt;feature&gt;</text><text class="detail" x="400" y="112">一个业务功能</text>
+    <use href="#file" x="93" y="127"/><text class="name" x="118" y="142">&lt;feature&gt;_api.dart</text><text class="detail" x="400" y="142">可选：对外公开入口</text>
+    <use href="#open" x="75" y="159"/><use href="#folder" x="93" y="157"/><text class="name" x="118" y="172">presentation</text><text class="detail" x="400" y="172">界面与界面状态</text>
+    <use href="#folder" x="117" y="187"/><text class="name" x="142" y="202">pages</text>
+    <use href="#folder" x="117" y="217"/><text class="name" x="142" y="232">widgets</text>
+    <use href="#folder" x="117" y="247"/><text class="name" x="142" y="262">providers</text>
+    <use href="#folder" x="93" y="277"/><text class="name" x="118" y="292">application</text><text class="detail" x="400" y="292">用例与业务流程编排</text>
+    <use href="#folder" x="93" y="307"/><text class="name" x="118" y="322">domain</text><text class="detail" x="400" y="322">领域模型、规则和业务接口</text>
+    <use href="#open" x="75" y="339"/><use href="#folder" x="93" y="337"/><text class="name" x="118" y="352">data</text><text class="detail" x="400" y="352">接口实现和外部数据访问</text>
+    <use href="#folder" x="117" y="367"/><text class="name" x="142" y="382">datasources</text>
+    <use href="#folder" x="117" y="397"/><text class="name" x="142" y="412">models</text>
+    <use href="#folder" x="117" y="427"/><text class="name" x="142" y="442">repositories</text>
+    <use href="#folder" x="93" y="457"/><text class="name" x="118" y="472">composition</text><text class="detail" x="400" y="472">可选：依赖装配</text>
+  </g>
+  <text class="detail" x="28" y="557">按职责创建目录；子目录位于对应父目录之下。</text>
+</svg>

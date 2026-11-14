@@ -34,18 +34,27 @@ import 'package:riverpod_annotation/experimental/scope.dart';
   animeInfoArgs,
 ])
 class AnimeInfoView extends StatefulWidget {
-  const AnimeInfoView(
-      {super.key, required this.onPlay, required this.onPlayEpisode});
+  const AnimeInfoView({
+    super.key,
+    required this.onPlay,
+    required this.onPlayEpisode,
+    this.scrollController,
+  });
 
   final VoidCallback onPlay;
   final ValueChanged<int> onPlayEpisode;
+
+  /// 抽屉提供滚动控制器时，使用单一滚动视图联动拖拽和内容滚动。
+  final ScrollController? scrollController;
 
   @override
   State<AnimeInfoView> createState() => _AnimeInfoViewState();
 }
 
 class _AnimeInfoViewState extends State<AnimeInfoView> {
-  final nestedScrollController = ScrollController();
+  final _scrollController = ScrollController();
+  ScrollController get nestedScrollController =>
+      widget.scrollController ?? _scrollController;
   late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
 
   bool isPinned = false;
@@ -53,7 +62,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
 
   @override
   void dispose() {
-    nestedScrollController.dispose();
+    _scrollController.dispose();
     _showTopButton.dispose();
     super.dispose();
   }
@@ -108,26 +117,32 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                     }
                     return false;
                   },
-                  child: NestedScrollView(
-                    scrollBehavior: const ScrollBehavior().copyWith(
-                      scrollbars: false,
-                    ),
-                    controller: nestedScrollController,
-                    headerSliverBuilder:
-                        (BuildContext context, bool innerBoxIsScrolled) {
-                      return <Widget>[
-                        SliverOverlapAbsorber(
-                          handle:
-                              NestedScrollView.sliverOverlapAbsorberHandleFor(
-                            context,
+                  child: widget.scrollController != null
+                      ? _buildSynopsis(
+                          context,
+                          headerSliver: _buildSliverAppBar(context,
+                              contentHeight, toolbarHeight, glassStyle),
+                        )
+                      : NestedScrollView(
+                          scrollBehavior: const ScrollBehavior().copyWith(
+                            scrollbars: false,
                           ),
-                          sliver: _buildSliverAppBar(context, contentHeight,
-                              toolbarHeight, glassStyle),
+                          controller: nestedScrollController,
+                          headerSliverBuilder:
+                              (BuildContext context, bool innerBoxIsScrolled) {
+                            return <Widget>[
+                              SliverOverlapAbsorber(
+                                handle: NestedScrollView
+                                    .sliverOverlapAbsorberHandleFor(
+                                  context,
+                                ),
+                                sliver: _buildSliverAppBar(context,
+                                    contentHeight, toolbarHeight, glassStyle),
+                              ),
+                            ];
+                          },
+                          body: _buildSynopsis(context),
                         ),
-                      ];
-                    },
-                    body: _buildSynopsis(context),
-                  ),
                 ),
                 floatingActionButton: _buildFloatingActionButton(context),
               );
@@ -346,7 +361,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
     ];
   }
 
-  Widget _buildSynopsis(BuildContext context) {
+  Widget _buildSynopsis(BuildContext context, {Widget? headerSliver}) {
     final l10n = AppLocalizations.of(context);
     final title = l10n.introduction;
     const fontWeightTitle = FontWeight.bold;
@@ -377,15 +392,20 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
             builder: (BuildContext context) {
               return CustomScrollView(
                 key: PageStorageKey<String>(title),
+                controller:
+                    headerSliver == null ? null : widget.scrollController,
                 scrollBehavior: const ScrollBehavior().copyWith(
                   scrollbars: false,
                 ),
                 slivers: <Widget>[
-                  SliverOverlapInjector(
-                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                      context,
+                  if (headerSliver != null)
+                    headerSliver
+                  else
+                    SliverOverlapInjector(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                        context,
+                      ),
                     ),
-                  ),
                   Consumer(
                     builder: (context, ref, _) {
                       final subjectsInfoAsync = ref.watch(animeInfoProvider);

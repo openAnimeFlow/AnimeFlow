@@ -1,18 +1,18 @@
 import 'dart:async';
 
-import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/logger/app_log.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:flutter/widgets.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 
 /// Adapts app visibility and playback activity to the platform wakelock.
 class PlaybackScreenAwake with WidgetsBindingObserver {
-  PlaybackScreenAwake(Stream<PlayerEvent> events) {
+  PlaybackScreenAwake(Stream<PlayerEvent> events, this.keepScreenOn) {
     WidgetsBinding.instance.addObserver(this);
     _subscription =
         events.listen(_onPlayerEvent, onDone: () => unawaited(dispose()));
   }
 
+  final Future<void> Function(bool) keepScreenOn;
   late final StreamSubscription<PlayerEvent> _subscription;
   // Wakelock is process-wide. Pages withdraw only their own demand, and all
   // native changes share one queue across overlapping page lifetimes.
@@ -60,10 +60,10 @@ class PlaybackScreenAwake with WidgetsBindingObserver {
     return _updates = _updates.then((_) async {
       if (enabled != _owners.isNotEmpty) return;
       try {
-        await WakelockPlus.toggle(enable: enabled);
+        await keepScreenOn(enabled);
       } catch (error, stackTrace) {
         if (_requested == enabled) _requested = !enabled;
-        LiggLogger().e('设置播放屏幕常亮失败', error: error, stackTrace: stackTrace);
+        logError('设置播放屏幕常亮失败', error: error, stackTrace: stackTrace);
       }
     });
   }

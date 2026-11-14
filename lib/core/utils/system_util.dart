@@ -1,10 +1,11 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_volume_controller/flutter_volume_controller.dart';
+import 'package:volume_controller/volume_controller.dart';
 import 'package:gal/gal.dart';
 import 'package:anime_flow/core/exception/storage_exception.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -100,8 +101,7 @@ class SystemUtil {
   }
 
   /// 是否支持系统音量同步
-  static bool get supportsSystemVolumeSync =>
-      !kIsWeb && (isMobile || isDesktop);
+  static bool get supportsSystemVolumeSync => !kIsWeb && isMobile;
 
   ///判断系统是否深色主题
   static bool isDarkTheme(BuildContext context) {
@@ -112,7 +112,7 @@ class SystemUtil {
   static Future<double?> getSystemVolume() async {
     if (!supportsSystemVolumeSync) return null;
     try {
-      return await FlutterVolumeController.getVolume();
+      return await VolumeController.instance.getVolume();
     } catch (e) {
       LiggLogger().e('获取系统音量失败: $e');
       return null;
@@ -123,34 +123,27 @@ class SystemUtil {
   static Future<void> setSystemVolume(double volume) async {
     if (!supportsSystemVolumeSync) return;
     try {
-      await FlutterVolumeController.setVolume(volume.clamp(0.0, 1.0));
+      await VolumeController.instance.setVolume(volume.clamp(0.0, 1.0));
     } catch (e) {
       LiggLogger().e('设置系统音量失败: $e');
     }
   }
 
   /// 监听系统音量变化，回调参数范围 0.0 - 1.0
-  static void addSystemVolumeListener(void Function(double volume) listener) {
-    if (!supportsSystemVolumeSync) return;
-    FlutterVolumeController.addListener(listener);
-  }
-
-  static void removeSystemVolumeListener() {
-    if (!supportsSystemVolumeSync) return;
-    FlutterVolumeController.removeListener();
+  static StreamSubscription<double>? addSystemVolumeListener(
+      void Function(double volume) listener) {
+    if (!supportsSystemVolumeSync) return null;
+    return VolumeController.instance.addListener(listener);
   }
 
   static Future<void> configureSystemVolumeSync() async {
     if (!supportsSystemVolumeSync) return;
-    try {
-      await FlutterVolumeController.updateShowSystemUI(false);
-    } catch (_) {}
+    VolumeController.instance.showSystemUI = false;
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       try {
-        await FlutterVolumeController.setAndroidAudioStream(
-          stream: AudioStream.music,
-        );
+        await const MethodChannel('anime_flow/system_volume')
+            .invokeMethod<void>('useMediaVolumeStream');
       } catch (e) {
         LiggLogger().e('设置 Android 音量流失败: $e');
       }

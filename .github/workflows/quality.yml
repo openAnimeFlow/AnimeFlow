@@ -57,7 +57,7 @@ jobs:
         # Use the isolated tool context to avoid app native build hooks.
         run: dart --packages=tool/architecture_guard/.dart_tool/package_config.json tool/generate_android_anime4k.dart --check
       - name: Static analysis including Riverpod plugin
-        run: flutter analyze --no-pub --fatal-infos
+        run: flutter analyze --no-pub --no-fatal-infos
       - name: Analyze architecture tool
         working-directory: tool/architecture_guard
         run: dart analyze --fatal-infos

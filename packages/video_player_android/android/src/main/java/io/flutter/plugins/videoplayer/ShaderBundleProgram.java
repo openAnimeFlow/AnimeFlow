@@ -8,7 +8,6 @@ import androidx.media3.common.util.GlProgram;
 import androidx.media3.common.util.GlUtil;
 import androidx.media3.common.util.UnstableApi;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /** Executes an application-supplied shader graph using signed RGBA16F intermediates. GL-thread only. */
@@ -19,7 +18,6 @@ final class ShaderBundleProgram {
           + "in vec4 aFramePosition; out vec2 vTexCoord;"
           + "void main(){gl_Position=aFramePosition;vTexCoord=aFramePosition.xy*0.5+0.5;}";
   private final ShaderBundle bundle;
-  private final List<ShaderPassPlan.Pass> passes;
   private final Map<String, GlProgram> programs = new HashMap<>();
   private final GlProgram copy;
   private ShaderPassPlan plan;
@@ -33,7 +31,6 @@ final class ShaderBundleProgram {
       GlUtil.checkGlException(
           version != null && version.startsWith("OpenGL ES 3"),
           "Shader bundles require OpenGL ES 3 and RGBA16F rendering");
-      passes = bundle.passes;
       copy =
           new GlProgram(
               VERTEX,
@@ -47,6 +44,10 @@ final class ShaderBundleProgram {
     }
   }
 
+  boolean usesBundle(ShaderBundle candidate) {
+    return bundle.encoded.equals(candidate.encoded);
+  }
+
   private void configure(int width, int height, int targetWidth, int targetHeight)
       throws GlUtil.GlException {
     if (plan != null
@@ -54,10 +55,9 @@ final class ShaderBundleProgram {
         && inputHeight == height
         && outputWidth == targetWidth
         && outputHeight == targetHeight) return;
-    deleteTargets();
-    plan = null;
+    releaseTargets();
     ShaderPassPlan next =
-        new ShaderPassPlan(passes, width, height, targetWidth, targetHeight);
+        new ShaderPassPlan(bundle.passes, width, height, targetWidth, targetHeight);
     int[] limit = new int[1];
     GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, limit, 0);
     GlUtil.checkGlException(
@@ -97,15 +97,20 @@ final class ShaderBundleProgram {
         }
         GlUtil.focusFramebufferUsingCurrentContext(
             fbos[step.output.slot], step.output.width, step.output.height);
+        // Slots can contain another pass or frame. Discarded fragments must start at zero.
+        GLES20.glClearColor(0f, 0f, 0f, 0f);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         program.use();
         for (int i = 0; i < step.inputs.length; i++) {
           ShaderPassPlan.Binding binding = step.pass.bindings.get(i);
           ShaderPassPlan.Node node = step.inputs[i];
-          if (binding.sampler)
+          // A declared uniform can be removed by the GLSL compiler when unused.
+          if (binding.sampler && program.getUniformLocation("u_" + binding.name) != -1)
             program.setSamplerTexIdUniform(
                 "u_" + binding.name, node.slot < 0 ? input : textures[node.slot], i);
           if (binding.dimensions)
-            program.setFloatsUniform("s_" + binding.name, new float[] {node.width, node.height});
+            program.setFloatsUniformIfPresent(
+                "s_" + binding.name, new float[] {node.width, node.height});
         }
         program.bindAttributesAndUniforms();
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
@@ -125,7 +130,9 @@ final class ShaderBundleProgram {
     }
   }
 
-  private void deleteTargets() throws GlUtil.GlException {
+  /** Frees intermediate GPU memory while retaining compiled programs for re-enabling the effect. */
+  void releaseTargets() throws GlUtil.GlException {
+    plan = null;
     GlUtil.GlException failure = null;
     for (int i = 0; i < textures.length; i++) {
       try {
@@ -143,13 +150,17 @@ final class ShaderBundleProgram {
         textures[i] = 0;
       }
     }
+    if (textures.length != 0) {
+      textures = new int[0];
+      fbos = new int[0];
+    }
     if (failure != null) throw failure;
   }
 
   void release() throws VideoFrameProcessingException {
     GlUtil.GlException failure = null;
     try {
-      deleteTargets();
+      releaseTargets();
     } catch (GlUtil.GlException e) {
       failure = e;
     }

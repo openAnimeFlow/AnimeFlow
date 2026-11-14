@@ -65,7 +65,7 @@ public class VideoEffectPipelineTest {
             argThat(
                 effects ->
                     effects.size() == 1
-                        && ((SwitchableVideoEffect) effects.get(0)).getEffect()
+                        && ((SwitchableVideoEffect) effects.get(0)).getConfiguration().effect
                             == PlatformVideoEffect.NONE));
     order.verify(player).prepare();
     texture.setVideoEffect(PlatformVideoEffect.DEBUG_GRAYSCALE);
@@ -74,7 +74,7 @@ public class VideoEffectPipelineTest {
             argThat(
                 effects ->
                     effects.size() == 1
-                        && ((SwitchableVideoEffect) effects.get(0)).getEffect()
+                        && ((SwitchableVideoEffect) effects.get(0)).getConfiguration().effect
                             == PlatformVideoEffect.DEBUG_GRAYSCALE));
     texture.dispose();
     assertThrows(

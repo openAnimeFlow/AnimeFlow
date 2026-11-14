@@ -56,7 +56,11 @@ public final class VideoEffectPipeline implements AnalyticsListener {
     setEffect(effect, targetWidth, targetHeight, null);
   }
 
-  public void setEffect(PlatformVideoEffect effect, @Nullable Long targetWidth, @Nullable Long targetHeight, @Nullable String encodedBundle) {
+  public void setEffect(
+      PlatformVideoEffect effect,
+      @Nullable Long targetWidth,
+      @Nullable Long targetHeight,
+      @Nullable String encodedBundle) {
     if (disposed) throw new IllegalStateException("Video effect pipeline is disposed");
     if ((targetWidth == null) != (targetHeight == null)
         || (targetWidth != null
@@ -68,21 +72,33 @@ public final class VideoEffectPipeline implements AnalyticsListener {
     }
     int nextWidth = targetWidth == null ? 0 : targetWidth.intValue();
     int nextHeight = targetHeight == null ? 0 : targetHeight.intValue();
-    if ((effect == PlatformVideoEffect.SHADER_BUNDLE) != (encodedBundle != null)) throw new IllegalArgumentException("Shader bundle configuration mismatch");
-    ShaderBundle nextBundle = encodedBundle == null ? null :
-        (bundle != null && bundle.encoded.equals(encodedBundle) ? bundle : new ShaderBundle(encodedBundle));
-    if (this.effect == effect && bundle == nextBundle && outputWidth == nextWidth && outputHeight == nextHeight) return;
+    if ((effect == PlatformVideoEffect.SHADER_BUNDLE) != (encodedBundle != null)) {
+      throw new IllegalArgumentException("Shader bundle configuration mismatch");
+    }
+    ShaderBundle nextBundle = null;
+    if (encodedBundle != null) {
+      nextBundle =
+          bundle != null && bundle.encoded.equals(encodedBundle)
+              ? bundle
+              : new ShaderBundle(encodedBundle);
+    }
+    if (this.effect == effect
+        && bundle == nextBundle
+        && outputWidth == nextWidth
+        && outputHeight == nextHeight) {
+      return;
+    }
     if (effect == PlatformVideoEffect.SHADER_BUNDLE
         && inputFormat != null
         && ColorInfo.isTransferHdr(inputFormat.colorInfo)) {
-      throw new IllegalArgumentException("Shader bundles currently supports SDR video only");
+      throw new IllegalArgumentException("Shader bundles currently support SDR video only");
     }
     switchableEffect.setConfiguration(effect, nextWidth, nextHeight, nextBundle);
     bundle = nextBundle;
     this.effect = effect;
     outputWidth = nextWidth;
     outputHeight = nextHeight;
-    // Layout determines a stable surface size for off/efficiency. Only a real size change
+    // Layout determines a stable surface size across effects. Only a real size change
     // needs rebinding; toggling a preset must not reset Media3's first-frame presentation.
     if (inputFormat != null && updateOutputSize(inputFormat) && surfaceAvailable) bindSurface();
   }
@@ -117,8 +133,7 @@ public final class VideoEffectPipeline implements AnalyticsListener {
     if (outputWidth > 0) {
       return new Size(outputWidth, outputHeight);
     }
-    Size size = outputSizeForFormat(format);
-    return size;
+    return outputSizeForFormat(format);
   }
 
   /** Initial output dimensions shared by the surface and Flutter initialization. */

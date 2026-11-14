@@ -198,7 +198,7 @@ public class Anime4kShaderProgramTest {
               }
             if (upscale) assertTrue("CNN must differ from resize", cnnChanged > 20);
             // Updating the requested mode must not invalidate a still-owned output frame.
-            effect.setEffect(PlatformVideoEffect.NONE);
+            effect.setConfiguration(PlatformVideoEffect.NONE, outWidth, outHeight, null);
             program.releaseOutputFrame(frame[0]);
             assertEquals(available + 1, ready[0]);
             if (i % 5 == 0) program.flush();

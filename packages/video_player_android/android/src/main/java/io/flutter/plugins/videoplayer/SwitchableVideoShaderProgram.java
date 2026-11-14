@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license in the LICENSE file.
 package io.flutter.plugins.videoplayer;
 
-import android.content.Context;
 import android.opengl.GLES20;
 import androidx.annotation.Nullable;
 import androidx.media3.common.GlObjectsProvider;
@@ -20,23 +19,20 @@ import java.util.concurrent.Executor;
  */
 @UnstableApi
 final class SwitchableVideoShaderProgram implements GlShaderProgram {
-  private final Context context;
   private final boolean useHdr;
   private final SwitchableVideoEffect configuration;
   private final GlProgram copyProgram;
   @Nullable private ShaderBundleProgram bundleProgram;
   @Nullable private GlTextureInfo output;
   private boolean outputInUse;
-  @Nullable private String activeBundle;
   private InputListener inputListener = new InputListener() {};
   private OutputListener outputListener = new OutputListener() {};
   private Executor errorExecutor = Runnable::run;
   private ErrorListener errorListener =
       error -> android.util.Log.e("VideoPlayer", "GPU effect failed", error);
 
-  SwitchableVideoShaderProgram(Context context, boolean useHdr, SwitchableVideoEffect configuration)
+  SwitchableVideoShaderProgram(boolean useHdr, SwitchableVideoEffect configuration)
       throws VideoFrameProcessingException {
-    this.context = context;
     this.useHdr = useHdr;
     this.configuration = configuration;
     try {
@@ -77,17 +73,19 @@ final class SwitchableVideoShaderProgram implements GlShaderProgram {
     PlatformVideoEffect effect = settings.effect;
     boolean custom = effect == PlatformVideoEffect.SHADER_BUNDLE;
     try {
-      if (custom && useHdr) throw new VideoFrameProcessingException("Shader bundles currently support SDR video only");
-      String nextBundle = settings.bundle == null ? null : settings.bundle.encoded;
-      if (!java.util.Objects.equals(activeBundle, nextBundle)) {
-        ShaderBundleProgram previous = bundleProgram;
-        bundleProgram = null;
-        activeBundle = null;
-        if (previous != null) previous.release();
-        if (custom) {
+      if (custom && useHdr) {
+        throw new VideoFrameProcessingException("Shader bundles currently support SDR video only");
+      }
+      if (custom) {
+        if (bundleProgram == null || !bundleProgram.usesBundle(settings.bundle)) {
+          ShaderBundleProgram previous = bundleProgram;
+          bundleProgram = null;
+          if (previous != null) previous.release();
           bundleProgram = new ShaderBundleProgram(settings.bundle);
-          activeBundle = nextBundle;
         }
+      } else if (bundleProgram != null) {
+        // Keep only the most recent bundle's compiled programs; large targets are expendable.
+        bundleProgram.releaseTargets();
       }
       int width = settings.outputWidth > 0 ? settings.outputWidth : input.width;
       int height = settings.outputHeight > 0 ? settings.outputHeight : input.height;

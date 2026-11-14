@@ -3,6 +3,7 @@
 package io.flutter.plugins.videoplayer;
 
 import android.content.Context;
+import androidx.annotation.Nullable;
 import androidx.media3.common.VideoFrameProcessingException;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.effect.GlEffect;
@@ -14,9 +15,13 @@ final class SwitchableVideoEffect implements GlEffect {
   static final class Configuration {
     final PlatformVideoEffect effect;
     final int outputWidth, outputHeight;
-    final ShaderBundle bundle;
+    @Nullable final ShaderBundle bundle;
 
-    Configuration(PlatformVideoEffect effect, int outputWidth, int outputHeight, ShaderBundle bundle) {
+    Configuration(
+        PlatformVideoEffect effect,
+        int outputWidth,
+        int outputHeight,
+        @Nullable ShaderBundle bundle) {
       this.effect = effect;
       this.bundle = bundle;
       this.outputWidth = outputWidth;
@@ -30,30 +35,21 @@ final class SwitchableVideoEffect implements GlEffect {
     configuration = new Configuration(effect, 0, 0, null);
   }
 
-  PlatformVideoEffect getEffect() {
-    return configuration.effect;
-  }
-
-  void setEffect(PlatformVideoEffect effect) {
-    setConfiguration(effect, configuration.outputWidth, configuration.outputHeight);
-  }
-
   Configuration getConfiguration() {
     return configuration;
   }
 
-  void setConfiguration(PlatformVideoEffect effect, int width, int height) {
-    setConfiguration(effect, width, height, null);
-  }
-
-  void setConfiguration(PlatformVideoEffect effect, int width, int height, ShaderBundle bundle) {
-    if ((effect == PlatformVideoEffect.SHADER_BUNDLE) != (bundle != null)) throw new IllegalArgumentException("Shader bundle configuration mismatch");
+  void setConfiguration(
+      PlatformVideoEffect effect, int width, int height, @Nullable ShaderBundle bundle) {
+    if ((effect == PlatformVideoEffect.SHADER_BUNDLE) != (bundle != null)) {
+      throw new IllegalArgumentException("Shader bundle configuration mismatch");
+    }
     configuration = new Configuration(effect, width, height, bundle);
   }
 
   @Override
   public GlShaderProgram toGlShaderProgram(Context context, boolean useHdr)
       throws VideoFrameProcessingException {
-    return new SwitchableVideoShaderProgram(context, useHdr, this);
+    return new SwitchableVideoShaderProgram(useHdr, this);
   }
 }

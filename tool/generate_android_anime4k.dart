@@ -1,17 +1,11 @@
-// Converts the application MPV preset and the x2 test fixture to GLES 3.
+// Converts the application MPV preset to GLES 3.
 // Run from the repository root; --check verifies the committed assets without writing.
 import 'dart:io';
 import 'dart:convert';
 
 void main(List<String> arguments) {
-  generateEfficiency(arguments.contains('--check'));
-  generateEfficiency(arguments.contains('--check'), x2: true);
-}
-
-void generateEfficiency(bool check, {bool x2 = false}) {
-  final output = x2
-      ? 'test/fixtures/video_shaders/android'
-      : 'assets/shaders/video_player/android';
+  final check = arguments.contains('--check');
+  const output = 'assets/shaders/video_player/android';
   // Read the MPV preset itself so its file order cannot silently diverge.
   final preset = File(
           'lib/features/play/infrastructure/player/media_kit/mpv_upscale_shaders.dart')
@@ -19,16 +13,13 @@ void generateEfficiency(bool check, {bool x2 = false}) {
   final list = RegExp(r'_efficiencyShaders = \[([\s\S]*?)\];')
       .firstMatch(preset)!
       .group(1)!;
-  final names = x2
-      ? ['Anime4K_Upscale_CNN_x2_S.glsl']
-      : RegExp(r"'([^']+\.glsl)'")
-          .allMatches(list)
-          .map((m) => m.group(1)!)
-          .toList();
-  if (!x2 && names.length != 7) {
+  final names = RegExp(r"'([^']+\.glsl)'")
+      .allMatches(list)
+      .map((m) => m.group(1)!)
+      .toList();
+  if (names.length != 7) {
     throw StateError('Review the changed MPV efficiency preset');
   }
-  final prefix = x2 ? 'x2' : 'efficiency';
   final passes = <Map<String, Object>>[];
   for (final name in names) {
     final source = File('assets/shaders/media_kit/common/$name')
@@ -83,7 +74,7 @@ void generateEfficiency(bool check, {bool x2 = false}) {
 #define ${binding}_tex(pos) texture(u_$binding, pos)
 #define ${binding}_texOff(offset) texture(u_$binding, vTexCoord + (offset) / s_$binding)''');
       }
-      final asset = '${prefix}_${passes.length}.glsl';
+      final asset = 'efficiency_${passes.length}.glsl';
       writeGenerated(
           '$output/$asset',
           '''#version 300 es
@@ -118,7 +109,7 @@ void main() { outColor = hook(); }
     for (final hook in ['MAIN', 'PREKERNEL'])
       ...passes.where((p) => p['hook'] == hook)
   ];
-  writeGenerated('$output/$prefix.json',
+  writeGenerated('$output/efficiency.json',
       '${const JsonEncoder.withIndent('  ').convert(ordered)}\n', check);
   stdout.writeln(
       'Anime4K efficiency: ${names.length} files, ${passes.length} passes verified.');

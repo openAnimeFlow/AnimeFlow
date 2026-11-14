@@ -62,22 +62,3 @@ once for the failed configuration; changing the configuration permits recovery.
 On iOS resign-active, new GPU submissions stop and any already-submitted command
 buffer completes before the app backgrounds. Resume schedules the cached video
 frame again, including while playback is paused.
-
-## Package validation
-
-From this package's directory on a Mac with Xcode and its Metal toolchain:
-
-```sh
-bash tool/test_shaders.sh
-```
-
-The runner compiles the native implementation, executes graph and GPU regressions,
-and compiles the built-in vertex/copy shaders for iPhoneOS. All fixtures are small
-synthetic shaders and pixel buffers defined in `darwin/Tests`. No host app, preset
-directory, or files outside this package are needed. A Metal GPU is required;
-missing GPU support fails the run instead of skipping it.
-
-Applications should separately validate their own presets and playback integration
-on iPhone, including rotation, color, resizing, paused switches, background/resume,
-seeks, disposal, and sustained GPU frame time. Mac GPU tests do not replace iPhone
-playback integration tests.

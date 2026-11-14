@@ -6,27 +6,21 @@ import 'dart:io';
 import 'generate_android_anime4k.dart' show writeGenerated;
 
 void main(List<String> arguments) {
-  for (final fixture in [false, true]) {
-    final base =
-        fixture ? 'test/fixtures/video_shaders' : 'assets/shaders/video_player';
-    final preset = fixture ? 'x2' : 'efficiency';
-    final passes =
-        (jsonDecode(File('$base/android/$preset.json').readAsStringSync())
-                as List)
-            .cast<Map<String, dynamic>>();
-    for (final pass in passes) {
-      final glsl = File('$base/android/${pass['asset']}').readAsStringSync();
-      final metal = convertShader(glsl.replaceAll('\r\n', '\n'), pass);
-      pass['asset'] = (pass['asset'] as String).replaceFirst('.glsl', '.metal');
-      writeGenerated(
-          '$base/ios/${pass['asset']}', metal, arguments.contains('--check'));
-    }
-    writeGenerated(
-        '$base/ios/$preset.json',
-        '${const JsonEncoder.withIndent('  ').convert(passes)}\n',
-        arguments.contains('--check'));
-    stdout.writeln('Metal $preset: ${passes.length} passes verified.');
+  final check = arguments.contains('--check');
+  const base = 'assets/shaders/video_player';
+  final passes =
+      (jsonDecode(File('$base/android/efficiency.json').readAsStringSync())
+              as List)
+          .cast<Map<String, dynamic>>();
+  for (final pass in passes) {
+    final glsl = File('$base/android/${pass['asset']}').readAsStringSync();
+    final metal = convertShader(glsl.replaceAll('\r\n', '\n'), pass);
+    pass['asset'] = (pass['asset'] as String).replaceFirst('.glsl', '.metal');
+    writeGenerated('$base/ios/${pass['asset']}', metal, check);
   }
+  writeGenerated('$base/ios/efficiency.json',
+      '${const JsonEncoder.withIndent('  ').convert(passes)}\n', check);
+  stdout.writeln('Metal efficiency: ${passes.length} passes verified.');
 }
 
 String convertShader(String glsl, Map<String, dynamic> pass) {

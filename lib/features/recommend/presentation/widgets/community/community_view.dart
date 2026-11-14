@@ -135,9 +135,9 @@ class _CommunityPageState extends ConsumerState<CommunityView>
                 watchingPeopleLabel: l10n.watchingPeople,
                 emptyMessage: l10n.noUsersWatchingAnime,
                 onlineSummary: (count) => l10n.communityOnlineSummary(
-                  count.onlineUsers,
-                  count.anonymousUsers,
-                  count.loggedInUsers,
+                  count.onlineUsers ?? '--',
+                  count.anonymousUsers ?? '--',
+                  count.loggedInUsers ?? '--',
                 ),
                 onRetry: _refresh,
               );
@@ -172,18 +172,21 @@ class _CommunityContent extends StatelessWidget {
   final Object? connectionError;
   final String retryLabel;
   final String sectionTitle;
-  final String Function(int count, int viewers) sectionSummary;
-  final String Function(int count) watchingPeopleLabel;
+  final String Function(int count, Object viewers) sectionSummary;
+  final String Function(Object count) watchingPeopleLabel;
   final String emptyMessage;
   final String Function(OnlineCount count) onlineSummary;
   final Future<void> Function() onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final totalWatching = subjects.fold<int>(
-      0,
-      (total, subject) => total + subject.online.onlineUsers,
-    );
+    final totalWatching =
+        (subjects.any((subject) => subject.online.onlineUsers == null))
+            ? null
+            : subjects.fold<int>(
+                0,
+                (total, subject) => total + subject.online.onlineUsers!,
+              );
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -219,14 +222,6 @@ class _CommunityContent extends StatelessWidget {
                   onlineCount: onlineCount,
                   connection: connection,
                   connectionError: connectionError,
-                  title: AppLocalizations.of(context).communityOnlineTitle,
-                  subtitle:
-                      AppLocalizations.of(context).communityOnlineSubtitle,
-                  versionNotice:
-                      AppLocalizations.of(context).communityOnlineVersionNotice,
-                  totalLabel: AppLocalizations.of(context).totalOnlineUsers,
-                  anonymousLabel: AppLocalizations.of(context).anonymousUsers,
-                  loggedInLabel: AppLocalizations.of(context).loggedInUsers,
                   onRetry: onRetry,
                 ),
               ),
@@ -243,7 +238,7 @@ class _CommunityContent extends StatelessWidget {
                   title: sectionTitle,
                   subtitle: subjects.isEmpty
                       ? null
-                      : sectionSummary(subjects.length, totalWatching),
+                      : sectionSummary(subjects.length, totalWatching ?? '--'),
                   icon: Icons.ondemand_video_outlined,
                 ),
               ),
@@ -314,35 +309,24 @@ class _CommunityHero extends StatelessWidget {
     required this.onlineCount,
     required this.connection,
     required this.connectionError,
-    required this.title,
-    required this.subtitle,
-    required this.versionNotice,
-    required this.totalLabel,
-    required this.anonymousLabel,
-    required this.loggedInLabel,
     required this.onRetry,
   });
 
   final AsyncValue<OnlineCount> onlineCount;
   final CommunityConnectionState connection;
   final Object? connectionError;
-  final String title;
-  final String subtitle;
-  final String versionNotice;
-  final String totalLabel;
-  final String anonymousLabel;
-  final String loggedInLabel;
   final Future<void> Function() onRetry;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Text(
-              title,
+              l10n.communityOnlineTitle,
               style: const TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.w800,
@@ -371,12 +355,12 @@ class _CommunityHero extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          subtitle,
+          l10n.communityOnlineSubtitle,
           style: const TextStyle(fontSize: 14),
         ),
         const SizedBox(height: 4),
         Text(
-          versionNotice,
+          l10n.communityOnlineVersionNotice,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontSize: 12,
@@ -385,21 +369,21 @@ class _CommunityHero extends StatelessWidget {
         const SizedBox(height: 22),
         onlineCount.when(
           loading: () => _StatsCard.loading(
-            totalLabel: totalLabel,
-            anonymousLabel: anonymousLabel,
-            loggedInLabel: loggedInLabel,
+            totalLabel: l10n.totalOnlineUsers,
+            anonymousLabel: l10n.anonymousUsers,
+            loggedInLabel: l10n.loggedInUsers,
           ),
           error: (error, __) => _StatsCard.error(
             error: error,
-            totalLabel: totalLabel,
-            anonymousLabel: anonymousLabel,
-            loggedInLabel: loggedInLabel,
+            totalLabel: l10n.totalOnlineUsers,
+            anonymousLabel: l10n.anonymousUsers,
+            loggedInLabel: l10n.loggedInUsers,
           ),
           data: (count) => _StatsCard(
             count: count,
-            totalLabel: totalLabel,
-            anonymousLabel: anonymousLabel,
-            loggedInLabel: loggedInLabel,
+            totalLabel: l10n.totalOnlineUsers,
+            anonymousLabel: l10n.anonymousUsers,
+            loggedInLabel: l10n.loggedInUsers,
           ),
         ),
       ],
@@ -602,9 +586,11 @@ class _StatsCard extends StatelessWidget {
       );
     }
 
-    final values = count == null
-        ? const [0, 0, 0]
-        : [count!.onlineUsers, count!.anonymousUsers, count!.loggedInUsers];
+    final values = [
+      count?.onlineUsers,
+      count?.anonymousUsers,
+      count?.loggedInUsers
+    ];
     final items = [
       (Icons.groups_rounded, totalLabel, values[0], colorScheme.primary),
       (
@@ -643,7 +629,7 @@ class _StatsCard extends StatelessWidget {
 class _StatItem extends StatelessWidget {
   const _StatItem({required this.item, required this.loading});
 
-  final (IconData, String, int, Color) item;
+  final (IconData, String, int?, Color) item;
   final bool loading;
 
   @override
@@ -672,7 +658,7 @@ class _StatItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  loading ? '--' : '${item.$3}',
+                  loading ? '--' : (item.$3?.toString() ?? '--'),
                   style: TextStyle(
                     color: colorScheme.onSurface,
                     fontSize: 20,
@@ -729,7 +715,7 @@ class _WatchingSubjectCard extends StatelessWidget {
       {required this.subject, required this.watchingPeopleLabel});
 
   final WatchingSubject subject;
-  final String Function(int count) watchingPeopleLabel;
+  final String Function(Object count) watchingPeopleLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -758,7 +744,7 @@ class _WatchingSubjectCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      watchingPeopleLabel(subject.online.onlineUsers),
+                      watchingPeopleLabel(subject.online.onlineUsers ?? '--'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

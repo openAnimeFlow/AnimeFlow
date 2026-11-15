@@ -1,7 +1,9 @@
+import 'player/playback_source.dart';
+
 /// 打开一集视频所需的播放地址与剧集上下文。
 class PlayRequest {
-  /// 播放地址
-  final String videoUrl;
+  /// 播放源
+  final PlaybackSource source;
 
   /// 播放偏移
   final int offset;
@@ -29,10 +31,8 @@ class PlayRequest {
 
   final String? localDanmakuPath;
 
-  final bool isLocalPlayback;
-
   const PlayRequest({
-    required this.videoUrl,
+    required this.source,
     required this.offset,
     required this.subjectId,
     required this.episodeIndex,
@@ -42,6 +42,5 @@ class PlayRequest {
     required this.subjectCover,
     required this.alias,
     this.localDanmakuPath,
-    this.isLocalPlayback = false,
   });
 }

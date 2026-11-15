@@ -3,6 +3,9 @@ import 'package:anime_flow/features/play/application/offline_playback.dart';
 import 'dart:async';
 
 import 'package:anime_flow/features/play/application/play_session.dart';
+import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
+import 'package:anime_flow/features/play/domain/player/video_validation_exception.dart';
+import 'package:anime_flow/features/play/presentation/extensions/playback_notice_presentation.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
@@ -81,7 +84,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
         ref.listenManual(videoSourceProvider.notifier, (_, __) {}).read();
     playSession = ref.listenManual(playSessionProvider, (_, __) {}).read();
     _offlinePlayback = OfflinePlayback(
-        ref.read(playHistoryServiceProvider), playSession.initPlayState);
+        ref.read(playHistoryServiceProvider), playSession.replacePlayback);
     _screenAwake = PlaybackScreenAwake(playSession.playbackCoordinator.events,
         ref.read(playbackDeviceProvider).keepScreenOn);
     _contentAnimationController = AnimationController(
@@ -103,7 +106,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
   void dispose() {
     _offlinePlayback.dispose();
     unawaited(_screenAwake.dispose());
-    playSession.clearPresence();
+    playSession.platform.clearPresence();
     if (_subscribedRouteObserver) {
       appRouteObserver.unsubscribe(this);
     }
@@ -171,7 +174,10 @@ class _PlayPageState extends ConsumerState<PlayPage>
     } catch (error, stackTrace) {
       if (!mounted) return;
       logError('本地视频打开失败', error: error, stackTrace: stackTrace);
-      NotificationToast.show(AppLocalizations.of(context).openFailed);
+      final notice = error is VideoValidationException
+          ? error.notice
+          : PlaybackNotice.localVideoOpenFailed;
+      NotificationToast.show(notice.localize(AppLocalizations.of(context)));
     }
   }
 

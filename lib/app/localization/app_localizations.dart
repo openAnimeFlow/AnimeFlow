@@ -1322,6 +1322,84 @@ abstract class AppLocalizations {
   /// **'切换源'**
   String get switchSource;
 
+  /// No description provided for @chooseLocalVideo.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'选择本地视频'**
+  String get chooseLocalVideo;
+
+  /// No description provided for @preparingLocalVideo.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在准备本地视频'**
+  String get preparingLocalVideo;
+
+  /// No description provided for @localVideoSource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'本地视频'**
+  String get localVideoSource;
+
+  /// No description provided for @videoSourceResolving.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在解析视频源…'**
+  String get videoSourceResolving;
+
+  /// No description provided for @videoSourceReady.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'资源解析成功，准备播放…'**
+  String get videoSourceReady;
+
+  /// No description provided for @openingLocalVideo.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在打开本地视频…'**
+  String get openingLocalVideo;
+
+  /// No description provided for @videoSourceResolutionTimedOut.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'视频解析超时，请重试。'**
+  String get videoSourceResolutionTimedOut;
+
+  /// No description provided for @videoSourceResolutionFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'视频解析失败，请切换视频源重试。'**
+  String get videoSourceResolutionFailed;
+
+  /// No description provided for @localVideoNoTrack.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'所选文件没有可播放的视频轨道，请选择视频文件。'**
+  String get localVideoNoTrack;
+
+  /// No description provided for @localVideoValidationTimedOut.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'视频校验超时。文件可能已损坏，或当前内核不支持该格式或编码。请重试或切换内核。'**
+  String get localVideoValidationTimedOut;
+
+  /// No description provided for @localVideoOpenFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法打开本地视频。文件可能无法读取、已损坏或不受当前内核支持。请选择其他文件或切换内核。'**
+  String get localVideoOpenFailed;
+
+  /// No description provided for @localVideoPlaybackFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'本地视频播放失败，请选择其他文件或切换内核。'**
+  String get localVideoPlaybackFailed;
+
+  /// No description provided for @onlineVideoPlaybackFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'视频播放失败，请切换视频源重试。'**
+  String get onlineVideoPlaybackFailed;
+
   /// No description provided for @sourceActions.
   ///
   /// In zh_Hans, this message translates to:

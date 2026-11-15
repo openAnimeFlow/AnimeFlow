@@ -311,19 +311,13 @@ class _IntroduceViewState extends State<IntroduceView>
             //数据源
             Consumer(builder: (context, ref, child) {
               final state = ref.watch(videoSourceProvider);
-              final hasSourceUrl = state.videoUrl.trim().isNotEmpty;
               return VideoResourcesView(
                 isSearchCompleted: state.isSearchCompleted,
-                webSiteTitle: state.webSiteTitle,
-                webSiteIcon: state.webSiteIcon,
-                resourceTitle: state.resourceTitle,
-                lineName: state.lineName,
+                source: state.selectedPlaybackSource,
                 onSwitchSource: () => _showSourceDrawer(
                     ref.read(playExtraProvider).playExtra.subjectName),
-                onOpenSourcePage:
-                    hasSourceUrl ? () => _openSourcePage(state.videoUrl) : null,
-                onCopySourcePage:
-                    hasSourceUrl ? () => _copySourcePage(state.videoUrl) : null,
+                onOpenSourcePage: _openSourcePage,
+                onCopySourcePage: _copySourcePage,
               );
             }),
             //弹幕

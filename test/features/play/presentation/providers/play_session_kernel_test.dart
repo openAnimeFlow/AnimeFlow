@@ -17,6 +17,7 @@ import 'package:anime_flow/features/play/infrastructure/danmaku/opencc_converter
 import 'package:anime_flow/features/play/domain/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
+import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
@@ -25,6 +26,8 @@ import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/domain/play_session_actions.dart';
+import 'package:anime_flow/features/play/domain/play_history_repository.dart';
+import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -35,6 +38,128 @@ void main() {
   setUpAll(() => Storage.setting = _Settings());
   setUp(() => (Storage.setting as _Settings).stored.clear());
 
+  test('replacement waits for old progress before resolving and stops once',
+      () async {
+    final factory = _Factory();
+    final history = _PendingHistory();
+    final session = _Session(factory, history: history);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session.replacePlayback(() => _request(1));
+    final engine = factory.engines.single;
+    final progress = session.playbackProgressManager;
+    progress.updatePlaybackState(
+      position: const Duration(seconds: 73),
+      duration: const Duration(minutes: 24),
+      playing: true,
+      isLoggedIn: false,
+    );
+    factory.onStop = () => progress.updatePlaybackState(
+          position: Duration.zero,
+          duration: Duration.zero,
+          playing: false,
+          isLoggedIn: false,
+        );
+
+    var resolving = false;
+    final opening = session.replacePlayback(() async {
+      resolving = true;
+      final offset = await PlayHistoryService(history).resumePosition(1, 1);
+      return _request(1, offset: offset);
+    });
+    final record = await history.started.future;
+    expect(record.episodeId, 1);
+    expect(record.position, 73);
+    expect(resolving, isFalse);
+    expect(engine.openedUris, hasLength(1));
+
+    history.commit.complete();
+    expect(await opening, isTrue);
+    expect(engine.stopCalls, 1);
+    expect(engine.startPositions.last, const Duration(seconds: 73));
+  });
+
+  test('a source resolved after a newer episode cannot reopen playback',
+      () async {
+    final factory = _Factory();
+    final session = _Session(factory);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session.replacePlayback(() => _request(1));
+    final engine = factory.engines.single;
+    final resolving = Completer<void>();
+    final delayed = Completer<PlayRequest>();
+    final old = session.replacePlayback(() {
+      resolving.complete();
+      return delayed.future;
+    });
+    await resolving.future;
+    await session.replacePlayback(() => _request(3));
+    delayed.complete(_request(2));
+    expect(await old, isFalse);
+    expect(engine.stopCalls, 1);
+    expect(engine.openedUris, [
+      Uri.file(_localPath(1)).toString(),
+      Uri.file(_localPath(3)).toString(),
+    ]);
+  });
+
+  test('local source remains local after opening and kernel switches',
+      () async {
+    final factory = _Factory();
+    final session = _Session(factory);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session.replacePlayback(() => PlayRequest(
+          source: PlaybackSource.localFile(
+              Directory.systemTemp.uri.resolve('sample.mkv').toFilePath()),
+          offset: 0,
+          subjectId: 1,
+          episodeIndex: 1,
+          episodeSort: 1,
+          episodeId: 1,
+          subjectName: 'Anime',
+          subjectCover: '',
+          alias: const [],
+        ));
+    expect(factory.engines.last.source, isA<LocalFilePlaybackSource>());
+    expect(await session.switchKernel(PlayerKernel.fvp), isTrue);
+    expect(factory.engines.last.source, isA<LocalFilePlaybackSource>());
+  });
+
+  test('failed native validation never starts playback', () async {
+    final factory = _Factory();
+    final session = _Session(factory);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    factory.beforeOpen = (_) async => throw StateError('unsupported codec');
+    await expectLater(
+        session.replacePlayback(() => _request(1)), throwsStateError);
+    expect(factory.engines.single.playCalls, 0);
+  });
+
+  test('superseded source does not start playing after native open completes',
+      () async {
+    final factory = _Factory();
+    final session = _Session(factory);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    final started = Completer<void>();
+    final gate = Completer<void>();
+    factory.beforeOpen = (_) async {
+      started.complete();
+      await gate.future;
+    };
+    var current = true;
+    final opening = session.replacePlayback(() => _request(1),
+        shouldUseResult: () => current);
+    await started.future;
+    current = false;
+    gate.complete();
+    await opening;
+    expect(factory.engines.single.playCalls, 0);
+  });
+
   test(
       'upscale selection survives episodes, decoder rebuilds and kernel round trips',
       () async {
@@ -43,9 +168,9 @@ void main() {
     final session = _Session(factory, state: state);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
-    await session.initPlayState(_request(1));
+    await session.replacePlayback(() => _request(1));
     await session.setUpscalePreset(UpscalePreset.quality);
-    await session.initPlayState(_request(2));
+    await session.replacePlayback(() => _request(2));
     expect(factory.engines.last.upscalePreset, UpscalePreset.quality);
     expect(await session.setHardwareDecoder(false), isTrue);
     expect(factory.engines.last.upscalePreset, UpscalePreset.quality);
@@ -86,7 +211,7 @@ void main() {
     final session = _Session(factory, state: state);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
-    await session.initPlayState(_request(1));
+    await session.replacePlayback(() => _request(1));
     await session.setUpscalePreset(UpscalePreset.quality);
     final started = Completer<void>();
     final gate = Completer<void>();
@@ -120,7 +245,6 @@ void main() {
     session.adjustPlaybackRate(0.25);
     session.adjustPlaybackRate(0.25);
     expect(state._value.rate, 3);
-    expect(session.basePlaybackRate, 1.75);
     session.endTemporaryPlaybackRate();
     expect(state._value.rate, 1.75);
 
@@ -156,11 +280,10 @@ void main() {
     final session = _Session(factory);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
-    await session.initPlayState(_request(1));
+    await session.replacePlayback(() => _request(1));
     expect(storageCalls, 0);
     expect(factory.engines.last.source?.uri.toFilePath(), _localPath(1));
-    expect(session.videoUrl, _localPath(1));
-    expect(factory.engines.last.source?.isLocal, isTrue);
+    expect(factory.engines.last.source, isA<LocalFilePlaybackSource>());
   });
 
   test('failed local opening allows retrying the same episode', () async {
@@ -170,11 +293,12 @@ void main() {
     addTearDown(session.playbackCoordinator.dispose);
     factory.beforeOpen =
         (_) async => throw StateError('local file unavailable');
-    await expectLater(session.initPlayState(_request(1)), throwsStateError);
+    await expectLater(
+        session.replacePlayback(() => _request(1)), throwsStateError);
     factory.beforeOpen = null;
-    await session.initPlayState(_request(1));
+    await session.replacePlayback(() => _request(1));
     expect(factory.engines.last.source?.uri.toFilePath(), _localPath(1));
-    expect(factory.engines.last.source?.isLocal, isTrue);
+    expect(factory.engines.last.source, isA<LocalFilePlaybackSource>());
   });
 
   for (final platform in [
@@ -195,7 +319,7 @@ void main() {
       final session = _Session(factory, state: state);
       await session.playbackCoordinator.initialize();
       addTearDown(session.playbackCoordinator.dispose);
-      await session.initPlayState(_request(1));
+      await session.replacePlayback(() => _request(1));
 
       for (final enabled in [false, true, false]) {
         expect(await session.setHardwareDecoder(enabled), isTrue);
@@ -262,14 +386,14 @@ void main() {
     addTearDown(session.playbackCoordinator.dispose);
     expect(await session.setHardwareDecoder(true), isTrue);
     expect(factory.engines, hasLength(1));
-    await session.initPlayState(_request(1));
+    await session.replacePlayback(() => _request(1));
     expect(await session.setHardwareDecoder(false), isTrue);
     expect(Storage.setting.get(PlaybackKey.hardwareDecoder), isFalse);
     expect(factory.engines, hasLength(2));
     expect(factory.engines.last.kernel, PlayerKernel.mediaKit);
     expect(factory.engines.first.disposeCount, 1);
     expect(factory.engines.last.source?.uri, Uri.file(_localPath(1)));
-    expect(factory.engines.last.source?.isLocal, isTrue);
+    expect(factory.engines.last.source, isA<LocalFilePlaybackSource>());
     expect(await session.setHardwareDecoder(true), isTrue);
     expect(Storage.setting.get(PlaybackKey.hardwareDecoder), isTrue);
     expect(factory.engines, hasLength(3));
@@ -284,12 +408,11 @@ void main() {
     final session = _Session(factory);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
-    await session.initPlayState(_request(1));
+    await session.replacePlayback(() => _request(1));
     final original = factory.engines.single;
     factory.beforeOpen = (_) async => throw StateError('decoder unavailable');
     expect(await session.setHardwareDecoder(false), isFalse);
     expect(Storage.setting.get(PlaybackKey.hardwareDecoder), isTrue);
-    expect(session.playbackCoordinator.hardwareDecoder, isTrue);
     expect(original.disposeCount, 0);
     expect(factory.engines.last.disposeCount, 1);
     factory.beforeOpen = null;
@@ -303,7 +426,7 @@ void main() {
     final session = _Session(factory);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
-    await session.initPlayState(_request(1));
+    await session.replacePlayback(() => _request(1));
     final started = Completer<void>();
     final gate = Completer<void>();
     factory.beforeOpen = (engine) async {
@@ -315,7 +438,7 @@ void main() {
 
     final switching = session.switchKernel(PlayerKernel.fvp);
     await started.future;
-    final episode = session.initPlayState(_request(2));
+    final episode = session.replacePlayback(() => _request(2));
     await Future<void>.delayed(Duration.zero);
     expect(session.episodeId, 1);
     gate.complete();
@@ -333,7 +456,7 @@ void main() {
     final session = _Session(factory);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
-    await session.initPlayState(_request(1));
+    await session.replacePlayback(() => _request(1));
     final started = Completer<void>();
     final gate = Completer<void>();
     factory.beforeOpen = (engine) async {
@@ -343,7 +466,7 @@ void main() {
       }
     };
 
-    final episode = session.initPlayState(_request(2));
+    final episode = session.replacePlayback(() => _request(2));
     await started.future;
     final switching = session.switchKernel(PlayerKernel.fvp);
     await Future<void>.delayed(Duration.zero);
@@ -361,7 +484,7 @@ void main() {
     final session = _Session(factory);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
-    await session.initPlayState(_request(1));
+    await session.replacePlayback(() => _request(1));
     final started = Completer<void>();
     final gate = Completer<void>();
     factory.beforeOpen = (engine) async {
@@ -372,8 +495,8 @@ void main() {
     };
     final switching = session.switchKernel(PlayerKernel.fvp);
     await started.future;
-    final second = session.initPlayState(_request(2));
-    final third = session.initPlayState(_request(3));
+    final second = session.replacePlayback(() => _request(2));
+    final third = session.replacePlayback(() => _request(3));
     gate.complete();
     await switching;
     await Future.wait([second, third]);
@@ -397,7 +520,7 @@ void main() {
     final session = _Session(factory, state: state);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
-    await session.initPlayState(_request(1));
+    await session.replacePlayback(() => _request(1));
 
     session.seekTo(duration);
     await Future<void>.delayed(Duration.zero);
@@ -445,9 +568,9 @@ void main() {
   });
 }
 
-PlayRequest _request(int episode) => PlayRequest(
-      videoUrl: _localPath(episode),
-      offset: 0,
+PlayRequest _request(int episode, {int offset = 0}) => PlayRequest(
+      source: PlaybackSource.localFile(_localPath(episode)),
+      offset: offset,
       subjectId: 1,
       episodeIndex: episode,
       episodeSort: episode,
@@ -455,21 +578,20 @@ PlayRequest _request(int episode) => PlayRequest(
       subjectName: 'test',
       subjectCover: '',
       alias: const [],
-      isLocalPlayback: true,
     );
 
 String _localPath(int episode) =>
     '${Directory.systemTemp.path}${Platform.pathSeparator}本地 #100% 第 $episode 集.mp4';
 
 class _Session extends PlaySession {
-  _Session(_Factory factory, {_State? state})
-      : this._(factory, state ?? _State());
+  _Session(_Factory factory, {_State? state, PlayHistoryRepository? history})
+      : this._(factory, state ?? _State(), history);
 
-  _Session._(_Factory factory, _State state)
+  _Session._(_Factory factory, _State state, PlayHistoryRepository? history)
       : super(
           preferences: StoredPlayPreferences(),
           platform: NativePlaybackPlatform(),
-          history: HivePlayHistoryRepository(),
+          history: history ?? HivePlayHistoryRepository(),
           markEpisodeWatched: (_) async {},
           playStateActions: state,
           readPlayState: () => state._value,
@@ -497,7 +619,15 @@ class _Session extends PlaySession {
       adBlocker: false,
       hardwareDecoder: true,
     );
-    playbackProgressManager = _Progress();
+    playbackProgressManager = history == null
+        ? _Progress()
+        : PlaybackProgressManager(
+            history: history,
+            autoMarkEnabled: () => false,
+            markEpisodeWatched: (_) async {},
+            onEpisodeWatched: (
+                {required subjectId, required episodeId, required watched}) {},
+          );
   }
 }
 
@@ -513,6 +643,7 @@ class _Factory {
   final engines = <_Engine>[];
   final decoderOptions = <bool>[];
   Future<void> Function(_Engine)? beforeOpen;
+  void Function()? onStop;
   PlayerEngine create(PlayerKernel kernel,
       {required bool adBlocker, required bool hardwareDecoder}) {
     decoderOptions.add(hardwareDecoder);
@@ -529,9 +660,11 @@ class _Engine implements PlayerEngine {
   final _Factory factory;
   PlaybackSource? source;
   final openedUris = <String>[];
+  final startPositions = <Duration?>[];
   final seekPositions = <Duration>[];
   int playCalls = 0;
   int pauseCalls = 0;
+  int stopCalls = 0;
   int disposeCount = 0;
   double? volume;
   UpscalePreset upscalePreset = UpscalePreset.off;
@@ -559,6 +692,7 @@ class _Engine implements PlayerEngine {
     expect(disposeCount, 0, reason: 'must not open on a disposed engine');
     this.source = source;
     openedUris.add(source.uri.toString());
+    startPositions.add(startPosition);
   }
 
   @override
@@ -576,6 +710,8 @@ class _Engine implements PlayerEngine {
   @override
   Future<void> stop() async {
     expect(disposeCount, 0);
+    stopCalls++;
+    factory.onStop?.call();
   }
 
   @override
@@ -658,5 +794,31 @@ class _Episodes implements EpisodeActions {
 
 class _Progress implements PlaybackProgressManager {
   @override
+  Future<void> save({
+    Duration? position,
+    PlayHistoryEventType eventType = PlayHistoryEventType.defaults,
+  }) async {}
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class _PendingHistory implements PlayHistoryRepository {
+  final started = Completer<PlaybackRecord>();
+  final commit = Completer<void>();
+  PlaybackRecord? _record;
+
+  @override
+  Future<void> save(PlaybackRecord record,
+      {required PlayHistoryEventType eventType}) async {
+    started.complete(record);
+    await commit.future;
+    _record = record;
+  }
+
+  @override
+  Future<PlaybackRecord?> getBySubjectId(int subjectId) async => _record;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

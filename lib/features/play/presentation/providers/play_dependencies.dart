@@ -1,4 +1,5 @@
 import 'package:anime_flow/features/play/domain/danmaku_repository.dart';
+import 'package:anime_flow/features/play/domain/local_video_files.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
 import 'package:anime_flow/core/video_source/domain/captcha_session.dart';
@@ -28,6 +29,8 @@ final playbackPlatformProvider =
 final playQueriesProvider = _dependency<PlayQueries>('playQueriesProvider');
 final playSourceRepositoryProvider =
     _dependency<PlaySourceRepository>('playSourceRepositoryProvider');
+final localVideoFilesProvider =
+    _dependency<LocalVideoFiles>('localVideoFilesProvider');
 final playbackDeviceProvider =
     _dependency<PlaybackDevice>('playbackDeviceProvider');
 final captchaSessionFactoryProvider =

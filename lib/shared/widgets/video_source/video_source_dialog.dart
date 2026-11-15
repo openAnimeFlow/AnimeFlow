@@ -43,6 +43,7 @@ class VideoSourceDialog extends StatefulWidget {
     this.keyboardInsetHandled = false,
     this.scrollController,
     this.closeOnSelection = true,
+    this.sourceAction,
   });
 
   final String subjectName;
@@ -66,6 +67,7 @@ class VideoSourceDialog extends StatefulWidget {
 
   /// 下载等场景可保留弹窗，继续展示解析结果。
   final bool closeOnSelection;
+  final Widget? sourceAction;
 
   @override
   State<VideoSourceDialog> createState() => _VideoSourceDialogState();
@@ -249,6 +251,10 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
         children: [
           _buildHeader(l10n),
           _buildManualSearch(l10n),
+          if (widget.sourceAction case final action?) ...[
+            const SizedBox(height: 12),
+            action,
+          ],
           const SizedBox(height: 16),
           if (selectedIndex != null) ...[
             _buildWebsiteSelector(

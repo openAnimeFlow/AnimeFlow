@@ -12,7 +12,7 @@ class PlayState {
   final UpscalePreset upscalePreset;
   final VideoFit videoFit;
   final PlaybackPhase phase;
-  final String statusMessage;
+  final PlaybackNotice notice;
   final bool playing;
   final Duration position;
   final Duration duration;
@@ -28,7 +28,7 @@ class PlayState {
     this.upscalePreset = UpscalePreset.off,
     this.videoFit = VideoFit.contain,
     this.phase = PlaybackPhase.idle,
-    this.statusMessage = '',
+    this.notice = PlaybackNotice.none,
     this.playing = false,
     this.position = Duration.zero,
     this.duration = Duration.zero,
@@ -45,7 +45,7 @@ class PlayState {
     UpscalePreset? upscalePreset,
     VideoFit? videoFit,
     PlaybackPhase? phase,
-    String? statusMessage,
+    PlaybackNotice? notice,
     bool? playing,
     Duration? position,
     Duration? duration,
@@ -61,7 +61,7 @@ class PlayState {
       upscalePreset: upscalePreset ?? this.upscalePreset,
       videoFit: videoFit ?? this.videoFit,
       phase: phase ?? this.phase,
-      statusMessage: statusMessage ?? this.statusMessage,
+      notice: notice ?? this.notice,
       playing: playing ?? this.playing,
       position: position ?? this.position,
       duration: duration ?? this.duration,

@@ -403,7 +403,8 @@ void main() {
     await coordinator.initialize();
     final switching = coordinator.switchKernel(PlayerKernel.fvp, _snapshot());
     await started.future;
-    final source = PlaybackSource(uri: Uri.parse('https://example.com/next'));
+    final source =
+        PlaybackSource.network(uri: Uri.parse('https://example.com/next'));
     final opening = coordinator.open(source);
     final playing = coordinator.play();
     expect(factory.created.first.openedSource, isNull);
@@ -454,7 +455,8 @@ void main() {
     addTearDown(coordinator.dispose);
 
     await coordinator.initialize();
-    final source = PlaybackSource(uri: Uri.parse('https://example.com/a'));
+    final source =
+        PlaybackSource.network(uri: Uri.parse('https://example.com/a'));
     final snapshot = PlayerSnapshot(
       source: source,
       position: const Duration(seconds: 42),
@@ -493,7 +495,7 @@ void main() {
     final switched = await coordinator.switchKernel(
       PlayerKernel.fvp,
       PlayerSnapshot(
-        source: PlaybackSource(uri: Uri.parse('https://example.com/a')),
+        source: PlaybackSource.network(uri: Uri.parse('https://example.com/a')),
         position: Duration.zero,
         volume: 100,
         rate: 1,
@@ -528,7 +530,8 @@ void main() {
 }
 
 PlayerSnapshot _snapshot() => PlayerSnapshot(
-      source: PlaybackSource(uri: Uri.parse('https://example.com/current')),
+      source:
+          PlaybackSource.network(uri: Uri.parse('https://example.com/current')),
       position: const Duration(seconds: 42),
       volume: 100,
       rate: 1,

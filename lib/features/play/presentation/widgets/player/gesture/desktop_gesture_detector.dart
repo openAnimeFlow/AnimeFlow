@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/features/play/application/play_session.dart';
+import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -16,7 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 桌面端手势检测器
-@Dependencies([playSession, VideoUiNotifier, PlayStateNotifier])
+@Dependencies([playSession, Episodes, VideoUiNotifier, PlayStateNotifier])
 class DesktopGestureDetector extends ConsumerStatefulWidget {
   final Widget child;
 
@@ -92,10 +93,6 @@ class _DesktopGestureDetectorState
 
     // 未达到长按阈值，按普通快捷键处理一次。
     return _handleShortcut(pressed);
-  }
-
-  Future<void> _takeScreenshot() async {
-    await capturePlayerScreenshot(context, ref, notify: false);
   }
 
   KeyEventResult _handleShortcut(int pressed, {bool isRepeat = false}) {
@@ -190,7 +187,7 @@ class _DesktopGestureDetectorState
       return KeyEventResult.handled;
     }
     if (shortcut[PlayerShortcutAction.screenshot]!.contains(pressed)) {
-      unawaited(_takeScreenshot());
+      unawaited(capturePlayerScreenshot(context, ref, notify: false));
       return KeyEventResult.handled;
     }
     if (shortcut[PlayerShortcutAction.toggleDanmaku]!.contains(pressed)) {
@@ -198,7 +195,7 @@ class _DesktopGestureDetectorState
       return KeyEventResult.handled;
     }
     if (shortcut[PlayerShortcutAction.nextEpisode]!.contains(pressed)) {
-      playSession.switchToNextEpisode();
+      ref.read(episodesProvider.notifier).switchToNextEpisode();
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;

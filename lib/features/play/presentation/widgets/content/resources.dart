@@ -1,31 +1,33 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/features/play/domain/play_source_selection.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:material_ui/material_ui.dart';
 
 enum _SourceAction { openPageUrl, copyPageUrl }
 
+typedef _SourceDisplay = ({
+  String title,
+  Widget icon,
+  String detail,
+  String? pageUrl,
+});
+
 class VideoResourcesView extends StatefulWidget {
   const VideoResourcesView({
     super.key,
     required this.isSearchCompleted,
-    required this.webSiteTitle,
-    required this.webSiteIcon,
-    required this.resourceTitle,
-    required this.lineName,
+    required this.source,
     required this.onSwitchSource,
-    this.onOpenSourcePage,
-    this.onCopySourcePage,
+    required this.onOpenSourcePage,
+    required this.onCopySourcePage,
   });
 
   final bool isSearchCompleted;
-  final String webSiteTitle;
-  final String webSiteIcon;
-  final String resourceTitle;
-  final String lineName;
+  final PlaySourceSelection? source;
   final VoidCallback onSwitchSource;
-  final VoidCallback? onOpenSourcePage;
-  final VoidCallback? onCopySourcePage;
+  final ValueChanged<String> onOpenSourcePage;
+  final ValueChanged<String> onCopySourcePage;
 
   @override
   State<VideoResourcesView> createState() => _VideoResourcesViewState();
@@ -34,15 +36,43 @@ class VideoResourcesView extends StatefulWidget {
 class _VideoResourcesViewState extends State<VideoResourcesView> {
   bool _isSourceActionMenuOpen = false;
 
+  _SourceDisplay? _describeSource(AppLocalizations l10n) =>
+      switch (widget.source) {
+        LocalVideoFile(:final name) => (
+            title: l10n.localVideoSource,
+            icon: const Icon(Icons.video_file_outlined, size: 25),
+            detail: name.trim(),
+            pageUrl: null,
+          ),
+        OnlineEpisodeSource(:final selection) => (
+            title: selection.websiteName,
+            icon: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: AnimationNetworkImage(
+                height: 25,
+                width: 25,
+                url: selection.websiteIcon,
+              ),
+            ),
+            detail: [
+              if (selection.resourceTitle.trim().isNotEmpty)
+                selection.resourceTitle.trim(),
+              if (selection.lineName.trim().isNotEmpty)
+                l10n.lineLabel(selection.lineName.trim()),
+            ].join(' - '),
+            pageUrl: selection.videoUrl.trim().isEmpty
+                ? null
+                : selection.videoUrl.trim(),
+          ),
+        null => null,
+      };
+
   Widget _buildSourceActionMenu({
     required AppLocalizations l10n,
+    required String pageUrl,
   }) {
-    final actions = [
-      if (widget.onOpenSourcePage != null) _SourceAction.openPageUrl,
-      if (widget.onCopySourcePage != null) _SourceAction.copyPageUrl,
-    ];
     return DropDownMenu<_SourceAction>(
-      items: actions,
+      items: _SourceAction.values,
       tooltip: l10n.sourceActions,
       buttonBorderRadius: BorderRadius.circular(25),
       disableSelected: false,
@@ -98,9 +128,9 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
       onSelected: (action) {
         switch (action) {
           case _SourceAction.openPageUrl:
-            widget.onOpenSourcePage?.call();
+            widget.onOpenSourcePage(pageUrl);
           case _SourceAction.copyPageUrl:
-            widget.onCopySourcePage?.call();
+            widget.onCopySourcePage(pageUrl);
         }
       },
     );
@@ -109,13 +139,8 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final resourceTitle = widget.resourceTitle.trim();
-    final lineName = widget.lineName.trim();
-    final displayLineName = lineName.isEmpty ? '' : lineName;
-    final resourceDetail = [
-      if (resourceTitle.isNotEmpty) resourceTitle,
-      if (displayLineName.isNotEmpty) l10n.lineLabel(displayLineName),
-    ].join(' - ');
+    final display = _describeSource(l10n);
+    final resourceDetail = display?.detail ?? '';
     return Card(
       elevation: 0,
       child: Padding(
@@ -136,38 +161,26 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                         ),
                       ),
                       const SizedBox(height: 5),
-                      if (widget.isSearchCompleted ||
-                          widget.webSiteTitle.isNotEmpty)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 5,
+                      if (display != null)
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(5),
-                                  child: AnimationNetworkImage(
-                                    height: 25,
-                                    width: 25,
-                                    url: widget.webSiteIcon,
-                                  ),
+                            display.icon,
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                display.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                const SizedBox(width: 5),
-                                Expanded(
-                                  child: Text(
-                                    widget.webSiteTitle,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ],
                         )
+                      else if (widget.isSearchCompleted)
+                        Text(l10n.noPlayableSourceForEpisode)
                       else
                         Row(
                           children: [
@@ -210,10 +223,10 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                     ),
                   ),
                 ],
-                if (widget.onOpenSourcePage != null ||
-                    widget.onCopySourcePage != null)
+                if (display?.pageUrl case final String pageUrl)
                   _buildSourceActionMenu(
                     l10n: l10n,
+                    pageUrl: pageUrl,
                   ),
               ],
             )

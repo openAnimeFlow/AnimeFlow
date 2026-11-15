@@ -323,7 +323,9 @@ class _BottomControlsContent extends ConsumerWidget {
                     return IconButton(
                       tooltip: l10n.nextEpisode,
                       onPressed: () {
-                        ref.read(playSessionProvider).switchToNextEpisode();
+                        ref
+                            .read(episodesProvider.notifier)
+                            .switchToNextEpisode();
                       },
                       icon: const Icon(
                         Icons.skip_next_rounded,
@@ -473,9 +475,8 @@ class _BottomControlsContent extends ConsumerWidget {
                           .watch(playStateProvider.select((s) => s.videoFit));
                       return FitButton(
                         value: videoFit,
-                        onChanged: (fit) {
-                          playController.toggleVideoFit(fit);
-                        },
+                        onChanged:
+                            ref.read(playStateProvider.notifier).setVideoFit,
                         onMenuOpen: () =>
                             videoUiStateController.cancelUiTimer(),
                         onMenuClose: () =>

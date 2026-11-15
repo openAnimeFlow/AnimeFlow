@@ -1,6 +1,7 @@
 import 'package:anime_flow/core/video_source/infrastructure/webview_captcha_session.dart';
 import 'package:anime_flow/features/play/infrastructure/player/native_playback_device.dart';
 import 'package:anime_flow/features/play/infrastructure/source/crawler_source_repository.dart';
+import 'package:anime_flow/features/play/infrastructure/source/native_local_video_files.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:anime_flow/features/play/infrastructure/queries/flow_play_queries.dart';
 import 'package:anime_flow/features/play/infrastructure/player/native_playback_platform.dart';
@@ -12,6 +13,7 @@ import 'package:anime_flow/features/play/infrastructure/danmaku/opencc_converter
 import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
 
 final playFeatureOverrides = [
+  localVideoFilesProvider.overrideWith((ref) => NativeLocalVideoFiles()),
   playHistoryRepositoryProvider
       .overrideWith((ref) => HivePlayHistoryRepository()),
   playPreferencesProvider.overrideWith((ref) => StoredPlayPreferences()),

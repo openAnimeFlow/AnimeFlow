@@ -1,11 +1,11 @@
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
-import 'package:anime_flow/features/play/domain/player/video_fit.dart';
 
 /// 播放会话写入当前播放状态所需的操作。
 abstract interface class PlayStateActions {
-  void setPlaybackPhase(PlaybackPhase phase, {String? message});
+  void setPlaybackPhase(PlaybackPhase phase,
+      {PlaybackNotice notice = PlaybackNotice.none});
   void setPlaying(bool value);
   void setPosition(Duration value);
   void setDuration(Duration value);
@@ -16,7 +16,6 @@ abstract interface class PlayStateActions {
   void setKernel(PlayerKernel value);
   void setSwitchingKernel(bool value);
   void setUpscalePreset(UpscalePreset value);
-  void setVideoFit(VideoFit value);
   void setScheduledStopDuration(int value);
 }
 

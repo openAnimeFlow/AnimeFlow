@@ -22,7 +22,6 @@ class PlaybackCoordinator {
   final PlayerEngineFactory engineFactory;
   final bool adBlocker;
   bool _hardwareDecoder;
-  bool get hardwareDecoder => _hardwareDecoder;
   final void Function(String message, Object error, StackTrace stackTrace)?
       reportError;
   final StreamController<PlayerEvent> _events =
@@ -34,13 +33,12 @@ class PlaybackCoordinator {
   Future<void>? _disposal;
   Future<void>? _initialization;
 
-  PlayerEngine get _activeEngine =>
+  PlayerEngine get engine =>
       _engine ?? (throw StateError('PlaybackCoordinator has no active engine'));
-  PlayerEngine get engine => _activeEngine;
 
-  PlayerKernel get kernel => _activeEngine.kernel;
+  PlayerKernel get kernel => engine.kernel;
   Stream<PlayerEvent> get events => _events.stream;
-  PlayerCapabilities get capabilities => _activeEngine.capabilities;
+  PlayerCapabilities get capabilities => engine.capabilities;
 
   Future<void> initialize({PlayerKernel kernel = PlayerKernel.mediaKit}) {
     if (_disposed) {
@@ -48,7 +46,7 @@ class PlaybackCoordinator {
     }
     return _initialization ??= (() async {
       final engine = engineFactory(kernel,
-          adBlocker: adBlocker, hardwareDecoder: hardwareDecoder);
+          adBlocker: adBlocker, hardwareDecoder: _hardwareDecoder);
       _engine = engine;
       await engine.initialize();
       if (_disposed) return;
@@ -61,27 +59,25 @@ class PlaybackCoordinator {
     Duration? startPosition,
     bool autoPlay = false,
   }) =>
-      _run(() => _activeEngine.open(
+      _run(() => engine.open(
             source,
             startPosition: startPosition,
             autoPlay: autoPlay,
           ));
 
-  Future<void> play() => _run(() => _activeEngine.play());
-  Future<void> pause() => _run(() => _activeEngine.pause());
-  Future<void> stop() => _run(() => _activeEngine.stop());
-  Future<void> seek(Duration position) =>
-      _run(() => _activeEngine.seek(position));
-  Future<void> setVolume(double volume) =>
-      _run(() => _activeEngine.setVolume(volume));
-  Future<void> setRate(double rate) => _run(() => _activeEngine.setRate(rate));
+  Future<void> play() => _run(() => engine.play());
+  Future<void> pause() => _run(() => engine.pause());
+  Future<void> stop() => _run(() => engine.stop());
+  Future<void> seek(Duration position) => _run(() => engine.seek(position));
+  Future<void> setVolume(double volume) => _run(() => engine.setVolume(volume));
+  Future<void> setRate(double rate) => _run(() => engine.setRate(rate));
   Future<Uint8List?> screenshot() =>
-      _run<Uint8List?>(() => _activeEngine.screenshot());
+      _run<Uint8List?>(() => engine.screenshot());
   Future<void> setUpscalePreset(UpscalePreset preset) => _run(() {
         if (!capabilities.supportsUpscalePreset(preset)) {
           throw UnsupportedError('当前播放器内核不支持此超分档位');
         }
-        return _activeEngine.setUpscalePreset(preset);
+        return engine.setUpscalePreset(preset);
       });
 
   /// 只在 UI 需要时读取，不向播放操作队列添加周期性任务。
@@ -108,9 +104,9 @@ class PlaybackCoordinator {
           UpscalePreset upscalePreset = UpscalePreset.off,
           bool? hardwareDecoder}) async =>
       await _run(() async {
-        if (!force && target == _activeEngine.kernel) return true;
+        final current = engine;
+        if (!force && target == current.kernel) return true;
 
-        final current = _activeEngine;
         final source = snapshot.source;
         PlayerEngine? next;
         try {
@@ -118,7 +114,7 @@ class PlaybackCoordinator {
           _ensureReady();
           next = engineFactory(target,
               adBlocker: adBlocker,
-              hardwareDecoder: hardwareDecoder ?? this.hardwareDecoder);
+              hardwareDecoder: hardwareDecoder ?? _hardwareDecoder);
           await next.initialize();
           _ensureReady();
           // 在 open 前配置，允许原生内核在 prepare 前建立 GPU 处理管线。
@@ -158,7 +154,7 @@ class PlaybackCoordinator {
         }
         if (!_disposed && source != null && snapshot.wasPlaying) {
           try {
-            await _activeEngine.play();
+            await engine.play();
           } catch (error, stackTrace) {
             if (!_disposed) _events.add(PlayerError(error, stackTrace));
           }

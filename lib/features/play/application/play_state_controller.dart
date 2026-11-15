@@ -26,18 +26,15 @@ mixin PlayStateController implements PlayStateActions {
     state = state.copyWith(upscalePreset: value);
   }
 
-  @override
   void setVideoFit(VideoFit value) {
     if (state.videoFit == value) return;
     state = state.copyWith(videoFit: value);
   }
 
   @override
-  void setPlaybackPhase(PlaybackPhase phase, {String? message}) {
-    state = state.copyWith(
-      phase: phase,
-      statusMessage: message ?? '',
-    );
+  void setPlaybackPhase(PlaybackPhase phase,
+      {PlaybackNotice notice = PlaybackNotice.none}) {
+    state = state.copyWith(phase: phase, notice: notice);
   }
 
   @override

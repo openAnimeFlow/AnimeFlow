@@ -1,5 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
+import 'package:anime_flow/features/play/presentation/extensions/playback_notice_presentation.dart';
 import 'package:anime_flow/features/play/presentation/providers/player_cache_speed_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -123,10 +124,10 @@ class _CenterIndicator extends ConsumerWidget {
             ),
             const SizedBox(height: 5),
             Consumer(builder: (context, ref, child) {
-              final statusMessage = ref.watch(
-                  playStateProvider.select((state) => state.statusMessage));
+              final notice =
+                  ref.watch(playStateProvider.select((state) => state.notice));
               return Text(
-                statusMessage,
+                notice.localize(AppLocalizations.of(context)),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

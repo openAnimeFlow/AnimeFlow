@@ -2,7 +2,6 @@ import 'package:anime_flow/features/play/domain/play_preferences.dart';
 import 'package:anime_flow/features/play/domain/playback_platform.dart';
 import 'package:anime_flow/features/play/domain/play_history_repository.dart';
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
@@ -14,7 +13,6 @@ import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
-import 'package:anime_flow/features/play/domain/player/video_fit.dart';
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
 import 'package:anime_flow/features/play/domain/play_request.dart';
@@ -59,9 +57,6 @@ class PlaySession {
     required bool watched,
   }) _setEpisodeWatched;
 
-  /// 视频地址
-  String? videoUrl;
-
   /// 番剧id
   int subjectId = 0;
 
@@ -80,7 +75,7 @@ class PlaySession {
   ///剧集id
   int episodeId = 0;
 
-  bool isLocalPlayback = false;
+  bool get isLocalPlayback => _currentSource is LocalFilePlaybackSource;
 
   String? localDanmakuPath;
 
@@ -246,7 +241,9 @@ class PlaySession {
 
   void _handlePlayerEvent(PlayerEvent event) {
     if (event is PlayerPlayingChanged) {
-      playbackProgressManager.saveAfterPlaybackChange();
+      if (_currentSource != null) {
+        playbackProgressManager.saveAfterPlaybackChange();
+      }
       _playStateActions.setPlaying(event.playing);
       if (event.playing) {
         _playStateActions.setPlaybackPhase(PlaybackPhase.playing);
@@ -295,6 +292,12 @@ class PlaySession {
       }
     } else if (event is PlayerError) {
       logError('播放器错误: ${event.error}', error: event.stackTrace);
+      _playStateActions.setPlaybackPhase(
+        PlaybackPhase.error,
+        notice: isLocalPlayback
+            ? PlaybackNotice.localVideoPlaybackFailed
+            : PlaybackNotice.onlineVideoPlaybackFailed,
+      );
     }
   }
 
@@ -335,28 +338,36 @@ class PlaySession {
     unawaited(playbackCoordinator.pause());
   }
 
-  bool _isCurrentPlayRequest(int requestId) =>
-      !_isDisposed && requestId == _playRequestId;
-
-  /// 初始化播放状态
-  Future<void> initPlayState(PlayRequest state) async {
-    if (_isDisposed) return;
-    _playStateActions.setPlaybackPhase(
-      PlaybackPhase.opening,
-      message: '资源解析成功，准备播放',
-    );
+  /// 先保存并停止旧播放，再解析新请求。解析期间不占用播放操作队列。
+  Future<bool> replacePlayback(
+    FutureOr<PlayRequest?> Function() resolveRequest, {
+    bool Function()? shouldUseResult,
+  }) async {
+    if (_isDisposed || !(shouldUseResult?.call() ?? true)) return false;
     danmaku.beginPlaybackChange();
     final requestId = ++_playRequestId;
-    int? automaticDanmakuRequestId;
+    bool isCurrent() =>
+        !_isDisposed &&
+        requestId == _playRequestId &&
+        (shouldUseResult?.call() ?? true);
     await _serializePlaybackChange(() async {
-      if (!_isCurrentPlayRequest(requestId)) return;
-      cancelScheduledStop();
-      _currentSource = null;
-      await playbackCoordinator.stop();
-      if (!_isCurrentPlayRequest(requestId)) return;
+      if (isCurrent()) await _stopCurrentPlayback();
+    });
+    if (!isCurrent()) return false;
+    final state = await resolveRequest();
+    if (state == null || !isCurrent()) return false;
+
+    final automaticDanmakuRequestId = await _serializePlaybackChange(() async {
+      if (!isCurrent()) return null;
+      _playStateActions.setPlaybackPhase(
+        PlaybackPhase.opening,
+        notice: state.source is LocalFilePlaybackSource
+            ? PlaybackNotice.openingLocalVideo
+            : PlaybackNotice.sourceReady,
+      );
       danmaku.clear();
-      automaticDanmakuRequestId = danmaku.requestId;
-      videoUrl = state.videoUrl;
+      final danmakuRequestId = danmaku.requestId;
+      _currentSource = state.source;
       subjectId = state.subjectId;
       episode = state.episodeIndex;
       episodeSort = state.episodeSort;
@@ -364,7 +375,6 @@ class PlaySession {
       subjectName = state.subjectName;
       subjectCover = state.subjectCover;
       alias = state.alias;
-      isLocalPlayback = state.isLocalPlayback;
       localDanmakuPath = state.localDanmakuPath;
       danmaku.setPlaybackContext(
         subjectId: subjectId,
@@ -380,31 +390,26 @@ class PlaySession {
         alias: alias,
         isLocalPlayback: isLocalPlayback,
       );
-      if (state.videoUrl.isEmpty) return;
-      _currentSource = state.isLocalPlayback
-          ? PlaybackSource.localFile(state.videoUrl)
-          : PlaybackSource(uri: Uri.parse(state.videoUrl));
       await playbackCoordinator.open(
-        _currentSource!,
+        state.source,
         startPosition: Duration(seconds: state.offset),
         autoPlay: false,
       );
-      if (!_isCurrentPlayRequest(requestId)) return;
+      if (!isCurrent()) return null;
       await playbackCoordinator.play();
+      return danmakuRequestId;
     });
-    if (!_isCurrentPlayRequest(requestId)) return;
-    if (state.videoUrl.isEmpty) return;
+    if (automaticDanmakuRequestId == null || !isCurrent()) return false;
     await danmaku.loadEpisode(
       subjectId: state.subjectId,
       episodeId: state.episodeId,
-      isLocalPlayback: state.isLocalPlayback,
-      localPath: localDanmakuPath,
-      expectedRequestId: automaticDanmakuRequestId!,
-      isPlaybackCurrent: () => _isCurrentPlayRequest(requestId),
+      isLocalPlayback: state.source is LocalFilePlaybackSource,
+      localPath: state.localDanmakuPath,
+      expectedRequestId: automaticDanmakuRequestId,
+      isPlaybackCurrent: isCurrent,
     );
+    return isCurrent();
   }
-
-  void clearPresence() => platform.clearPresence();
 
   void handlePlayStateChanged(PlayState state, {required bool isLoggedIn}) {
     playbackProgressManager.updatePlaybackState(
@@ -451,13 +456,6 @@ class PlaySession {
     await _episodesActions.updateEpisodeWatched(episodeId, watched: watched);
   }
 
-  void switchToNextEpisode() => _episodesActions.switchToNextEpisode();
-
-  /// 切换视频画面填充模式
-  void toggleVideoFit(VideoFit fits) {
-    _playStateActions.setVideoFit(fits);
-  }
-
   ///暂停/播放
   bool playOrPauseVideo() {
     if (_isStartupInProgress) return false;
@@ -477,11 +475,9 @@ class PlaySession {
     unawaited(playbackCoordinator.setRate(speed));
   }
 
-  /// 用户选择的常驻倍速，不包含长按时的临时倍速。
-  double get basePlaybackRate => _speedBeforeBoost ?? _readPlayState().rate;
-
   /// 按步长调整常驻倍速；长按期间修改松开后恢复的速度。
   void adjustPlaybackRate(double delta) {
+    final basePlaybackRate = _speedBeforeBoost ?? _readPlayState().rate;
     final speed = ((basePlaybackRate + delta) * 100).round() / 100;
     setPlaybackRate(speed.clamp(0.5, 4.0).toDouble());
   }
@@ -676,22 +672,32 @@ class PlaySession {
         if (!_isDisposed) _playStateActions.setUpscalePreset(preset);
       });
 
-  Future<Uint8List?> takeScreenshot() => playbackCoordinator.screenshot();
-
   Future<void> stop() async {
     _playRequestId++;
-    _clearPendingSeek();
-    _resumeAfterManualSeek = null;
     danmaku.beginPlaybackChange();
     await _serializePlaybackChange(() async {
-      if (_isDisposed) return;
-      cancelScheduledStop();
-      final savingProgress =
-          _currentSource != null ? playbackProgressManager.save() : null;
-      _currentSource = null;
+      if (!_isDisposed) await _stopCurrentPlayback();
+    });
+  }
+
+  Future<void> _stopCurrentPlayback() async {
+    cancelScheduledStop();
+    _clearPendingSeek();
+    _resumeAfterManualSeek = null;
+    final source = _currentSource;
+    if (source == null) return;
+
+    // save 在发出停止命令前采集旧剧集和位置，避免使用内核重置后的进度。
+    final savingProgress = playbackProgressManager.save();
+    _currentSource = null;
+    try {
       await playbackCoordinator.stop();
+    } catch (_) {
+      _currentSource = source;
+      rethrow;
+    } finally {
       if (!_isDisposed) danmaku.clearCanvas();
       await savingProgress;
-    });
+    }
   }
 }

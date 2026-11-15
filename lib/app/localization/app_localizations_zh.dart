@@ -670,6 +670,47 @@ class AppLocalizationsZh extends AppLocalizations {
   String get switchSource => '切换源';
 
   @override
+  String get chooseLocalVideo => '选择本地视频';
+
+  @override
+  String get preparingLocalVideo => '正在准备本地视频';
+
+  @override
+  String get localVideoSource => '本地视频';
+
+  @override
+  String get videoSourceResolving => '正在解析影片來源…';
+
+  @override
+  String get videoSourceReady => '來源解析完成，正在準備播放…';
+
+  @override
+  String get openingLocalVideo => '正在開啟本機影片…';
+
+  @override
+  String get videoSourceResolutionTimedOut => '影片解析逾時，請重試。';
+
+  @override
+  String get videoSourceResolutionFailed => '影片解析失敗，請切換影片來源後重試。';
+
+  @override
+  String get localVideoNoTrack => '所選檔案沒有可播放的視訊軌，請選擇影片檔案。';
+
+  @override
+  String get localVideoValidationTimedOut =>
+      '檢查影片逾時。檔案可能已損毀，或目前的播放器核心不支援該格式或編碼。請重試或切換核心。';
+
+  @override
+  String get localVideoOpenFailed =>
+      '無法開啟本機影片。檔案可能無法讀取、已損毀，或目前的播放器核心不支援。請選擇其他檔案或切換核心。';
+
+  @override
+  String get localVideoPlaybackFailed => '本機影片播放失敗，請選擇其他檔案或切換播放器核心。';
+
+  @override
+  String get onlineVideoPlaybackFailed => '影片播放失敗，請切換影片來源後重試。';
+
+  @override
   String get sourceActions => '数据源操作';
 
   @override
@@ -3302,6 +3343,47 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get switchSource => '切换源';
+
+  @override
+  String get chooseLocalVideo => '选择本地视频';
+
+  @override
+  String get preparingLocalVideo => '正在准备本地视频';
+
+  @override
+  String get localVideoSource => '本地视频';
+
+  @override
+  String get videoSourceResolving => '正在解析视频源…';
+
+  @override
+  String get videoSourceReady => '资源解析成功，准备播放…';
+
+  @override
+  String get openingLocalVideo => '正在打开本地视频…';
+
+  @override
+  String get videoSourceResolutionTimedOut => '视频解析超时，请重试。';
+
+  @override
+  String get videoSourceResolutionFailed => '视频解析失败，请切换视频源重试。';
+
+  @override
+  String get localVideoNoTrack => '所选文件没有可播放的视频轨道，请选择视频文件。';
+
+  @override
+  String get localVideoValidationTimedOut =>
+      '视频校验超时。文件可能已损坏，或当前内核不支持该格式或编码。请重试或切换内核。';
+
+  @override
+  String get localVideoOpenFailed =>
+      '无法打开本地视频。文件可能无法读取、已损坏或不受当前内核支持。请选择其他文件或切换内核。';
+
+  @override
+  String get localVideoPlaybackFailed => '本地视频播放失败，请选择其他文件或切换内核。';
+
+  @override
+  String get onlineVideoPlaybackFailed => '视频播放失败，请切换视频源重试。';
 
   @override
   String get sourceActions => '数据源操作';
@@ -5937,6 +6019,47 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get switchSource => '切換來源';
 
   @override
+  String get chooseLocalVideo => '選擇本機影片';
+
+  @override
+  String get preparingLocalVideo => '正在準備本機影片';
+
+  @override
+  String get localVideoSource => '本機影片';
+
+  @override
+  String get videoSourceResolving => '正在解析影片來源…';
+
+  @override
+  String get videoSourceReady => '來源解析完成，正在準備播放…';
+
+  @override
+  String get openingLocalVideo => '正在開啟本機影片…';
+
+  @override
+  String get videoSourceResolutionTimedOut => '影片解析逾時，請重試。';
+
+  @override
+  String get videoSourceResolutionFailed => '影片解析失敗，請切換影片來源後重試。';
+
+  @override
+  String get localVideoNoTrack => '所選檔案沒有可播放的視訊軌，請選擇影片檔案。';
+
+  @override
+  String get localVideoValidationTimedOut =>
+      '檢查影片逾時。檔案可能已損毀，或目前的播放器核心不支援該格式或編碼。請重試或切換核心。';
+
+  @override
+  String get localVideoOpenFailed =>
+      '無法開啟本機影片。檔案可能無法讀取、已損毀，或目前的播放器核心不支援。請選擇其他檔案或切換核心。';
+
+  @override
+  String get localVideoPlaybackFailed => '本機影片播放失敗，請選擇其他檔案或切換播放器核心。';
+
+  @override
+  String get onlineVideoPlaybackFailed => '影片播放失敗，請切換影片來源後重試。';
+
+  @override
   String get sourceActions => '資料源操作';
 
   @override
@@ -8569,6 +8692,47 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get switchSource => '切換來源';
+
+  @override
+  String get chooseLocalVideo => '選擇本機影片';
+
+  @override
+  String get preparingLocalVideo => '正在準備本機影片';
+
+  @override
+  String get localVideoSource => '本機影片';
+
+  @override
+  String get videoSourceResolving => '正在解析影片來源…';
+
+  @override
+  String get videoSourceReady => '來源解析完成，正在準備播放…';
+
+  @override
+  String get openingLocalVideo => '正在開啟本機影片…';
+
+  @override
+  String get videoSourceResolutionTimedOut => '影片解析逾時，請重試。';
+
+  @override
+  String get videoSourceResolutionFailed => '影片解析失敗，請切換影片來源後重試。';
+
+  @override
+  String get localVideoNoTrack => '所選檔案沒有可播放的視訊軌，請選擇影片檔案。';
+
+  @override
+  String get localVideoValidationTimedOut =>
+      '檢查影片逾時。檔案可能已損毀，或目前的播放器核心不支援該格式或編碼。請重試或切換核心。';
+
+  @override
+  String get localVideoOpenFailed =>
+      '無法開啟本機影片。檔案可能無法讀取、已損毀，或目前的播放器核心不支援。請選擇其他檔案或切換核心。';
+
+  @override
+  String get localVideoPlaybackFailed => '本機影片播放失敗，請選擇其他檔案或切換播放器核心。';
+
+  @override
+  String get onlineVideoPlaybackFailed => '影片播放失敗，請切換影片來源後重試。';
 
   @override
   String get sourceActions => '資料源操作';

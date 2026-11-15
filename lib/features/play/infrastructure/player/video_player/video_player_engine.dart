@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:anime_flow/core/async/serial_operation_queue.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
+import 'package:anime_flow/features/play/domain/player/video_validation_exception.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
@@ -89,15 +90,25 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
           // 不支持控制回退缓冲的平台会忽略此选项。
           backBufferDurationMs: 60 * 1000,
         );
-        final controller = source.isLocal || source.uri.isScheme('file')
-            ? VideoPlayerController.file(File(source.uri.toFilePath()),
+        final controller = source is LocalFilePlaybackSource
+            ? VideoPlayerController.file(File(source.path),
                 videoPlayerOptions: options)
             : VideoPlayerController.networkUrl(source.uri,
                 httpHeaders: headers, videoPlayerOptions: options);
         _controller.value = controller;
         controller.addListener(_onChanged);
         try {
-          await controller.initialize();
+          final initialization = controller.initialize();
+          if (source is LocalFilePlaybackSource) {
+            await initialization.timeout(VideoValidationException.timeout,
+                onTimeout: () =>
+                    throw const VideoValidationException.timedOut());
+            if (controller.value.size.isEmpty) {
+              throw const VideoValidationException.noVideo();
+            }
+          } else {
+            await initialization;
+          }
           _ensureReady();
           await controller.setVolume(_volume);
           await controller.setPlaybackSpeed(_rate);

@@ -1,19 +1,21 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'video_player_upscale_shaders.dart';
+
 import 'package:anime_flow/core/async/serial_operation_queue.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
-import 'package:anime_flow/features/play/domain/player/video_validation_exception.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
+import 'package:anime_flow/features/play/domain/player/video_validation_exception.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:material_ui/material_ui.dart';
 import 'package:video_player/video_player.dart';
-import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+
+import 'video_player_upscale_shaders.dart';
 
 class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
   /// Android/iOS 默认启用 GPU 管线，超分效果由 [setUpscalePreset] 控制。
@@ -128,17 +130,16 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
       final output = _pendingOutputSize;
       if (_disposed || target != _controller.value || output == null) return;
       unawaited(_operations.run(() async {
-        if (target != _controller.value || _videoEffects == null) return;
+        final effects = _videoEffects;
+        if (target != _controller.value || effects == null) return;
         final configuration = VideoEffectConfiguration(
-          effect: _videoEffects!.effect,
-          shaderBundle: _videoEffects!.shaderBundle,
+          effect: effects.effect,
+          shaderBundle: effects.shaderBundle,
           outputWidth: output.width.toInt(),
           outputHeight: output.height.toInt(),
         );
-        if (configuration == _videoEffects) return;
-        await target!.setVideoEffectConfiguration(configuration);
-        _ensureReady();
-        _videoEffects = configuration;
+        if (configuration == effects) return;
+        await _applyVideoEffects(configuration);
       }).catchError((Object error) {
         if (!_disposed) _emit(PlayerError(error));
       }));
@@ -226,21 +227,6 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
   @override
   Future<Uint8List?> screenshot() async => null;
 
-  /// 管线须在创建 Controller 时启用。配置随切集恢复。
-  Future<void> setVideoEffectConfiguration(
-          VideoEffectConfiguration configuration) =>
-      _operations.run(() async {
-        if (!_supportsVideoEffects) {
-          throw UnsupportedError('Video effects require Android or iOS');
-        }
-        final controller = _controller.value;
-        if (controller != null) {
-          await controller.setVideoEffectConfiguration(configuration);
-          _ensureReady();
-        }
-        _videoEffects = configuration;
-      });
-
   @override
   Future<void> setUpscalePreset(UpscalePreset preset) =>
       _operations.run(() async {
@@ -249,20 +235,25 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
               'Video Player does not support this upscale preset');
         }
         if (!_supportsVideoEffects) return;
-        final configuration = VideoEffectConfiguration(
-          effect: preset == UpscalePreset.efficiency
-              ? VideoEffectType.shaderBundle
-              : VideoEffectType.none,
-          shaderBundle: preset == UpscalePreset.efficiency
-              ? await VideoPlayerUpscaleShaders.loadEfficiency()
-              : null,
+        final bundle = preset == UpscalePreset.efficiency
+            ? await VideoPlayerUpscaleShaders.loadEfficiency()
+            : null;
+        await _applyVideoEffects(VideoEffectConfiguration(
+          effect: bundle == null
+              ? VideoEffectType.none
+              : VideoEffectType.shaderBundle,
+          shaderBundle: bundle,
           outputWidth: _videoEffects?.outputWidth,
           outputHeight: _videoEffects?.outputHeight,
-        );
-        await _controller.value?.setVideoEffectConfiguration(configuration);
-        _ensureReady();
-        _videoEffects = configuration;
+        ));
       });
+
+  Future<void> _applyVideoEffects(
+      VideoEffectConfiguration configuration) async {
+    await _controller.value?.setVideoEffectConfiguration(configuration);
+    _ensureReady();
+    _videoEffects = configuration;
+  }
 
   @override
   Future<double?> readCacheSpeed() async => null;

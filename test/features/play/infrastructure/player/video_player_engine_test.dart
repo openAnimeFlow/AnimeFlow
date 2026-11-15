@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/infrastructure/player/video_player/video_player_engine.dart';
-import 'package:anime_flow/features/play/infrastructure/player/video_player/video_player_upscale_shaders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +14,7 @@ void main() {
   late _FakeVideoPlatform platform;
   late VideoPlayerEngine engine;
   final source =
-      PlaybackSource(uri: Uri.parse('https://example.com/video.mp4'));
+      PlaybackSource.network(uri: Uri.parse('https://example.com/video.mp4'));
 
   setUp(() async {
     previousPlatform = VideoPlayerPlatform.instance;
@@ -83,7 +82,8 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     engine = VideoPlayerEngine();
     await engine.initialize();
-    expect(engine.capabilities.supportsUpscaling, isTrue);
+    expect(engine.capabilities.supportsUpscalePreset(UpscalePreset.efficiency),
+        isTrue);
     await engine.setUpscalePreset(UpscalePreset.efficiency);
     await engine.open(source);
     await engine.open(source);
@@ -103,7 +103,8 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
     engine = VideoPlayerEngine();
     await engine.initialize();
-    expect(engine.capabilities.supportsUpscaling, isFalse);
+    expect(engine.capabilities.supportsUpscalePreset(UpscalePreset.efficiency),
+        isFalse);
     await engine.open(source);
     expect(platform.created.single.videoPlayerOptions?.videoEffects, isNull);
     await expectLater(engine.setUpscalePreset(UpscalePreset.efficiency),
@@ -113,7 +114,6 @@ void main() {
   testWidgets(
       'physical fitted output survives toggles and follows layout changes',
       (tester) async {
-    await tester.runAsync(VideoPlayerUpscaleShaders.loadEfficiency);
     await engine.open(source);
     Widget view(double width) => MediaQuery(
           data: const MediaQueryData(devicePixelRatio: 3),
@@ -129,14 +129,17 @@ void main() {
     await tester.pump();
     expect(platform.configurations.last.outputWidth, 960);
     expect(platform.configurations.last.outputHeight, 540);
-    await engine.setUpscalePreset(UpscalePreset.efficiency);
+    await tester
+        .runAsync(() => engine.setUpscalePreset(UpscalePreset.efficiency));
     expect(platform.configurations.last.effect, VideoEffectType.shaderBundle);
     expect(platform.configurations.last.shaderBundle, isNotNull);
     expect(platform.configurations.last.outputWidth, 960);
     expect(platform.configurations.last.outputHeight, 540);
-    await engine.setUpscalePreset(UpscalePreset.off);
+    await tester.runAsync(() => engine.setUpscalePreset(UpscalePreset.off));
     expect(platform.configurations.last.outputWidth, 960);
     await tester.pumpWidget(view(400));
+    // The layout update queues behind the preset changes run outside fake async.
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pump();
     expect(platform.configurations.last.outputWidth, 1200);
     expect(platform.configurations.last.outputHeight, 675);

@@ -58,6 +58,7 @@ class _PlayVideoSourceDialogState extends ConsumerState<PlayVideoSourceDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final episodeIndex = ref.watch(episodesProvider.select(
       (state) => state.asData?.value.episodeIndex ?? 0,
     ));
@@ -80,18 +81,21 @@ class _PlayVideoSourceDialogState extends ConsumerState<PlayVideoSourceDialog> {
       keyboardInsetHandled: widget.keyboardInsetHandled,
       scrollController: widget.scrollController,
       closeOnSelection: false,
-      sourceAction: OutlinedButton.icon(
+      sourceAction: IconButton(
+        tooltip: _pickingLocalVideo
+            ? l10n.preparingLocalVideo
+            : l10n.chooseLocalVideo,
         onPressed:
             _pickingLocalVideo || episodeIndex <= 0 ? null : _pickLocalVideo,
         icon: _pickingLocalVideo
-            ? const SizedBox.square(
+            ? SizedBox.square(
                 dimension: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  color: colorScheme.onPrimaryContainer,
+                  strokeWidth: 2,
+                ),
               )
-            : const Icon(Icons.folder_open_rounded, size: 20),
-        label: Text(_pickingLocalVideo
-            ? l10n.preparingLocalVideo
-            : l10n.chooseLocalVideo),
+            : const Icon(Icons.drive_file_move_outline),
       ),
       onSearchDraftChanged: controller.setManualSearchDraft,
       onWebsiteSelected: controller.setSelectedWebsiteIndex,

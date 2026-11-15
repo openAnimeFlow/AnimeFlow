@@ -67,6 +67,7 @@ class VideoSourceDialog extends StatefulWidget {
 
   /// 下载等场景可保留弹窗，继续展示解析结果。
   final bool closeOnSelection;
+
   final Widget? sourceAction;
 
   @override
@@ -251,10 +252,6 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
         children: [
           _buildHeader(l10n),
           _buildManualSearch(l10n),
-          if (widget.sourceAction case final action?) ...[
-            const SizedBox(height: 12),
-            action,
-          ],
           const SizedBox(height: 16),
           if (selectedIndex != null) ...[
             _buildWebsiteSelector(
@@ -273,8 +270,8 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
   Widget _buildHeader(AppLocalizations l10n) {
     return Row(
       children: [
-        _sectionTitle(l10n.videoSource),
-        const Spacer(),
+        Expanded(child: _sectionTitle(l10n.videoSource)),
+        if (widget.sourceAction case final action?) action,
         IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.close_rounded),

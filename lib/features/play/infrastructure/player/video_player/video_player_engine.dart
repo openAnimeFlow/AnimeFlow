@@ -1,20 +1,36 @@
-import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:anime_flow/core/async/serial_operation_queue.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
-import 'package:anime_flow/features/play/domain/player/video_validation_exception.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
+import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
+import 'package:anime_flow/features/play/domain/player/video_validation_exception.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:material_ui/material_ui.dart';
 import 'package:video_player/video_player.dart';
 
+import 'video_player_upscale_shaders.dart';
+
 class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
+  /// Android/iOS 默认启用 GPU 管线，超分效果由 [setUpscalePreset] 控制。
+  VideoPlayerEngine()
+      : _videoEffects =
+            _supportsVideoEffects ? const VideoEffectConfiguration() : null;
+
+  static bool get _supportsVideoEffects =>
+      defaultTargetPlatform == TargetPlatform.android ||
+      defaultTargetPlatform == TargetPlatform.iOS;
+
+  VideoEffectConfiguration? _videoEffects;
+  VideoPlayerController? _pendingSurfaceController;
+  Size? _pendingOutputSize;
+  bool _outputSizeScheduled = false;
   late final _events = StreamController<PlayerEvent>.broadcast(onListen: () {
     _lastValue = null;
     _onChanged();
@@ -32,7 +48,10 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
   @override
   PlayerKernel get kernel => PlayerKernel.videoPlayer;
   @override
-  PlayerCapabilities get capabilities => const PlayerCapabilities();
+  PlayerCapabilities get capabilities => PlayerCapabilities(
+        supportedUpscalePresets:
+            _supportsVideoEffects ? const {UpscalePreset.efficiency} : const {},
+      );
   @override
   Stream<PlayerEvent> get events => _events.stream;
 
@@ -55,8 +74,31 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
                 if (!value.isInitialized || value.size.isEmpty) {
                   return const SizedBox.expand();
                 }
-                return SizedBox.expand(
-                  child: FittedBox(
+                return LayoutBuilder(builder: (context, constraints) {
+                  if (_videoEffects != null &&
+                      constraints.hasBoundedWidth &&
+                      constraints.hasBoundedHeight &&
+                      !constraints.biggest.isEmpty) {
+                    final fitted =
+                        applyBoxFit(fit, value.size, constraints.biggest);
+                    final ratio = MediaQuery.devicePixelRatioOf(context);
+                    // Include the full scaled image for cover/fitWidth; clipping happens in Flutter.
+                    final size = Size(
+                      (value.size.width *
+                              fitted.destination.width /
+                              fitted.source.width *
+                              ratio)
+                          .roundToDouble(),
+                      (value.size.height *
+                              fitted.destination.height /
+                              fitted.source.height *
+                              ratio)
+                          .roundToDouble(),
+                    );
+                    _scheduleOutputSize(controller, size);
+                  }
+                  return SizedBox.expand(
+                      child: FittedBox(
                     fit: fit,
                     clipBehavior: Clip.hardEdge,
                     child: SizedBox(
@@ -64,13 +106,45 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
                       height: value.size.height,
                       child: VideoPlayer(controller),
                     ),
-                  ),
-                );
+                  ));
+                });
               },
             );
           },
         ),
       );
+
+  void _scheduleOutputSize(VideoPlayerController controller, Size size) {
+    if (size.isEmpty || !size.width.isFinite || !size.height.isFinite) return;
+    if (_videoEffects?.outputWidth == size.width &&
+        _videoEffects?.outputHeight == size.height) {
+      return;
+    }
+    _pendingSurfaceController = controller;
+    _pendingOutputSize = size;
+    if (_outputSizeScheduled) return;
+    _outputSizeScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _outputSizeScheduled = false;
+      final target = _pendingSurfaceController;
+      final output = _pendingOutputSize;
+      if (_disposed || target != _controller.value || output == null) return;
+      unawaited(_operations.run(() async {
+        final effects = _videoEffects;
+        if (target != _controller.value || effects == null) return;
+        final configuration = VideoEffectConfiguration(
+          effect: effects.effect,
+          shaderBundle: effects.shaderBundle,
+          outputWidth: output.width.toInt(),
+          outputHeight: output.height.toInt(),
+        );
+        if (configuration == effects) return;
+        await _applyVideoEffects(configuration);
+      }).catchError((Object error) {
+        if (!_disposed) _emit(PlayerError(error));
+      }));
+    });
+  }
 
   @override
   Future<void> open(PlaybackSource source,
@@ -89,6 +163,7 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
           // ExoPlayer 保留近期播放过的媒体数据，供向后跳转时复用。
           // 不支持控制回退缓冲的平台会忽略此选项。
           backBufferDurationMs: 60 * 1000,
+          videoEffects: _videoEffects,
         );
         final controller = source is LocalFilePlaybackSource
             ? VideoPlayerController.file(File(source.path),
@@ -151,12 +226,33 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
       });
   @override
   Future<Uint8List?> screenshot() async => null;
+
   @override
-  Future<void> setUpscalePreset(UpscalePreset preset) async {
+  Future<void> setUpscalePreset(UpscalePreset preset) =>
+      _operations.run(() async {
+        if (!capabilities.supportsUpscalePreset(preset)) {
+          throw UnsupportedError(
+              'Video Player does not support this upscale preset');
+        }
+        if (!_supportsVideoEffects) return;
+        final bundle = preset == UpscalePreset.efficiency
+            ? await VideoPlayerUpscaleShaders.loadEfficiency()
+            : null;
+        await _applyVideoEffects(VideoEffectConfiguration(
+          effect: bundle == null
+              ? VideoEffectType.none
+              : VideoEffectType.shaderBundle,
+          shaderBundle: bundle,
+          outputWidth: _videoEffects?.outputWidth,
+          outputHeight: _videoEffects?.outputHeight,
+        ));
+      });
+
+  Future<void> _applyVideoEffects(
+      VideoEffectConfiguration configuration) async {
+    await _controller.value?.setVideoEffectConfiguration(configuration);
     _ensureReady();
-    if (!capabilities.supportsUpscalePreset(preset)) {
-      throw UnsupportedError('Video Player does not support upscaling');
-    }
+    _videoEffects = configuration;
   }
 
   @override

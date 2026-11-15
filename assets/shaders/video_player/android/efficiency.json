@@ -1,0 +1,645 @@
+[
+  {
+    "asset": "efficiency_0.glsl",
+    "source": "Anime4K_Clamp_Highlights.glsl",
+    "description": "Anime4K-v4.0-De-Ring-Compute-Statistics",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "MAIN",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "STATSMAX",
+    "width": "HOOKED.w",
+    "height": "HOOKED.h",
+    "when": "1",
+    "components": 1
+  },
+  {
+    "asset": "efficiency_1.glsl",
+    "source": "Anime4K_Clamp_Highlights.glsl",
+    "description": "Anime4K-v4.0-De-Ring-Compute-Statistics",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "STATSMAX",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "STATSMAX",
+    "width": "HOOKED.w",
+    "height": "HOOKED.h",
+    "when": "1",
+    "components": 1
+  },
+  {
+    "asset": "efficiency_3.glsl",
+    "source": "Anime4K_Restore_CNN_M.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(M)-Conv-4x3x3x3",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "MAIN",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_tf",
+    "width": "MAIN.w",
+    "height": "MAIN.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_4.glsl",
+    "source": "Anime4K_Restore_CNN_M.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_1_tf",
+    "width": "conv2d_tf.w",
+    "height": "conv2d_tf.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_5.glsl",
+    "source": "Anime4K_Restore_CNN_M.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_1_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_2_tf",
+    "width": "conv2d_1_tf.w",
+    "height": "conv2d_1_tf.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_6.glsl",
+    "source": "Anime4K_Restore_CNN_M.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_2_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_3_tf",
+    "width": "conv2d_2_tf.w",
+    "height": "conv2d_2_tf.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_7.glsl",
+    "source": "Anime4K_Restore_CNN_M.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_3_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_4_tf",
+    "width": "conv2d_3_tf.w",
+    "height": "conv2d_3_tf.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_8.glsl",
+    "source": "Anime4K_Restore_CNN_M.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_4_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_5_tf",
+    "width": "conv2d_4_tf.w",
+    "height": "conv2d_4_tf.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_9.glsl",
+    "source": "Anime4K_Restore_CNN_M.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_5_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_6_tf",
+    "width": "conv2d_5_tf.w",
+    "height": "conv2d_5_tf.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_10.glsl",
+    "source": "Anime4K_Restore_CNN_M.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(M)-Conv-3x1x1x56",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_1_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_2_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_3_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_4_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_5_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_6_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "MAIN",
+        "sampler": true,
+        "dimensions": false
+      }
+    ],
+    "save": "MAIN",
+    "width": "conv2d_tf.w",
+    "height": "conv2d_tf.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_11.glsl",
+    "source": "Anime4K_Restore_CNN_S.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(S)-Conv-4x3x3x3",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "MAIN",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_tf",
+    "width": "MAIN.w",
+    "height": "MAIN.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_12.glsl",
+    "source": "Anime4K_Restore_CNN_S.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(S)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_1_tf",
+    "width": "conv2d_tf.w",
+    "height": "conv2d_tf.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_13.glsl",
+    "source": "Anime4K_Restore_CNN_S.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(S)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_1_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_2_tf",
+    "width": "conv2d_1_tf.w",
+    "height": "conv2d_1_tf.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_14.glsl",
+    "source": "Anime4K_Restore_CNN_S.glsl",
+    "description": "Anime4K-v4.0-Restore-CNN-(S)-Conv-3x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_2_tf",
+        "sampler": true,
+        "dimensions": true
+      },
+      {
+        "name": "MAIN",
+        "sampler": true,
+        "dimensions": false
+      }
+    ],
+    "save": "MAIN",
+    "width": "conv2d_2_tf.w",
+    "height": "conv2d_2_tf.h",
+    "when": "1",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_15.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_M.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(M)-Conv-4x3x3x3",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "MAIN",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_tf",
+    "width": "MAIN.w",
+    "height": "MAIN.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_16.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_M.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_1_tf",
+    "width": "conv2d_tf.w",
+    "height": "conv2d_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_17.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_M.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_1_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_2_tf",
+    "width": "conv2d_1_tf.w",
+    "height": "conv2d_1_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_18.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_M.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_2_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_3_tf",
+    "width": "conv2d_2_tf.w",
+    "height": "conv2d_2_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_19.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_M.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_3_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_4_tf",
+    "width": "conv2d_3_tf.w",
+    "height": "conv2d_3_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_20.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_M.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_4_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_5_tf",
+    "width": "conv2d_4_tf.w",
+    "height": "conv2d_4_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_21.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_M.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(M)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_5_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_6_tf",
+    "width": "conv2d_5_tf.w",
+    "height": "conv2d_5_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_22.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_M.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(M)-Conv-4x1x1x56",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_1_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_2_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_3_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_4_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_5_tf",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "conv2d_6_tf",
+        "sampler": true,
+        "dimensions": false
+      }
+    ],
+    "save": "conv2d_last_tf",
+    "width": "conv2d_tf.w",
+    "height": "conv2d_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_23.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_M.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(M)-Depth-to-Space",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_last_tf",
+        "sampler": true,
+        "dimensions": true
+      },
+      {
+        "name": "MAIN",
+        "sampler": true,
+        "dimensions": false
+      }
+    ],
+    "save": "MAIN",
+    "width": "conv2d_last_tf.w 2 *",
+    "height": "conv2d_last_tf.h 2 *",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_24.glsl",
+    "source": "Anime4K_AutoDownscalePre_x2.glsl",
+    "description": "Anime4K-v4.0-AutoDownscalePre-x2",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "HOOKED",
+        "sampler": true,
+        "dimensions": false
+      }
+    ],
+    "save": "HOOKED",
+    "width": "OUTPUT.w",
+    "height": "OUTPUT.h",
+    "when": "OUTPUT.w NATIVE.w / 2.0 < OUTPUT.h NATIVE.h / 2.0 < * OUTPUT.w NATIVE.w / 1.2 > OUTPUT.h NATIVE.h / 1.2 > * *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_25.glsl",
+    "source": "Anime4K_AutoDownscalePre_x4.glsl",
+    "description": "Anime4K-v3.2-AutoDownscalePre-x4",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "HOOKED",
+        "sampler": true,
+        "dimensions": false
+      }
+    ],
+    "save": "HOOKED",
+    "width": "OUTPUT.w 2 /",
+    "height": "OUTPUT.h 2 /",
+    "when": "OUTPUT.w NATIVE.w / 4.0 < OUTPUT.h NATIVE.h / 4.0 < * OUTPUT.w NATIVE.w / 2.4 > OUTPUT.h NATIVE.h / 2.4 > * *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_26.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_S.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(S)-Conv-4x3x3x3",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "MAIN",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_tf",
+    "width": "MAIN.w",
+    "height": "MAIN.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_27.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_S.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(S)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_1_tf",
+    "width": "conv2d_tf.w",
+    "height": "conv2d_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_28.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_S.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(S)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_1_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_2_tf",
+    "width": "conv2d_1_tf.w",
+    "height": "conv2d_1_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_29.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_S.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(S)-Conv-4x3x3x8",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_2_tf",
+        "sampler": true,
+        "dimensions": true
+      }
+    ],
+    "save": "conv2d_last_tf",
+    "width": "conv2d_2_tf.w",
+    "height": "conv2d_2_tf.h",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_30.glsl",
+    "source": "Anime4K_Upscale_CNN_x2_S.glsl",
+    "description": "Anime4K-v3.2-Upscale-CNN-x2-(S)-Depth-to-Space",
+    "hook": "MAIN",
+    "bindings": [
+      {
+        "name": "conv2d_last_tf",
+        "sampler": true,
+        "dimensions": true
+      },
+      {
+        "name": "MAIN",
+        "sampler": true,
+        "dimensions": false
+      }
+    ],
+    "save": "MAIN",
+    "width": "conv2d_last_tf.w 2 *",
+    "height": "conv2d_last_tf.h 2 *",
+    "when": "OUTPUT.w MAIN.w / 1.200 > OUTPUT.h MAIN.h / 1.200 > *",
+    "components": 4
+  },
+  {
+    "asset": "efficiency_2.glsl",
+    "source": "Anime4K_Clamp_Highlights.glsl",
+    "description": "Anime4K-v4.0-De-Ring-Clamp",
+    "hook": "PREKERNEL",
+    "bindings": [
+      {
+        "name": "HOOKED",
+        "sampler": true,
+        "dimensions": false
+      },
+      {
+        "name": "STATSMAX",
+        "sampler": true,
+        "dimensions": false
+      }
+    ],
+    "save": "HOOKED",
+    "width": "HOOKED.w",
+    "height": "HOOKED.h",
+    "when": "1",
+    "components": 4
+  }
+]

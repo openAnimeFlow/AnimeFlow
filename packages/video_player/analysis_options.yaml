@@ -1,0 +1,6 @@
+# The vendored Flutter plugin has a separate analysis context from the app.
+analyzer:
+  exclude:
+    - '**/*.g.dart'
+    - '**/*.mocks.dart'
+    - build/**

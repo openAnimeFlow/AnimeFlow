@@ -425,21 +425,8 @@ class _BottomControlsContent extends ConsumerWidget {
                         value: upscalePreset,
                         capabilities:
                             playController.playbackCoordinator.capabilities,
-                        onChanged: (type) async {
-                          try {
-                            await playController.setUpscalePreset(type);
-                          } catch (error) {
-                            if (!context.mounted) return;
-                            NotificationToast.show(
-                              error is UnsupportedError
-                                  ? error.message ?? error.toString()
-                                  : error.toString(),
-                              title: l10n.tip,
-                            );
-                          }
-                        },
-                        onMenuOpen: () =>
-                            videoUiStateController.cancelUiTimer(),
+                        onChanged: playController.setUpscalePreset,
+                        onMenuOpen: videoUiStateController.cancelUiTimer,
                         onMenuClose: () =>
                             videoUiStateController.hideControlsUi(
                           duration: const Duration(seconds: 2),

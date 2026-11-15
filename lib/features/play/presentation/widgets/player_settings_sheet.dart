@@ -141,6 +141,7 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSettingsSheet> {
             left: !isWideScreen,
             top: isWideScreen,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
                   height: isWideScreen ? 0 : 24,

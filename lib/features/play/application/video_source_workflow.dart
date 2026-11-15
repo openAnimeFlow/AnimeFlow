@@ -1,10 +1,16 @@
+import 'dart:async';
+
 import 'package:anime_flow/core/video_source/application/chapter_collection_service.dart';
 import 'package:anime_flow/core/video_source/application/search_result_rank_service.dart';
 import 'package:anime_flow/features/play/domain/play_request.dart';
+import 'package:anime_flow/features/play/domain/local_video_files.dart';
+import 'package:anime_flow/features/play/domain/play_source_selection.dart';
 import 'package:anime_flow/core/utils/source_url.dart' show resolveSourceUrl;
 import 'package:anime_flow/core/video_source/domain/episode_source_matcher.dart';
 import 'package:anime_flow/core/video_source/domain/selected_video_source.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
+import 'package:anime_flow/features/play/domain/player/playback_source.dart';
+import 'package:anime_flow/features/play/domain/player/video_validation_exception.dart';
 import 'package:anime_flow/core/video_source/domain/video_source.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
@@ -33,8 +39,13 @@ mixin VideoSourceWorkflow {
   PlaySourceRepository get sourceRepository;
   PlayHistoryService get history;
   IVideoSourceProvider get resolver;
-  Future<void> Function(PlayRequest request) get openPlayback;
-  void setPlaybackPhase(PlaybackPhase phase, {String? message});
+  LocalVideoFiles get localVideoFiles;
+  Future<bool> replacePlayback(
+    FutureOr<PlayRequest?> Function() resolveRequest, {
+    bool Function()? shouldUseResult,
+  });
+  void setPlaybackPhase(PlaybackPhase phase,
+      {PlaybackNotice notice = PlaybackNotice.none});
 
   static const _maxSearchItems = 5;
   static const _maxConcurrentSearches = 5;
@@ -46,6 +57,8 @@ mixin VideoSourceWorkflow {
   int? _autoSelectEpisodeIndex;
   String? _preferredAutoSelectWebsiteName;
   int _videoPageLoadToken = 0;
+  int _pickerRevision = 0;
+  bool _isManualSelectionPending = false;
   VideoSourceCancellation? _resolution;
   final Set<String> _attemptedAutoLoadUrls = {};
 
@@ -55,6 +68,7 @@ mixin VideoSourceWorkflow {
   }
 
   void disposeSearch() {
+    _pickerRevision++;
     _resolution?.cancel();
     _resolution = null;
     _searchSessionId++;
@@ -64,7 +78,7 @@ mixin VideoSourceWorkflow {
   }
 
   Future<void> initVideoResources() async {
-    final configs = await _loadSources();
+    final configs = await sourceRepository.websites();
     if (!active) return;
     _syncVideoResources(configs);
   }
@@ -83,19 +97,23 @@ mixin VideoSourceWorkflow {
       return;
     }
 
-    final configs = await _loadSources();
+    final selectionToken = _videoPageLoadToken;
+    final configs = await sourceRepository.websites();
     if (!active) return;
+    // 搜索初始化等待配置时，用户可能已经手动选好了本地或在线来源。
+    final keepSelection = preserveCurrentPlayback ||
+        (selectionToken != _videoPageLoadToken && state.hasSelectedSource);
     final sessionId = ++_searchSessionId;
     _resetAutoSelectionAttempts();
     _syncVideoResources(configs);
     _clearAllResources(configs);
     state = state.copyWith(
       keyword: normalizedKeyword,
-      userManuallySelected:
-          preserveCurrentPlayback ? state.userManuallySelected : false,
+      userManuallySelected: keepSelection ? state.userManuallySelected : false,
       isSearchCompleted: false,
       selectedWebsiteIndex: 0,
-      selectedSource: preserveCurrentPlayback ? state.selectedSource : null,
+      selectedPlaybackSource:
+          keepSelection ? state.selectedPlaybackSource : null,
     );
 
     final eligibleConfigs = <PlayWebsite>[];
@@ -210,7 +228,7 @@ mixin VideoSourceWorkflow {
     String websiteName, {
     String? keyword,
   }) async {
-    final configs = await _loadSources();
+    final configs = await sourceRepository.websites();
     if (!active) return;
     _syncVideoResources(configs);
     final config = _firstConfigWhere(configs, (c) => c.name == websiteName);
@@ -377,10 +395,6 @@ mixin VideoSourceWorkflow {
     }
   }
 
-  Future<List<PlayWebsite>> _loadSources() {
-    return sourceRepository.websites();
-  }
-
   Future<void> _runSearchPool({
     required List<PlayWebsite> configs,
     required String keyword,
@@ -452,27 +466,10 @@ mixin VideoSourceWorkflow {
     state = state.copyWith(videoResources: updatedResources);
   }
 
-  void _selectSource(SelectedVideoSource? source) {
-    state = state.copyWith(selectedSource: source);
-  }
-
-  void bindManualSourceForCurrentEpisode({
-    required String websiteName,
-    required String websiteIcon,
-    required String resourceTitle,
-    required String lineName,
-    required String videoUrl,
-  }) {
-    final source = SelectedVideoSource(
-      websiteName: websiteName,
-      websiteIcon: websiteIcon,
-      resourceTitle: resourceTitle,
-      lineName: lineName,
-      videoUrl: videoUrl,
-    );
-    final episodeId = _currentEpisodeId;
+  void _bindManualSource(PlaySourceSelection source) {
+    final episodeId = episode.id;
     state = state.copyWith(
-      selectedSource: source,
+      selectedPlaybackSource: source,
       userManuallySelected: true,
       manualEpisodeSources: episodeId > 0
           ? {...state.manualEpisodeSources, episodeId: source}
@@ -487,39 +484,18 @@ mixin VideoSourceWorkflow {
   }
 
   void resetManualSelection() {
+    _pickerRevision++;
+    _isManualSelectionPending = false;
     if (state.userManuallySelected) {
       state = state.copyWith(userManuallySelected: false);
     }
-  }
-
-  int get _currentEpisodeIndex => episode.index;
-
-  int get _currentEpisodeId => episode.id;
-
-  SelectedVideoSource? _manualSourceForCurrentEpisode() {
-    final episodeId = _currentEpisodeId;
-    if (episodeId <= 0) {
-      return null;
-    }
-    return state.manualEpisodeSources[episodeId];
-  }
-
-  Future<bool> _loadManualSourceForCurrentEpisode() async {
-    if (!active) return false;
-    final manualSource = _manualSourceForCurrentEpisode();
-    if (manualSource == null) {
-      return false;
-    }
-
-    _selectSource(manualSource);
-    return loadVideoPage(manualSource.videoUrl);
   }
 
   void autoSelectAvailableResource({
     bool force = false,
     bool preferCurrentWebsite = false,
   }) {
-    if (state.userManuallySelected) {
+    if (state.userManuallySelected || _isManualSelectionPending) {
       return;
     }
     if (!force && state.webSiteTitle.isNotEmpty) {
@@ -530,10 +506,14 @@ mixin VideoSourceWorkflow {
     }
 
     Future.microtask(() {
-      if (!active) return;
-      final manualSource = _manualSourceForCurrentEpisode();
+      if (!active || state.userManuallySelected || _isManualSelectionPending) {
+        return;
+      }
+      final episodeId = episode.id;
+      final manualSource =
+          episodeId > 0 ? state.manualEpisodeSources[episodeId] : null;
       if (manualSource != null) {
-        _loadManualSourceForCurrentEpisode();
+        unawaited(openSelectedSource(manualSource));
         return;
       }
       final preferredWebsiteName = state.webSiteTitle.isNotEmpty
@@ -550,25 +530,28 @@ mixin VideoSourceWorkflow {
   void _resetAutoSelectionAttempts() {
     _autoSelectEpoch++;
     _isAutoSelecting = false;
-    _autoSelectEpisodeIndex = _currentEpisodeIndex;
+    _autoSelectEpisodeIndex = episode.index;
     _preferredAutoSelectWebsiteName = null;
     _attemptedAutoLoadUrls.clear();
   }
 
   void resetAutoSelectionForCurrentEpisode() {
+    _videoPageLoadToken++;
+    _resolution?.cancel();
     final preferredWebsiteName =
         state.webSiteTitle.isNotEmpty ? state.webSiteTitle : null;
     _resetAutoSelectionAttempts();
     _preferredAutoSelectWebsiteName = preferredWebsiteName;
-    _selectSource(null);
+    state = state.copyWith(selectedPlaybackSource: null);
   }
 
   void _syncAutoSelectionEpisode() {
-    if (_autoSelectEpisodeIndex == _currentEpisodeIndex) {
+    final episodeIndex = episode.index;
+    if (_autoSelectEpisodeIndex == episodeIndex) {
       return;
     }
     _autoSelectEpoch++;
-    _autoSelectEpisodeIndex = _currentEpisodeIndex;
+    _autoSelectEpisodeIndex = episodeIndex;
     _attemptedAutoLoadUrls.clear();
   }
 
@@ -577,7 +560,7 @@ mixin VideoSourceWorkflow {
     String? preferredWebsiteName,
   }) async {
     if (!active) return;
-    if (state.userManuallySelected) {
+    if (state.userManuallySelected || _isManualSelectionPending) {
       return;
     }
     if (!force && state.webSiteTitle.isNotEmpty) {
@@ -602,7 +585,7 @@ mixin VideoSourceWorkflow {
 
         final candidates = EpisodeSourceMatcher.buildCandidates(
           state.videoResources,
-          episodeIndex: _currentEpisodeIndex,
+          episodeIndex: episode.index,
           preferredWebsiteName: preferredWebsiteName,
         ).where((candidate) {
           final url = resolveSourceUrl(
@@ -621,17 +604,18 @@ mixin VideoSourceWorkflow {
 
         state = state.copyWith(
           selectedWebsiteIndex: candidate.websiteIndex,
-          selectedSource: SelectedVideoSource(
-            websiteName: candidate.resource.websiteName,
-            websiteIcon: candidate.resource.websiteIcon,
-            resourceTitle: candidate.resourceItem.subjectsTitle,
-            lineName: candidate.resourceItem.lineNames,
-            videoUrl: candidateUrl,
-          ),
         );
+        final source = OnlineEpisodeSource(SelectedVideoSource(
+          websiteName: candidate.resource.websiteName,
+          websiteIcon: candidate.resource.websiteIcon,
+          resourceTitle: candidate.resourceItem.subjectsTitle,
+          lineName: candidate.resourceItem.lineNames,
+          videoUrl: candidateUrl,
+        ));
 
-        final loaded = await loadVideoPage(
-          candidateUrl,
+        final loaded = await openSelectedSource(
+          source,
+          manual: false,
           shouldUseResult: () => epoch == _autoSelectEpoch,
         );
         if (!active) return;
@@ -643,7 +627,7 @@ mixin VideoSourceWorkflow {
         if (epoch != _autoSelectEpoch || state.userManuallySelected) {
           return;
         }
-        _selectSource(null);
+        state = state.copyWith(selectedPlaybackSource: null);
       }
     } finally {
       if (epoch == _autoSelectEpoch) {
@@ -652,101 +636,151 @@ mixin VideoSourceWorkflow {
     }
   }
 
-  Future<bool> loadVideoPage(
-    String url, {
+  /// 选片期间的取消、切集、页面退出以及其他手动选源都会使结果失效。
+  Future<LocalVideoFile?> pickLocalVideo({
+    required String dialogTitle,
+    required bool Function() isPickerActive,
+  }) async {
+    final revision = ++_pickerRevision;
+    final selectedEpisode = episode;
+    final selectedSubjectId = subject.subjectId;
+    final file = await localVideoFiles.pick(dialogTitle: dialogTitle);
+    if (!active ||
+        !isPickerActive() ||
+        revision != _pickerRevision ||
+        episode != selectedEpisode ||
+        subject.subjectId != selectedSubjectId) {
+      return null;
+    }
+    return file;
+  }
+
+  /// 所有选源共用请求版本和剧集校验，在提交播放前使旧解析失效。
+  Future<bool> openSelectedSource(
+    PlaySourceSelection source, {
+    bool manual = true,
     bool Function()? shouldUseResult,
   }) async {
-    if (shouldUseResult != null && !shouldUseResult()) {
+    if (!active || !(shouldUseResult?.call() ?? true)) {
       return false;
     }
-    if (!active) return false;
+    final selectedEpisode = episode;
+    final selectedSubject = subject;
+    if (selectedEpisode.id <= 0 || selectedEpisode.index <= 0) return false;
     final loadToken = ++_videoPageLoadToken;
     _resolution?.cancel();
-    final cancellation = _resolution = VideoSourceCancellation();
-    final webViewVideoProvider = resolver;
+    if (manual) {
+      _pickerRevision++;
+      _isManualSelectionPending = true;
+      _resetAutoSelectionAttempts();
+    }
+    bool isCurrent() =>
+        active &&
+        loadToken == _videoPageLoadToken &&
+        episode == selectedEpisode &&
+        subject.subjectId == selectedSubject.subjectId &&
+        (shouldUseResult?.call() ?? true);
 
-    final startPlayback = openPlayback;
-    setPlaybackPhase(
-      PlaybackPhase.resolving,
-      message: '正在解析视频源...',
-    );
-
-    if (!active || loadToken != _videoPageLoadToken) return false;
-
-    final (
-      subjectId: subjectId,
-      subjectName: subjectName,
-      subjectCover: subjectCover,
-      subjectAliases: subjectAlias
-    ) = subject;
-    final (index: episodeIndex, sort: episodeSort, id: episodeId) = episode;
     try {
-      final offset = await history.resumePosition(subjectId, episodeId);
-      if (!active || loadToken != _videoPageLoadToken) return false;
-      final source = await webViewVideoProvider.resolve(
-          VideoSourceResolveRequest(
-              episodeUrl: url,
-              offset: offset,
-              cancellation: cancellation,
-              timeout: const Duration(seconds: 15)));
-      if (!active) return false;
-      final canUseResult = loadToken == _videoPageLoadToken &&
-          (shouldUseResult == null || shouldUseResult());
-      if (!canUseResult) {
-        if (loadToken == _videoPageLoadToken) {
-          setPlaybackPhase(
-            PlaybackPhase.idle,
-          );
-        }
-        return false;
+      if (source case LocalVideoFile file) {
+        await localVideoFiles.ensureReadable(file);
+        if (!isCurrent()) return false;
       }
-
-      setPlaybackPhase(
-        PlaybackPhase.resolved,
-        message: '资源解析成功，准备播放',
-      );
-      await startPlayback(
-        PlayRequest(
-          videoUrl: source.url,
-          offset: source.offset,
-          subjectId: subjectId,
-          subjectName: subjectName,
-          subjectCover: subjectCover,
-          episodeIndex: episodeIndex,
-          episodeSort: episodeSort,
-          alias: subjectAlias,
-          episodeId: episodeId,
-        ),
-      );
-      if (!active) return false;
-      return true;
+      if (manual) {
+        _bindManualSource(source);
+      } else {
+        state = state.copyWith(selectedPlaybackSource: source);
+      }
+      return await replacePlayback(() async {
+        final media = switch (source) {
+          OnlineEpisodeSource(:final selection) => await _loadVideoPage(
+              selection.videoUrl,
+              selectedSubject,
+              selectedEpisode,
+              isCurrent,
+            ),
+          LocalVideoFile(:final path) => (
+              source: PlaybackSource.localFile(path),
+              offset: 0,
+            ),
+        };
+        if (media == null || !isCurrent()) return null;
+        return PlayRequest(
+          source: media.source,
+          offset: media.offset,
+          subjectId: selectedSubject.subjectId,
+          subjectName: selectedSubject.subjectName,
+          subjectCover: selectedSubject.subjectCover,
+          episodeIndex: selectedEpisode.index,
+          episodeSort: selectedEpisode.sort,
+          alias: selectedSubject.subjectAliases,
+          episodeId: selectedEpisode.id,
+        );
+      }, shouldUseResult: isCurrent);
+    } on VideoSourceCancelledException {
+      return false;
     } on VideoSourceTimeoutException {
-      if (!active) return false;
-      if (loadToken == _videoPageLoadToken) {
+      if (isCurrent()) {
         setPlaybackPhase(
           PlaybackPhase.error,
-          message: '视频解析超时，请重试',
+          notice: PlaybackNotice.sourceResolutionTimedOut,
         );
       }
     } on VideoSourceNotFoundException {
-      if (!active) return false;
-      if (loadToken == _videoPageLoadToken) {
+      if (isCurrent()) {
         setPlaybackPhase(
           PlaybackPhase.error,
-          message: '未找到视频资源，请切换数据源重试',
+          notice: PlaybackNotice.sourceNotFound,
         );
       }
+    } on VideoValidationException catch (e) {
+      if (isCurrent()) {
+        setPlaybackPhase(PlaybackPhase.error, notice: e.notice);
+        logError(e);
+      }
     } catch (e) {
-      if (!active) return false;
-      if (loadToken == _videoPageLoadToken) {
+      if (isCurrent()) {
         setPlaybackPhase(
           PlaybackPhase.error,
-          message: '视频解析失败: ${e.toString()}',
+          notice: source is LocalVideoFile
+              ? PlaybackNotice.localVideoOpenFailed
+              : PlaybackNotice.sourceResolutionFailed,
         );
         logError(e);
       }
+    } finally {
+      if (loadToken == _videoPageLoadToken) {
+        _isManualSelectionPending = false;
+      }
     }
     return false;
+  }
+
+  Future<({PlaybackSource source, int offset})?> _loadVideoPage(
+    String url,
+    SourceSubject selectedSubject,
+    SourceEpisode selectedEpisode,
+    bool Function() isCurrent,
+  ) async {
+    final cancellation = _resolution = VideoSourceCancellation();
+    setPlaybackPhase(PlaybackPhase.resolving,
+        notice: PlaybackNotice.resolvingSource);
+    final offset = await history.resumePosition(
+        selectedSubject.subjectId, selectedEpisode.id);
+    if (!isCurrent()) return null;
+    final source = await resolver.resolve(VideoSourceResolveRequest(
+      episodeUrl: url,
+      offset: offset,
+      cancellation: cancellation,
+      timeout: const Duration(seconds: 15),
+    ));
+    if (!isCurrent()) return null;
+    setPlaybackPhase(PlaybackPhase.resolved,
+        notice: PlaybackNotice.sourceReady);
+    return (
+      source: PlaybackSource.network(uri: Uri.parse(source.url)),
+      offset: source.offset,
+    );
   }
 }
 

@@ -685,6 +685,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get switchSource => 'Switch source';
 
   @override
+  String get chooseLocalVideo => 'Choose local video';
+
+  @override
+  String get preparingLocalVideo => 'Preparing local video';
+
+  @override
+  String get localVideoSource => 'Local video';
+
+  @override
+  String get videoSourceResolving => 'Resolving video source…';
+
+  @override
+  String get videoSourceReady => 'Video source ready. Preparing playback…';
+
+  @override
+  String get openingLocalVideo => 'Opening local video…';
+
+  @override
+  String get videoSourceResolutionTimedOut =>
+      'Resolving the video source timed out. Try again.';
+
+  @override
+  String get videoSourceResolutionFailed =>
+      'Couldn\'t resolve the video source. Try switching sources.';
+
+  @override
+  String get localVideoNoTrack =>
+      'This file has no playable video track. Choose a video file.';
+
+  @override
+  String get localVideoValidationTimedOut =>
+      'Checking the video timed out. The file may be damaged or use an unsupported format or codec. Try again or switch player kernels.';
+
+  @override
+  String get localVideoOpenFailed =>
+      'Couldn\'t open the local video. The file may be unreadable, damaged, or unsupported by the current player kernel. Choose another file or switch kernels.';
+
+  @override
+  String get localVideoPlaybackFailed =>
+      'Couldn\'t play the local video. Choose another file or switch player kernels.';
+
+  @override
+  String get onlineVideoPlaybackFailed =>
+      'Playback failed. Try switching sources.';
+
+  @override
   String get sourceActions => 'Source actions';
 
   @override

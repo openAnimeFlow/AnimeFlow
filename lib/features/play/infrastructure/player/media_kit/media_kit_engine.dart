@@ -14,6 +14,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'mpv_upscale_shaders.dart';
+import 'media_kit_video_validation.dart';
 
 class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
   final bool adBlocker;
@@ -52,7 +53,6 @@ class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
           UpscalePreset.quality,
         },
         supportsHardwareDecoder: true,
-        supportsAudioOnly: true,
       );
 
   @override
@@ -126,7 +126,7 @@ class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
     Duration? startPosition,
     bool autoPlay = false,
   }) =>
-      _enqueue(() async {
+      _operations.run(() async {
         if (_opened) {
           await _releasePlayer();
           _ensureReady();
@@ -139,48 +139,64 @@ class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
         }
         _opened = true;
         _ensureReady();
-        await _player.open(
-          Media(
-            source.uri.toString(),
-            start: startPosition,
-            httpHeaders: source.headers.isEmpty ? null : source.headers,
-          ),
-          play: false,
-        );
+        Future<void> openMedia() => _player.open(
+              Media(
+                source.uri.toString(),
+                start: startPosition,
+                httpHeaders: source.headers.isEmpty ? null : source.headers,
+              ),
+              play: false,
+            );
+        if (source is LocalFilePlaybackSource) {
+          try {
+            await openMediaKitVideo(
+              tracks: _player.stream.tracks,
+              videoParams: _player.stream.videoParams,
+              open: openMedia,
+            );
+          } catch (_) {
+            await _player.stop();
+            rethrow;
+          }
+        } else {
+          await openMedia();
+        }
         _ensureReady();
         if (autoPlay) await _player.play();
       });
 
   @override
-  Future<void> play() => _enqueue(() => _player.play());
+  Future<void> play() => _operations.run(() => _player.play());
 
   @override
-  Future<void> pause() => _enqueue(() => _player.pause());
+  Future<void> pause() => _operations.run(() => _player.pause());
 
   @override
-  Future<void> stop() => _enqueue(() => _player.stop());
+  Future<void> stop() => _operations.run(() => _player.stop());
 
   @override
   Future<void> seek(Duration position) =>
-      _enqueue(() => _player.seek(position));
+      _operations.run(() => _player.seek(position));
 
   @override
-  Future<void> setVolume(double volume) => _enqueue(() async {
+  Future<void> setVolume(double volume) => _operations.run(() async {
         await _player.setVolume(volume);
         _volume = volume;
       });
 
   @override
-  Future<void> setRate(double rate) => _enqueue(() async {
+  Future<void> setRate(double rate) => _operations.run(() async {
         await _player.setRate(rate);
         _rate = rate;
       });
 
   @override
-  Future<Uint8List?> screenshot() => _enqueue(() => _player.screenshot());
+  Future<Uint8List?> screenshot() =>
+      _operations.run(() => _player.screenshot());
 
   @override
-  Future<void> setUpscalePreset(UpscalePreset preset) => _enqueue(() async {
+  Future<void> setUpscalePreset(UpscalePreset preset) =>
+      _operations.run(() async {
         await _applyUpscalePreset(preset);
         _upscalePreset = preset;
       });
@@ -236,9 +252,6 @@ class MediaKitEngine implements PlayerEngine, PlayerVideoSurface {
     _subscriptions.clear();
     await _player.dispose();
   }
-
-  Future<T> _enqueue<T>(Future<T> Function() operation) =>
-      _operations.run(operation);
 
   void _ensureReady() {
     if (!_initialized || _disposed) {

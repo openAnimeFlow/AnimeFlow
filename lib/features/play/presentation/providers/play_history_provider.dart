@@ -34,11 +34,11 @@ class PlayHistoryNotifier extends _$PlayHistoryNotifier {
         final wasLoggedIn = previous?.value ?? false;
         final isLoggedIn = next.value ?? false;
         if (previous != null && isLoggedIn && !wasLoggedIn) {
-          unawaited(syncFromServer());
+          unawaited(_syncFromServer());
         }
       },
     );
-    unawaited(syncFromServer());
+    unawaited(_syncFromServer());
     try {
       return await _loadHistories();
     } catch (e) {
@@ -83,7 +83,7 @@ class PlayHistoryNotifier extends _$PlayHistoryNotifier {
     if (ref.mounted) await _reloadState();
   }
 
-  Future<void> syncFromServer() async {
+  Future<void> _syncFromServer() async {
     try {
       await ref
           .read(playHistoryServiceProvider)

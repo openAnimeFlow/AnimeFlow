@@ -67,7 +67,7 @@ class _IntroduceViewState extends State<IntroduceView>
       await showPlayerSettingsSheet(
         context: context,
         label: AppLocalizations.of(context).detailsTitle,
-        child: PlayerSettingsSheet(
+        child: PlayerSheet(
           closeOnMinExtent: true,
           builder: (context, scrollController, isBottomSheet) =>
               MediaQuery.removePadding(
@@ -124,7 +124,7 @@ class _IntroduceViewState extends State<IntroduceView>
     showPlayerSettingsSheet(
       context: context,
       label: AppLocalizations.of(context).videoSource,
-      child: PlayerSettingsSheet(
+      child: PlayerSheet(
         avoidKeyboard: true,
         initialSize: 0.60,
         snapSizes: const [0.3, 0.52, 0.95],
@@ -311,19 +311,13 @@ class _IntroduceViewState extends State<IntroduceView>
             //数据源
             Consumer(builder: (context, ref, child) {
               final state = ref.watch(videoSourceProvider);
-              final hasSourceUrl = state.videoUrl.trim().isNotEmpty;
               return VideoResourcesView(
                 isSearchCompleted: state.isSearchCompleted,
-                webSiteTitle: state.webSiteTitle,
-                webSiteIcon: state.webSiteIcon,
-                resourceTitle: state.resourceTitle,
-                lineName: state.lineName,
+                source: state.selectedPlaybackSource,
                 onSwitchSource: () => _showSourceDrawer(
                     ref.read(playExtraProvider).playExtra.subjectName),
-                onOpenSourcePage:
-                    hasSourceUrl ? () => _openSourcePage(state.videoUrl) : null,
-                onCopySourcePage:
-                    hasSourceUrl ? () => _copySourcePage(state.videoUrl) : null,
+                onOpenSourcePage: _openSourcePage,
+                onCopySourcePage: _copySourcePage,
               );
             }),
             //弹幕

@@ -43,6 +43,7 @@ class VideoSourceDialog extends StatefulWidget {
     this.keyboardInsetHandled = false,
     this.scrollController,
     this.closeOnSelection = true,
+    this.sourceAction,
   });
 
   final String subjectName;
@@ -66,6 +67,7 @@ class VideoSourceDialog extends StatefulWidget {
 
   /// 下载等场景可保留弹窗，继续展示解析结果。
   final bool closeOnSelection;
+  final Widget? sourceAction;
 
   @override
   State<VideoSourceDialog> createState() => _VideoSourceDialogState();
@@ -230,6 +232,10 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final resources = widget.resources;
+    final selectedIndex =
+        resources.isEmpty ? null : _resolveSelectedWebsiteIndex(resources);
     return Padding(
       padding: EdgeInsets.fromLTRB(
         16,
@@ -240,30 +246,26 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
                 ? 0
                 : MediaQuery.viewInsetsOf(context).bottom),
       ),
-      child: _buildDrawerContent(),
-    );
-  }
-
-  Widget _buildDrawerContent() {
-    final l10n = AppLocalizations.of(context);
-    final resources = widget.resources;
-    final selectedIndex =
-        resources.isEmpty ? null : _resolveSelectedWebsiteIndex(resources);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _buildHeader(l10n),
-        _buildManualSearch(l10n),
-        const SizedBox(height: 16),
-        if (selectedIndex != null) ...[
-          _buildWebsiteSelector(
-            dataSource: resources,
-            selectedIndex: selectedIndex,
-          ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildHeader(l10n),
+          _buildManualSearch(l10n),
+          if (widget.sourceAction case final action?) ...[
+            const SizedBox(height: 12),
+            action,
+          ],
           const SizedBox(height: 16),
-          Expanded(child: _buildVideoSource(resources[selectedIndex])),
+          if (selectedIndex != null) ...[
+            _buildWebsiteSelector(
+              dataSource: resources,
+              selectedIndex: selectedIndex,
+            ),
+            const SizedBox(height: 16),
+            Expanded(child: _buildVideoSource(resources[selectedIndex])),
+          ],
         ],
-      ],
+      ),
     );
   }
 

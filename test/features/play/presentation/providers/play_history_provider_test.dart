@@ -7,6 +7,7 @@ import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_history_provider.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:dio/dio.dart';
@@ -91,15 +92,25 @@ void main() {
     DioFactory.reset();
   });
 
-  test(
-      'failed auto sync preserves local records and a later success clears the error',
+  test('failed auto sync preserves local records and sign-in retries the sync',
       () async {
-    final container = ProviderContainer(overrides: playFeatureOverrides);
+    var loggedIn = false;
+    final container = ProviderContainer(overrides: [
+      ...playFeatureOverrides,
+      isLoggedInProvider.overrideWith((ref) async => loggedIn),
+    ]);
     addTearDown(container.dispose);
     final failed = Completer<void>();
+    final recovered = Completer<PlayHistoryState>();
     container.listen(playHistoryProvider, (_, next) {
-      if (next.value?.syncError != null && !failed.isCompleted) {
+      final state = next.value;
+      if (state == null) return;
+      if (state.syncError != null && !failed.isCompleted) {
         failed.complete();
+      } else if (failed.isCompleted &&
+          state.syncError == null &&
+          !recovered.isCompleted) {
+        recovered.complete(state);
       }
     });
     final initial = await container.read(playHistoryProvider.future);
@@ -110,11 +121,11 @@ void main() {
     expect(state.syncError.toString(), contains('同步服务不可用'));
     expect(adapter.requests, 3);
 
-    // 等待当前自动同步完成，再手动重试，避免复用尚未结束的去重操作。
-    await pumpEventQueue();
     adapter.fail = false;
-    await container.read(playHistoryProvider.notifier).syncFromServer();
-    final refreshed = container.read(playHistoryProvider).requireValue;
+    loggedIn = true;
+    container.invalidate(isLoggedInProvider);
+    final refreshed =
+        await recovered.future.timeout(const Duration(seconds: 5));
     expect(refreshed.syncError, isNull);
     expect(refreshed.records.single.subjectId, 42);
     expect(adapter.requests, 4);

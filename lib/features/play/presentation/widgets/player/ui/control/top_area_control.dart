@@ -308,7 +308,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                       context: context,
                                       label: l10n.videoSource,
                                       forceSide: true,
-                                      child: PlayerSettingsSheet(
+                                      child: PlayerSheet(
                                         forceSide: true,
                                         builder:
                                             (context, scrollController, _) =>

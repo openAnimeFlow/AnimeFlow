@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
+import 'package:anime_flow/features/play/domain/player/video_validation_exception.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
@@ -56,7 +57,6 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
   PlayerCapabilities get capabilities => const PlayerCapabilities(
         supportsScreenshot: true,
         supportsHardwareDecoder: true,
-        supportsAudioOnly: true,
       );
 
   @override
@@ -210,7 +210,7 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
     Duration? startPosition,
     bool autoPlay = false,
   }) =>
-      _enqueue(() =>
+      _operations.run(() =>
           _open(source, startPosition: startPosition, autoPlay: autoPlay));
 
   Future<void> _open(
@@ -244,19 +244,35 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
     }
     _acceptMediaStatus = true;
     try {
-      _player.media = source.uri.isScheme('file')
-          ? source.uri.toFilePath()
-          : source.uri.toString();
-      final result = await _player.prepare(
-        position: startPosition?.inMilliseconds ?? 0,
+      _player.media = switch (source) {
+        LocalFilePlaybackSource(:final path) => path,
+        NetworkPlaybackSource(:final uri) => uri.toString(),
+      };
+      final requestedPosition = startPosition?.inMilliseconds ?? 0;
+      final isLocalVideo = source is LocalFilePlaybackSource;
+      final preparation = _player.prepare(
+        // MDK prepare(0) 只保证元数据就绪；正数位置会等待首帧解码结果。
+        // 本地视频从 1ms 预加载，避免把仅能解封装误判为可解码。
+        position:
+            isLocalVideo && requestedPosition == 0 ? 1 : requestedPosition,
         // 默认 flags 包含 KeyFrame，会向前跳到关键帧，导致重建时进度漂移。
         flags: const fvp.SeekFlag(fvp.SeekFlag.fromStart),
       );
+      final result = isLocalVideo
+          ? await preparation.timeout(VideoValidationException.timeout,
+              onTimeout: () => throw const VideoValidationException.timedOut())
+          : await preparation;
       _ensureReady();
       if (result < 0) {
         throw StateError('FVP prepare failed: $result');
       }
       final video = _player.mediaInfo.video?.firstOrNull;
+      if (isLocalVideo &&
+          (video == null ||
+              video.codec.width <= 0 ||
+              video.codec.height <= 0)) {
+        throw const VideoValidationException.noVideo();
+      }
       if (video != null) {
         _videoSize = Size(
           video.codec.width.toDouble(),
@@ -275,23 +291,24 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
     } catch (_) {
       _acceptMediaStatus = false;
       _hasMedia = false;
+      _player.state = fvp.PlaybackState.stopped;
       _emit(const PlayerBufferingChanged(false));
       rethrow;
     }
   }
 
   @override
-  Future<void> play() => _enqueue(() async {
+  Future<void> play() => _operations.run(() async {
         _player.state = fvp.PlaybackState.playing;
       });
 
   @override
-  Future<void> pause() => _enqueue(() async {
+  Future<void> pause() => _operations.run(() async {
         _player.state = fvp.PlaybackState.paused;
       });
 
   @override
-  Future<void> stop() => _enqueue(_stop);
+  Future<void> stop() => _operations.run(_stop);
 
   Future<void> _stop() async {
     _ensureReady();
@@ -321,7 +338,7 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
 
   /// 精确跳转到指定位置，并优先复用已有缓冲。
   @override
-  Future<void> seek(Duration position) => _enqueue(() async {
+  Future<void> seek(Duration position) => _operations.run(() async {
         final result = await _player.seek(
           position: position.inMilliseconds,
           flags: const fvp.SeekFlag(
@@ -438,9 +455,6 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
 
     _emit(PlayerBufferedChanged(bufferedEnd));
   }
-
-  Future<void> _enqueue(Future<void> Function() operation) =>
-      _operations.run(operation);
 
   void _ensureReady() {
     if (!_initialized || _disposed) {

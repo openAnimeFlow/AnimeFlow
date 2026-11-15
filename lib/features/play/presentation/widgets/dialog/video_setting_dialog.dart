@@ -81,7 +81,7 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
     final switchingKernel = ref.watch(
       playStateProvider.select((state) => state.switchingKernel),
     );
-    return PlayerSettingsSheet(
+    return PlayerSheet(
       child: SingleChildScrollView(
         primary: true,
         physics: const AlwaysScrollableScrollPhysics(),

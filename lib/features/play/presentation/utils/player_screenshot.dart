@@ -18,7 +18,7 @@ Future<void> capturePlayerScreenshot(
   WidgetRef ref, {
   bool notify = true,
 }) async {
-  final playController = ref.read(playSessionProvider);
+  final playback = ref.read(playSessionProvider).playbackCoordinator;
   final device = ref.read(playbackDeviceProvider);
   final videoUi = ref.read(videoUiProvider.notifier);
 
@@ -33,7 +33,7 @@ Future<void> capturePlayerScreenshot(
   }
 
   try {
-    final bytes = await playController.takeScreenshot();
+    final bytes = await playback.screenshot();
     if (bytes == null) {
       notifyUser('截图失败，无法获取截图数据');
       return;

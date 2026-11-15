@@ -164,7 +164,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
         break;
       }
     }
-    return PlayerSettingsSheet(
+    return PlayerSheet(
       child: Column(
         children: [
           Padding(

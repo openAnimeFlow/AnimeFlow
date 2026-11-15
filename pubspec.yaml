@@ -211,9 +211,7 @@ flutter:
     - LICENSE.txt
     - assets/icons/
     - assets/plugins/
-    - assets/shaders/media_kit/common/
-    - assets/shaders/video_player/android/
-    - assets/shaders/video_player/ios/
+    - assets/shaders/**
     - assets/animation/
     - assets/image/
     - assets/network/ligg-candidates.txt

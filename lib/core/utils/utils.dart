@@ -2,16 +2,11 @@ import 'dart:io';
 import 'dart:math';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/network/api_path.dart';
-import 'package:anime_flow/core/logger/logger.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class Utils {
-  static LiggLogger logger = LiggLogger();
-  static const double kMobileBreakpoint = 480;
-  static const double kTabletBreakpoint = 1024;
-
   // 从URL参数中解析 m3u8/mp4
   static String decodeVideoSource(String iframeUrl) {
     var decodedUrl = Uri.decodeFull(iframeUrl);

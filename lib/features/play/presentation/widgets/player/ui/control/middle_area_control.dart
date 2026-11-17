@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/features/play/presentation/extensions/playback_notice_presentation.dart';
@@ -14,7 +16,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 播放器指示器
-/// 顶部提示与居中指示器各自成层，可同时展示且互不影响。
 @Dependencies([VideoUiNotifier, PlayStateNotifier, playerCacheSpeed])
 class MiddleAreaControl extends ConsumerWidget {
   const MiddleAreaControl({super.key});
@@ -53,7 +54,7 @@ class MiddleAreaControl extends ConsumerWidget {
   }
 }
 
-/// 居中指示器：解析、缓冲与拖动进度，可长期驻留。
+/// 居中指示器：解析、缓冲与拖动进度
 @Dependencies([VideoUiNotifier, PlayStateNotifier, playerCacheSpeed])
 class _CenterIndicator extends ConsumerWidget {
   const _CenterIndicator({required this.type});
@@ -152,6 +153,7 @@ class _TopIndicator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return switch (type) {
+      // 音量
       VideoControlsIndicatorType.volumeIndicator => Consumer(
           builder: (context, ref, child) {
             final volume =
@@ -166,6 +168,7 @@ class _TopIndicator extends ConsumerWidget {
             );
           },
         ),
+      // 亮度
       VideoControlsIndicatorType.brightnessIndicator => Consumer(
           builder: (context, ref, child) {
             final brightness = ref.watch(
@@ -236,41 +239,59 @@ class _TopIndicator extends ConsumerWidget {
   }
 }
 
-/// 音量与亮度共用的条形提示。
 class _ProgressCard extends StatelessWidget {
-  const _ProgressCard({required this.progress, required this.icon});
+  const _ProgressCard({
+    required this.progress,
+    required this.icon,
+  });
 
   final double progress;
   final IconData icon;
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(10);
     return Container(
       width: 180,
       height: 35,
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(10),
+      decoration: BoxDecoration(borderRadius: radius),
+      clipBehavior: Clip.antiAlias,
+      foregroundDecoration: BoxDecoration(
+        borderRadius: radius,
+        border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
       ),
-      clipBehavior: Clip.hardEdge,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.white30,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).colorScheme.primary,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            Positioned.fill(
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: progress, end: progress),
+                duration: const Duration(milliseconds: 80),
+                builder: (context, value, child) => LinearProgressIndicator(
+                  value: value,
+                  borderRadius: const BorderRadius.horizontal(
+                    left: Radius.circular(8),
+                    right: Radius.circular(8),
+                  ),
+                  trackGap: 0,
+                  stopIndicatorRadius: 0,
+                  backgroundColor: Colors.white.withValues(alpha: 0.08),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               ),
             ),
-          ),
-          Positioned(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-              child: Icon(icon, color: Colors.white, size: 24),
+            Positioned(
+              child: Padding(
+                padding: const EdgeInsets.symmetric( horizontal: 5),
+                child: Icon(icon, color: Colors.white),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

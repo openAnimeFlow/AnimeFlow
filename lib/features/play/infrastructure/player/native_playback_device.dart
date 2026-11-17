@@ -45,7 +45,13 @@ class NativePlaybackDevice implements PlaybackDevice {
   @override
   Future<int> batteryLevel() => SystemUtil.getBatteryLevel();
   @override
-  Future<double> brightness() => ScreenBrightnessPlatform.instance.application;
+  Future<double> brightness() async {
+    final brightness = ScreenBrightnessPlatform.instance;
+    // 手势持续更新亮度时，避免每次调用都重启原生过渡动画。
+    if (isMobile) await brightness.setAnimate(false);
+    return brightness.application;
+  }
+
   @override
   Future<void> setBrightness(double value) =>
       ScreenBrightnessPlatform.instance.setApplicationScreenBrightness(value);

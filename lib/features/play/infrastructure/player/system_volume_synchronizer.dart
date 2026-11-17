@@ -42,6 +42,7 @@ class SystemVolumeSynchronizer implements PlaybackVolume {
     if (!isSupported || _disposed) return;
 
     _pendingVolume = normalizedVolume.clamp(0.0, 1.0).toDouble();
+    _ignoreEventsUntil = DateTime.now().add(syncInterval * 2);
     if (_syncTimer?.isActive ?? false) return;
 
     _syncTimer = Timer(syncInterval, () {
@@ -69,9 +70,9 @@ class SystemVolumeSynchronizer implements PlaybackVolume {
     if (_disposed) return;
     final normalized = volume.clamp(0.0, 1.0).toDouble();
     final ignoreUntil = _ignoreEventsUntil;
-    if (ignoreUntil != null &&
-        DateTime.now().isBefore(ignoreUntil) &&
-        _isSameVolume(_lastKnownVolume, normalized)) {
+    // 系统音量会取整到设备档位，拖动期间的回传不覆盖最新手势值。
+    if (_pendingVolume != null ||
+        (ignoreUntil != null && DateTime.now().isBefore(ignoreUntil))) {
       return;
     }
 
@@ -84,6 +85,9 @@ class SystemVolumeSynchronizer implements PlaybackVolume {
     _lastKnownVolume = normalizedVolume;
     _ignoreEventsUntil = DateTime.now().add(syncInterval * 2);
     await SystemUtil.setSystemVolume(normalizedVolume);
+    if (!_disposed) {
+      _ignoreEventsUntil = DateTime.now().add(syncInterval * 2);
+    }
   }
 
   bool _isSameVolume(double? first, double? second) {

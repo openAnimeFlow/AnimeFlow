@@ -9,7 +9,7 @@ import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
-import 'package:anime_flow/shared/widgets/collection_button.dart';
+import 'package:anime_flow/shared/widgets/collection_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
@@ -407,7 +407,7 @@ class _CollectionFooter extends StatelessWidget {
 }
 
 /// 条目卡片。
-class _CollectionItemCard extends StatefulWidget {
+class _CollectionItemCard extends StatelessWidget {
   final UserCollectionData collection;
   final double coverWidth;
   final Future<void> Function(CollectType type) onCollectTypeChanged;
@@ -418,21 +418,6 @@ class _CollectionItemCard extends StatefulWidget {
     required this.coverWidth,
     required this.onCollectTypeChanged,
   });
-
-  @override
-  State<_CollectionItemCard> createState() => _CollectionItemCardState();
-}
-
-class _CollectionItemCardState extends State<_CollectionItemCard> {
-  final _menuTurns = ValueNotifier<double>(0);
-
-  UserCollectionData get collection => widget.collection;
-
-  @override
-  void dispose() {
-    _menuTurns.dispose();
-    super.dispose();
-  }
 
   /// 观看进度文案：未看过时省略已看集数；连载中（有下一集）总集数带"预计"，否则为"全"；
   String get _episodeLabel {
@@ -489,7 +474,7 @@ class _CollectionItemCardState extends State<_CollectionItemCard> {
           AspectRatio(
             aspectRatio: 2 / 3,
             child: DebouncedImageWidth(
-              width: widget.coverWidth,
+              width: coverWidth,
               builder: (context, cacheWidth) => AnimationNetworkImage(
                 borderRadius: const BorderRadius.all(Radius.circular(12)),
                 url: collection.images.large,
@@ -528,36 +513,12 @@ class _CollectionItemCardState extends State<_CollectionItemCard> {
                             child: Icon(Icons.cloud_off_outlined, size: 18),
                           ),
                         ),
-                      CollectionButton(
-                        key: ValueKey(collection.id),
+                      CollectionMenu.icon(
                         collectType: collectTypeFromApiType(
                           collection.interest.type,
                         ),
-                        onMenuOpen: () => _menuTurns.value = 0.5,
-                        onMenuClose: () => _menuTurns.value = 0,
-                        buttonBuilder: (context, label, icon, onPressed) {
-                          return IconButton(
-                            tooltip: label,
-                            onPressed: onPressed,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                              minWidth: 40,
-                              minHeight: 40,
-                            ),
-                            icon: ValueListenableBuilder<double>(
-                              valueListenable: _menuTurns,
-                              builder: (context, turns, child) =>
-                                  AnimatedRotation(
-                                turns: turns,
-                                duration: const Duration(milliseconds: 180),
-                                curve: Curves.easeOutCubic,
-                                child: child,
-                              ),
-                              child: const Icon(Icons.expand_more_outlined),
-                            ),
-                          );
-                        },
-                        onCollectTypeChanged: widget.onCollectTypeChanged,
+                        iconSize: 25,
+                        onCollectTypeChanged: onCollectTypeChanged,
                       ),
                     ],
                   ),

@@ -16,7 +16,7 @@ import 'package:anime_flow/core/utils/playback_format.dart';
 import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/ios_battery_icon.dart';
 import 'package:anime_flow/shared/widgets/network_icon.dart';
-import 'package:anime_flow/shared/widgets/collection_button.dart';
+import 'package:anime_flow/shared/widgets/collection_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/play/presentation/widgets/dialog/play_video_source_dialog.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
@@ -265,15 +265,21 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                               onPressed: _skipAhead,
                             ),
                           if (collection != null)
-                            _CollectionControlButton(
+                            CollectionMenu.icon(
                               key: ValueKey(collection.id),
+                              iconColor: Colors.white,
+                              iconSize: 29,
                               collectType:
                                   collectTypeFromApiType(collection.type),
-                              onMenuOpen: videoUiStateController.cancelUiTimer,
-                              onMenuClose: () =>
+                              onOpenChanged: (isOpen) {
+                                if (isOpen) {
+                                  videoUiStateController.cancelUiTimer();
+                                } else {
                                   videoUiStateController.hideControlsUi(
-                                duration: const Duration(seconds: 2),
-                              ),
+                                    duration: const Duration(seconds: 2),
+                                  );
+                                }
+                              },
                               onCollectTypeChanged: _updateCollectionType,
                             ),
                           if (!isWideScreen) const PlayerMoreButton(),
@@ -512,44 +518,6 @@ class _SkipButton extends StatelessWidget {
           colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
         ),
       ),
-    );
-  }
-}
-
-class _CollectionControlButton extends StatelessWidget {
-  const _CollectionControlButton({
-    super.key,
-    required this.collectType,
-    required this.onMenuOpen,
-    required this.onMenuClose,
-    required this.onCollectTypeChanged,
-  });
-
-  final CollectType? collectType;
-  final VoidCallback onMenuOpen;
-  final VoidCallback onMenuClose;
-  final Future<void> Function(CollectType) onCollectTypeChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return CollectionButton(
-      collectType: collectType,
-      onMenuOpen: onMenuOpen,
-      onMenuClose: onMenuClose,
-      buttonBuilder: (context, label, _, onPressed) {
-        return IconButton(
-          tooltip: label,
-          onPressed: onPressed,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-          icon: Icon(
-            collectType == null ? Icons.favorite_border : Icons.favorite,
-            color: Colors.white,
-            size: 29,
-          ),
-        );
-      },
-      onCollectTypeChanged: onCollectTypeChanged,
     );
   }
 }

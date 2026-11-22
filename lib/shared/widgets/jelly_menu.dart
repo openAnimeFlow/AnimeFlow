@@ -10,6 +10,7 @@ class JellyMenu<T> extends StatefulWidget {
     required this.trigger,
     required this.menuBuilder,
     required this.onSelected,
+    this.onOpenChanged,
     this.triggerColor,
     this.enabled = true,
     this.preferredVerticalDirection,
@@ -26,21 +27,35 @@ class JellyMenu<T> extends StatefulWidget {
     this.tooltip = '更多',
   });
 
+  /// 点击后展开菜单的组件。
   final Widget trigger;
+
+  /// 触发组件的背景色，省略时使用主题的 surfaceContainerHigh。
   final Color? triggerColor;
+
+  /// 是否允许打开菜单。
   final bool enabled;
 
-  /// Spring controlling horizontal morphing, including interrupted animations.
+  /// 控制菜单宽度变化的弹簧参数，也适用于动画中途反转。
   final SpringDescription widthSpring;
 
-  /// Spring controlling vertical morphing.
+  /// 控制菜单高度变化的弹簧参数。
   final SpringDescription heightSpring;
 
-  /// Preferred expansion direction, when there is space beyond the trigger.
+  /// 菜单优先向哪个垂直方向展开，空间不足时可向另一侧展开。
   final VerticalDirection? preferredVerticalDirection;
+
+  /// 构建菜单内容，调用 select 选择一项并关闭菜单。
   final Widget Function(BuildContext context, ValueChanged<T> select)
       menuBuilder;
+
+  /// 选择菜单项时回调，参数为选中的值。
   final ValueChanged<T> onSelected;
+
+  /// 菜单开始展开时回调 true，开始收起或展开期间被移除时回调 false。
+  final ValueChanged<bool>? onOpenChanged;
+
+  /// 触发组件的提示文案。
   final String tooltip;
 
   @override
@@ -95,6 +110,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
     if (open == next) return;
     final generation = ++_animationGeneration;
     setState(() => open = next);
+    widget.onOpenChanged?.call(next);
 
     Future<void> move(
         AnimationController controller, SpringDescription spring) async {
@@ -138,6 +154,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
 
   @override
   void dispose() {
+    if (open) widget.onOpenChanged?.call(false);
     width.dispose();
     height.dispose();
     super.dispose();
@@ -238,7 +255,8 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
               message: widget.tooltip,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: widget.enabled ? _open : null,
+                excludeFromSemantics: !widget.enabled,
+                onTap: _open,
                 child: widget.trigger,
               ),
             ),

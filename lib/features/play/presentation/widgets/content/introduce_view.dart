@@ -10,7 +10,7 @@ import 'package:anime_flow/core/network/core/flow_response.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/video_resource_download_route_args.dart';
-import 'package:anime_flow/shared/widgets/collection_button.dart';
+import 'package:anime_flow/shared/widgets/collection_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,7 +56,6 @@ class IntroduceView extends StatefulWidget {
 
 class _IntroduceViewState extends State<IntroduceView>
     with AutomaticKeepAliveClientMixin {
-  final _collectionMenuTurns = ValueNotifier<double>(0);
   bool _isGridView = false;
   bool _detailsOpen = false;
 
@@ -151,12 +150,6 @@ class _IntroduceViewState extends State<IntroduceView>
   }
 
   @override
-  void dispose() {
-    _collectionMenuTurns.dispose();
-    super.dispose();
-  }
-
-  @override
   bool get wantKeepAlive => true;
 
   @override
@@ -194,34 +187,11 @@ class _IntroduceViewState extends State<IntroduceView>
                     ),
                   ),
                   if (isLoggedIn && subject != null)
-                    CollectionButton(
+                    CollectionMenu.icon(
                       key: ValueKey(extra.subjectId),
                       collectType:
                           collectTypeFromApiType(subject.interest?.type),
-                      onMenuOpen: () => _collectionMenuTurns.value = 0.5,
-                      onMenuClose: () => _collectionMenuTurns.value = 0,
-                      buttonBuilder: (context, label, icon, onPressed) {
-                        return IconButton(
-                          tooltip: label,
-                          onPressed: onPressed,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 40,
-                            minHeight: 40,
-                          ),
-                          icon: ValueListenableBuilder<double>(
-                            valueListenable: _collectionMenuTurns,
-                            builder: (context, turns, child) =>
-                                AnimatedRotation(
-                              turns: turns,
-                              duration: const Duration(milliseconds: 180),
-                              curve: Curves.easeOutCubic,
-                              child: child,
-                            ),
-                            child: const Icon(Icons.expand_more_outlined),
-                          ),
-                        );
-                      },
+                      iconSize: 25,
                       onCollectTypeChanged: (newType) async {
                         try {
                           await ref

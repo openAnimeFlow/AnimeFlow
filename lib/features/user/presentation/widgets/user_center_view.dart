@@ -18,7 +18,7 @@ import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
 import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,11 +27,23 @@ import 'collection_filter_dialog.dart';
 import 'user_collection_tabs.dart';
 
 enum _LoginOverflowAction {
-  favoriteWallpapers,
-  settings,
-  playRecord,
-  downloads,
-  logout
+  settings(Icons.settings_outlined),
+  favoriteWallpapers(Icons.image_outlined),
+  playRecord(Icons.smart_display_outlined),
+  downloads(Icons.cloud_download_outlined),
+  logout(Icons.logout_outlined);
+
+  const _LoginOverflowAction(this.icon);
+
+  final IconData icon;
+
+  String label(AppLocalizations l10n) => switch (this) {
+        _LoginOverflowAction.settings => l10n.settings,
+        _LoginOverflowAction.favoriteWallpapers => l10n.favoriteWallpapers,
+        _LoginOverflowAction.playRecord => l10n.playbackHistory,
+        _LoginOverflowAction.downloads => l10n.downloadsTitle,
+        _LoginOverflowAction.logout => l10n.logout,
+      };
 }
 
 class UserCenterView extends ConsumerStatefulWidget {
@@ -437,43 +449,50 @@ class _UserViewState extends ConsumerState<UserCenterView>
                 );
               },
             ),
-          DropDownMenu<_LoginOverflowAction>(
-            items: _LoginOverflowAction.values,
+          JellyMenu<_LoginOverflowAction>(
             tooltip: l10n.moreMenu,
-            disableSelected: false,
-            buttonBuilder: (context, _) => const Icon(
-              Icons.notes_outlined,
-              size: 30,
-            ),
-            itemBuilder: (context, action, _) {
-              final (icon, label) = switch (action) {
-                _LoginOverflowAction.favoriteWallpapers => (
-                    Icons.image_outlined,
-                    l10n.favoriteWallpapers
+            triggerColor: Colors.transparent,
+            preferredVerticalDirection: VerticalDirection.down,
+            trigger: const Icon(Icons.notes_outlined, size: 30),
+            menuBuilder: (context, select) {
+              final theme = Theme.of(context);
+              final style = TextButton.styleFrom(
+                alignment: AlignmentDirectional.centerStart,
+                foregroundColor: theme.colorScheme.onSurface,
+                textStyle: theme.textTheme.bodyLarge,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                minimumSize: const Size(0, 48),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              );
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: IntrinsicWidth(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final action in _LoginOverflowAction.values)
+                        TextButton(
+                          style: style,
+                          onPressed: () => select(action),
+                          child: Row(
+                            children: [
+                              Icon(action.icon, size: 20),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  action.label(l10n),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
-                _LoginOverflowAction.settings => (
-                    Icons.settings_outlined,
-                    l10n.settings
-                  ),
-                _LoginOverflowAction.playRecord => (
-                    Icons.smart_display_outlined,
-                    l10n.playbackHistory
-                  ),
-                _LoginOverflowAction.downloads => (
-                    Icons.cloud_download_outlined,
-                    l10n.downloadsTitle
-                  ),
-                _LoginOverflowAction.logout => (
-                    Icons.logout_outlined,
-                    l10n.logout
-                  ),
-              };
-              return Row(
-                children: [
-                  Icon(icon, size: 20),
-                  const SizedBox(width: 8),
-                  Text(label),
-                ],
+                ),
               );
             },
             onSelected: (action) {

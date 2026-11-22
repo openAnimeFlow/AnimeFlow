@@ -5,7 +5,7 @@ import 'package:anime_flow/features/anime_info/presentation/providers/anime_info
 import 'package:anime_flow/core/exception/storage_exception.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
@@ -100,38 +100,61 @@ class InfoAppbar extends ConsumerWidget {
         Expanded(
           child: _buildInfo(ref),
         ),
-        _buildMenu(context, ref),
+        Padding(
+          padding: const EdgeInsetsDirectional.only(end: 8),
+          child: _buildMenu(context, ref),
+        ),
       ],
     );
   }
 
   Widget _buildMenu(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    return DropDownMenu<MoreMenuAction>(
+    return JellyMenu<MoreMenuAction>(
       tooltip: l10n.moreActions,
-      items: MoreMenuAction.values,
-      offset: const Offset(0, 40),
-      disableSelected: false,
-      buttonBuilder: (context, selectedItem) {
-        return const Padding(
-          padding: EdgeInsets.all(8),
-          child: Icon(
-            Icons.share_outlined,
-            size: 25,
-          ),
-        );
-      },
-      itemBuilder: (context, item, isSelected) {
-        return Row(
-          children: [
-            Icon(
-              item.icon,
-              size: 20,
-              color: Theme.of(context).colorScheme.primary,
+      triggerColor: Colors.transparent,
+      preferredVerticalDirection: VerticalDirection.down,
+      trigger: const Padding(
+        padding: EdgeInsets.all(8),
+        child: Icon(Icons.share_outlined, size: 25),
+      ),
+      menuBuilder: (context, select) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final action in MoreMenuAction.values)
+                  TextButton(
+                    onPressed: () => select(action),
+                    style: TextButton.styleFrom(
+                      alignment: AlignmentDirectional.centerStart,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(action.icon, size: 20),
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: Text(
+                            action.label(l10n),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Text(item.label(l10n)),
-          ],
+          ),
         );
       },
       onSelected: (action) => _handleMenuAction(context, ref, action),

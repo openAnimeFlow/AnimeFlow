@@ -135,7 +135,13 @@ class _CollectionMenuState extends State<CollectionMenu> {
               (type) => type.isCollected || current != null,
             )
             .toList();
-        final style = Theme.of(context).textTheme.labelLarge!;
+        final itemStyle = TextButton.styleFrom(
+          alignment: Alignment.centerLeft,
+          padding: JellyMenu.itemPadding(context),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          textStyle: Theme.of(context).textTheme.labelLarge,
+        );
         return SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: IntrinsicWidth(
@@ -148,14 +154,7 @@ class _CollectionMenuState extends State<CollectionMenu> {
                     padding: const EdgeInsets.symmetric(horizontal: 5),
                     child: TextButton(
                       onPressed: type == current ? null : () => select(type),
-                      style: TextButton.styleFrom(
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 15),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        textStyle: style,
-                      ),
+                      style: itemStyle,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

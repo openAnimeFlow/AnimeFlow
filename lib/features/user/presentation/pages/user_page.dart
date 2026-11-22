@@ -46,12 +46,12 @@ class UserPage extends ConsumerWidget {
           alignment: AlignmentDirectional.centerStart,
           foregroundColor: colors.onSurface,
           textStyle: theme.textTheme.bodyLarge,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          minimumSize: const Size(0, 48),
+          padding: JellyMenu.itemPadding(context),
+          minimumSize: Size.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         );
         return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
           child: IntrinsicWidth(
             child: Column(
               mainAxisSize: MainAxisSize.min,

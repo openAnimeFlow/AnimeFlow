@@ -119,8 +119,14 @@ class InfoAppbar extends ConsumerWidget {
         child: Icon(Icons.share_outlined, size: 25),
       ),
       menuBuilder: (context, select) {
+        final itemStyle = TextButton.styleFrom(
+          alignment: AlignmentDirectional.centerStart,
+          padding: JellyMenu.itemPadding(context),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        );
         return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           child: IntrinsicWidth(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -128,18 +134,10 @@ class InfoAppbar extends ConsumerWidget {
               children: [
                 for (final action in MoreMenuAction.values)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 0),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: TextButton(
                       onPressed: () => select(action),
-                      style: TextButton.styleFrom(
-                        alignment: AlignmentDirectional.centerStart,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 15,
-                        ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
+                      style: itemStyle,
                       child: Row(
                         children: [
                           Icon(action.icon, size: 20),

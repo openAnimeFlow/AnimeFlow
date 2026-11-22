@@ -62,6 +62,15 @@ class JellyMenu<T> extends StatefulWidget {
   /// 触发组件的提示文案。
   final String tooltip;
 
+  static EdgeInsets itemPadding(BuildContext context) {
+    final vertical = switch (MediaQuery.sizeOf(context).width) {
+      < 600 => 10.0,
+      < 900 => 16.0,
+      _ => 20.0,
+    };
+    return EdgeInsets.symmetric(horizontal: 14, vertical: vertical);
+  }
+
   @override
   State<JellyMenu<T>> createState() => _JellyMenuState<T>();
 }

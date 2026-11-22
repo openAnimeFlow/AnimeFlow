@@ -460,13 +460,12 @@ class _UserViewState extends ConsumerState<UserCenterView>
                 alignment: AlignmentDirectional.centerStart,
                 foregroundColor: theme.colorScheme.onSurface,
                 textStyle: theme.textTheme.bodyLarge,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                minimumSize: const Size(0, 48),
+                padding: JellyMenu.itemPadding(context),
+                minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               );
               return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(vertical: 6),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
                 child: IntrinsicWidth(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,

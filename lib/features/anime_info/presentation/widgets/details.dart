@@ -170,25 +170,28 @@ bool _isUrl(String text) {
 }
 
 // 构建链接文本
-Widget _buildLinkText(String url, Color themeTextColor, double? textSize) {
-  return InkWell(
-    splashFactory: NoSplash.splashFactory,
-    onTap: () async {
-      final uri = Uri.parse(url.trim());
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(
-          uri,
-          mode: io.Platform.isIOS
-              ? LaunchMode.externalApplication
-              : LaunchMode.platformDefault,
-        );
-      }
-    },
-    child: Text(' $url',
-        style: TextStyle(
-          fontSize: textSize,
-          color: Colors.blue,
-        )),
+Widget _buildLinkText(String url, double? textSize) {
+  return Align(
+    alignment: AlignmentDirectional.centerStart,
+    child: InkWell(
+      splashFactory: NoSplash.splashFactory,
+      onTap: () async {
+        final uri = Uri.parse(url.trim());
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(
+            uri,
+            mode: io.Platform.isIOS
+                ? LaunchMode.externalApplication
+                : LaunchMode.platformDefault,
+          );
+        }
+      },
+      child: Text(' $url',
+          style: TextStyle(
+            fontSize: textSize,
+            color: Colors.blue,
+          )),
+    ),
   );
 }
 
@@ -198,7 +201,7 @@ Widget _buildValueContent(
   if (values.length == 1) {
     final value = values.first.v;
     if (_isUrl(value)) {
-      return _buildLinkText(value, themeTextColor, textSize);
+      return _buildLinkText(value, textSize);
     }
   }
 

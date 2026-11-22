@@ -5,10 +5,13 @@ import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/shared/widgets/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
+
+enum _CommentSort { oldest, newest }
 
 @Dependencies([episodeComments])
 class CommentsView extends ConsumerStatefulWidget {
@@ -20,7 +23,7 @@ class CommentsView extends ConsumerStatefulWidget {
 
 class _CommentsViewState extends ConsumerState<CommentsView>
     with AutomaticKeepAliveClientMixin {
-  String _sortOrder = 'default';
+  _CommentSort _sortOrder = _CommentSort.oldest;
   List<EpisodeComment>? _sortedComments;
   final _scrollController = ScrollController();
 
@@ -40,18 +43,13 @@ class _CommentsViewState extends ConsumerState<CommentsView>
 
   void _applySort() {
     if (_sortedComments == null) return;
-    if (_sortOrder == 'newest') {
+    if (_sortOrder == _CommentSort.newest) {
       _sortedComments!.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } else {
       _sortedComments!.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     }
   }
 
-  void _sortComments() {
-    setState(() {
-      _applySort();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,32 +144,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                     color: Theme.of(context).colorScheme.outline,
                   ),
                 ),
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.sort_rounded),
-                  offset: const Offset(0, 40),
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      CheckedPopupMenuItem<String>(
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        checked: _sortOrder == 'default',
-                        value: 'default',
-                        child: Text(l10n.defaultSort),
-                      ),
-                      CheckedPopupMenuItem<String>(
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        value: 'newest',
-                        checked: _sortOrder == 'newest',
-                        child: Text(l10n.newestSort),
-                      ),
-                    ];
-                  },
-                  onSelected: (value) {
-                    setState(() {
-                      _sortOrder = value;
-                    });
-                    _sortComments();
-                  },
-                )
+                _buildSortMenu(l10n, comments),
               ],
             ),
           ),
@@ -217,6 +190,54 @@ class _CommentsViewState extends ConsumerState<CommentsView>
             ),
           )
       ],
+    );
+  }
+
+  Widget _buildSortMenu(
+      AppLocalizations l10n,
+      List<EpisodeComment> comments,
+      ) {
+    return JellyMenu<_CommentSort>(
+      tooltip: MaterialLocalizations.of(context).showMenuTooltip,
+      triggerColor: Colors.transparent,
+      preferredVerticalDirection: VerticalDirection.down,
+      trigger: const SizedBox.square(
+        dimension: 48,
+        child: Icon(Icons.sort_rounded),
+      ),
+      menuBuilder: (context, select) => SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: IntrinsicWidth(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final order in _CommentSort.values)
+                MenuItemButton(
+                  leadingIcon: _sortOrder == order
+                      ? const Icon(Icons.check)
+                      : const SizedBox(width: 24),
+                  onPressed: () => select(order),
+                  child: Text(
+                    switch (order) {
+                      _CommentSort.oldest => l10n.defaultSort,
+                      _CommentSort.newest => l10n.newestSort,
+                    },
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+      onSelected: (order) {
+        setState(() {
+          _sortOrder = order;
+          _sortedComments ??= List<EpisodeComment>.of(comments);
+          _applySort();
+        });
+      },
     );
   }
 

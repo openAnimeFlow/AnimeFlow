@@ -101,7 +101,7 @@ class _CollectionButtonState extends State<CollectionButton> {
             child: Row(
               children: [
                 Icon(
-                  _getCollectTypeIcon(type),
+                  collectTypeIcon(type),
                   size: 20,
                   color: isCurrentType
                       ? Theme.of(context).disabledColor
@@ -110,7 +110,7 @@ class _CollectionButtonState extends State<CollectionButton> {
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
-                    _collectTypeLabel(type, l10n),
+                    collectTypeLabel(type, l10n),
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: isCurrentType
@@ -134,48 +134,48 @@ class _CollectionButtonState extends State<CollectionButton> {
         context,
         currentCollectType == null
             ? l10n.collection
-            : _collectTypeLabel(currentCollectType, l10n),
+            : collectTypeLabel(currentCollectType, l10n),
         currentCollectType == null
             ? Icons.play_circle_outline
-            : _getCollectTypeIcon(currentCollectType),
+            : collectTypeIcon(currentCollectType),
         () {
           if (!_isUpdating) _menuKey.currentState?.showButtonMenu();
         },
       ),
     );
   }
+}
 
-  IconData _getCollectTypeIcon(CollectType type) {
-    switch (type) {
-      case CollectType.watching:
-        return Icons.subscriptions_outlined;
-      case CollectType.planToWatch:
-        return Icons.bookmark_outline;
-      case CollectType.onHold:
-        return Icons.pending_actions_outlined;
-      case CollectType.watched:
-        return Icons.task_alt_outlined;
-      case CollectType.abandoned:
-        return Icons.auto_delete_outlined;
-      case CollectType.none:
-        return Icons.bookmark_remove_outlined;
-    }
+IconData collectTypeIcon(CollectType type) {
+  switch (type) {
+    case CollectType.watching:
+      return Icons.subscriptions_outlined;
+    case CollectType.planToWatch:
+      return Icons.bookmark_outline;
+    case CollectType.onHold:
+      return Icons.pending_actions_outlined;
+    case CollectType.watched:
+      return Icons.task_alt_outlined;
+    case CollectType.abandoned:
+      return Icons.auto_delete_outlined;
+    case CollectType.none:
+      return Icons.bookmark_remove_outlined;
   }
+}
 
-  String _collectTypeLabel(CollectType type, AppLocalizations l10n) {
-    switch (type) {
-      case CollectType.planToWatch:
-        return l10n.collectionPlanToWatch;
-      case CollectType.watched:
-        return l10n.collectionWatched;
-      case CollectType.watching:
-        return l10n.collectionWatching;
-      case CollectType.onHold:
-        return l10n.collectionOnHold;
-      case CollectType.abandoned:
-        return l10n.collectionAbandoned;
-      case CollectType.none:
-        return l10n.cancelCollection;
-    }
+String collectTypeLabel(CollectType type, AppLocalizations l10n) {
+  switch (type) {
+    case CollectType.planToWatch:
+      return l10n.collectionPlanToWatch;
+    case CollectType.watched:
+      return l10n.collectionWatched;
+    case CollectType.watching:
+      return l10n.collectionWatching;
+    case CollectType.onHold:
+      return l10n.collectionOnHold;
+    case CollectType.abandoned:
+      return l10n.collectionAbandoned;
+    case CollectType.none:
+      return l10n.cancelCollection;
   }
 }

@@ -16,6 +16,8 @@ import 'package:anime_flow/features/anime_info/presentation/widgets/episodes_dra
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/collection_button.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
+import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:material_ui/material_ui.dart';
@@ -391,11 +393,10 @@ class InfoHeadView extends StatelessWidget {
                 () => appNavigatorOf(context).goToUser(),
               )
             else
-              CollectionButton(
-                buttonBuilder: (context, label, icon, onPressed) =>
-                    buildCollectionButton(context, label, icon, onPressed),
+              _CollectionMenu(
+                key: ValueKey(subjectItem.id),
+                layoutScale: layoutScale,
                 collectType: collectTypeFromApiType(subjectItem.interest?.type),
-                offset: const Offset(0, 50),
                 onCollectTypeChanged: (type) async {
                   final session =
                       ref.read(currentFlowTokenProvider).value?.sessionId;
@@ -599,6 +600,132 @@ class InfoHeadView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CollectionMenu extends StatefulWidget {
+  const _CollectionMenu({
+    super.key,
+    required this.collectType,
+    required this.layoutScale,
+    required this.onCollectTypeChanged,
+  });
+
+  final CollectType? collectType;
+  final double layoutScale;
+  final Future<void> Function(CollectType) onCollectTypeChanged;
+
+  @override
+  State<_CollectionMenu> createState() => _CollectionMenuState();
+}
+
+class _CollectionMenuState extends State<_CollectionMenu> {
+  late CollectType? _displayType = widget.collectType;
+  bool _isUpdating = false;
+
+  @override
+  void didUpdateWidget(_CollectionMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.collectType != widget.collectType) {
+      _displayType = widget.collectType;
+    }
+  }
+
+  Future<void> _select(CollectType type) async {
+    if (_isUpdating) return;
+    setState(() => _isUpdating = true);
+    try {
+      await widget.onCollectTypeChanged(type);
+      if (mounted) {
+        setState(() => _displayType = type.isCollected ? type : null);
+      }
+    } catch (_) {
+      // The caller handles request failures and displays the error.
+    } finally {
+      if (mounted) setState(() => _isUpdating = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
+    final scale = widget.layoutScale;
+    final current = _displayType;
+    final label =
+        current == null ? l10n.collection : collectTypeLabel(current, l10n);
+    final icon =
+        current == null ? Icons.play_circle_outline : collectTypeIcon(current);
+    final triggerStyle =
+        TextStyle(fontSize: 12 * scale, color: colors.onPrimary);
+
+    return JellyMenu<CollectType>(
+      preferredVerticalDirection: VerticalDirection.down,
+      enabled: !_isUpdating,
+      triggerColor:
+          _isUpdating ? colors.primary.withValues(alpha: .6) : colors.primary,
+      tooltip: label,
+      trigger: ConstrainedBox(
+        constraints:
+            BoxConstraints(minWidth: 100 * scale, minHeight: 40 * scale),
+        child: Padding(
+          padding:
+              EdgeInsets.symmetric(horizontal: 12 * scale, vertical: 8 * scale),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 16 * scale, color: colors.onPrimary),
+              SizedBox(width: 8 * scale),
+              Text(label, style: triggerStyle),
+            ],
+          ),
+        ),
+      ),
+      onSelected: _select,
+      menuBuilder: (context, select) {
+        final types = CollectType.values
+            .where(
+              (type) => type.isCollected || current != null,
+            )
+            .toList();
+        final style = Theme.of(context).textTheme.labelLarge!;
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final type in types)
+                  TextButton(
+                    onPressed: type == current ? null : () => select(type),
+                    style: TextButton.styleFrom(
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 12),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      textStyle: style,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(collectTypeIcon(type), size: 20),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(collectTypeLabel(type, l10n),
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

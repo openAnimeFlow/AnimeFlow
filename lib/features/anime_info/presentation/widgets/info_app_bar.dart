@@ -127,29 +127,32 @@ class InfoAppbar extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (final action in MoreMenuAction.values)
-                  TextButton(
-                    onPressed: () => select(action),
-                    style: TextButton.styleFrom(
-                      alignment: AlignmentDirectional.centerStart,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(action.icon, size: 20),
-                        const SizedBox(width: 12),
-                        Flexible(
-                          child: Text(
-                            action.label(l10n),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 0),
+                    child: TextButton(
+                      onPressed: () => select(action),
+                      style: TextButton.styleFrom(
+                        alignment: AlignmentDirectional.centerStart,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 15,
                         ),
-                      ],
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(action.icon, size: 20),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Text(
+                              action.label(l10n),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
               ],

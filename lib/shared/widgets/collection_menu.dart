@@ -144,26 +144,29 @@ class _CollectionMenuState extends State<CollectionMenu> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (final type in types)
-                  TextButton(
-                    onPressed: type == current ? null : () => select(type),
-                    style: TextButton.styleFrom(
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      textStyle: style,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(_collectTypeIcon(type), size: 20),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(_collectTypeLabel(type, l10n),
-                              maxLines: 1, overflow: TextOverflow.ellipsis),
-                        ),
-                      ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: TextButton(
+                      onPressed: type == current ? null : () => select(type),
+                      style: TextButton.styleFrom(
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 15),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        textStyle: style,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(_collectTypeIcon(type), size: 20),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(_collectTypeLabel(type, l10n),
+                                maxLines: 1, overflow: TextOverflow.ellipsis),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
               ],

@@ -1,6 +1,10 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
+import 'package:anime_flow/features/anime_info/presentation/widgets/evaluate_dialog.dart';
+import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
+import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
@@ -9,7 +13,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
-@Dependencies([SubjectComments])
+@Dependencies([SubjectComments, AnimeInfo, animeInfoArgs])
 class InfoCommentView extends ConsumerWidget {
   const InfoCommentView({
     super.key,
@@ -31,18 +35,22 @@ class InfoCommentView extends ConsumerWidget {
         final isLoadingMore = viewState.isLoadingMore;
         final hasMore = viewState.hasMore;
         return _buildContent(
-            context, subjectComments, isLoadingMore, hasMore, l10n);
+            context, ref, subjectComments, isLoadingMore, hasMore, l10n);
       },
     );
   }
 
   Widget _buildContent(
     BuildContext context,
+    WidgetRef ref,
     SubjectCommentItem subjectComments,
     bool isLoadingMore,
     bool hasMore,
     AppLocalizations l10n,
   ) {
+    final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
+    final subjectsInfo = ref.watch(animeInfoProvider).value;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -60,7 +68,10 @@ class InfoCommentView extends ConsumerWidget {
             Text(
               '${subjectComments.total}',
               style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
-            )
+            ),
+            const Spacer(),
+            if (isLoggedIn && subjectsInfo != null)
+              _buildEvaluateButton(context, ref, subjectsInfo: subjectsInfo),
           ],
         ),
         const SizedBox(height: 16),
@@ -91,6 +102,35 @@ class InfoCommentView extends ConsumerWidget {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildEvaluateButton(BuildContext context, WidgetRef ref,
+      {required SubjectsInfoItem subjectsInfo}) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(5),
+      onTap: () {
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => InfoEvaluateDialog(
+            subjectsInfo: subjectsInfo,
+            onSaved: (updated) {
+              if (!context.mounted ||
+                  ref.read(animeInfoArgsProvider).id != updated.id) {
+                return;
+              }
+              ref.read(animeInfoProvider.notifier).setAnimeInfo(updated);
+              ref.read(subjectCommentsProvider.notifier).refresh();
+            },
+          ),
+        );
+      },
+      child: Text(
+        '发表吐槽',
+        style: TextStyle(color: colorScheme.primary),
+      ),
     );
   }
 

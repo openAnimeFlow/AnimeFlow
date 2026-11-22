@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.6.8
+version: 2.7.0
 
 environment:
   sdk: ">=3.3.4 <4.0.0"
@@ -84,7 +84,7 @@ dependencies:
   desktop_webview_window: # 在 Linux 桌面创建承载 WebView 的独立窗口。
     git:
       url: https://github.com/Predidit/linux_webview_window.git
-      ref: b429f8ba6b8a99cd0f7eb5fe8d1621f325635c3d
+      ref: 8b0d1a625795f2ec679f844349e11f77249f41b0
 
   # 网络通信与文本解析
   dio: ^5.10.0 # 提供支持拦截器、取消请求和文件传输的 HTTP 客户端。

@@ -27,6 +27,21 @@ abstract final class AppSettings {
   static Future<void> setRulesMirror(RulesMirror mirror) =>
       setSetting(SettingKey.rulesMirror, mirror.name);
 
+  static RulesMirror get fontRepoMirror {
+    final saved = getSetting<String>(SettingKey.fontRepoMirror);
+    if (saved != null) return RulesMirror.fromSettings(saved);
+
+    final useCdn = getSetting<Object>(SettingKey.fontRepoUseCdn);
+    return switch (useCdn) {
+      true => RulesMirror.jsDelivr,
+      int value when value != 0 => RulesMirror.jsDelivr,
+      _ => RulesMirror.ghProxy,
+    };
+  }
+
+  static Future<void> setFontRepoMirror(RulesMirror mirror) =>
+      setSetting(SettingKey.fontRepoMirror, mirror.name);
+
   static StartupPage get startupPage {
     final saved = getSetting<String>(SettingKey.startupPage);
     return StartupPage.values.firstWhere(

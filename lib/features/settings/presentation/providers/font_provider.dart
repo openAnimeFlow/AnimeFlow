@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/network/api/github_api.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/core/settings/rules_mirror.dart';
 import 'package:anime_flow/shared/models/font_item.dart';
 import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/core/settings/storage.dart';
@@ -13,36 +14,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'font_provider.g.dart';
 
-bool isFontRequestCancelled(Object error) {
-  if (error is DioException && error.type == DioExceptionType.cancel) {
-    return true;
-  }
-  if (error is String && error.contains('下载已取消')) return true;
-  return error.toString().contains('下载已取消');
-}
-
-bool _readFontRepoUseCdnFromStorage() {
-  final v = AppSettings.getSetting<Object?>(SettingKey.fontRepoUseCdn,
-      defaultValue: false);
-  if (v is bool) return v;
-  if (v is int) return v != 0;
-  return true;
-}
-
-// ──────────────────────────────────────────
-// CDN：开 = jsDelivr；关 = 直连 Raw（走 GitHub 镜像）
-// ──────────────────────────────────────────
+bool isFontRequestCancelled(Object error) =>
+    error is DioException && CancelToken.isCancel(error);
 
 @riverpod
-class FontRepoCdn extends _$FontRepoCdn {
+class FontRepoMirror extends _$FontRepoMirror {
   @override
-  bool build() => _readFontRepoUseCdnFromStorage();
+  RulesMirror build() => AppSettings.fontRepoMirror;
 
-  void setEnabled(bool value) {
-    if (state == value) return;
+  Future<void> setMirror(RulesMirror mirror) async {
+    if (state == mirror) return;
+    await AppSettings.setFontRepoMirror(mirror);
+    if (!ref.mounted) return;
     ref.read(fontNetworkTasksProvider.notifier).cancelAll();
-    AppSettings.setSetting(SettingKey.fontRepoUseCdn, value);
-    state = value;
+    state = mirror;
   }
 }
 
@@ -90,7 +75,7 @@ class FontDownloadState {
 class Font extends _$Font {
   @override
   Future<List<FontItem>> build() async {
-    final useCdn = ref.watch(fontRepoCdnProvider);
+    final mirror = ref.watch(fontRepoMirrorProvider);
     ref.watch(fontNetworkTasksProvider);
     final tasks = ref.read(fontNetworkTasksProvider.notifier);
     final cancelToken = CancelToken();
@@ -103,7 +88,7 @@ class Font extends _$Font {
 
     try {
       final list = await getFontList(
-        useCdn: useCdn,
+        mirror: mirror,
         cancelToken: cancelToken,
       );
       // 远程列表拿到后，顺手为已下载但缺少元数据的旧版本数据回填元信息，
@@ -112,7 +97,7 @@ class Font extends _$Font {
         Future.microtask(() async {
           try {
             if (cancelToken.isCancelled ||
-                ref.read(fontRepoCdnProvider) != useCdn) {
+                ref.read(fontRepoMirrorProvider) != mirror) {
               return;
             }
             await ref
@@ -128,11 +113,11 @@ class Font extends _$Font {
   }
 
   Future<List<FontItem>> getFontList({
-    required bool useCdn,
+    required RulesMirror mirror,
     CancelToken? cancelToken,
   }) async {
     return GithubApi.getRepoFonts(
-      useCdn: useCdn,
+      mirror: mirror,
       cancelToken: cancelToken,
     );
   }
@@ -142,10 +127,10 @@ class Font extends _$Font {
     String fontUrl, {
     CancelToken? cancelToken,
   }) async {
-    final useCdn = ref.read(fontRepoCdnProvider);
+    final mirror = ref.read(fontRepoMirrorProvider);
     return GithubApi.previewFont(
       fontUrl,
-      useCdn: useCdn,
+      mirror: mirror,
       cancelToken: cancelToken,
     );
   }
@@ -174,15 +159,8 @@ class FontNetworkTasks extends _$FontNetworkTasks {
   }
 
   void cancelAll() {
-    const downloadPrefix = 'download:';
-    for (final entry in Map<String, CancelToken>.from(_tokens).entries) {
-      if (!entry.value.isCancelled) {
-        entry.value.cancel();
-      }
-      if (entry.key.startsWith(downloadPrefix)) {
-        final fontId = entry.key.substring(downloadPrefix.length);
-        ref.read(fontDownloadProvider(fontId).notifier).resetOnCancel();
-      }
+    for (final token in _tokens.values) {
+      token.cancel();
     }
     _tokens.clear();
   }
@@ -314,36 +292,35 @@ class FontDownload extends _$FontDownload {
     return {};
   }
 
-  /// 切换 CDN / 离开页面等主动取消时，立即恢复为可再次下载。
-  void resetOnCancel() {
-    if (state.status == FontDownloadStatus.downloading) {
-      state = const FontDownloadState();
-    }
-  }
-
   Future<void> download(FontItem font) async {
-    final useCdn = ref.read(fontRepoCdnProvider);
+    if (state.status == FontDownloadStatus.downloading ||
+        state.status == FontDownloadStatus.done) {
+      return;
+    }
+    // 切换线路期间字体列表会暂时卸载，保留下载状态直到旧请求完成清理。
+    final keepAlive = ref.keepAlive();
+    final mirror = ref.read(fontRepoMirrorProvider);
+    final tasks = ref.read(fontNetworkTasksProvider.notifier);
     final taskKey = 'download:$fontId';
     final cancelToken = CancelToken();
-    ref.read(fontNetworkTasksProvider.notifier).register(taskKey, cancelToken);
+    tasks.register(taskKey, cancelToken);
 
     state = const FontDownloadState(
       status: FontDownloadStatus.downloading,
       progress: 0.0,
     );
 
-    final dir = await getApplicationDocumentsDirectory();
-    final fontsDir = Directory('${dir.path}/animeflow_fonts');
-    if (!fontsDir.existsSync()) {
-      fontsDir.createSync(recursive: true);
-    }
-    final filePath = '${fontsDir.path}/${font.id}.ttf';
-
+    String? filePath;
     try {
+      final dir = await getApplicationDocumentsDirectory();
+      final fontsDir = Directory('${dir.path}/animeflow_fonts');
+      await fontsDir.create(recursive: true);
+      if (cancelToken.isCancelled) throw cancelToken.cancelError!;
+      filePath = '${fontsDir.path}/${font.id}.ttf';
       await GithubApi.downloadFontToFile(
         font.font,
         filePath,
-        useCdn: useCdn,
+        mirror: mirror,
         cancelToken: cancelToken,
         onReceiveProgress: (received, total) {
           if (cancelToken.isCancelled || total <= 0) return;
@@ -354,6 +331,8 @@ class FontDownload extends _$FontDownload {
         },
       );
 
+      if (cancelToken.isCancelled) throw cancelToken.cancelError!;
+      tasks.unregister(taskKey, cancelToken);
       final savedPaths = _getSavedPaths();
       savedPaths[font.id] = filePath;
       await AppSettings.setSetting(SettingKey.downloadedFonts, savedPaths);
@@ -365,8 +344,8 @@ class FontDownload extends _$FontDownload {
         progress: 1.0,
       );
     } catch (e) {
-      await _deletePartialFile(filePath);
-      if (isFontRequestCancelled(e)) {
+      if (filePath != null) await _deletePartialFile(filePath);
+      if (cancelToken.isCancelled || isFontRequestCancelled(e)) {
         state = const FontDownloadState();
         return;
       }
@@ -375,9 +354,8 @@ class FontDownload extends _$FontDownload {
         errorMessage: e.toString(),
       );
     } finally {
-      ref
-          .read(fontNetworkTasksProvider.notifier)
-          .unregister(taskKey, cancelToken);
+      tasks.unregister(taskKey, cancelToken);
+      keepAlive.close();
     }
   }
 

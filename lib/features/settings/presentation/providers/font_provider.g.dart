@@ -9,47 +9,48 @@ part of 'font_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(FontRepoCdn)
-final fontRepoCdnProvider = FontRepoCdnProvider._();
+@ProviderFor(FontRepoMirror)
+final fontRepoMirrorProvider = FontRepoMirrorProvider._();
 
-final class FontRepoCdnProvider extends $NotifierProvider<FontRepoCdn, bool> {
-  FontRepoCdnProvider._()
+final class FontRepoMirrorProvider
+    extends $NotifierProvider<FontRepoMirror, RulesMirror> {
+  FontRepoMirrorProvider._()
       : super(
           from: null,
           argument: null,
           retry: null,
-          name: r'fontRepoCdnProvider',
+          name: r'fontRepoMirrorProvider',
           isAutoDispose: true,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
 
   @override
-  String debugGetCreateSourceHash() => _$fontRepoCdnHash();
+  String debugGetCreateSourceHash() => _$fontRepoMirrorHash();
 
   @$internal
   @override
-  FontRepoCdn create() => FontRepoCdn();
+  FontRepoMirror create() => FontRepoMirror();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(bool value) {
+  Override overrideWithValue(RulesMirror value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<bool>(value),
+      providerOverride: $SyncValueProvider<RulesMirror>(value),
     );
   }
 }
 
-String _$fontRepoCdnHash() => r'edc7dcf4e1a6cdf815695df8eac4e9cb8b4c4d5d';
+String _$fontRepoMirrorHash() => r'4a8dbedc29977013147549d5b0bb1ca3e7875206';
 
-abstract class _$FontRepoCdn extends $Notifier<bool> {
-  bool build();
+abstract class _$FontRepoMirror extends $Notifier<RulesMirror> {
+  RulesMirror build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<bool, bool>;
+    final ref = this.ref as $Ref<RulesMirror, RulesMirror>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<bool, bool>, bool, Object?, Object?>;
+        AnyNotifier<RulesMirror, RulesMirror>, RulesMirror, Object?, Object?>;
     return element.handleCreate(ref, build);
   }
 }
@@ -77,7 +78,7 @@ final class FontProvider extends $AsyncNotifierProvider<Font, List<FontItem>> {
   Font create() => Font();
 }
 
-String _$fontHash() => r'12bdf02a6482ab2fb139321fea0d57a3a892120e';
+String _$fontHash() => r'30fe405da6c3a7058b57cb1356b9b780cf6688d2';
 
 abstract class _$Font extends $AsyncNotifier<List<FontItem>> {
   FutureOr<List<FontItem>> build();
@@ -126,7 +127,7 @@ final class FontNetworkTasksProvider
   }
 }
 
-String _$fontNetworkTasksHash() => r'4c7d088788512617dc69b882d6fb372e1f6751c3';
+String _$fontNetworkTasksHash() => r'6f1e0560720dcc535397915cedc4785844bb88b5';
 
 abstract class _$FontNetworkTasks extends $Notifier<int> {
   int build();
@@ -238,7 +239,7 @@ final class FontDownloadProvider
   }
 }
 
-String _$fontDownloadHash() => r'21d073f53ff43ba3c06f946f42b667fadbabae0d';
+String _$fontDownloadHash() => r'c848f2bd3345f06cdb3a066d051c68a343678e2c';
 
 final class FontDownloadFamily extends $Family
     with

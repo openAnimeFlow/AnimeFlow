@@ -1614,13 +1614,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fontLibrary => '字体库';
 
   @override
-  String get cdnAcceleration => 'CDN 加速';
+  String get fontMirrorLabel => '字体下载线路';
+
+  @override
+  String get fontMirrorSubtitle => '用于字体列表、预览与下载';
 
   @override
   String get fontDelayHint => '新上架的字体可能会延迟显示';
-
-  @override
-  String get cdnTooltip => '开启：经 jsDelivr 拉取字体；关闭：直连 GitHub Raw（走镜像）';
 
   @override
   String get fontRestartHint => '如果字体效果没有完全显示请重启应用';
@@ -4289,13 +4289,13 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get fontLibrary => '字体库';
 
   @override
-  String get cdnAcceleration => 'CDN 加速';
+  String get fontMirrorLabel => '字体下载线路';
+
+  @override
+  String get fontMirrorSubtitle => '用于字体列表、预览与下载';
 
   @override
   String get fontDelayHint => '新上架的字体可能会延迟显示';
-
-  @override
-  String get cdnTooltip => '开启：经 jsDelivr 拉取字体；关闭：直连 GitHub Raw（走镜像）';
 
   @override
   String get fontRestartHint => '如果字体效果没有完全显示请重启应用';
@@ -6963,13 +6963,13 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get fontLibrary => '字型庫';
 
   @override
-  String get cdnAcceleration => 'CDN 加速';
+  String get fontMirrorLabel => '字型下載線路';
+
+  @override
+  String get fontMirrorSubtitle => '用於字型列表、預覽與下載';
 
   @override
   String get fontDelayHint => '新上架的字型可能會延遲顯示';
-
-  @override
-  String get cdnTooltip => '開啟：經 jsDelivr 取得字型；關閉：直連 GitHub Raw（透過鏡像）';
 
   @override
   String get fontRestartHint => '如果字型效果沒有完整顯示，請重新啟動應用程式';
@@ -9638,13 +9638,13 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get fontLibrary => '字型庫';
 
   @override
-  String get cdnAcceleration => 'CDN 加速';
+  String get fontMirrorLabel => '字型下載線路';
+
+  @override
+  String get fontMirrorSubtitle => '用於字型列表、預覽與下載';
 
   @override
   String get fontDelayHint => '新上架的字型可能會延遲顯示';
-
-  @override
-  String get cdnTooltip => '開啟：經 jsDelivr 取得字型；關閉：直連 GitHub Raw（透過鏡像）';
 
   @override
   String get fontRestartHint => '如果字型效果沒有完整顯示，請重新啟動應用程式';

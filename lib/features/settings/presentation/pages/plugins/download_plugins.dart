@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/download_mirror_menu.dart';
 import 'package:anime_flow/core/settings/rules_mirror.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_install_message.dart';
@@ -43,12 +43,6 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
     _sourceRepository = ref.read(sourceRepositoryProvider);
     _mirror = AppSettings.rulesMirror;
   }
-
-  String _mirrorLabel(RulesMirror mirror) => switch (mirror) {
-        RulesMirror.ghProxy => 'gh-proxy.org',
-        RulesMirror.jsDelivr => 'jsDelivr',
-        RulesMirror.direct => 'GitHub',
-      };
 
   Future<void> _selectMirror(RulesMirror mirror) async {
     if (_savingMirror || mirror == _mirror) return;
@@ -211,41 +205,11 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
                             ListTile(
                               title: Text(l10n.rulesMirrorLabel),
                               subtitle: Text(l10n.rulesMirrorSubtitle),
-                              trailing: IgnorePointer(
-                                ignoring: _savingMirror,
-                                child: DropDownMenu<RulesMirror>(
-                                  items: RulesMirror.values,
-                                  selectedItem: _mirror,
-                                  tooltip: l10n.rulesMirrorLabel,
-                                  onSelected: _selectMirror,
-                                  buttonBuilder: (context, selected) => Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(_mirrorLabel(selected!),
-                                            style: TextStyle(
-                                                color: colorScheme.primary)),
-                                        Icon(Icons.arrow_drop_down,
-                                            color: colorScheme.primary),
-                                      ],
-                                    ),
-                                  ),
-                                  itemBuilder: (context, mirror, selected) =>
-                                      Row(
-                                    children: [
-                                      SizedBox(
-                                          width: 28,
-                                          child: selected
-                                              ? Icon(Icons.check,
-                                                  size: 18,
-                                                  color: colorScheme.primary)
-                                              : null),
-                                      Text(_mirrorLabel(mirror)),
-                                    ],
-                                  ),
-                                ),
+                              trailing: DownloadMirrorMenu(
+                                selectedMirror: _mirror,
+                                tooltip: l10n.rulesMirrorLabel,
+                                onSelected: _selectMirror,
+                                enabled: !_savingMirror,
                               ),
                             ),
                             ...ref.watch(pluginCatalogProvider).when(

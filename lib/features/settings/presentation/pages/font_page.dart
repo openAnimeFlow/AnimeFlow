@@ -4,7 +4,9 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:anime_flow/shared/models/font_item.dart';
+import 'package:anime_flow/core/settings/rules_mirror.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/download_mirror_menu.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
@@ -24,6 +26,7 @@ class FontSettingsPage extends ConsumerStatefulWidget {
 class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
   /// 递增后强制重建预览加载器（刷新列表 / 取消下载后重新拉预览）。
   int _previewRefreshKey = 0;
+  bool _savingMirror = false;
 
   late final FontNetworkTasks _fontNetworkTasks;
 
@@ -62,10 +65,26 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
     setState(() => _previewRefreshKey++);
   }
 
+  Future<void> _selectMirror(RulesMirror mirror) async {
+    if (_savingMirror) return;
+    setState(() => _savingMirror = true);
+    try {
+      await ref.read(fontRepoMirrorProvider.notifier).setMirror(mirror);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString())),
+      );
+    } finally {
+      if (mounted) setState(() => _savingMirror = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final paddingOf = MediaQuery.paddingOf(context);
+    final mirror = ref.watch(fontRepoMirrorProvider);
     final fontsAsync = ref.watch(fontProvider);
     ref.watch(fontNetworkTasksProvider);
     final downloadedMetas = ref.watch(downloadedFontMetasProvider);
@@ -123,51 +142,29 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                       )).add(EdgeInsets.only(
                           top: SettingsPageBuilder.topInsetOf(context))),
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              l10n.fontLibrary,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Row(
-                              spacing: 5,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      l10n.cdnAcceleration,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                    ),
-                                    Text(
-                                      l10n.fontDelayHint,
-                                      style: const TextStyle(fontSize: 10),
-                                    )
-                                  ],
-                                ),
-                                Tooltip(
-                                  message: l10n.cdnTooltip,
-                                  child: Switch(
-                                    value: ref.watch(fontRepoCdnProvider),
-                                    onChanged: (value) => ref
-                                        .read(fontRepoCdnProvider.notifier)
-                                        .setEnabled(value),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                        Text(
+                          l10n.fontLibrary,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
                           l10n.fontRestartHint,
                           style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(l10n.fontMirrorLabel),
+                          subtitle: Text(mirror == RulesMirror.jsDelivr
+                              ? l10n.fontDelayHint
+                              : l10n.fontMirrorSubtitle),
+                          trailing: DownloadMirrorMenu(
+                            selectedMirror: mirror,
+                            tooltip: l10n.fontMirrorLabel,
+                            onSelected: _selectMirror,
+                            enabled: !_savingMirror,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         fontsAsync.when(
@@ -736,7 +733,7 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
   String _loadedFamily = '';
   int _loadSerial = 0;
   CancelToken? _previewCancelToken;
-  ProviderSubscription<bool>? _cdnSubscription;
+  ProviderSubscription<RulesMirror>? _mirrorSubscription;
   late final FontNetworkTasks _fontNetworkTasks;
 
   String get _taskKey => 'preview:${widget.font.id}';
@@ -745,8 +742,8 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
   void initState() {
     super.initState();
     _fontNetworkTasks = ref.read(fontNetworkTasksProvider.notifier);
-    _cdnSubscription = ref.listenManual(
-      fontRepoCdnProvider,
+    _mirrorSubscription = ref.listenManual(
+      fontRepoMirrorProvider,
       (previous, next) {
         if (previous != next && mounted) {
           setState(() {
@@ -762,7 +759,7 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
 
   @override
   void dispose() {
-    _cdnSubscription?.close();
+    _mirrorSubscription?.close();
     _previewCancelToken?.cancel();
     final token = _previewCancelToken;
     if (token != null) _fontNetworkTasks.unregister(_taskKey, token);

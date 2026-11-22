@@ -3140,23 +3140,23 @@ abstract class AppLocalizations {
   /// **'字体库'**
   String get fontLibrary;
 
-  /// No description provided for @cdnAcceleration.
+  /// No description provided for @fontMirrorLabel.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'CDN 加速'**
-  String get cdnAcceleration;
+  /// **'字体下载线路'**
+  String get fontMirrorLabel;
+
+  /// No description provided for @fontMirrorSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'用于字体列表、预览与下载'**
+  String get fontMirrorSubtitle;
 
   /// No description provided for @fontDelayHint.
   ///
   /// In zh_Hans, this message translates to:
   /// **'新上架的字体可能会延迟显示'**
   String get fontDelayHint;
-
-  /// No description provided for @cdnTooltip.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'开启：经 jsDelivr 拉取字体；关闭：直连 GitHub Raw（走镜像）'**
-  String get cdnTooltip;
 
   /// No description provided for @fontRestartHint.
   ///

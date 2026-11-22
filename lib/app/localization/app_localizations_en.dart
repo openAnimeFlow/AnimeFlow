@@ -1663,14 +1663,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fontLibrary => 'Font library';
 
   @override
-  String get cdnAcceleration => 'CDN acceleration';
+  String get fontMirrorLabel => 'Font download route';
+
+  @override
+  String get fontMirrorSubtitle =>
+      'Used for the font list, previews, and downloads';
 
   @override
   String get fontDelayHint => 'Newly added fonts may take time to appear';
-
-  @override
-  String get cdnTooltip =>
-      'On: fetch fonts through jsDelivr; off: connect directly to GitHub Raw through a mirror';
 
   @override
   String get fontRestartHint =>

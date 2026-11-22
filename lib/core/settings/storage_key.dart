@@ -100,5 +100,6 @@ class SettingKey {
       selectedFontId = 'selected_font_id',
       downloadedFonts = 'downloaded_fonts',
       downloadedFontsMeta = 'downloaded_fonts_meta',
-      fontRepoUseCdn = 'font_repo_use_cdn';
+      fontRepoUseCdn = 'font_repo_use_cdn',
+      fontRepoMirror = 'font_repo_mirror';
 }

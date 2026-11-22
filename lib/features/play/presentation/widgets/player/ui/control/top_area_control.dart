@@ -315,6 +315,9 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                       label: l10n.videoSource,
                                       forceSide: true,
                                       child: PlayerSheet(
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerLow,
                                         forceSide: true,
                                         builder:
                                             (context, scrollController, _) =>

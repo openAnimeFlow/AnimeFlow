@@ -56,6 +56,7 @@ class PlayerSheet extends ConsumerStatefulWidget {
     super.key,
     this.child,
     this.builder,
+    this.backgroundColor,
     this.forceSide = false,
     this.avoidKeyboard = false,
     this.initialSize = 0.75,
@@ -66,6 +67,7 @@ class PlayerSheet extends ConsumerStatefulWidget {
   final Widget? child;
   final Widget Function(BuildContext context, ScrollController controller,
       bool isBottomSheet)? builder;
+  final Color? backgroundColor;
   final bool forceSide;
   final bool avoidKeyboard;
   final double initialSize;
@@ -73,8 +75,7 @@ class PlayerSheet extends ConsumerStatefulWidget {
   final bool closeOnMinExtent;
 
   @override
-  ConsumerState<PlayerSheet> createState() =>
-      _PlayerSettingsSheetState();
+  ConsumerState<PlayerSheet> createState() => _PlayerSettingsSheetState();
 }
 
 class _PlayerSettingsSheetState extends ConsumerState<PlayerSheet> {
@@ -132,7 +133,7 @@ class _PlayerSettingsSheetState extends ConsumerState<PlayerSheet> {
       }
     }
     Widget buildSheet(ScrollController scrollController) => Material(
-          color: Theme.of(context).cardColor,
+          color: widget.backgroundColor ?? Theme.of(context).cardColor,
           clipBehavior: Clip.antiAlias,
           borderRadius: isWideScreen
               ? const BorderRadius.horizontal(left: Radius.circular(16))

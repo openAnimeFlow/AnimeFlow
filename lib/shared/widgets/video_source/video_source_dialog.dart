@@ -7,7 +7,7 @@ import 'package:anime_flow/core/video_source/domain/selected_video_source.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -75,8 +75,6 @@ class VideoSourceDialog extends StatefulWidget {
 }
 
 class _VideoSourceDialogState extends State<VideoSourceDialog> {
-  static const String _allLinesValue = '__all_lines__';
-
   _SourceEpisodeMode _sourceEpisodeMode = _SourceEpisodeMode.matched;
   String? _selectedLineName;
   bool _sortDescending = false;
@@ -237,30 +235,33 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
     final resources = widget.resources;
     final selectedIndex =
         resources.isEmpty ? null : _resolveSelectedWebsiteIndex(resources);
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        0,
-        16,
-        widget.keyboardInsetHandled
-            ? 0
-            : MediaQuery.viewInsetsOf(context).bottom,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildHeader(l10n),
-          _buildManualSearch(l10n),
-          const SizedBox(height: 16),
-          if (selectedIndex != null) ...[
-            _buildWebsiteSelector(
-              dataSource: resources,
-              selectedIndex: selectedIndex,
-            ),
+    return Material(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          0,
+          16,
+          widget.keyboardInsetHandled
+              ? 0
+              : MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildHeader(l10n),
+            _buildManualSearch(l10n),
             const SizedBox(height: 16),
-            Expanded(child: _buildVideoSource(resources[selectedIndex])),
+            if (selectedIndex != null) ...[
+              _buildWebsiteSelector(
+                dataSource: resources,
+                selectedIndex: selectedIndex,
+              ),
+              const SizedBox(height: 16),
+              Expanded(child: _buildVideoSource(resources[selectedIndex])),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -293,6 +294,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
   }
 
   Widget _buildManualSearch(AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 40,
       child: Row(
@@ -301,21 +303,25 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
           const SizedBox(width: 5),
           Expanded(
             child: Material(
+              type: MaterialType.transparency,
               child: TextField(
                 controller: _searchController,
                 onChanged: widget.onSearchDraftChanged,
                 decoration: InputDecoration(
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerLowest,
                   hintText: l10n.manualSearchResource,
                   suffixIcon: IconButton(
                     tooltip: l10n.restoreDefaultSearchKeyword,
                     onPressed: _restoreDefaultSearchKeyword,
                     icon: const Icon(Icons.restart_alt_rounded),
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                    borderSide: BorderSide.none,
                   ),
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
                 onSubmitted: (_) => _performSearch(),
@@ -352,7 +358,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
                     margin: const EdgeInsets.only(right: 12),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest,
+                      color: colorScheme.surfaceContainerLowest,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: selectedIndex == index
@@ -504,6 +510,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
     );
 
     return Material(
+      type: MaterialType.transparency,
       child: Column(
         children: [
           ClipRect(
@@ -592,6 +599,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
     required String? selectedLineName,
   }) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 40,
       child: Row(
@@ -603,7 +611,11 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
             ),
           ),
           const SizedBox(width: 8),
-          OutlinedButton.icon(
+          FilledButton.tonalIcon(
+            style: FilledButton.styleFrom(
+              backgroundColor: colorScheme.surfaceContainerLowest,
+              foregroundColor: colorScheme.primary,
+            ),
             onPressed: () {
               setState(() {
                 _sortDescending = !_sortDescending;
@@ -626,56 +638,24 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
   }) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final value = selectedLineName ?? _allLinesValue;
-    final items = [_allLinesValue, ...lineNames];
-    return DropDownMenu<String>(
-      items: items,
-      selectedItem: value,
-      tooltip: l10n.lineFilter,
-      offset: const Offset(0, 44),
-      itemBuilder: (context, item, isSelected) {
-        final label = item == _allLinesValue ? l10n.allLines : item;
-        return SizedBox(
-          width: 180,
-          child: Row(
-            children: [
-              Icon(
-                isSelected ? Icons.check_rounded : Icons.account_tree_outlined,
-                size: 18,
-                color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      buttonBuilder: (context, selectedItem) {
-        final label = selectedItem == null || selectedItem == _allLinesValue
-            ? l10n.allLines
-            : selectedItem;
-        return Container(
+    final items = <String?>[null, ...lineNames];
+    return LayoutBuilder(
+      builder: (context, constraints) => JellyMenu<String?>(
+        tooltip: l10n.lineFilter,
+        triggerColor: colorScheme.surfaceContainerLowest,
+        menuColor: colorScheme.surfaceContainerLowest,
+        preferredVerticalDirection: VerticalDirection.down,
+        trigger: Container(
+          width: constraints.maxWidth,
           height: 40,
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            border: Border.all(color: colorScheme.outline),
-            borderRadius: BorderRadius.circular(8),
-          ),
           child: Row(
             children: [
               const Icon(Icons.account_tree_outlined, size: 18),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  label,
+                  selectedLineName ?? l10n.allLines,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -684,13 +664,57 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
               const Icon(Icons.arrow_drop_down_rounded),
             ],
           ),
-        );
-      },
-      onSelected: (value) {
-        setState(() {
-          _selectedLineName = value == _allLinesValue ? null : value;
-        });
-      },
+        ),
+        menuBuilder: (context, select) {
+          final itemStyle = TextButton.styleFrom(
+            alignment: AlignmentDirectional.centerStart,
+            foregroundColor: colorScheme.onSurface,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            minimumSize: const Size(0, 48),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          );
+          return SizedBox(
+            width: 208,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final item in items)
+                    TextButton(
+                      style: itemStyle,
+                      onPressed:
+                          item == selectedLineName ? null : () => select(item),
+                      child: Row(
+                        children: [
+                          Icon(
+                            item == selectedLineName
+                                ? Icons.check_rounded
+                                : Icons.account_tree_outlined,
+                            size: 18,
+                            color: item == selectedLineName
+                                ? colorScheme.primary
+                                : colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              item ?? l10n.allLines,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+        onSelected: (value) => setState(() => _selectedLineName = value),
+      ),
     );
   }
 
@@ -699,9 +723,23 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
     required int allCount,
   }) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
       child: SegmentedButton<_SourceEpisodeMode>(
+        style: ButtonStyle(
+          side: const WidgetStatePropertyAll(BorderSide.none),
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? colorScheme.secondaryContainer
+                : colorScheme.surfaceContainerLowest,
+          ),
+          foregroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? colorScheme.onSecondaryContainer
+                : colorScheme.onSurface,
+          ),
+        ),
         segments: [
           ButtonSegment(
             value: _SourceEpisodeMode.matched,
@@ -837,6 +875,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
     Widget? action,
   }) {
     return Material(
+      type: MaterialType.transparency,
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -1005,6 +1044,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
             : null,
       ),
       child: Card.filled(
+        color: colorScheme.surfaceContainerLowest,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),

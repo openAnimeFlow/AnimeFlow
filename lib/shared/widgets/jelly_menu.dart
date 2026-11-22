@@ -12,6 +12,7 @@ class JellyMenu<T> extends StatefulWidget {
     required this.onSelected,
     this.onOpenChanged,
     this.triggerColor,
+    this.menuColor,
     this.enabled = true,
     this.preferredVerticalDirection,
     this.widthSpring = const SpringDescription(
@@ -32,6 +33,9 @@ class JellyMenu<T> extends StatefulWidget {
 
   /// 触发组件的背景色，省略时使用主题的 surfaceContainerHigh。
   final Color? triggerColor;
+
+  /// 菜单展开后的背景色，省略时使用主题的 surfaceContainerHigh。
+  final Color? menuColor;
 
   /// 是否允许打开菜单。
   final bool enabled;
@@ -197,7 +201,9 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
                       constraints: BoxConstraints.loose(_available),
                       child: Material(
                         color: Color.lerp(
-                            triggerColor, colors.surfaceContainerHigh, reveal),
+                            triggerColor,
+                            widget.menuColor ?? colors.surfaceContainerHigh,
+                            reveal),
                         borderRadius: BorderRadius.circular(
                             radius + (18 - radius) * reveal),
                         clipBehavior: Clip.antiAlias,

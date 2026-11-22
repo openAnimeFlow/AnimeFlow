@@ -201,7 +201,10 @@ class _CommentsViewState extends ConsumerState<CommentsView>
           )
         else
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: EdgeInsets.only(
+                left: 10,
+                right: 10,
+                bottom: MediaQuery.paddingOf(context).bottom + 10),
             sliver: SliverList.separated(
               itemCount: comments.length,
               itemBuilder: (BuildContext context, int index) {

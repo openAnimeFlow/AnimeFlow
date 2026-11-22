@@ -242,10 +242,9 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
         16,
         0,
         16,
-        16 +
-            (widget.keyboardInsetHandled
-                ? 0
-                : MediaQuery.viewInsetsOf(context).bottom),
+        widget.keyboardInsetHandled
+            ? 0
+            : MediaQuery.viewInsetsOf(context).bottom,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -7,6 +7,7 @@ import 'package:anime_flow/core/settings/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/features/ranking/presentation/widgets/ranking_grid.dart';
+import 'package:anime_flow/features/ranking/presentation/widgets/ranking_list_skeleton.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/widgets/top_gradient_mask.dart';
 import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
@@ -419,31 +420,62 @@ class _RankingLoadingSkeleton extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius),
           ),
         );
-    final columns = isDetailsContent
-        ? (contentWidth >= 900 ? 3 : contentWidth >= 600 ? 2 : 1)
-        : (contentWidth / 200).floor().clamp(3, 7);
+    const itemCount = 10;
+    final posterColumns = (contentWidth / 200).floor().clamp(3, 7);
     const spacing = 10.0;
-    final cardWidth = (contentWidth - spacing * (columns - 1)) / columns;
-    return SliverToBoxAdapter(
-      child: Shimmer.fromColors(
-        baseColor: base,
-        highlightColor: highlight,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SizedBox(
-            height: contentWidth < 600 ? 220 : 300,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: 3,
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemBuilder: (_, __) => SizedBox(width: contentWidth / 3.2, child: block(height: double.infinity, radius: 20)),
+    final posterWidth =
+        (contentWidth - spacing * (posterColumns - 1)) / posterColumns;
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Shimmer.fromColors(
+            baseColor: base,
+            highlightColor: highlight,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: contentWidth < 600 ? 220 : 300,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 3,
+                    separatorBuilder: (_, __) => const SizedBox(width: 16),
+                    itemBuilder: (_, __) => SizedBox(
+                      width: contentWidth / 3.2,
+                      child: block(height: double.infinity, radius: 20),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  children: [
+                    block(width: 24, height: 24),
+                    const SizedBox(width: 10),
+                    block(width: 90, height: 22),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (!isDetailsContent)
+                  Wrap(
+                    spacing: spacing,
+                    runSpacing: spacing,
+                    children: List.generate(
+                      itemCount,
+                      (_) =>
+                          block(width: posterWidth, height: posterWidth * 1.5),
+                    ),
+                  ),
+              ],
             ),
           ),
-          const SizedBox(height: 32),
-          Row(children: [block(width: 24, height: 24), const SizedBox(width: 10), block(width: 90, height: 22)]),
-          const SizedBox(height: 16),
-          Wrap(spacing: spacing, runSpacing: spacing, children: List.generate(10, (_) => block(width: cardWidth, height: isDetailsContent ? 160 : cardWidth * 1.5))),
-        ]),
-      ),
+        ),
+        if (isDetailsContent)
+          SliverGrid.builder(
+            gridDelegate: RankingGrid.detailsGridDelegate(contentWidth),
+            itemCount: itemCount,
+            itemBuilder: (context, index) => const RankingListSkeleton(),
+          ),
+      ],
     );
   }
 }

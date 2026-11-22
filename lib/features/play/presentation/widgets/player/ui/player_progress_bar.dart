@@ -129,7 +129,7 @@ class MiniPlayerProgressBar extends StatelessWidget {
           progress: progress,
           buffer: buffer,
           backgroundColor: colorScheme.onSurface.withValues(alpha: 0.28),
-          bufferColor: colorScheme.onSurface.withValues(alpha: 0.52),
+          bufferColor: Colors.white.withValues(alpha: 0.52),
           progressColor: colorScheme.primary,
         ),
       ),

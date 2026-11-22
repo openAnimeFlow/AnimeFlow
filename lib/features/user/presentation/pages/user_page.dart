@@ -27,7 +27,67 @@ class UserPage extends ConsumerWidget {
     return isLoggedInAsync.when(
       data: (isLoggedIn) {
         if (!isLoggedIn) {
-          return _buildLoginPage(context, colorScheme);
+          return LoginPage(
+            appBar: AppBar(
+              forceMaterialTransparency: true,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: DropDownMenu<_NoLoginOverflowAction>(
+                    tooltip: l10n.moreMenu,
+                    items: _NoLoginOverflowAction.values,
+                    disableSelected: false,
+                    buttonBuilder: (context, _) => Icon(
+                      Icons.notes_outlined,
+                      size: 28,
+                      color: colorScheme.onSurface,
+                    ),
+                    itemBuilder: (context, action, _) {
+                      final (icon, label) = switch (action) {
+                        _NoLoginOverflowAction.settings => (
+                        Icons.settings_outlined,
+                        l10n.settings
+                        ),
+                        _NoLoginOverflowAction.playRecord => (
+                        Icons.smart_display_outlined,
+                        l10n.playbackHistory
+                        ),
+                        _NoLoginOverflowAction.downloads => (
+                        Icons.cloud_download_outlined,
+                        l10n.downloadsTitle
+                        ),
+                      };
+                      return SizedBox(
+                        height: 48,
+                        child: Row(
+                          children: [
+                            Icon(
+                              icon,
+                              size: 20,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(label, style: Theme.of(context).textTheme.bodyLarge),
+                          ],
+                        ),
+                      );
+                    },
+                    onSelected: (action) {
+                      switch (action) {
+                        case _NoLoginOverflowAction.settings:
+                          appNavigatorOf(context).openSettings<void>(
+                              destination: SettingsDestination.menu);
+                        case _NoLoginOverflowAction.playRecord:
+                          appNavigatorOf(context).openPlayRecord<void>();
+                        case _NoLoginOverflowAction.downloads:
+                          appNavigatorOf(context).openDownload<void>();
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
         }
 
         ref.listen<AsyncValue<dynamic>>(currentUserInfoProvider,
@@ -120,71 +180,6 @@ class UserPage extends ConsumerWidget {
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (_, __) => const LoginPage(),
-    );
-  }
-
-  Widget _buildLoginPage(BuildContext context, ColorScheme colorScheme) {
-    final l10n = AppLocalizations.of(context);
-    return LoginPage(
-      appBar: AppBar(
-        forceMaterialTransparency: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: DropDownMenu<_NoLoginOverflowAction>(
-              tooltip: l10n.moreMenu,
-              items: _NoLoginOverflowAction.values,
-              disableSelected: false,
-              buttonBuilder: (context, _) => Icon(
-                Icons.notes_outlined,
-                size: 28,
-                color: colorScheme.onSurface,
-              ),
-              itemBuilder: (context, action, _) {
-                final (icon, label) = switch (action) {
-                  _NoLoginOverflowAction.settings => (
-                      Icons.settings_outlined,
-                      l10n.settings
-                    ),
-                  _NoLoginOverflowAction.playRecord => (
-                      Icons.smart_display_outlined,
-                      l10n.playbackHistory
-                    ),
-                  _NoLoginOverflowAction.downloads => (
-                      Icons.cloud_download_outlined,
-                      l10n.downloadsTitle
-                    ),
-                };
-                return SizedBox(
-                  height: 48,
-                  child: Row(
-                    children: [
-                      Icon(
-                        icon,
-                        size: 20,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(label, style: Theme.of(context).textTheme.bodyLarge),
-                    ],
-                  ),
-                );
-              },
-              onSelected: (action) {
-                switch (action) {
-                  case _NoLoginOverflowAction.settings:
-                    appNavigatorOf(context).openSettings<void>(
-                        destination: SettingsDestination.menu);
-                  case _NoLoginOverflowAction.playRecord:
-                    appNavigatorOf(context).openPlayRecord<void>();
-                  case _NoLoginOverflowAction.downloads:
-                    appNavigatorOf(context).openDownload<void>();
-                }
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

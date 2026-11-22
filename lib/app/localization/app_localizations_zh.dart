@@ -834,7 +834,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get collectionSortLabel => '排序方式';
 
   @override
-  String get collectionSortWatch => '最近观看';
+  String get collectionSortWatch => '最近';
 
   @override
   String get resetCollectionFilters => '重置';
@@ -3509,7 +3509,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get collectionSortLabel => '排序方式';
 
   @override
-  String get collectionSortWatch => '最近观看';
+  String get collectionSortWatch => '最近';
 
   @override
   String get resetCollectionFilters => '重置';
@@ -6183,7 +6183,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get collectionSortLabel => '排序方式';
 
   @override
-  String get collectionSortWatch => '最近觀看';
+  String get collectionSortWatch => '最近';
 
   @override
   String get resetCollectionFilters => '重設';
@@ -8858,7 +8858,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get collectionSortLabel => '排序方式';
 
   @override
-  String get collectionSortWatch => '最近觀看';
+  String get collectionSortWatch => '最近';
 
   @override
   String get resetCollectionFilters => '重設';

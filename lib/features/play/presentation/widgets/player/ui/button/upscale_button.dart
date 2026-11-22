@@ -16,6 +16,7 @@ List<MenuItemButton> buildUpscaleMenuItems(
   required PlayerCapabilities capabilities,
   required Future<void> Function(UpscalePreset) onChanged,
   Widget Function(String label, bool isSelected)? buildLabel,
+  void Function(VoidCallback)? onActivate,
 }) {
   final selected =
       capabilities.supportsUpscalePreset(value) ? value : UpscalePreset.off;
@@ -38,9 +39,13 @@ List<MenuItemButton> buildUpscaleMenuItems(
   return UpscalePreset.values.map((preset) {
     final isSelected = selected == preset;
     final label = _upscaleLabels[preset]!;
+    void apply() => select(preset);
     return MenuItemButton(
+      closeOnActivate: onActivate == null,
       onPressed: capabilities.supportsUpscalePreset(preset)
-          ? () => select(preset)
+          ? onActivate == null
+              ? apply
+              : () => onActivate(apply)
           : null,
       trailingIcon:
           buildLabel == null && isSelected ? const Icon(Icons.check) : null,

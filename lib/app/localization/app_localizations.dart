@@ -1625,7 +1625,7 @@ abstract class AppLocalizations {
   /// No description provided for @collectionSortWatch.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'最近观看'**
+  /// **'最近'**
   String get collectionSortWatch;
 
   /// No description provided for @resetCollectionFilters.

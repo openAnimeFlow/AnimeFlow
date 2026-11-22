@@ -1,10 +1,22 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/domain/play_source_selection.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:material_ui/material_ui.dart';
 
-enum _SourceAction { openPageUrl, copyPageUrl }
+enum _SourceAction {
+  openPageUrl(Icons.open_in_browser_rounded),
+  copyPageUrl(Icons.content_copy_rounded);
+
+  const _SourceAction(this.icon);
+
+  final IconData icon;
+
+  String label(AppLocalizations l10n) => switch (this) {
+        _SourceAction.openPageUrl => l10n.openPlaybackPage,
+        _SourceAction.copyPageUrl => l10n.copySourceLink,
+      };
+}
 
 typedef _SourceDisplay = ({
   String title,
@@ -13,7 +25,7 @@ typedef _SourceDisplay = ({
   String? pageUrl,
 });
 
-class VideoResourcesView extends StatefulWidget {
+class VideoResourcesView extends StatelessWidget {
   const VideoResourcesView({
     super.key,
     required this.isSearchCompleted,
@@ -29,15 +41,7 @@ class VideoResourcesView extends StatefulWidget {
   final ValueChanged<String> onOpenSourcePage;
   final ValueChanged<String> onCopySourcePage;
 
-  @override
-  State<VideoResourcesView> createState() => _VideoResourcesViewState();
-}
-
-class _VideoResourcesViewState extends State<VideoResourcesView> {
-  bool _isSourceActionMenuOpen = false;
-
-  _SourceDisplay? _describeSource(AppLocalizations l10n) =>
-      switch (widget.source) {
+  _SourceDisplay? _describeSource(AppLocalizations l10n) => switch (source) {
         LocalVideoFile(:final name) => (
             title: l10n.localVideoSource,
             icon: const Icon(Icons.video_file_outlined, size: 25),
@@ -67,70 +71,68 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
         null => null,
       };
 
-  Widget _buildSourceActionMenu({
-    required AppLocalizations l10n,
-    required String pageUrl,
-  }) {
-    return DropDownMenu<_SourceAction>(
-      items: _SourceAction.values,
+  Widget _buildSourceActionMenu(
+    BuildContext context,
+    AppLocalizations l10n,
+    String pageUrl,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    return JellyMenu<_SourceAction>(
       tooltip: l10n.sourceActions,
-      buttonBorderRadius: BorderRadius.circular(25),
-      disableSelected: false,
-      onOpenedChanged: (isOpen) {
-        if (!mounted || _isSourceActionMenuOpen == isOpen) {
-          return;
-        }
-        setState(() {
-          _isSourceActionMenuOpen = isOpen;
-        });
-      },
-      offset: const Offset(0, 55),
-      buttonBuilder: (context, _) {
-        final colorScheme = Theme.of(context).colorScheme;
-        return SizedBox.square(
-          dimension: 50,
-          child: Center(
-            child: AnimatedRotation(
-              turns: _isSourceActionMenuOpen ? 0.5 : 0,
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOutCubic,
-              child: Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: colorScheme.onSurface,
-                size: 30,
-              ),
-            ),
-          ),
+      triggerColor: Colors.transparent,
+      preferredVerticalDirection: VerticalDirection.down,
+      trigger: SizedBox.square(
+        dimension: 50,
+        child: Icon(
+          Icons.keyboard_arrow_down_rounded,
+          color: colors.onSurface,
+          size: 30,
+        ),
+      ),
+      menuBuilder: (context, select) {
+        final style = TextButton.styleFrom(
+          alignment: AlignmentDirectional.centerStart,
+          foregroundColor: colors.onSurface,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          minimumSize: const Size(0, 48),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         );
-      },
-      itemBuilder: (context, action, _) {
-        final (icon, label) = switch (action) {
-          _SourceAction.openPageUrl => (
-              Icons.open_in_browser_rounded,
-              l10n.openPlaybackPage
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final action in _SourceAction.values)
+                  TextButton(
+                    style: style,
+                    onPressed: () => select(action),
+                    child: Row(
+                      children: [
+                        Icon(action.icon, size: 18),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            action.label(l10n),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
-          _SourceAction.copyPageUrl => (
-              Icons.content_copy_rounded,
-              l10n.copySourceLink
-            ),
-        };
-        return SizedBox(
-          width: 150,
-          child: Row(
-            children: [
-              Icon(icon, size: 18),
-              const SizedBox(width: 8),
-              Expanded(child: Text(label)),
-            ],
           ),
         );
       },
       onSelected: (action) {
         switch (action) {
           case _SourceAction.openPageUrl:
-            widget.onOpenSourcePage(pageUrl);
+            onOpenSourcePage(pageUrl);
           case _SourceAction.copyPageUrl:
-            widget.onCopySourcePage(pageUrl);
+            onCopySourcePage(pageUrl);
         }
       },
     );
@@ -179,7 +181,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                             ),
                           ],
                         )
-                      else if (widget.isSearchCompleted)
+                      else if (isSearchCompleted)
                         Text(l10n.noPlayableSourceForEpisode)
                       else
                         Row(
@@ -197,7 +199,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                   ),
                 ),
                 FilledButton.icon(
-                  onPressed: widget.onSwitchSource,
+                  onPressed: onSwitchSource,
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.primary,
@@ -224,10 +226,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                   ),
                 ],
                 if (display?.pageUrl case final String pageUrl)
-                  _buildSourceActionMenu(
-                    l10n: l10n,
-                    pageUrl: pageUrl,
-                  ),
+                  _buildSourceActionMenu(context, l10n, pageUrl),
               ],
             )
           ],

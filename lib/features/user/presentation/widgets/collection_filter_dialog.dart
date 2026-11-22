@@ -1,6 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/enums/collection_sort.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:material_ui/material_ui.dart';
 
 class CollectionFilterResult {
@@ -52,14 +52,83 @@ class _CollectionFilterDialogState extends State<CollectionFilterDialog> {
     setState(() => _sort = CollectionSort.defaultSort);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+  Widget _buildSortMenu(BuildContext context, AppLocalizations l10n) {
     final colorScheme = Theme.of(context).colorScheme;
     String sortLabel(CollectionSort sort) => switch (sort) {
           CollectionSort.defaultSort => l10n.defaultSort,
           CollectionSort.watch => l10n.collectionSortWatch,
         };
+
+    return JellyMenu<CollectionSort>(
+      tooltip: l10n.collectionSortLabel,
+      triggerColor: Colors.transparent,
+      preferredVerticalDirection: VerticalDirection.down,
+      trigger: Container(
+        constraints: const BoxConstraints(minHeight: 48),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                sortLabel(_sort),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
+      ),
+      menuBuilder: (context, select) {
+        final style = TextButton.styleFrom(
+          alignment: AlignmentDirectional.centerStart,
+          foregroundColor: colorScheme.onSurface,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          minimumSize: const Size(0, 48),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        );
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final sort in CollectionSort.values)
+                  TextButton(
+                    style: style,
+                    onPressed: sort == _sort ? null : () => select(sort),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            sortLabel(sort),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (sort == _sort) ...[
+                          const SizedBox(width: 12),
+                          Icon(Icons.check,
+                              size: 18, color: colorScheme.primary),
+                        ],
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+      onSelected: (sort) => setState(() => _sort = sort),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       title: Text(l10n.filterCollection),
       content: SizedBox(
@@ -85,47 +154,10 @@ class _CollectionFilterDialogState extends State<CollectionFilterDialog> {
               ),
               const SizedBox(height: 20),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Flexible(
-                    flex: 2,
-                    child: DropDownMenu<CollectionSort>(
-                      items: CollectionSort.values,
-                      selectedItem: _sort,
-                      tooltip: l10n.collectionSortLabel,
-                      offset: const Offset(0, 48),
-                      buttonBorderRadius: BorderRadius.circular(8),
-                      buttonBuilder: (context, selected) => Container(
-                        constraints: const BoxConstraints(minHeight: 48),
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                sortLabel(selected ?? _sort),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(Icons.arrow_drop_down),
-                          ],
-                        ),
-                      ),
-                      itemBuilder: (context, sort, isSelected) => Row(
-                        children: [
-                          Expanded(child: Text(sortLabel(sort))),
-                          if (isSelected) ...[
-                            const SizedBox(width: 12),
-                            Icon(Icons.check,
-                                size: 18, color: colorScheme.primary),
-                          ],
-                        ],
-                      ),
-                      onSelected: (sort) => setState(() => _sort = sort),
-                    ),
-                  ),
+                  const Text('排序'),
+                  Flexible(child: _buildSortMenu(context, l10n)),
                 ],
               ),
             ],

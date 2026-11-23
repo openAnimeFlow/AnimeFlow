@@ -6,7 +6,7 @@ class TopGradientMask extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final surface = Theme.of(context).colorScheme.surface;
+    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
     return AbsorbPointer(
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -14,9 +14,9 @@ class TopGradientMask extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              surface.withValues(alpha: 1),
-              surface.withValues(alpha: 0.7),
-              surface.withValues(alpha: 0),
+              backgroundColor,
+              backgroundColor.withValues(alpha: 0.7),
+              backgroundColor.withValues(alpha: 0),
             ],
             stops: const [0, 0.4, 1],
           ),

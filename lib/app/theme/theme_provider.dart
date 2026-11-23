@@ -145,6 +145,13 @@ ThemeData buildLightTheme(Color seedColor, {String? fontFamily}) {
       color: Colors.white,
       surfaceTintColor: Colors.transparent,
     ),
+    navigationRailTheme: const NavigationRailThemeData(
+      backgroundColor: Colors.white,
+    ),
+    navigationBarTheme: const NavigationBarThemeData(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+    ),
     appBarTheme: const AppBarTheme(
       backgroundColor: backgroundColor,
       systemOverlayStyle: SystemUiOverlayStyle(

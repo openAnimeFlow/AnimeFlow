@@ -70,11 +70,13 @@ class ShellNavigationRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final backgroundColor = NavigationRailTheme.of(context).backgroundColor ??
+        colorScheme.surfaceContainerHighest;
     final l10n = AppLocalizations.of(context);
     final safePadding = MediaQuery.paddingOf(context);
+    final railColor = glassBar ? Colors.transparent : backgroundColor;
     final rail = NavigationRail(
-      backgroundColor:
-          glassBar ? Colors.transparent : colorScheme.surfaceContainerHighest,
+      backgroundColor: railColor,
       selectedIndex: selectedIndex,
       groupAlignment: 1.0,
       scrollable: true,
@@ -107,8 +109,7 @@ class ShellNavigationRail extends StatelessWidget {
       destinations: _buildRailDestinations(colorScheme, avatar),
     );
     return ColoredBox(
-      color:
-          glassBar ? Colors.transparent : colorScheme.surfaceContainerHighest,
+      color: railColor,
       child: SafeArea(
         right: false,
         minimum: glassBar
@@ -124,8 +125,7 @@ class ShellNavigationRail extends StatelessWidget {
                     filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.78),
+                        color: backgroundColor.withValues(alpha: 0.78),
                         borderRadius: BorderRadius.circular(28),
                         border: Border.all(
                             color: colorScheme.outlineVariant

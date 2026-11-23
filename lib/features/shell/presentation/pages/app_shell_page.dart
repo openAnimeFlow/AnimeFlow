@@ -39,8 +39,6 @@ class AppShellPage extends StatelessWidget {
           final glassBar = snapshot.data ?? false;
           return Scaffold(
             extendBody: glassBar,
-            backgroundColor:
-            isDesktop && !glassBar ? colorScheme.surfaceContainerHighest : null,
             body: Row(
               children: [
                 if (isDesktop)

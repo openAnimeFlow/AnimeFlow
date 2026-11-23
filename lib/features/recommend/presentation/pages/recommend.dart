@@ -61,6 +61,8 @@ class _RecommendPageState extends State<RecommendPage>
       ValueChanged<WallpaperDetailArgs> onOpenWallpaper) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final searchBackgroundColor =
+        CardTheme.of(context).color ?? colorScheme.surfaceContainerHighest;
     final glassHeaderHeight =
         MediaQuery.paddingOf(context).top + kToolbarHeight;
     return Scaffold(
@@ -80,7 +82,7 @@ class _RecommendPageState extends State<RecommendPage>
                 width: 200,
                 height: 35,
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
+                  color: searchBackgroundColor,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: TextField(

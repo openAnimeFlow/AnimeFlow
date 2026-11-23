@@ -223,8 +223,9 @@ class _SettingsMenu extends ConsumerWidget {
       ],
     );
     if (!wide) return menu;
+    final theme = Theme.of(context);
     return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      color: theme.cardTheme.color ?? theme.colorScheme.surfaceContainerHighest,
       child: SafeArea(
         right: false,
         child: Column(children: [

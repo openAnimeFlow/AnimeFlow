@@ -128,7 +128,9 @@ class _WindowsTitleBarState extends State<WindowsTitleBar> with WindowListener {
     return Container(
       height: widget.height,
       decoration: BoxDecoration(
-        color: widget.backgroundColor ?? colorScheme.surfaceContainerHighest,
+        color: widget.backgroundColor ??
+            CardTheme.of(context).color ??
+            colorScheme.surfaceContainerHighest,
         border: Border(
           bottom: BorderSide(
             color: theme.dividerColor.withValues(alpha: 0.12),

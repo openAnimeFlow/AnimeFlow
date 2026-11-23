@@ -64,6 +64,9 @@ class ShellBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final backgroundColor = NavigationBarTheme.of(context).backgroundColor ??
+        colorScheme.surfaceContainerHighest;
     if (glassBar) {
       return SafeArea(
         top: false,
@@ -72,20 +75,19 @@ class ShellBottomNavigation extends StatelessWidget {
         maintainBottomViewPadding: true,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: _buildGlassBar(context),
+          child: _buildGlassBar(context, backgroundColor),
         ),
       );
     }
-    final colorScheme = Theme.of(context).colorScheme;
     return NavigationBar(
-      backgroundColor: colorScheme.surfaceContainerHighest,
+      backgroundColor: backgroundColor,
       selectedIndex: selectedIndex,
       onDestinationSelected: onSelected,
       destinations: _buildBarDestinations(colorScheme, avatar),
     );
   }
 
-  Widget _buildGlassBar(BuildContext context) {
+  Widget _buildGlassBar(BuildContext context, Color backgroundColor) {
     final colors = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(40);
     final labelSize = Theme.of(context).textTheme.labelSmall?.fontSize ?? 11;
@@ -113,7 +115,7 @@ class ShellBottomNavigation extends StatelessWidget {
               child: Container(
                 height: height,
                 decoration: BoxDecoration(
-                  color: colors.surfaceContainerHighest.withValues(alpha: 0.78),
+                  color: backgroundColor.withValues(alpha: 0.78),
                   borderRadius: radius,
                   border: Border.all(
                     color: colors.outlineVariant.withValues(alpha: 0.45),

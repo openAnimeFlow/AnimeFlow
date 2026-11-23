@@ -5,6 +5,7 @@ import 'package:anime_flow/features/play/presentation/widgets/player_settings_sh
 import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/domain/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
@@ -15,7 +16,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 弹幕设置弹窗
-@Dependencies([playSession, VideoUiNotifier])
+@Dependencies([playSession, VideoUiNotifier, PlayStateNotifier])
 class DanmakuSettingDialog extends ConsumerStatefulWidget {
   const DanmakuSettingDialog({super.key});
 
@@ -58,14 +59,15 @@ class _DanmakuOptionSliderState extends State<_DanmakuOptionSlider> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.bodyMedium?.color,
           ),
         ),
         SliderTheme(
           data: SliderTheme.of(context).copyWith(trackHeight: 15),
           child: Slider(
+            padding: EdgeInsets.zero,
             value: _value,
             min: widget.min,
             max: widget.max,
@@ -156,6 +158,8 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
     final hideTop = danmakuController.option.hideTop;
     final hideBottom = danmakuController.option.hideBottom;
     final danmakuChineseMode = ref.watch(danmakuChineseModeProvider);
+    final preferences = ref.read(playPreferencesProvider);
+    final speed = preferences.danmakuSpeed;
     final fixedValues = [0.1, 0.25, 0.5, 0.75, 1.0];
     int currentIndex = 0;
     for (int i = 0; i < fixedValues.length; i++) {
@@ -384,38 +388,22 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  Builder(
-                    builder: (context) {
-                      // duration 范围：2.0 (最快) 到 16.0 (最慢)
-                      // 速度百分比：0% (最慢) 到 100% (最快)
-                      // 转换公式：speedPercent = (16.0 - duration) / (16.0 - 2.0) * 100
-                      const minDuration = 2.0;
-                      const maxDuration = 16.0;
-                      final currentDuration = danmakuController.option.duration
-                          .clamp(minDuration, maxDuration);
-                      final speedPercent = ((maxDuration - currentDuration) /
-                              (maxDuration - minDuration) *
-                              100)
-                          .round();
-                      return _DanmakuOptionSlider(
-                        initialValue: speedPercent.toDouble(),
-                        min: 0,
-                        max: 100,
-                        divisions: 20,
-                        labelBuilder: (value) =>
-                            l10n.danmakuSpeed(value.round()),
-                        onChanged: (value) {
-                          final newDuration = maxDuration -
-                              (value / 100.0) * (maxDuration - minDuration);
-                          danmakuController.updateOption(
-                            danmakuController.option
-                                .copyWith(duration: newDuration),
-                          );
-                          ref
-                              .read(playPreferencesProvider)
-                              .setDanmakuDuration(newDuration);
-                        },
+                  _DanmakuOptionSlider(
+                    initialValue: speed.percent,
+                    min: speed.min,
+                    max: speed.max,
+                    divisions: speed.divisions,
+                    labelBuilder: (value) => l10n.danmakuSpeed(value.round()),
+                    onChanged: (value) {
+                      final duration =
+                          preferences.danmakuDurationForSpeed(value);
+                      final rate = ref.read(playStateProvider).rate;
+                      danmakuController.updateOption(
+                        danmakuController.option.copyWith(
+                          duration: duration / rate,
+                        ),
                       );
+                      preferences.setDanmakuDuration(duration);
                     },
                   ),
                   const SizedBox(height: 16),

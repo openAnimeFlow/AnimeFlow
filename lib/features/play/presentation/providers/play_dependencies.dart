@@ -24,6 +24,10 @@ final playHistoryServiceProvider = Provider<PlayHistoryService>(
     (ref) => PlayHistoryService(ref.watch(playHistoryRepositoryProvider)));
 final playPreferencesProvider =
     _dependency<PlayPreferences>('playPreferencesProvider');
+final danmakuFontSettingsProvider =
+    StreamProvider.autoDispose<({bool enabled, String? family})>(
+  (ref) => ref.watch(playPreferencesProvider).watchDanmakuFont(),
+);
 final playbackPlatformProvider =
     _dependency<PlaybackPlatform>('playbackPlatformProvider');
 final playQueriesProvider = _dependency<PlayQueries>('playQueriesProvider');

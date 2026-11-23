@@ -2312,6 +2312,18 @@ abstract class AppLocalizations {
   /// **'自定义应用字体'**
   String get customAppFont;
 
+  /// No description provided for @customDanmakuFont.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'自定义弹幕字体'**
+  String get customDanmakuFont;
+
+  /// No description provided for @followAppFont.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'跟随应用字体'**
+  String get followAppFont;
+
   /// No description provided for @autoNextEpisode.
   ///
   /// In zh_Hans, this message translates to:

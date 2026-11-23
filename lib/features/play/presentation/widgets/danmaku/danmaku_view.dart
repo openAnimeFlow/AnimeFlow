@@ -3,7 +3,6 @@ import 'package:anime_flow/features/play/presentation/providers/play_session_pro
 import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
 import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/core/settings/danmaku_font_provider.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,7 +31,6 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
   late bool _hideBottom;
   late bool _hideScroll;
   late bool _massiveMode;
-  late double _danmakuDuration;
   late double _danmakuLineHeight;
   late int _danmakuFontWeight;
 
@@ -53,7 +51,6 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     _hideBottom = ref.read(playPreferencesProvider).danmakuHideBottom;
     _hideScroll = ref.read(playPreferencesProvider).danmakuHideScroll;
     _massiveMode = ref.read(playPreferencesProvider).danmakuMassiveMode;
-    _danmakuDuration = ref.read(playPreferencesProvider).danmakuDuration;
     _danmakuLineHeight = ref.read(playPreferencesProvider).danmakuLineHeight;
     _danmakuFontWeight = ref.read(playPreferencesProvider).danmakuFontWeight;
   }
@@ -74,9 +71,11 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     final rate = ref.watch(
       playStateProvider.select((state) => state.rate),
     );
-    final useFont = ref.watch(danmakuFontEnabledProvider);
-    final projectFontFamily = useFont
-        ? ref.watch(danmakuFontFamilyProvider) ??
+    final duration = ref.read(playPreferencesProvider).danmakuDuration / rate;
+    final font = ref.watch(danmakuFontSettingsProvider).value ??
+        ref.read(playPreferencesProvider).danmakuFont;
+    final fontFamily = font.enabled
+        ? font.family ??
             ref.watch(themeProvider.select((state) => state.fontFamily))
         : null;
     return IgnorePointer(
@@ -101,9 +100,9 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
                   hideScroll: _hideScroll,
                   hideTop: _hideTop,
                   hideBottom: _hideBottom,
-                  duration: _danmakuDuration / rate,
+                  duration: duration,
                   massiveMode: _massiveMode,
-                  fontFamily: projectFontFamily,
+                  fontFamily: fontFamily,
                 ),
               );
             } catch (_) {
@@ -118,12 +117,12 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
           area: _danmakuArea,
           opacity: _opacity,
           fontSize: _fontSize,
-          duration: _danmakuDuration / rate,
+          duration: duration,
           lineHeight: _danmakuLineHeight,
           strokeWidth: _strokeWidth,
           fontWeight: _danmakuFontWeight,
           massiveMode: _massiveMode,
-          fontFamily: projectFontFamily,
+          fontFamily: fontFamily,
         ),
       ),
     );

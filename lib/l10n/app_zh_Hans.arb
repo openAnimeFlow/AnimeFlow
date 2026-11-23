@@ -407,6 +407,8 @@
   "themeColor": "主题颜色",
   "fontStyle": "字体样式",
   "customAppFont": "自定义应用字体",
+  "customDanmakuFont": "自定义弹幕字体",
+  "followAppFont": "跟随应用字体",
   "autoNextEpisode": "自动跳转下一集",
   "autoNextEpisodeSubtitle": "播放完成后自动切换到下一集",
   "adBlocker": "过滤广告",

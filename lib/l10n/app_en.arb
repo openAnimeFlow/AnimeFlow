@@ -405,6 +405,8 @@
   "themeColor": "Theme color",
   "fontStyle": "Font style",
   "customAppFont": "Customize app font",
+  "customDanmakuFont": "Custom danmaku font",
+  "followAppFont": "Use app font",
   "autoNextEpisode": "Auto-play next episode",
   "autoNextEpisodeSubtitle": "Automatically switch to the next episode when playback finishes",
   "adBlocker": "Ad blocking",

@@ -18,9 +18,20 @@ class StoredPlayPreferences implements PlayPreferences {
   @override
   double get danmakuDuration => AppSettings.danmakuDuration;
   @override
+  ({double percent, double min, double max, int divisions}) get danmakuSpeed =>
+      AppSettings.danmakuSpeed;
+  @override
+  double danmakuDurationForSpeed(double percent) =>
+      AppSettings.danmakuDurationForSpeed(percent);
+  @override
   double get danmakuLineHeight => AppSettings.danmakuLineHeight;
   @override
   int get danmakuFontWeight => AppSettings.danmakuFontWeight;
+  @override
+  ({bool enabled, String? family}) get danmakuFont => AppSettings.danmakuFont;
+  @override
+  Stream<({bool enabled, String? family})> watchDanmakuFont() =>
+      AppSettings.watchDanmakuFont();
   @override
   bool get danmakuMassiveMode => AppSettings.danmakuMassiveMode;
   @override
@@ -93,7 +104,7 @@ class StoredPlayPreferences implements PlayPreferences {
       AppSettings.setSetting(DanmakuKey.danmakuBorder, value);
   @override
   Future<void> setDanmakuDuration(double value) =>
-      AppSettings.setSetting(DanmakuKey.danmakuDuration, value);
+      AppSettings.setDanmakuDuration(value);
   @override
   Future<void> setDanmakuOpacity(double value) =>
       AppSettings.setSetting(DanmakuKey.danmakuOpacity, value);

@@ -7,8 +7,12 @@ abstract interface class PlayPreferences {
   double get danmakuArea;
   double get danmakuOpacity;
   double get danmakuDuration;
+  ({double percent, double min, double max, int divisions}) get danmakuSpeed;
+  double danmakuDurationForSpeed(double percent);
   double get danmakuLineHeight;
   int get danmakuFontWeight;
+  ({bool enabled, String? family}) get danmakuFont;
+  Stream<({bool enabled, String? family})> watchDanmakuFont();
   bool get danmakuMassiveMode;
   double get danmakuStrokeWidth;
   bool get danmakuColor;

@@ -1217,6 +1217,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customAppFont => 'Customize app font';
 
   @override
+  String get customDanmakuFont => 'Custom danmaku font';
+
+  @override
+  String get followAppFont => 'Use app font';
+
+  @override
   String get autoNextEpisode => 'Auto-play next episode';
 
   @override

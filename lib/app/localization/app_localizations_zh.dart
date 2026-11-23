@@ -1189,6 +1189,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get customAppFont => '自定义应用字体';
 
   @override
+  String get customDanmakuFont => '自定义弹幕字体';
+
+  @override
+  String get followAppFont => '跟随应用字体';
+
+  @override
   String get autoNextEpisode => '自动跳转下一集';
 
   @override
@@ -3862,6 +3868,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get customAppFont => '自定义应用字体';
+
+  @override
+  String get customDanmakuFont => '自定义弹幕字体';
+
+  @override
+  String get followAppFont => '跟随应用字体';
 
   @override
   String get autoNextEpisode => '自动跳转下一集';
@@ -6538,6 +6550,12 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get customAppFont => '自訂應用程式字型';
 
   @override
+  String get customDanmakuFont => '自訂彈幕字型';
+
+  @override
+  String get followAppFont => '跟隨應用程式字型';
+
+  @override
   String get autoNextEpisode => '自動跳轉下一集';
 
   @override
@@ -9211,6 +9229,12 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get customAppFont => '自訂應用程式字型';
+
+  @override
+  String get customDanmakuFont => '自訂彈幕字型';
+
+  @override
+  String get followAppFont => '跟隨應用程式字型';
 
   @override
   String get autoNextEpisode => '自動跳轉下一集';

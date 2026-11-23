@@ -306,6 +306,13 @@ abstract final class AppSettings {
   static const double defaultDanmakuArea = 0.25;
   static const double defaultDanmakuOpacity = 1.0;
   static const double defaultDanmakuDuration = 8.0;
+  static const _minDanmakuSpeed = 10.0;
+  static const _maxDanmakuSpeed = 100.0;
+  static const _danmakuSpeedStep = 5;
+  static const _danmakuDurationAtZeroSpeed = 16.0;
+  static const _fastestDanmakuDuration = 2.0;
+  static const _danmakuDurationRange =
+      _danmakuDurationAtZeroSpeed - _fastestDanmakuDuration;
   static const double defaultDanmakuLineHeight = 1.6;
   static const int defaultDanmakuFontWeight = 4;
   static const bool defaultDanmakuMassiveMode = false;
@@ -332,8 +339,37 @@ abstract final class AppSettings {
   static double get danmakuOpacity =>
       _readDouble(DanmakuKey.danmakuOpacity, defaultDanmakuOpacity);
 
-  static double get danmakuDuration =>
-      _readDouble(DanmakuKey.danmakuDuration, defaultDanmakuDuration);
+  static double get danmakuDuration => _clampDanmakuDuration(
+        _readDouble(DanmakuKey.danmakuDuration, defaultDanmakuDuration),
+      );
+
+  static Future<void> setDanmakuDuration(double duration) => setDanmakuValue(
+        DanmakuKey.danmakuDuration,
+        _clampDanmakuDuration(duration),
+      );
+
+  static ({double percent, double min, double max, int divisions})
+      get danmakuSpeed {
+    final percent = (_danmakuDurationAtZeroSpeed - danmakuDuration) /
+        _danmakuDurationRange *
+        _maxDanmakuSpeed;
+    return (
+      percent: percent.clamp(_minDanmakuSpeed, _maxDanmakuSpeed),
+      min: _minDanmakuSpeed,
+      max: _maxDanmakuSpeed,
+      divisions: (_maxDanmakuSpeed - _minDanmakuSpeed) ~/ _danmakuSpeedStep,
+    );
+  }
+
+  static double danmakuDurationForSpeed(double percent) =>
+      _danmakuDurationAtZeroSpeed -
+      (percent.clamp(_minDanmakuSpeed, _maxDanmakuSpeed) / _maxDanmakuSpeed) *
+          _danmakuDurationRange;
+
+  static double _clampDanmakuDuration(double duration) => duration.clamp(
+        _fastestDanmakuDuration,
+        danmakuDurationForSpeed(_minDanmakuSpeed),
+      );
 
   static double get danmakuLineHeight =>
       _readDouble(DanmakuKey.danmakuLineHeight, defaultDanmakuLineHeight);
@@ -341,8 +377,25 @@ abstract final class AppSettings {
   static int get danmakuFontWeight =>
       _readInt(DanmakuKey.danmakuFontWeight, defaultDanmakuFontWeight);
 
-  static String? get danmakuFontFamily =>
-      getSetting<Object?>(DanmakuKey.danmakuFontFamily) as String?;
+  static ({bool enabled, String? family}) get danmakuFont => (
+        enabled: _readBool(DanmakuKey.danmakuUseFont, true),
+        family: getSetting<String>(DanmakuKey.danmakuFontFamily),
+      );
+
+  static Stream<({bool enabled, String? family})> watchDanmakuFont() =>
+      Storage.setting
+          .watch()
+          .where((event) =>
+              event.key == DanmakuKey.danmakuUseFont ||
+              event.key == DanmakuKey.danmakuFontFamily)
+          .map((_) => danmakuFont)
+          .distinct();
+
+  static Future<void> setDanmakuFontEnabled(bool enabled) =>
+      setDanmakuValue(DanmakuKey.danmakuUseFont, enabled);
+
+  static Future<void> setDanmakuFontFamily(String? family) =>
+      setDanmakuValue(DanmakuKey.danmakuFontFamily, family);
 
   static bool get danmakuMassiveMode =>
       _readBool(DanmakuKey.danmakuMassiveMode, defaultDanmakuMassiveMode);
@@ -361,8 +414,6 @@ abstract final class AppSettings {
 
   static bool get danmakuColor =>
       _readBool(DanmakuKey.danmakuColor, defaultDanmakuColor);
-
-  static bool get danmakuUseFont => _readBool(DanmakuKey.danmakuUseFont, true);
 
   static bool get danmakuHideScroll =>
       _readBool(DanmakuKey.danmakuHideScroll, defaultDanmakuHideScroll);

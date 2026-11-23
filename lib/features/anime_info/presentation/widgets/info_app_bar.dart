@@ -17,12 +17,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 @Dependencies([AnimeInfo, animeInfoArgs])
 class InfoAppbar extends ConsumerWidget {
-  final bool isPinned;
+  const InfoAppbar({super.key});
 
-  const InfoAppbar({
-    super.key,
-    required this.isPinned,
-  });
+  static const double _controlSize = 44;
+
+  Color _controlColor(ThemeData theme) =>
+      theme.cardTheme.color ?? theme.colorScheme.surfaceContainerHigh;
 
   Future<void> _openInBrowser(String url, AppLocalizations l10n) async {
     final uri = Uri.parse(url);
@@ -89,34 +89,51 @@ class InfoAppbar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Row(
-      children: [
-        IconButton(
-          padding: EdgeInsets.zero,
-          iconSize: 25,
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
-        Expanded(
-          child: _buildInfo(ref),
-        ),
-        Padding(
-          padding: const EdgeInsetsDirectional.only(end: 8),
-          child: _buildMenu(context, ref),
-        ),
-      ],
+    final settings =
+        context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+    final isPinned =
+        settings != null && settings.currentExtent - settings.minExtent < 0.5;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        spacing: 8,
+        children: [
+          IconButton(
+            style: IconButton.styleFrom(
+              backgroundColor: _controlColor(theme),
+              foregroundColor: colors.onSurface,
+              fixedSize: const Size.square(_controlSize),
+              padding: EdgeInsets.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: const CircleBorder(),
+            ),
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            iconSize: 23,
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: () => Navigator.of(context).maybePop(),
+          ),
+          Expanded(child: _buildInfo(context, ref, isPinned: isPinned)),
+          _buildMenu(context, ref),
+        ],
+      ),
     );
   }
 
   Widget _buildMenu(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final backgroundColor = _controlColor(theme);
     return JellyMenu<MoreMenuAction>(
       tooltip: l10n.moreActions,
-      triggerColor: Colors.transparent,
+      triggerColor: backgroundColor,
+      menuColor: backgroundColor,
       preferredVerticalDirection: VerticalDirection.down,
-      trigger: const Padding(
-        padding: EdgeInsets.all(8),
-        child: Icon(Icons.share_outlined, size: 25),
+      trigger: SizedBox.square(
+        dimension: _controlSize,
+        child: Icon(Icons.more_vert_rounded, size: 23, color: colors.onSurface),
       ),
       menuBuilder: (context, select) {
         final itemStyle = TextButton.styleFrom(
@@ -162,68 +179,87 @@ class InfoAppbar extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfo(WidgetRef ref) {
+  Widget _buildInfo(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool isPinned,
+  }) {
     final args = ref.watch(animeInfoArgsProvider);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return AnimatedOpacity(
       opacity: isPinned ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 300),
-      child: IgnorePointer(
-        ignoring: !isPinned,
+      duration: const Duration(milliseconds: 200),
+      child: Material(
+        color: _controlColor(theme),
+        shape: const StadiumBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(
+          height: _controlSize,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            spacing: 8,
+            children: [
+              AnimationNetworkImage(
+                width: _controlSize,
+                height: _controlSize,
+                fit: BoxFit.cover,
+                url: args.image,
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      flex: 3,
+                      child: Text(
+                        args.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    Flexible(flex: 2, child: _buildRating()),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRating() {
+    return Consumer(builder: (context, ref, child) {
+      final rating = ref.watch(animeInfoProvider.select(
+        (state) => state.value?.rating,
+      ));
+      if (rating == null || rating.rank <= 0) return const SizedBox.shrink();
+      final theme = Theme.of(context);
+      return FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerStart,
         child: Row(
+          spacing: 5,
           children: [
-            AnimationNetworkImage(
-              borderRadius: BorderRadius.circular(5),
-              width: 26,
-              height: 36,
-              fit: BoxFit.cover,
-              url: args.image,
-            ),
-            const SizedBox(width: 5),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    args.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 15),
-                  ),
-                  Consumer(builder: (context, ref, child) {
-                    final ratingAsync = ref.watch(animeInfoProvider.select(
-                      (state) => state.whenData((subject) => subject.rating),
-                    ));
-                    return ratingAsync.when(
-                        data: (rating) => rating.rank > 0
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  RankingView(ranking: rating.rank),
-                                  StarView(score: rating.score),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    rating.score.toStringAsFixed(1),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : const SizedBox.shrink(),
-                        error: (error, stack) => const SizedBox.shrink(),
-                        loading: () => const SizedBox.shrink());
-                  }),
-                ],
+            RankingView(ranking: rating.rank),
+            StarView(score: rating.score, iconSize: 12),
+            Text(
+              rating.score.toStringAsFixed(1),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
         ),
-      ),
-    );
+      );
+    });
   }
 }
 

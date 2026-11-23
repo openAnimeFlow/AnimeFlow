@@ -142,10 +142,12 @@ class InfoCommentView extends ConsumerWidget {
   }
 
   Widget _buildCommentItem(BuildContext context, {required DataItem comment}) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: Theme.of(context).disabledColor.withValues(alpha: 0.05),
+          color:
+              theme.cardTheme.color ?? theme.colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(8)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,7 +190,7 @@ class InfoCommentView extends ConsumerWidget {
                       FormatTimeUtil.formatTime(comment.updatedAt),
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).textTheme.bodySmall?.color,
+                        color: theme.textTheme.bodySmall?.color,
                       ),
                     ),
                   ],
@@ -203,7 +205,7 @@ class InfoCommentView extends ConsumerWidget {
                         '${comment.rate}',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

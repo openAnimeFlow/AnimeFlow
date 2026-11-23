@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/widgets/adaptive_sliver_app_bar.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
@@ -10,8 +9,8 @@ import 'package:anime_flow/features/anime_info/presentation/widgets/related.dart
 import 'package:anime_flow/features/anime_info/presentation/widgets/tags.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/subject_stills.dart';
 import 'package:anime_flow/shared/widgets/expandable_text.dart';
+import 'package:anime_flow/shared/widgets/top_gradient_mask.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/inf_head.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
@@ -30,7 +29,7 @@ import 'package:riverpod_annotation/experimental/scope.dart';
   SubjectRelated,
   animeInfoArgs,
 ])
-class AnimeInfoView extends StatefulWidget {
+class AnimeInfoView extends ConsumerStatefulWidget {
   const AnimeInfoView({
     super.key,
     required this.onPlay,
@@ -45,17 +44,19 @@ class AnimeInfoView extends StatefulWidget {
   final ScrollController? scrollController;
 
   @override
-  State<AnimeInfoView> createState() => _AnimeInfoViewState();
+  ConsumerState<AnimeInfoView> createState() => _AnimeInfoViewState();
 }
 
-class _AnimeInfoViewState extends State<AnimeInfoView> {
+class _AnimeInfoViewState extends ConsumerState<AnimeInfoView> {
+  static final _scrollBehavior = const ScrollBehavior().copyWith(
+    scrollbars: false,
+    overscroll: false,
+  );
+
   final _scrollController = ScrollController();
 
   ScrollController get nestedScrollController =>
       widget.scrollController ?? _scrollController;
-  late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
-
-  bool isPinned = false;
   final _showTopButton = ValueNotifier<bool>(false);
 
   @override
@@ -67,110 +68,118 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<bool>(
-      stream: _glassNavigationStyle,
-      initialData: AppSettings.glassNavigationStyle,
-      builder: (context, snapshot) {
-        final glassStyle = snapshot.data ?? false;
-        // 同一尺寸档位内复用页面；状态或组件更新时重新创建缓存，保持内容最新。
-        Widget? page;
-        double? previousHeight;
-        double? previousToolbarHeight;
-        double? previousTopPadding;
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final contentHeight = switch (constraints.maxWidth) {
-              >= 1440 => 450.0,
-              >= 1100 => 340.0,
-              >= 840 => 260.0,
-              _ => 200.0,
-            };
-            final toolbarHeight = switch (constraints.maxWidth) {
-              >= 1440 => 72.0,
-              >= 1100 => 64.0,
-              >= 840 => 60.0,
-              _ => kToolbarHeight,
-            };
-            final topPadding = MediaQuery.paddingOf(context).top;
-            if (page == null ||
-                previousHeight != contentHeight ||
-                previousToolbarHeight != toolbarHeight ||
-                previousTopPadding != topPadding) {
-              previousHeight = contentHeight;
-              previousToolbarHeight = toolbarHeight;
-              previousTopPadding = topPadding;
-              page = Scaffold(
-                body: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    if (notification is ScrollUpdateNotification) {
-                      if (notification.depth == 0) {
-                        final bool isPinned =
-                            notification.metrics.pixels >= contentHeight;
-                        if (this.isPinned != isPinned) {
-                          setState(() {
-                            this.isPinned = isPinned;
-                          });
-                        }
-                      }
-                    }
-                    return false;
-                  },
-                  child: widget.scrollController != null
-                      ? _buildSynopsis(
-                          context,
-                          headerSliver: _buildSliverAppBar(context,
-                              contentHeight, toolbarHeight, glassStyle),
-                        )
-                      : NestedScrollView(
-                          scrollBehavior: const ScrollBehavior().copyWith(
-                            scrollbars: false,
-                          ),
-                          controller: nestedScrollController,
-                          headerSliverBuilder:
-                              (BuildContext context, bool innerBoxIsScrolled) {
-                            return <Widget>[
-                              SliverOverlapAbsorber(
-                                handle: NestedScrollView
-                                    .sliverOverlapAbsorberHandleFor(
-                                  context,
-                                ),
-                                sliver: _buildSliverAppBar(context,
-                                    contentHeight, toolbarHeight, glassStyle),
-                              ),
-                            ];
-                          },
-                          body: _buildSynopsis(context),
-                        ),
-                ),
-                floatingActionButton: _buildFloatingActionButton(context),
-              );
-            }
-            return page!;
-          },
+    final name = ref.watch(animeInfoArgsProvider.select((args) => args.name));
+    // 约束在同一尺寸档位内变化时复用页面。
+    Widget? page;
+    (double, double, double, bool)? previousLayout;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final padding = MediaQuery.paddingOf(context);
+        final safeWidth = constraints.maxWidth - padding.horizontal;
+        final compact = InfoHeadView.usesCompactLayout(safeWidth);
+        final contentHeight = switch ((compact, constraints.maxWidth)) {
+          (true, _) =>
+            InfoHeadView.compactContentHeight(context, safeWidth, name),
+          (false, >= 1440) => 450.0,
+          (false, >= 1100) => 340.0,
+          (false, >= 840) => 260.0,
+          _ => 200.0,
+        };
+        final toolbarHeight = switch (constraints.maxWidth) {
+          >= 1440 => 72.0,
+          >= 1100 => 64.0,
+          >= 840 => 60.0,
+          _ => kToolbarHeight,
+        };
+        final statusBarHeight = padding.top;
+        final layout = (contentHeight, toolbarHeight, statusBarHeight, compact);
+        if (previousLayout == layout && page != null) return page!;
+        previousLayout = layout;
+
+        final header = _buildSliverAppBar(
+          contentHeight: contentHeight,
+          toolbarHeight: toolbarHeight,
+          statusBarHeight: statusBarHeight,
+          compact: compact,
         );
+        page = Scaffold(
+          body: widget.scrollController != null
+              ? _buildSynopsis(context, headerSliver: header)
+              : NestedScrollView(
+                  scrollBehavior: _scrollBehavior,
+                  controller: nestedScrollController,
+                  headerSliverBuilder: (context, _) => [
+                    SliverOverlapAbsorber(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                        context,
+                      ),
+                      sliver: header,
+                    ),
+                  ],
+                  body: _buildSynopsis(context),
+                ),
+          floatingActionButton: _buildFloatingActionButton(context),
+        );
+        return page!;
       },
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context, double contentHeight,
-      double toolbarHeight, bool glassStyle) {
-    final statusBarHeight = MediaQuery.paddingOf(context).top;
-    return AdaptiveSliverAppBar(
-      title: InfoAppbar(isPinned: isPinned),
+  Widget _buildSliverAppBar({
+    required double contentHeight,
+    required double toolbarHeight,
+    required double statusBarHeight,
+    required bool compact,
+  }) {
+    const maskFadeHeight = 48.0;
+    return SliverAppBar(
+      title: const InfoAppbar(),
+      automaticallyImplyLeading: false,
+      titleSpacing: 0,
       toolbarHeight: toolbarHeight,
-      isPinned: isPinned,
-      glassStyle: glassStyle,
-      expandedHeight: contentHeight + statusBarHeight + toolbarHeight,
-      flexibleSpace: FlexibleSpaceBar(
-        collapseMode: CollapseMode.pin,
-        background: Padding(
-          padding: const EdgeInsets.only(bottom: 15),
-          child: InfoHeadView(
-            onPlayEpisode: widget.onPlayEpisode,
-            statusBarHeight: statusBarHeight,
-            contentHeight: contentHeight,
+      pinned: true,
+      backgroundColor: Colors.transparent,
+      forceMaterialTransparency: true,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      expandedHeight: contentHeight + toolbarHeight,
+      flexibleSpace: Stack(
+        fit: StackFit.expand,
+        clipBehavior: Clip.none,
+        children: [
+          FlexibleSpaceBar(
+            collapseMode: CollapseMode.pin,
+            background: InfoHeadView(
+              onPlayEpisode: widget.onPlayEpisode,
+              statusBarHeight: statusBarHeight,
+              toolbarHeight: toolbarHeight,
+              contentHeight: contentHeight,
+              compact: compact,
+            ),
           ),
-        ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: statusBarHeight + toolbarHeight + maskFadeHeight,
+            child: IgnorePointer(
+              child: Builder(
+                builder: (context) {
+                  final settings = context.dependOnInheritedWidgetOfExactType<
+                      FlexibleSpaceBarSettings>()!;
+                  final remainingHeight =
+                      settings.currentExtent - settings.minExtent;
+                  final opacity =
+                      (1 - remainingHeight / maskFadeHeight).clamp(0.0, 1.0);
+                  return Opacity(
+                    opacity: opacity,
+                    child: const TopGradientMask(),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -344,9 +353,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                 key: PageStorageKey<String>(title),
                 controller:
                     headerSliver == null ? null : widget.scrollController,
-                scrollBehavior: const ScrollBehavior().copyWith(
-                  scrollbars: false,
-                ),
+                scrollBehavior: _scrollBehavior,
                 slivers: <Widget>[
                   if (headerSliver != null)
                     headerSliver

@@ -1,12 +1,14 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
-import 'package:anime_flow/features/anime_info/presentation/widgets/evaluate_dialog.dart';
+import 'package:anime_flow/features/anime_info/presentation/widgets/evaluate_form.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,31 +108,36 @@ class InfoCommentView extends ConsumerWidget {
 
   Widget _buildEvaluateButton(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(5),
-      onTap: () {
+    return JellyMenu<SubjectsInfoItem?>(
+      tooltip: '发表吐槽',
+      triggerColor: Colors.transparent,
+      barrierDismissible: false,
+      avoidKeyboard: true,
+      trigger: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Text(
+          '发表吐槽',
+          style: TextStyle(color: colorScheme.primary),
+        ),
+      ),
+      menuBuilder: (context, select) {
         final subjectsInfo = ref.read(animeInfoProvider).value;
-        if (subjectsInfo == null) return;
-        showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) => InfoEvaluateDialog(
-            subjectsInfo: subjectsInfo,
-            onSaved: (updated) {
-              if (!context.mounted ||
-                  ref.read(animeInfoArgsProvider).id != updated.id) {
-                return;
-              }
-              ref.read(animeInfoProvider.notifier).setAnimeInfo(updated);
-              ref.read(subjectCommentsProvider.notifier).refresh();
-            },
-          ),
+        if (subjectsInfo == null) return const SizedBox.shrink();
+        return InfoEvaluateForm(
+          subjectsInfo: subjectsInfo,
+          onSaved: select,
+          onClose: () => select(null),
         );
       },
-      child: Text(
-        '发表吐槽',
-        style: TextStyle(color: colorScheme.primary),
-      ),
+      onSelected: (updated) {
+        if (updated == null ||
+            !context.mounted ||
+            ref.read(animeInfoArgsProvider).id != updated.id) {
+          return;
+        }
+        ref.read(animeInfoProvider.notifier).setAnimeInfo(updated);
+        ref.read(subjectCommentsProvider.notifier).refresh();
+      },
     );
   }
 

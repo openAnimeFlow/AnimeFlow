@@ -8,24 +8,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:go_router/go_router.dart';
 
-/// 评价对话框
-class InfoEvaluateDialog extends ConsumerStatefulWidget {
+/// 条目评价表单。
+class InfoEvaluateForm extends ConsumerStatefulWidget {
   final SubjectsInfoItem subjectsInfo;
   final ValueChanged<SubjectsInfoItem> onSaved;
+  final VoidCallback onClose;
 
-  const InfoEvaluateDialog({
+  const InfoEvaluateForm({
     super.key,
     required this.subjectsInfo,
     required this.onSaved,
+    required this.onClose,
   });
 
   @override
-  ConsumerState<InfoEvaluateDialog> createState() => _EvaluateDialogState();
+  ConsumerState<InfoEvaluateForm> createState() => _EvaluateFormState();
 }
 
-class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
+class _EvaluateFormState extends ConsumerState<InfoEvaluateForm> {
   late TextEditingController _commentController;
   late TextEditingController _tagsController;
   int _selectedRate = 0; // 0-10分，0表示未评分
@@ -106,11 +107,8 @@ class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
       ));
       ref.invalidate(userCollectionsProvider);
       ref.invalidate(currentUserInfoProvider);
+      showCollectionSaveNotice(context, result);
       widget.onSaved(updated);
-      if (mounted) {
-        showCollectionSaveNotice(context, result);
-        context.pop();
-      }
     } catch (e) {
       if (mounted) {
         NotificationToast.show(e.toString(), title: '评价失败', maxWidth: 500);
@@ -129,18 +127,14 @@ class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
     final animeInfo = widget.subjectsInfo;
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: 600,
-        ),
-        child: Padding(
+    return FocusScope(
+      child: SizedBox(
+        width: 500,
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 标题栏
               Row(
@@ -159,7 +153,9 @@ class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close_rounded),
-                    onPressed: () => context.pop(),
+                    tooltip:
+                        MaterialLocalizations.of(context).closeButtonTooltip,
+                    onPressed: _isSubmitting ? null : widget.onClose,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
@@ -167,142 +163,129 @@ class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
               ),
               const SizedBox(height: 5),
               // 评价内容
-              Container(
-                constraints:
-                    const BoxConstraints(maxWidth: 500, maxHeight: 600),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (animeInfo.interest == null) ...[
-                        DropdownButtonFormField<int>(
-                          initialValue: _selectedType,
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context)
-                                .collectionSelectType,
-                          ),
-                          items: CollectType.values
-                              .where((type) => type.isCollected)
-                              .map((type) => DropdownMenuItem(
-                                    value: type.value,
-                                    child: Text(type.label),
-                                  ))
-                              .toList(),
-                          onChanged: _isSubmitting
-                              ? null
-                              : (value) =>
-                                  setState(() => _selectedType = value),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                      // 评分选择
-                      _buildStarRating(primaryColor),
-                      const SizedBox(height: 12),
-                      // 标签输入框
-                      TextField(
-                        controller: _tagsController,
-                        decoration: InputDecoration(
-                          hintText: "选择标签或手动输入...",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: theme.dividerColor,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: theme.dividerColor,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: primaryColor,
-                              width: 2,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.all(12),
-                        ),
-                      ),
-                      if (animeInfo.tags.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        SizedBox(height: 80, child: _buildTags),
-                      ],
-                      const SizedBox(height: 12),
-                      // 评价输入框
-                      SizedBox(
-                        height: 100,
-                        child: TextField(
-                          controller: _commentController,
-                          maxLines: null,
-                          // 设置为null以允许滚动
-                          expands: true,
-                          // 允许TextField填充整个高度
-                          textAlignVertical: TextAlignVertical.top,
-                          // 文本从顶部开始
-                          decoration: InputDecoration(
-                            hintText: "写下你的评价...",
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: theme.dividerColor,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: theme.dividerColor,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: primaryColor,
-                                width: 2,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.all(16),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      // 提交按钮
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isSubmitting ? null : _submitEvaluation,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 2,
-                          ),
-                          child: _isSubmitting
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
-                                  ),
-                                )
-                              : const Text(
-                                  '发表评价',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ],
+              if (animeInfo.interest == null) ...[
+                DropdownButtonFormField<int>(
+                  initialValue: _selectedType,
+                  decoration: InputDecoration(
+                    labelText:
+                        AppLocalizations.of(context).collectionSelectType,
                   ),
+                  items: CollectType.values
+                      .where((type) => type.isCollected)
+                      .map((type) => DropdownMenuItem(
+                            value: type.value,
+                            child: Text(type.label),
+                          ))
+                      .toList(),
+                  onChanged: _isSubmitting
+                      ? null
+                      : (value) => setState(() => _selectedType = value),
+                ),
+                const SizedBox(height: 12),
+              ],
+              // 评分选择
+              _buildStarRating(primaryColor),
+              const SizedBox(height: 12),
+              // 标签输入框
+              TextField(
+                controller: _tagsController,
+                decoration: InputDecoration(
+                  hintText: "选择标签或手动输入...",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: theme.dividerColor,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: theme.dividerColor,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: primaryColor,
+                      width: 2,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.all(12),
+                ),
+              ),
+              if (animeInfo.tags.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                SizedBox(height: 80, child: _buildTags),
+              ],
+              const SizedBox(height: 12),
+              // 评价输入框
+              SizedBox(
+                height: 100,
+                child: TextField(
+                  controller: _commentController,
+                  maxLines: null,
+                  // 设置为null以允许滚动
+                  expands: true,
+                  // 允许TextField填充整个高度
+                  textAlignVertical: TextAlignVertical.top,
+                  // 文本从顶部开始
+                  decoration: InputDecoration(
+                    hintText: "写下你的评价...",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: theme.dividerColor,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: theme.dividerColor,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: primaryColor,
+                        width: 2,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.all(16),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // 提交按钮
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isSubmitting ? null : _submitEvaluation,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 2,
+                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          '发表评价',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ],

@@ -16,6 +16,8 @@ class JellyMenu<T> extends StatefulWidget {
     this.elevation = 0,
     this.triggerResizeDuration = Duration.zero,
     this.enabled = true,
+    this.barrierDismissible = true,
+    this.avoidKeyboard = false,
     this.preferredVerticalDirection,
     this.widthSpring = const SpringDescription(
       mass: 1,
@@ -47,6 +49,12 @@ class JellyMenu<T> extends StatefulWidget {
 
   /// 是否允许打开菜单。
   final bool enabled;
+
+  /// 是否允许点按菜单外部来收起菜单。
+  final bool barrierDismissible;
+
+  /// 表单菜单在键盘弹出时使用可见区域重新定位。
+  final bool avoidKeyboard;
 
   /// 控制菜单宽度变化的弹簧参数，也适用于动画中途反转。
   final SpringDescription widthSpring;
@@ -84,7 +92,7 @@ class JellyMenu<T> extends StatefulWidget {
 }
 
 class _JellyMenuState<T> extends State<JellyMenu<T>>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late final width = AnimationController.unbounded(vsync: this);
   late final height = AnimationController.unbounded(vsync: this);
   final _portal = OverlayPortalController();
@@ -96,6 +104,28 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
   Widget? _overlayTrigger;
   bool open = false;
   int _animationGeneration = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.avoidKeyboard) WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didUpdateWidget(covariant JellyMenu<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.avoidKeyboard == oldWidget.avoidKeyboard) return;
+    if (widget.avoidKeyboard) {
+      WidgetsBinding.instance.addObserver(this);
+    } else {
+      WidgetsBinding.instance.removeObserver(this);
+    }
+  }
+
+  @override
+  void didChangeMetrics() {
+    if (_portal.isShowing) setState(() {});
+  }
 
   void _open() {
     if (!widget.enabled || open) return;
@@ -180,6 +210,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
   @override
   void dispose() {
     if (open) widget.onOpenChanged?.call(false);
+    if (widget.avoidKeyboard) WidgetsBinding.instance.removeObserver(this);
     width.dispose();
     height.dispose();
     super.dispose();
@@ -202,76 +233,118 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
               child: _overlayTrigger ?? widget.trigger,
             ),
           );
+    final target = CompositedTransformTarget(
+      key: _targetKey,
+      link: _link,
+      child: Opacity(
+        opacity: _portal.isShowing ? 0 : 1,
+        child: Material(
+          elevation: widget.elevation,
+          color: triggerColor,
+          shape: const StadiumBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: Tooltip(
+            message: widget.tooltip,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              excludeFromSemantics: !widget.enabled,
+              onTap: _open,
+              child: trigger,
+            ),
+          ),
+        ),
+      ),
+    );
+    if (widget.avoidKeyboard) {
+      return OverlayPortal.overlayChildLayoutBuilder(
+        controller: _portal,
+        overlayChildBuilder: (context, layout) =>
+            _buildOverlay(context, triggerColor, radius, layout: layout),
+        child: target,
+      );
+    }
     return OverlayPortal(
       controller: _portal,
-      overlayChildBuilder: (context) => AnimatedBuilder(
-        animation: Listenable.merge([width, height]),
-        child:
-            Builder(builder: (context) => widget.menuBuilder(context, select)),
-        builder: (context, menu) {
-          final reveal =
-              ((height.value - .45) * 2.4).clamp(0.0, 1.0).toDouble();
-          return IgnorePointer(
-            ignoring: !open,
+      overlayChildBuilder: (context) =>
+          _buildOverlay(context, triggerColor, radius),
+      child: target,
+    );
+  }
+
+  Widget _buildOverlay(
+    BuildContext context,
+    Color triggerColor,
+    double radius, {
+    OverlayChildLayoutInfo? layout,
+  }) {
+    var anchor = _anchor;
+    var available = _available;
+    Rect? target;
+    double? verticalEdge;
+    if (layout != null) {
+      target = MatrixUtils.transformRect(
+        layout.childPaintTransform,
+        Offset.zero & layout.childSize,
+      );
+      final view = View.of(context);
+      final keyboardInset = view.viewInsets.bottom / view.devicePixelRatio;
+      final overlaySize = layout.overlaySize;
+      final visibleBottom =
+          (overlaySize.height - keyboardInset).clamp(0.0, overlaySize.height);
+      final top = target.top.clamp(0.0, visibleBottom);
+      final bottom = target.bottom.clamp(0.0, visibleBottom);
+      final opensDown =
+          keyboardInset > 0 ? visibleBottom - top >= bottom : anchor.y < 0;
+      anchor = Alignment(anchor.x, opensDown ? -1 : 1);
+      verticalEdge = opensDown ? top : bottom;
+      available = Size(
+        (anchor.x < 0 ? overlaySize.width - target.left : target.right)
+            .clamp(0.0, overlaySize.width),
+        opensDown ? visibleBottom - top : bottom,
+      );
+    }
+
+    return AnimatedBuilder(
+      animation: Listenable.merge([width, height]),
+      child: Builder(builder: (context) => widget.menuBuilder(context, select)),
+      builder: (context, menu) {
+        final colors = Theme.of(context).colorScheme;
+        final reveal = ((height.value - .45) * 2.4).clamp(0.0, 1.0).toDouble();
+        final surface = ConstrainedBox(
+          constraints: BoxConstraints.loose(available),
+          child: Material(
+            elevation: widget.elevation,
+            color: Color.lerp(
+              triggerColor,
+              widget.menuColor ?? colors.surfaceContainerHigh,
+              reveal,
+            ),
+            borderRadius:
+                BorderRadius.circular(radius + (18 - radius) * reveal),
+            clipBehavior: Clip.antiAlias,
             child: Stack(
-              fit: StackFit.expand,
               children: [
-                ModalBarrier(
-                  color: Colors.black
-                      .withValues(alpha: .12 * height.value.clamp(0.0, 1.0)),
-                  onDismiss: () => toggle(false),
-                  semanticsLabel: MaterialLocalizations.of(context)
-                      .modalBarrierDismissLabel,
+                _MenuSurface(
+                  triggerSize: _triggerSize,
+                  widthProgress: width.value,
+                  heightProgress: height.value,
+                  alignment: anchor,
+                  child: IgnorePointer(
+                    ignoring: !open || reveal == 0,
+                    child: ExcludeSemantics(
+                      excluding: !open || reveal == 0,
+                      child: Opacity(opacity: reveal, child: menu),
+                    ),
+                  ),
                 ),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: CompositedTransformFollower(
-                    link: _link,
-                    showWhenUnlinked: false,
-                    targetAnchor: _anchor,
-                    followerAnchor: _anchor,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints.loose(_available),
-                      child: Material(
-                        elevation: widget.elevation,
-                        color: Color.lerp(
-                            triggerColor,
-                            widget.menuColor ?? colors.surfaceContainerHigh,
-                            reveal),
-                        borderRadius: BorderRadius.circular(
-                            radius + (18 - radius) * reveal),
-                        clipBehavior: Clip.antiAlias,
-                        child: Stack(
-                          children: [
-                            _MenuSurface(
-                              triggerSize: _triggerSize,
-                              widthProgress: width.value,
-                              heightProgress: height.value,
-                              alignment: _anchor,
-                              child: IgnorePointer(
-                                ignoring: !open || reveal == 0,
-                                child: ExcludeSemantics(
-                                  excluding: !open || reveal == 0,
-                                  child: Opacity(opacity: reveal, child: menu),
-                                ),
-                              ),
-                            ),
-                            Positioned.fill(
-                              child: IgnorePointer(
-                                child: Opacity(
-                                  opacity: (1 - width.value * 3)
-                                      .clamp(0.0, 1.0)
-                                      .toDouble(),
-                                  child: Center(
-                                    child: FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: _overlayTrigger ?? widget.trigger,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Opacity(
+                      opacity: (1 - width.value * 3).clamp(0.0, 1.0).toDouble(),
+                      child: Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: _overlayTrigger ?? widget.trigger,
                         ),
                       ),
                     ),
@@ -279,31 +352,48 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
                 ),
               ],
             ),
-          );
-        },
-      ),
-      child: CompositedTransformTarget(
-        key: _targetKey,
-        link: _link,
-        child: Opacity(
-          opacity: _portal.isShowing ? 0 : 1,
-          child: Material(
-            elevation: widget.elevation,
-            color: triggerColor,
-            shape: const StadiumBorder(),
-            clipBehavior: Clip.antiAlias,
-            child: Tooltip(
-              message: widget.tooltip,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                excludeFromSemantics: !widget.enabled,
-                onTap: _open,
-                child: trigger,
-              ),
-            ),
           ),
-        ),
-      ),
+        );
+        final menuPosition = layout == null
+            ? Align(
+                alignment: Alignment.topLeft,
+                child: CompositedTransformFollower(
+                  link: _link,
+                  showWhenUnlinked: false,
+                  targetAnchor: anchor,
+                  followerAnchor: anchor,
+                  child: surface,
+                ),
+              )
+            : Positioned(
+                left: anchor.x < 0 ? target!.left : null,
+                right: anchor.x > 0
+                    ? layout.overlaySize.width - target!.right
+                    : null,
+                top: anchor.y < 0 ? verticalEdge : null,
+                bottom: anchor.y > 0
+                    ? layout.overlaySize.height - verticalEdge!
+                    : null,
+                child: surface,
+              );
+        return IgnorePointer(
+          ignoring: !open,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              ModalBarrier(
+                color: Colors.black
+                    .withValues(alpha: .12 * height.value.clamp(0.0, 1.0)),
+                dismissible: widget.barrierDismissible,
+                onDismiss: () => toggle(false),
+                semanticsLabel:
+                    MaterialLocalizations.of(context).modalBarrierDismissLabel,
+              ),
+              menuPosition,
+            ],
+          ),
+        );
+      },
     );
   }
 }

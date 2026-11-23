@@ -50,7 +50,6 @@ class _CommentsViewState extends ConsumerState<CommentsView>
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -194,50 +193,62 @@ class _CommentsViewState extends ConsumerState<CommentsView>
   }
 
   Widget _buildSortMenu(
-      AppLocalizations l10n,
-      List<EpisodeComment> comments,
-      ) {
-    return JellyMenu<_CommentSort>(
-      tooltip: MaterialLocalizations.of(context).showMenuTooltip,
-      triggerColor: Colors.transparent,
-      preferredVerticalDirection: VerticalDirection.down,
-      trigger: const SizedBox.square(
-        dimension: 48,
-        child: Icon(Icons.sort_rounded),
-      ),
-      menuBuilder: (context, select) => SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: IntrinsicWidth(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final order in _CommentSort.values)
-                MenuItemButton(
-                  leadingIcon: _sortOrder == order
-                      ? const Icon(Icons.check)
-                      : const SizedBox(width: 24),
-                  onPressed: () => select(order),
-                  child: Text(
-                    switch (order) {
-                      _CommentSort.oldest => l10n.defaultSort,
-                      _CommentSort.newest => l10n.newestSort,
-                    },
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+    AppLocalizations l10n,
+    List<EpisodeComment> comments,
+  ) {
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: JellyMenu<_CommentSort>(
+        tooltip: MaterialLocalizations.of(context).showMenuTooltip,
+        triggerColor: Colors.transparent,
+        preferredVerticalDirection: VerticalDirection.down,
+        trigger: const SizedBox.square(
+          dimension: 48,
+          child: Icon(Icons.sort_rounded),
+        ),
+        menuBuilder: (context, select) => SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final order in _CommentSort.values)
+                  IconButton(
+                    onPressed: () => select(order),
+                    style: IconButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10)
+                    ),
+                    icon: Row(
+                      spacing: 5,
+                      children: [
+                        _sortOrder == order
+                            ? const Icon(Icons.check)
+                            : const SizedBox(width: 24),
+                        Text(
+                          switch (order) {
+                            _CommentSort.oldest => l10n.defaultSort,
+                            _CommentSort.newest => l10n.newestSort,
+                          },
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      ],
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
+        onSelected: (order) {
+          setState(() {
+            _sortOrder = order;
+            _sortedComments ??= List<EpisodeComment>.of(comments);
+            _applySort();
+          });
+        },
       ),
-      onSelected: (order) {
-        setState(() {
-          _sortOrder = order;
-          _sortedComments ??= List<EpisodeComment>.of(comments);
-          _applySort();
-        });
-      },
     );
   }
 

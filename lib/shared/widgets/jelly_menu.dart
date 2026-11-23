@@ -13,6 +13,8 @@ class JellyMenu<T> extends StatefulWidget {
     this.onOpenChanged,
     this.triggerColor,
     this.menuColor,
+    this.elevation = 0,
+    this.triggerResizeDuration = Duration.zero,
     this.enabled = true,
     this.preferredVerticalDirection,
     this.widthSpring = const SpringDescription(
@@ -36,6 +38,12 @@ class JellyMenu<T> extends StatefulWidget {
 
   /// 菜单展开后的背景色，省略时使用主题的 surfaceContainerHigh。
   final Color? menuColor;
+
+  /// 触发组件和展开菜单的阴影高度。
+  final double elevation;
+
+  /// 菜单收起后，触发组件在内容尺寸变化时的动画时长。
+  final Duration triggerResizeDuration;
 
   /// 是否允许打开菜单。
   final bool enabled;
@@ -85,6 +93,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
   Alignment _anchor = Alignment.topRight;
   Size _available = Size.zero;
   Size _triggerSize = Size.zero;
+  Widget? _overlayTrigger;
   bool open = false;
   int _animationGeneration = 0;
 
@@ -98,6 +107,9 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
     final overlay =
         Overlay.of(context).context.findRenderObject()! as RenderBox;
     _triggerSize = target.size;
+    if (widget.triggerResizeDuration != Duration.zero) {
+      _overlayTrigger = widget.trigger;
+    }
     final origin = target.localToGlobal(Offset.zero, ancestor: overlay);
     final right = overlay.size.width - origin.dx;
     final left = origin.dx + target.size.width;
@@ -152,7 +164,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
       ]);
       if (mounted && generation == _animationGeneration && !open) {
         _portal.hide();
-        setState(() {});
+        setState(() => _overlayTrigger = null);
       }
     } on TickerCanceled {
       // A new animation or disposal superseded this one.
@@ -178,6 +190,18 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
     final colors = Theme.of(context).colorScheme;
     final triggerColor = widget.triggerColor ?? colors.surfaceContainerHigh;
     final radius = _triggerSize.shortestSide / 2;
+    final trigger = widget.triggerResizeDuration == Duration.zero
+        ? widget.trigger
+        : AnimatedSize(
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : widget.triggerResizeDuration,
+            curve: Curves.easeInOutCubic,
+            child: SizedBox.fromSize(
+              size: _portal.isShowing ? _triggerSize : null,
+              child: _overlayTrigger ?? widget.trigger,
+            ),
+          );
     return OverlayPortal(
       controller: _portal,
       overlayChildBuilder: (context) => AnimatedBuilder(
@@ -209,6 +233,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
                     child: ConstrainedBox(
                       constraints: BoxConstraints.loose(_available),
                       child: Material(
+                        elevation: widget.elevation,
                         color: Color.lerp(
                             triggerColor,
                             widget.menuColor ?? colors.surfaceContainerHigh,
@@ -240,7 +265,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
                                   child: Center(
                                     child: FittedBox(
                                       fit: BoxFit.scaleDown,
-                                      child: widget.trigger,
+                                      child: _overlayTrigger ?? widget.trigger,
                                     ),
                                   ),
                                 ),
@@ -263,6 +288,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
         child: Opacity(
           opacity: _portal.isShowing ? 0 : 1,
           child: Material(
+            elevation: widget.elevation,
             color: triggerColor,
             shape: const StadiumBorder(),
             clipBehavior: Clip.antiAlias,
@@ -272,7 +298,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
                 behavior: HitTestBehavior.opaque,
                 excludeFromSemantics: !widget.enabled,
                 onTap: _open,
-                child: widget.trigger,
+                child: trigger,
               ),
             ),
           ),

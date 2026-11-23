@@ -101,8 +101,11 @@ class _CollectionMenuState extends State<CollectionMenu> {
             dimension: 40,
             child: Opacity(
               opacity: _isUpdating ? .6 : 1,
-              child:
-                  Icon(icon, size: widget._iconSize, color: widget._iconColor),
+              child: Icon(
+                icon,
+                size: widget._iconSize,
+                color: widget._iconColor ?? colors.primaryContainer,
+              ),
             ),
           ),
         _CollectionMenuVariant.labeled => ConstrainedBox(

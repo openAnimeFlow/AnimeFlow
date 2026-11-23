@@ -23,7 +23,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'collection_filter_dialog.dart';
+import 'collection_filter_form.dart';
 import 'user_collection_tabs.dart';
 
 enum _LoginOverflowAction {
@@ -86,32 +86,6 @@ class _UserViewState extends ConsumerState<UserCenterView>
 
   Future<void> _showRefreshIndicatorForCurrentTab() async {
     await _refreshIndicatorKeys[_currentType]?.currentState?.show();
-  }
-
-  Future<void> _showCollectionFilterDialog() async {
-    final currentType = _currentType;
-    final tab = ref.read(userCollectionsProvider).tabState(currentType);
-    final filters = await showDialog<CollectionFilterResult>(
-      context: context,
-      useRootNavigator: false,
-      builder: (dialogContext) => CollectionFilterDialog(
-        initialKeyword: tab.keyword ?? '',
-        initialSort: AppSettings.getCollectionSort(currentType),
-      ),
-    );
-    if (filters == null || !mounted) {
-      return;
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      ref.read(userCollectionsProvider.notifier).applyFilters(
-            currentType,
-            keyword: filters.keyword,
-            sort: filters.sort,
-          );
-    });
   }
 
   /// 切换用户信息显示状态
@@ -323,40 +297,75 @@ class _UserViewState extends ConsumerState<UserCenterView>
           OcclusionAwareFabLocation(BottomOcclusionScope.of(context)),
       floatingActionButton: Consumer(
         builder: (context, ref, _) {
+          final currentType = _currentType;
           final (keyword, sort) = ref.watch(
             userCollectionsProvider.select(
               (state) {
-                final tab = state.tabState(_currentType);
+                final tab = state.tabState(currentType);
                 return (tab.keyword, tab.sort);
               },
             ),
           );
           final l10n = AppLocalizations.of(context);
-          if ((keyword == null || keyword.isEmpty) &&
-              sort == CollectionSort.defaultSort) {
-            return FloatingActionButton(
-              heroTag: null,
-              tooltip: l10n.filterCollection,
-              onPressed: _showCollectionFilterDialog,
-              child: const Icon(Icons.tune),
-            );
-          }
+          final theme = Theme.of(context);
+          final fabTheme = theme.floatingActionButtonTheme;
+          final foreground =
+              fabTheme.foregroundColor ?? theme.colorScheme.onPrimaryContainer;
+          final label = [
+            if (keyword != null && keyword.isNotEmpty) keyword,
+            if (sort == CollectionSort.watch) l10n.collectionSortWatch,
+          ].join(' · ');
 
-          return FloatingActionButton.extended(
-            heroTag: null,
+          return JellyMenu<CollectionFilterResult?>(
+            key: ValueKey((widget.user.id, currentType)),
             tooltip: l10n.filterCollection,
-            onPressed: _showCollectionFilterDialog,
-            icon: const Icon(Icons.tune),
-            label: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 160),
-              child: Text(
-                [
-                  if (keyword != null && keyword.isNotEmpty) keyword,
-                  if (sort == CollectionSort.watch) l10n.collectionSortWatch,
-                ].join(' · '),
-                overflow: TextOverflow.ellipsis,
+            preferredVerticalDirection: VerticalDirection.up,
+            elevation: fabTheme.elevation ?? 6,
+            triggerResizeDuration: const Duration(milliseconds: 220),
+            triggerColor:
+                fabTheme.backgroundColor ?? theme.colorScheme.primaryContainer,
+            trigger: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 56, minHeight: 56),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.tune, color: foreground),
+                    if (label.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 160),
+                          child: Text(
+                            label,
+                            style: theme.textTheme.labelLarge
+                                ?.copyWith(color: foreground),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
+            menuBuilder: (context, select) => CollectionFilterForm(
+              initialKeyword: keyword ?? '',
+              initialSort: AppSettings.getCollectionSort(currentType),
+              onSubmit: select,
+              onCancel: () => select(null),
+            ),
+            onSelected: (filters) {
+              if (filters == null) return;
+              ref.read(userCollectionsProvider.notifier).applyFilters(
+                    currentType,
+                    keyword: filters.keyword,
+                    sort: filters.sort,
+                  );
+            },
           );
         },
       ),

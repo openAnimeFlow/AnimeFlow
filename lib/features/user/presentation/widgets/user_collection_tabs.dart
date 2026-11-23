@@ -201,7 +201,8 @@ class _UserCollectionTab extends ConsumerWidget {
           child: NotificationListener<Notification>(
             onNotification: (notification) {
               if (notification is OverscrollIndicatorNotification &&
-                  notification.depth == 0 && notification.leading) {
+                  notification.depth == 0 &&
+                  notification.leading) {
                 notification.paintOffset = overlap;
               } else if (notification is ScrollMetricsNotification) {
                 _scheduleLoadMoreForMetrics(
@@ -304,8 +305,8 @@ class _UserCollectionTab extends ConsumerWidget {
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: crossAxisCount,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 5,
+                            mainAxisSpacing: 5,
                             childAspectRatio: 2.5,
                           ),
                           delegate: SliverChildBuilderDelegate(
@@ -459,106 +460,109 @@ class _CollectionItemCard extends StatelessWidget {
     final syncStatus =
         CollectionRemoteSyncStatus.parse(collection.interest.remoteSyncStatus);
 
-    return InkWell(
-      borderRadius: const BorderRadius.all(Radius.circular(12)),
-      onTap: () {
-        appNavigatorOf(context).openAnimeInfoFromExtra<void>(InfoRouteExtra(
-          id: collection.id,
-          name: displayName,
-          image: collection.images.large,
-        ));
-      },
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AspectRatio(
-            aspectRatio: 2 / 3,
-            child: DebouncedImageWidth(
-              width: coverWidth,
-              builder: (context, cacheWidth) => AnimationNetworkImage(
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
-                url: collection.images.large,
-                memCacheWidth: cacheWidth,
-                gaplessResize: true,
-                fit: BoxFit.cover,
+    return Card(
+      elevation: 0,
+      child: InkWell(
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        onTap: () {
+          appNavigatorOf(context).openAnimeInfoFromExtra<void>(InfoRouteExtra(
+            id: collection.id,
+            name: displayName,
+            image: collection.images.large,
+          ));
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 2 / 3,
+              child: DebouncedImageWidth(
+                width: coverWidth,
+                builder: (context, cacheWidth) => AnimationNetworkImage(
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  url: collection.images.large,
+                  memCacheWidth: cacheWidth,
+                  gaplessResize: true,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(5),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          displayName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (syncStatus.needsAttention)
-                        Tooltip(
-                          message: collectionSaveMessage(l10n, syncStatus),
-                          child: const Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Icon(Icons.cloud_off_outlined, size: 18),
-                          ),
-                        ),
-                      CollectionMenu.icon(
-                        collectType: collectTypeFromApiType(
-                          collection.interest.type,
-                        ),
-                        iconSize: 25,
-                        onCollectTypeChanged: onCollectTypeChanged,
-                      ),
-                    ],
-                  ),
-                  Text(
-                    _episodeLabel,
-                    style: TextStyle(
-                        color: colorScheme.onSurfaceVariant
-                            .withValues(alpha: 0.8)),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      RankingView(ranking: collection.rating.rank),
-                      if (collection.rating.score > 0) ...[
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            StarView(
-                                iconSize: 16, score: collection.rating.score),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${collection.rating.score}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            displayName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
                             ),
-                          ],
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (syncStatus.needsAttention)
+                          Tooltip(
+                            message: collectionSaveMessage(l10n, syncStatus),
+                            child: const Padding(
+                              padding: EdgeInsets.all(8),
+                              child: Icon(Icons.cloud_off_outlined, size: 18),
+                            ),
+                          ),
+                        CollectionMenu.icon(
+                          collectType: collectTypeFromApiType(
+                            collection.interest.type,
+                          ),
+                          iconSize: 25,
+                          onCollectTypeChanged: onCollectTypeChanged,
                         ),
                       ],
-                    ],
-                  )
-                ],
+                    ),
+                    Text(
+                      _episodeLabel,
+                      style: TextStyle(
+                          color: colorScheme.onSurfaceVariant
+                              .withValues(alpha: 0.8)),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        RankingView(ranking: collection.rating.rank),
+                        if (collection.rating.score > 0) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              StarView(
+                                  iconSize: 16, score: collection.rating.score),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${collection.rating.score}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

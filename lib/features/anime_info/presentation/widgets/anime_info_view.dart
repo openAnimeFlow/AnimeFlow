@@ -207,8 +207,10 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
               ),
             Consumer(
               builder: (context, ref, child) {
-                final subjectsInfo = ref.watch(animeInfoProvider).value;
-                if (subjectsInfo == null) return const SizedBox.shrink();
+                final hasSubject = ref.watch(
+                  animeInfoProvider.select((state) => state.hasValue),
+                );
+                if (!hasSubject) return const SizedBox.shrink();
 
                 return FloatingActionButton(
                   heroTag: null,
@@ -227,8 +229,10 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
   }
 
   List<Widget> _sliversForSubjectsInfo(
-    BuildContext context,
-    SubjectsInfoItem subjectsInfo, {
+    BuildContext context, {
+    required String summary,
+    required List<Tags> tags,
+    required List<Infobox> infobox,
     required String title,
     required double fontSizeTitle,
     required FontWeight fontWeightTitle,
@@ -243,7 +247,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
             title: title,
             fontSizeTitle: fontSizeTitle,
             fontWeightTitle: fontWeightTitle,
-            text: subjectsInfo.summary,
+            text: summary,
             fontWeight: fontWeight,
           ),
         ),
@@ -256,7 +260,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
             title: l10n.tagsTitle,
             fontSizeTitle: fontSizeTitle,
             fontWeightTitle: fontWeightTitle,
-            tags: subjectsInfo.tags,
+            tags: tags,
             fontSize: 12,
             fontWeight: FontWeight.w700,
             numbersSize: 10,
@@ -269,7 +273,7 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
           context,
           DetailsView(
             title: l10n.detailsTitle,
-            subject: subjectsInfo,
+            infobox: infobox,
             textSize: 13,
             textFontWeight: FontWeight.w600,
           ),
@@ -354,13 +358,23 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
                     ),
                   Consumer(
                     builder: (context, ref, _) {
-                      final subjectsInfoAsync = ref.watch(animeInfoProvider);
+                      final subjectsInfoAsync = ref.watch(
+                        animeInfoProvider.select((state) => state.whenData(
+                              (subject) => (
+                                summary: subject.summary,
+                                tags: subject.tags,
+                                infobox: subject.infobox,
+                              ),
+                            )),
+                      );
 
                       return subjectsInfoAsync.when(
                         data: (subjectsInfo) => SliverMainAxisGroup(
                           slivers: _sliversForSubjectsInfo(
                             context,
-                            subjectsInfo,
+                            summary: subjectsInfo.summary,
+                            tags: subjectsInfo.tags,
+                            infobox: subjectsInfo.infobox,
                             title: title,
                             fontSizeTitle: fontSizeTitle,
                             fontWeightTitle: fontWeightTitle,

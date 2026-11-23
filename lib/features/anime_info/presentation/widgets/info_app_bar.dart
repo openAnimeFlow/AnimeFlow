@@ -191,17 +191,19 @@ class InfoAppbar extends ConsumerWidget {
                     style: const TextStyle(fontSize: 15),
                   ),
                   Consumer(builder: (context, ref, child) {
-                    final infoAsync = ref.watch(animeInfoProvider);
-                    return infoAsync.when(
-                        data: (data) => data.rating.rank > 0
+                    final ratingAsync = ref.watch(animeInfoProvider.select(
+                      (state) => state.whenData((subject) => subject.rating),
+                    ));
+                    return ratingAsync.when(
+                        data: (rating) => rating.rank > 0
                             ? Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  RankingView(ranking: data.rating.rank),
-                                  StarView(score: data.rating.score),
+                                  RankingView(ranking: rating.rank),
+                                  StarView(score: rating.score),
                                   const SizedBox(width: 5),
                                   Text(
-                                    data.rating.score.toStringAsFixed(1),
+                                    rating.score.toStringAsFixed(1),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(

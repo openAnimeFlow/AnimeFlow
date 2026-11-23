@@ -8,6 +8,10 @@ import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
+import 'package:anime_flow/features/subject_episodes/data/repositories/subject_episodes_repository.dart';
+import 'package:anime_flow/features/user/application/user_collection_provider.dart';
+import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
+import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -69,6 +73,7 @@ void main() {
     directory = await Directory.systemTemp.createTemp('subject_episodes_test_');
     Hive.init(directory.path);
     Storage.subjectEpisodesCache = await Hive.openBox<String>('episodes');
+    Storage.userDataCache = await Hive.openBox<String>('user_data');
   });
   tearDownAll(() async {
     await Hive.close();
@@ -80,12 +85,53 @@ void main() {
     container = ProviderContainer(retry: (_, error) => null, overrides: [
       currentFlowTokenProvider.overrideWith(_GuestToken.new),
       provider.overrideWith(() => notifier),
+      collectionTypeUpdateProvider.overrideWithValue((_, __) async =>
+          const CollectionUpdateResult(
+              remoteSyncStatus: CollectionRemoteSyncStatus.pending)),
+      collectionCancelProvider.overrideWithValue((_) async {}),
     ]);
     container.listen(provider, (_, next) {});
     // Loading now awaits the session and cache lookup before requesting a page.
     await notifier.firstRequest.future;
   });
   tearDown(() => container.dispose());
+
+  test('a collection type save preserves loaded episodes and their cache',
+      () async {
+    notifier.requests.single.result.complete(_page([1], 1));
+    final before = await container.read(provider.future);
+    await Storage.subjectEpisodesCache.put('cached page', 'cached');
+    final collection = UserCollectionData.fromJson({
+      'id': 1,
+      'type': 2,
+      'rating': <String, dynamic>{},
+      'images': <String, dynamic>{},
+      'interest': {'type': 3},
+    });
+    final collections = container.read(userCollectionsProvider.notifier);
+
+    await collections.updateCollectionType(collection, 2);
+    await container.pump();
+
+    expect(container.read(provider).requireValue, same(before));
+    expect(notifier.requests.map((request) => request.offset), [0]);
+    expect(Storage.subjectEpisodesCache.get('cached page'), 'cached');
+
+    await collections.updateCollectionType(collection, 0);
+    final refreshed = container.read(provider.future);
+    await container.read(subjectEpisodesRepositoryProvider.notifier).readPage(
+          1,
+          sessionId: null,
+          limit: 100,
+          offset: 0,
+        );
+    await _flush();
+
+    expect(Storage.subjectEpisodesCache.isEmpty, isTrue);
+    expect(notifier.requests.map((request) => request.offset), [0, 0]);
+    notifier.requests.last.result.complete(_page([1], 1));
+    await refreshed;
+  });
 
   test('target loading waits for initialization and shares concurrent pages',
       () async {

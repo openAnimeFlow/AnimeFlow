@@ -7,6 +7,7 @@ import 'package:anime_flow/features/user/user_events.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'subject_episodes_repository.g.dart';
@@ -20,7 +21,10 @@ class SubjectEpisodesRepository extends _$SubjectEpisodesRepository {
 
   @override
   void build() {
-    ref.listen(collectionRevisionProvider, (_, __) {
+    final episodeProgressRevision = collectionRevisionProvider.select(
+      (change) => change.episodeProgressRevision,
+    );
+    ref.listen(episodeProgressRevision, (_, __) {
       _revision++;
       _cacheReady = _cacheReady
           .then((_) => JsonResponseCache.clear(Storage.subjectEpisodesCache))

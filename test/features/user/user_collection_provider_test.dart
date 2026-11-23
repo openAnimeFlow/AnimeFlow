@@ -9,7 +9,6 @@ import 'package:anime_flow/features/user/application/user_collection_provider.da
 import 'package:anime_flow/features/user/application/user_collection_state.dart';
 import 'package:anime_flow/features/user/application/user_state_provider.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
-import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'package:anime_flow/features/user/application/collection_refresh_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/enums/collection_sort.dart';

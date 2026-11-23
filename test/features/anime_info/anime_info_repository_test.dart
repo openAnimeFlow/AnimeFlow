@@ -14,8 +14,10 @@ import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/anime_info/data/datasources/anime_info_local_data_source.dart';
 import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
+import 'package:anime_flow/features/user/application/user_collection_provider.dart';
+import 'package:anime_flow/features/user/user_events.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -111,7 +113,13 @@ void main() {
   AnimeInfoRepository createRepository() {
     repositoryContainer = ProviderContainer(
       retry: (_, __) => null,
-      overrides: [currentFlowTokenProvider.overrideWith(GuestToken.new)],
+      overrides: [
+        currentFlowTokenProvider.overrideWith(GuestToken.new),
+        collectionTypeUpdateProvider.overrideWithValue((_, __) async =>
+            const CollectionUpdateResult(
+                remoteSyncStatus: CollectionRemoteSyncStatus.pending)),
+        collectionCancelProvider.overrideWithValue((_) async {}),
+      ],
     );
     addTearDown(repositoryContainer.dispose);
     return repositoryContainer.read(animeInfoRepositoryProvider.notifier);
@@ -124,6 +132,7 @@ void main() {
     Storage.animeInfoCache = await Hive.openBox<String>('anime_info_cache');
     Storage.subjectCommentsCache =
         await Hive.openBox<String>('subject_comments');
+    Storage.userDataCache = await Hive.openBox<String>('user_data');
   });
   tearDownAll(() async {
     await Hive.close();
@@ -194,6 +203,41 @@ void main() {
     expect(Storage.subjectCommentsCache.get('42:20:0'), 'cached comments');
     expect(container.read(subjectCommentsProvider.exists), isFalse);
     expect(remote.requests, hasLength(1));
+  });
+
+  test('collection changes update interest without refetching current details',
+      () async {
+    await Storage.animeInfoCache.put(
+      jsonEncode([null, 42]),
+      jsonEncode({'subject': subject('cached').toJson(), 'cachedAt': 0}),
+    );
+    final container = createContainer();
+    final before = await container.read(animeInfoProvider.future);
+    await remote.waitForRequests(1);
+    final notifier = container.read(animeInfoProvider.notifier);
+
+    final result = await notifier.updateCollectionType(3);
+    expect(result?.remoteSyncStatus, CollectionRemoteSyncStatus.pending);
+    remote.requests.single.complete(reply(subject: subject('stale')));
+    await container.pump();
+
+    final collected = container.read(animeInfoProvider).requireValue;
+    expect(collected.name, 'cached');
+    expect(collected.interest?.type, 3);
+    expect(collected.rating, same(before.rating));
+    expect(collected.infobox, same(before.infobox));
+
+    await notifier.updateCollectionType(0);
+    await container.pump();
+    expect(container.read(animeInfoProvider).requireValue.interest, isNull);
+    expect(remote.requests, hasLength(1));
+    expect(repositoryContainer.read(collectionRevisionProvider).revision, 2);
+
+    repositoryContainer.read(collectionRevisionProvider.notifier).changed();
+    await remote.waitForRequests(2);
+    remote.requests.last.complete(reply(subject: subject('external change')));
+    expect((await container.read(animeInfoProvider.future)).name,
+        'external change');
   });
 
   test('failure of an invalidated request retries; current failure is surfaced',

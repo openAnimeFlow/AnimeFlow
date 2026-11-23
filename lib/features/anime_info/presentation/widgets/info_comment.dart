@@ -4,7 +4,6 @@ import 'package:anime_flow/features/anime_info/presentation/widgets/evaluate_dia
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
@@ -49,7 +48,8 @@ class InfoCommentView extends ConsumerWidget {
     AppLocalizations l10n,
   ) {
     final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
-    final subjectsInfo = ref.watch(animeInfoProvider).value;
+    final canEvaluate = isLoggedIn &&
+        ref.watch(animeInfoProvider.select((state) => state.hasValue));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,8 +70,7 @@ class InfoCommentView extends ConsumerWidget {
               style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
             ),
             const Spacer(),
-            if (isLoggedIn && subjectsInfo != null)
-              _buildEvaluateButton(context, ref, subjectsInfo: subjectsInfo),
+            if (canEvaluate) _buildEvaluateButton(context, ref),
           ],
         ),
         const SizedBox(height: 16),
@@ -105,12 +104,13 @@ class InfoCommentView extends ConsumerWidget {
     );
   }
 
-  Widget _buildEvaluateButton(BuildContext context, WidgetRef ref,
-      {required SubjectsInfoItem subjectsInfo}) {
+  Widget _buildEvaluateButton(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       borderRadius: BorderRadius.circular(5),
       onTap: () {
+        final subjectsInfo = ref.read(animeInfoProvider).value;
+        if (subjectsInfo == null) return;
         showDialog<void>(
           context: context,
           barrierDismissible: false,

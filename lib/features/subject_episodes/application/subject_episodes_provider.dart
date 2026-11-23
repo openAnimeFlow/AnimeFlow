@@ -42,7 +42,9 @@ class SubjectEpisodes extends _$SubjectEpisodes {
     // 观看状态属于当前账号；会话变化时重建，并等待凭证就绪后再请求。
     ref.watch(
         currentFlowTokenProvider.select((token) => token.value?.sessionId));
-    ref.watch(collectionRevisionProvider);
+    ref.watch(collectionRevisionProvider.select(
+      (change) => change.episodeProgressRevision,
+    ));
     final repository = ref.watch(subjectEpisodesRepositoryProvider.notifier);
     final token = await ref.read(currentFlowTokenProvider.future);
     if (!_isCurrent(revision)) throw cancelToken.cancelError!;

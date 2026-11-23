@@ -12,7 +12,7 @@ import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/auth/application/account_provider.dart';
 import 'package:anime_flow/features/auth/application/oauth_notice_provider.dart';
-import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
+import 'package:anime_flow/features/user/application/collection_refresh_provider.dart';
 import 'package:anime_flow/features/user/application/user_collection_provider.dart';
 import 'package:anime_flow/features/user/data/repository/collection_sync_repository.dart';
 import 'package:anime_flow/features/user/user_api.dart';
@@ -213,7 +213,7 @@ void main() {
         status: BgmCollectionSyncStatus.success, taskId: 9, syncedCount: 5));
     await pending;
     expect(container.read(bgmCollectionSyncProvider).value, isNull);
-    expect(container.read(collectionRevisionProvider), 0);
+    expect(container.read(collectionRevisionProvider).revision, 0);
     expect(await container.read(currentUserInfoProvider.future), isNull);
     expect(await container.read(bangumiBindProvider.future), isNull);
   });
@@ -254,7 +254,7 @@ void main() {
     final pages = container.read(userCollectionsProvider);
     await container.read(bgmCollectionSyncProvider.notifier).refreshStatus();
     expect(container.read(userCollectionsProvider), same(pages));
-    expect(container.read(collectionRevisionProvider), 1);
+    expect(container.read(collectionRevisionProvider).revision, 1);
   });
 
   test(

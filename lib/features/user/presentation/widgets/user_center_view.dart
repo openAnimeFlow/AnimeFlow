@@ -3,7 +3,7 @@ import 'dart:async';
 
 import 'package:anime_flow/shared/widgets/adaptive_sliver_app_bar.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
-import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
+import 'package:anime_flow/features/user/application/collection_refresh_provider.dart';
 import 'collection_sync_pending_banner.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/shared/models/enums/collection_sort.dart';

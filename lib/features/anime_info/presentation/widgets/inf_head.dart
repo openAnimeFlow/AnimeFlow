@@ -10,6 +10,7 @@ import 'package:anime_flow/shared/navigation/args/video_resource_download_route_
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
+import 'package:anime_flow/shared/models/bangumi/rating_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/episodes_drawer.dart';
@@ -22,6 +23,15 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
+
+typedef _HeaderDetails = ({
+  int id,
+  String? airtime,
+  String platform,
+  int episodeCount,
+  RatingItem rating,
+  Collection collection,
+});
 
 @Dependencies([AnimeInfo, SubjectComments, animeInfoArgs])
 class InfoHeadView extends StatelessWidget {
@@ -45,12 +55,23 @@ class InfoHeadView extends StatelessWidget {
     };
     // 仅布局约束变化时复用子树，状态、主题和语言变化仍正常触发重建。
     final details = Consumer(builder: (context, ref, child) {
-      final subjectsInfo = ref.watch(animeInfoProvider);
+      final subjectsInfo = ref.watch(animeInfoProvider.select(
+        (state) => state.whenData(
+          (subject) => (
+            id: subject.id,
+            airtime: subject.airtime?.date,
+            platform: subject.platform.typeCN,
+            episodeCount: subject.eps,
+            rating: subject.rating,
+            collection: subject.collection,
+          ),
+        ),
+      ));
       return subjectsInfo.when(
         data: (data) => _dataView(
           context,
           ref: ref,
-          subjectItem: data,
+          subject: data,
           layoutScale: layoutScale,
         ),
         error: (error, stackTrace) => const SizedBox.shrink(),
@@ -270,7 +291,7 @@ class InfoHeadView extends StatelessWidget {
   Widget _dataView(
     BuildContext context, {
     required WidgetRef ref,
-    required SubjectsInfoItem subjectItem,
+    required _HeaderDetails subject,
     required double layoutScale,
   }) {
     final name = ref.watch(animeInfoArgsProvider.select((e) => e.name));
@@ -278,36 +299,8 @@ class InfoHeadView extends StatelessWidget {
     final fontSize = 12 * layoutScale;
     const FontWeight fontWeight = FontWeight.w600;
     const amberAccent = Colors.amberAccent;
-    final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
-    Widget buildCollectionButton(
-      BuildContext context,
-      String label,
-      IconData icon,
-      VoidCallback onPressed,
-    ) {
-      return FilledButton.icon(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          minimumSize: Size(100 * layoutScale, 0),
-          side: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal: 12 * layoutScale,
-            vertical: 12 * layoutScale,
-          ),
-          textStyle: TextStyle(fontSize: fontSize),
-        ),
-        icon: Icon(icon, size: 16 * layoutScale),
-        label: Text(label),
-      );
-    }
-
     final collectionTotal =
-        subjectItem.collection.data.values.reduce((a, b) => a + b);
+        subject.collection.data.values.fold(0, (sum, count) => sum + count);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -325,40 +318,46 @@ class InfoHeadView extends StatelessWidget {
           runSpacing: 5 * layoutScale,
           children: [
             Text(
-              '${subjectItem.airtime?.date ?? l10n.noData}(${subjectItem.platform.typeCN})',
+              '${subject.airtime ?? l10n.noData}(${subject.platform})',
               style: TextStyle(fontSize: fontSize, fontWeight: fontWeight),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            Text(l10n.episodeCount(subjectItem.eps),
+            Text(l10n.episodeCount(subject.episodeCount),
                 style: TextStyle(fontSize: fontSize, fontWeight: fontWeight)),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (subjectItem.interest != null &&
-                    subjectItem.interest!.rate > 0)
-                  Text(
-                    l10n.yourRating(subjectItem.interest!.rate),
-                    style: TextStyle(
-                        fontSize: 14 * layoutScale,
-                        fontWeight: fontWeight,
-                        color: amberAccent),
-                  ),
+                Consumer(builder: (context, ref, _) {
+                  final rate = ref.watch(animeInfoProvider.select(
+                    (state) => state.value?.interest?.rate ?? 0,
+                  ));
+                  return rate > 0
+                      ? Text(
+                          l10n.yourRating(rate),
+                          style: TextStyle(
+                            fontSize: 14 * layoutScale,
+                            fontWeight: fontWeight,
+                            color: amberAccent,
+                          ),
+                        )
+                      : const SizedBox.shrink();
+                }),
                 Row(children: [
-                  if (subjectItem.rating.score > 0) ...[
+                  if (subject.rating.score > 0) ...[
                     StarView(
-                      score: subjectItem.rating.score,
+                      score: subject.rating.score,
                       iconSize: 20 * layoutScale,
                     ),
                     Text(
-                      subjectItem.rating.score.toStringAsFixed(1),
+                      subject.rating.score.toStringAsFixed(1),
                       style: TextStyle(
                           fontSize: 14 * layoutScale,
                           fontWeight: fontWeight,
                           color: amberAccent),
                     ),
                     SizedBox(width: 5 * layoutScale),
-                    Text('#${subjectItem.rating.rank}',
+                    Text('#${subject.rating.rank}',
                         style: TextStyle(
                             fontSize: fontSize,
                             fontWeight: fontWeight,
@@ -368,14 +367,14 @@ class InfoHeadView extends StatelessWidget {
               ],
             ),
             Text(
-              l10n.ratingCount(subjectItem.rating.total),
+              l10n.ratingCount(subject.rating.total),
               style: TextStyle(fontSize: fontSize, fontWeight: fontWeight),
             ),
             Text(l10n.collectionCount(collectionTotal),
                 style: TextStyle(fontSize: fontSize, fontWeight: fontWeight)),
-            Text(l10n.watchingCount(subjectItem.collection.data['3'] ?? 0),
+            Text(l10n.watchingCount(subject.collection.data['3'] ?? 0),
                 style: TextStyle(fontSize: fontSize, fontWeight: fontWeight)),
-            Text(l10n.droppedCount(subjectItem.collection.data['5'] ?? 0),
+            Text(l10n.droppedCount(subject.collection.data['5'] ?? 0),
                 style: TextStyle(fontSize: fontSize, fontWeight: fontWeight)),
           ],
         ),
@@ -383,50 +382,19 @@ class InfoHeadView extends StatelessWidget {
         Row(
           spacing: 8 * layoutScale,
           children: [
-            if (!isLoggedIn)
-              buildCollectionButton(
+            Consumer(
+              builder: (context, ref, _) => _buildCollectionButton(
                 context,
-                l10n.loginToCollect,
-                Icons.login_rounded,
-                () => appNavigatorOf(context).goToUser(),
-              )
-            else
-              CollectionMenu.labeled(
-                key: ValueKey(subjectItem.id),
+                ref,
+                subjectId: subject.id,
                 layoutScale: layoutScale,
-                collectType: collectTypeFromApiType(subjectItem.interest?.type),
-                onCollectTypeChanged: (type) async {
-                  final session =
-                      ref.read(currentFlowTokenProvider).value?.sessionId;
-                  try {
-                    final result = await ref
-                        .read(animeInfoProvider.notifier)
-                        .updateCollectionType(type.value);
-                    if (!context.mounted ||
-                        ref.read(currentFlowTokenProvider).value?.sessionId !=
-                            session ||
-                        ref.read(animeInfoProvider).asData?.value.id !=
-                            subjectItem.id) {
-                      return;
-                    }
-                    ref.read(subjectCommentsProvider.notifier).refresh();
-                    showCollectionSaveNotice(context, result);
-                  } on AnimeFlowApiException catch (e) {
-                    if (context.mounted) {
-                      NotificationToast.show(
-                        e.message,
-                        title: '收藏更新失败',
-                        maxWidth: 500,
-                      );
-                    }
-                    rethrow;
-                  }
-                },
               ),
+            ),
             Consumer(
               builder: (context, ref, child) {
                 // 详情页存续期间保留剧集缓存。
-                ref.watch(subjectEpisodesProvider(subjectItem.id));
+                ref.watch(
+                    subjectEpisodesProvider(subject.id).select((_) => null));
                 return IconButton(
                   style: IconButton.styleFrom(
                     padding: EdgeInsets.all(8 * layoutScale),
@@ -434,7 +402,7 @@ class InfoHeadView extends StatelessWidget {
                   ),
                   onPressed: () => EpisodesDrawerView.show(
                     context,
-                    subjectId: subjectItem.id,
+                    subjectId: subject.id,
                     onPlayEpisode: onPlayEpisode,
                     onDownloadEpisodes: (episodes) {
                       appNavigatorOf(context).openVideoResourceDownload<void>(
@@ -449,7 +417,7 @@ class InfoHeadView extends StatelessWidget {
                       try {
                         await ref
                             .read(
-                              subjectEpisodesProvider(subjectItem.id).notifier,
+                              subjectEpisodesProvider(subject.id).notifier,
                             )
                             .updateEpisodeWatched(
                               episodeId: episode.id,
@@ -474,6 +442,71 @@ class InfoHeadView extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildCollectionButton(
+    BuildContext context,
+    WidgetRef ref, {
+    required int subjectId,
+    required double layoutScale,
+  }) {
+    final l10n = AppLocalizations.of(context);
+    final isLoggedIn = ref.watch(
+      isLoggedInProvider.select((state) => state.value ?? false),
+    );
+    if (!isLoggedIn) {
+      return FilledButton.icon(
+        onPressed: () => appNavigatorOf(context).goToUser(),
+        style: OutlinedButton.styleFrom(
+          minimumSize: Size(100 * layoutScale, 0),
+          side: BorderSide(color: Theme.of(context).colorScheme.primary),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: EdgeInsets.all(12 * layoutScale),
+          textStyle: TextStyle(fontSize: 12 * layoutScale),
+        ),
+        icon: Icon(Icons.login_rounded, size: 16 * layoutScale),
+        label: Text(l10n.loginToCollect),
+      );
+    }
+    final collectType = ref.watch(animeInfoProvider.select(
+      (state) => collectTypeFromApiType(state.value?.interest?.type),
+    ));
+    return CollectionMenu.labeled(
+      key: ValueKey(subjectId),
+      layoutScale: layoutScale,
+      collectType: collectType,
+      onCollectTypeChanged: (type) async {
+        final session = ref.read(currentFlowTokenProvider).value?.sessionId;
+        final previous = ref.read(animeInfoProvider).value?.interest;
+        try {
+          final result = await ref
+              .read(animeInfoProvider.notifier)
+              .updateCollectionType(type.value);
+          if (!context.mounted ||
+              ref.read(currentFlowTokenProvider).value?.sessionId != session ||
+              ref.read(animeInfoProvider).asData?.value.id != subjectId) {
+            return;
+          }
+          if (!type.isCollected &&
+              previous != null &&
+              (previous.rate > 0 || previous.comment.isNotEmpty)) {
+            ref.read(subjectCommentsProvider.notifier).refresh();
+          }
+          showCollectionSaveNotice(context, result);
+        } on AnimeFlowApiException catch (e) {
+          if (context.mounted) {
+            NotificationToast.show(
+              e.message,
+              title: '收藏更新失败',
+              maxWidth: 500,
+            );
+          }
+          rethrow;
+        }
+      },
     );
   }
 

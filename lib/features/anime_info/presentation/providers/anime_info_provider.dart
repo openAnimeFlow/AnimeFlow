@@ -34,7 +34,9 @@ CancelToken _requestCancelToken(Ref ref) {
 
 @Riverpod(dependencies: [animeInfoArgs])
 class AnimeInfo extends _$AnimeInfo {
+  final _collectionRevisionSource = Object();
   bool _initialConsumed = false;
+  CancelToken? _detailRequest;
 
   Future<String> downloadCover(String image, String name) =>
       Api.downloadImage(image, name);
@@ -42,13 +44,17 @@ class AnimeInfo extends _$AnimeInfo {
   @override
   Stream<SubjectsInfoItem> build() async* {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    // 监听收藏和会话变化，使路由传入的旧数据失效，并获取当前用户的最新收藏状态。
-    ref.watch(collectionRevisionProvider);
+    // 当前页面保存成功后直接更新收藏状态，其他入口的修改仍会使详情失效。
+    ref.listen(collectionRevisionProvider, (_, change) {
+      if (!identical(change.source, _collectionRevisionSource)) {
+        ref.invalidateSelf();
+      }
+    });
     final repository = ref.watch(animeInfoRepositoryProvider.notifier);
     final tokenFuture = ref.watch(currentFlowTokenProvider.future);
     final initial = ref.watch(animeInfoInitialProvider);
     final forceRefresh = !ref.isFirstBuild;
-    final cancelToken = _requestCancelToken(ref);
+    final cancelToken = _detailRequest = _requestCancelToken(ref);
     // 等待凭证加载完成后再选择会话缓存或请求用户数据，避免误用访客缓存。
     final token = await tokenFuture;
     if (cancelToken.isCancelled) throw cancelToken.cancelError!;
@@ -57,16 +63,25 @@ class AnimeInfo extends _$AnimeInfo {
       yield initial!;
       return;
     }
-    yield* repository.watchSubject(subjectId,
-        sessionId: token?.sessionId,
-        cancelToken: cancelToken,
-        forceRefresh: forceRefresh);
+    try {
+      yield* repository.watchSubject(subjectId,
+          sessionId: token?.sessionId,
+          cancelToken: cancelToken,
+          forceRefresh: forceRefresh);
+    } on DioException {
+      if (!cancelToken.isCancelled) rethrow;
+    }
   }
 
   void setAnimeInfo(SubjectsInfoItem subjectInfo) {
     state = AsyncData(subjectInfo);
     final repository = ref.read(animeInfoRepositoryProvider.notifier);
     repository.invalidateCache();
+    _cacheSubject(subjectInfo);
+  }
+
+  void _cacheSubject(SubjectsInfoItem subjectInfo) {
+    final repository = ref.read(animeInfoRepositoryProvider.notifier);
     unawaited(repository.cacheSubject(subjectInfo,
         sessionId: ref.read(currentFlowTokenProvider).value?.sessionId));
   }
@@ -79,32 +94,35 @@ class AnimeInfo extends _$AnimeInfo {
         await ref.read(userCollectionsProvider.notifier).updateCollectionType(
               UserCollectionData.fromSubject(subject),
               newType,
+              revisionSource: _collectionRevisionSource,
             );
     if (!ref.mounted ||
+        ref.read(animeInfoArgsProvider).id != subject.id ||
         ref.read(currentFlowTokenProvider).value?.sessionId != token) {
       return null;
     }
     final current = state.asData?.value;
     if (current == null || current.id != subject.id) return null;
-    if (newType == 0) {
-      setAnimeInfo(current.copyWith(clearInterest: true));
-      return null;
-    }
     final interest = current.interest;
-    setAnimeInfo(current.copyWith(
-      interest: InterestItem(
-        id: interest?.id,
-        rate: interest?.rate ?? 0,
-        type: newType,
-        comment: interest?.comment ?? '',
-        tags: interest?.tags ?? const [],
-        epStatus: interest?.epStatus ?? 0,
-        volStatus: interest?.volStatus ?? 0,
-        private: interest?.private ?? false,
-        updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        remoteSyncStatus: result?.remoteSyncStatus.apiValue,
-      ),
-    ));
+    final updated = newType == 0
+        ? current.copyWith(clearInterest: true)
+        : current.copyWith(
+            interest: InterestItem(
+            id: interest?.id,
+            rate: interest?.rate ?? 0,
+            type: newType,
+            comment: interest?.comment ?? '',
+            tags: interest?.tags ?? const [],
+            epStatus: interest?.epStatus ?? 0,
+            volStatus: interest?.volStatus ?? 0,
+            private: interest?.private ?? false,
+            updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+            remoteSyncStatus: result?.remoteSyncStatus.apiValue,
+          ));
+    // 缓存过期时可能仍有后台请求，避免旧响应覆盖刚保存的收藏状态。
+    _detailRequest?.cancel();
+    state = AsyncData(updated);
+    _cacheSubject(updated);
     return result;
   }
 }

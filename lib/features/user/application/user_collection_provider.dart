@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'collection_revision_provider.dart';
 import 'collection_refresh_provider.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
@@ -57,10 +56,7 @@ typedef CollectionPageLoader = Future<UserCollectionsItem> Function({
 });
 
 final collectionCancelProvider = Provider<Future<void> Function(int)>((ref) {
-  return (subjectId) async {
-    await FlowApi.cancelCollectionService(subjectId);
-    ref.read(collectionRevisionProvider.notifier).changed();
-  };
+  return FlowApi.cancelCollectionService;
 });
 
 final collectionPageLoaderProvider = Provider<CollectionPageLoader>((ref) {
@@ -77,15 +73,11 @@ final collectionPageLoaderProvider = Provider<CollectionPageLoader>((ref) {
 final collectionTypeUpdateProvider =
     Provider<Future<CollectionUpdateResult> Function(UserCollectionData, int)>(
         (ref) {
-  return (collection, newType) async {
-    final result = await FlowApi.updateCollectionService(
-      collection.id,
-      type: newType,
-      subjectType: collection.type,
-    );
-    ref.read(collectionRevisionProvider.notifier).changed();
-    return result;
-  };
+  return (collection, newType) => FlowApi.updateCollectionService(
+        collection.id,
+        type: newType,
+        subjectType: collection.type,
+      );
 });
 
 @Riverpod(keepAlive: true)
@@ -112,8 +104,9 @@ class UserCollections extends _$UserCollections {
 
   Future<CollectionUpdateResult?> updateCollectionType(
     UserCollectionData collection,
-    int newType,
-  ) async {
+    int newType, {
+    Object? revisionSource,
+  }) async {
     // Use the state shown by the caller. Cached tabs may predate a fresh
     // detail response and must not suppress the user's requested update.
 
@@ -121,6 +114,9 @@ class UserCollections extends _$UserCollections {
     if (newType == 0) {
       await ref.read(collectionCancelProvider)(collection.id);
       if (!ref.mounted || session != _session) return null;
+      ref.read(collectionRevisionProvider.notifier).changed(
+            source: revisionSource,
+          );
       final loadingTypes = state.tabs.entries
           .where((entry) => entry.value.data == null && entry.value.isBusy)
           .map((entry) => entry.key)
@@ -137,6 +133,10 @@ class UserCollections extends _$UserCollections {
     final result =
         await ref.read(collectionTypeUpdateProvider)(collection, newType);
     if (!ref.mounted || session != _session) return null;
+    ref.read(collectionRevisionProvider.notifier).changed(
+          source: revisionSource,
+          affectsEpisodeProgress: false,
+        );
     if (collection.interest.type == newType) {
       await refresh(newType);
       return ref.mounted && session == _session ? result : null;

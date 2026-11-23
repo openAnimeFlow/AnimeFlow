@@ -8,11 +8,11 @@ class DetailsView extends StatelessWidget {
   final String title;
   final double? textSize;
   final FontWeight? textFontWeight;
-  final SubjectsInfoItem subject;
+  final List<Infobox> infobox;
 
   const DetailsView(
       {super.key,
-      required this.subject,
+      required this.infobox,
       required this.title,
       this.textSize,
       this.textFontWeight});
@@ -29,7 +29,7 @@ class DetailsView extends StatelessWidget {
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 5),
-        _buildText(textData: subject.infobox, themeTextColor: themeTextColor)
+        _buildText(textData: infobox, themeTextColor: themeTextColor)
       ],
     );
   }

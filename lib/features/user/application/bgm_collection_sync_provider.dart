@@ -8,7 +8,6 @@ import 'package:anime_flow/shared/models/flow/collection_conflict_item.dart';
 import 'package:anime_flow/features/user/application/user_state_provider.dart';
 import 'collection_refresh_provider.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
-import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'bgm_collection_sync_provider.g.dart';

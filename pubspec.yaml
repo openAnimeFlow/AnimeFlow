@@ -45,10 +45,8 @@ dependencies:
     git:
       url: https://github.com/openAnimeFlow/bot_toast.git
       ref: 383ac490589aeb42704e1daadb362e59e2054175
-  material_ui: ^1.5.0 # 提供 Material Design 风格的 Flutter 界面组件。
-  cupertino_ui: ^1.1.1 # 提供 iOS 风格的 Flutter 界面组件。
-
-  # 音视频播放与设备控制
+  material_ui: ^1.11.1 # 提供 Material Design 风格的 Flutter 界面组件。
+  cupertino_ui: ^1.1.7 # 提供 iOS 风格的 Flutter 界面组件。
   media_kit: # 提供跨平台音视频播放与播放控制能力。
     git:
       url: https://github.com/Predidit/media-kit.git

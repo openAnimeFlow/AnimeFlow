@@ -132,6 +132,7 @@ class ThemeNotifier extends _$ThemeNotifier {
 }
 
 ThemeData buildLightTheme(Color seedColor, {String? fontFamily}) {
+  const backgroundColor = Color(0xFFF2F3F5);
   return ThemeData(
     useMaterial3: true,
     fontFamily: fontFamily,
@@ -139,7 +140,13 @@ ThemeData buildLightTheme(Color seedColor, {String? fontFamily}) {
       seedColor: seedColor,
       brightness: Brightness.light,
     ),
+    scaffoldBackgroundColor: backgroundColor,
+    cardTheme: const CardThemeData(
+      color: Colors.white,
+      surfaceTintColor: Colors.transparent,
+    ),
     appBarTheme: const AppBarTheme(
+      backgroundColor: backgroundColor,
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,

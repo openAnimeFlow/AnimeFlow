@@ -212,61 +212,14 @@ class _SettingsMenu extends ConsumerWidget {
         appNavigatorOf(context).settingsDestinationForLocation(location);
     final menu = ListView(
       padding: (EdgeInsets.only(
-        left: wide ? 15 : 0,
-        right: wide ? 15 : 0,
+        left: wide ? 15 : 12,
+        right: wide ? 15 : 12,
         top: 8,
         bottom: wide ? 8 : paddingOf.bottom,
       )).add(EdgeInsets.only(top: SettingsPageBuilder.topInsetOf(context))),
       children: [
-        for (final category in categories) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(category.title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                )),
-          ),
-          for (final item in category.items)
-            ListTile(
-              shape: wide ? const StadiumBorder() : null,
-              selected:
-                  wide && _category(currentDestination) == item.destination,
-              selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
-              leading: item.avatar != null
-                  ? DecoratedBox(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      position: DecorationPosition.foreground,
-                      child: AnimationNetworkImage(
-                        borderRadius: BorderRadius.circular(50),
-                        url: item.avatar!,
-                        width: 24,
-                        height: 24,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Icon(item.icon),
-              title: Text(item.title),
-              trailing: wide ? null : const Icon(Icons.chevron_right),
-              onTap: () {
-                if (wide && currentDestination != SettingsDestination.menu) {
-                  if (currentDestination != item.destination) {
-                    appNavigatorOf(context).replaceSettings(item.destination);
-                  }
-                } else {
-                  appNavigatorOf(context)
-                      .openSettings<void>(destination: item.destination);
-                }
-              },
-            ),
-          const SizedBox(height: 8),
-        ]
+        for (final category in categories)
+          ..._buildCategory(context, category, currentDestination),
       ],
     );
     if (!wide) return menu;
@@ -292,6 +245,75 @@ class _SettingsMenu extends ConsumerWidget {
         ]),
       ),
     );
+  }
+
+  List<Widget> _buildCategory(
+    BuildContext context,
+    _SettingsCategory category,
+    SettingsDestination? currentDestination,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    final tiles = [
+      for (final item in category.items)
+        ListTile(
+          shape: wide ? const StadiumBorder() : null,
+          selected: wide && _category(currentDestination) == item.destination,
+          selectedTileColor: colors.primaryContainer,
+          leading: item.avatar != null
+              ? DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: colors.primary,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  position: DecorationPosition.foreground,
+                  child: AnimationNetworkImage(
+                    borderRadius: BorderRadius.circular(50),
+                    url: item.avatar!,
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : Icon(item.icon),
+          title: Text(item.title),
+          trailing: wide ? null : const Icon(Icons.chevron_right),
+          onTap: () {
+            if (wide && currentDestination != SettingsDestination.menu) {
+              if (currentDestination != item.destination) {
+                appNavigatorOf(context).replaceSettings(item.destination);
+              }
+            } else {
+              appNavigatorOf(context)
+                  .openSettings<void>(destination: item.destination);
+            }
+          },
+        ),
+    ];
+    return [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Text(
+          category.title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: colors.primary,
+          ),
+        ),
+      ),
+      if (wide)
+        ...tiles
+      else
+        Card(
+          margin: EdgeInsets.zero,
+          elevation: 0,
+          clipBehavior: Clip.antiAlias,
+          child: Column(children: tiles),
+        ),
+      const SizedBox(height: 8),
+    ];
   }
 }
 

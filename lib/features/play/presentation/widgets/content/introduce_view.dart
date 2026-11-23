@@ -156,9 +156,11 @@ class _IntroduceViewState extends State<IntroduceView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final paddingOf = MediaQuery.paddingOf(context);
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.only(
+            left: 10, top: 10, right: 10, bottom: paddingOf.bottom + 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 5,

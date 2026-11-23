@@ -61,7 +61,10 @@ class RecommendationsView extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.recommendationsTitle),
+        Text(
+          l10n.recommendationsTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         child,
       ],
@@ -99,12 +102,12 @@ class _RecommendationTile extends StatelessWidget {
         ),
     ];
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
+    return Card(
+      elevation: 0,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () =>
-            appNavigatorOf(context).openAnimeInfoFromExtra<void>(InfoRouteExtra(
+        onTap: () => appNavigatorOf(context)
+            .openAnimeInfoFromExtra<void>(InfoRouteExtra(
           id: subject.id,
           name: title,
           image: subject.images.large,

@@ -72,13 +72,32 @@ class RecommendationsView extends ConsumerWidget {
 class _RecommendationTile extends StatelessWidget {
   const _RecommendationTile(this.subject);
 
+  static const _coverHeight = 104.0;
+
   final Subject subject;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final title = subject.nameCN.isEmpty ? subject.name : subject.nameCN;
-    final score = subject.rating.score;
+    final rating = subject.rating;
+    final metadata = [
+      if (rating.score > 0)
+        _RecommendationMeta(
+          icon: Icons.star_rounded,
+          label: rating.score.toStringAsFixed(1),
+        ),
+      if (rating.rank > 0)
+        _RecommendationMeta(
+          icon: Icons.leaderboard_rounded,
+          label: '#${rating.rank}',
+        ),
+      if (rating.total > 0)
+        _RecommendationMeta(
+          icon: Icons.people_alt_rounded,
+          label: '${rating.total}',
+        ),
+    ];
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10, left: 5, right: 5),
@@ -93,64 +112,58 @@ class _RecommendationTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AnimationNetworkImage(
-              borderRadius: BorderRadius.circular(8),
+            SizedBox(
               width: 72,
-              height: 104,
-              url: subject.images.common.isNotEmpty
-                  ? subject.images.common
-                  : subject.images.large,
-              fit: BoxFit.cover,
+              height: _coverHeight,
+              child: AnimationNetworkImage(
+                borderRadius: BorderRadius.circular(8),
+                url: subject.images.common.isNotEmpty
+                    ? subject.images.common
+                    : subject.images.large,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: SizedBox(
-                height: 104,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: _coverHeight),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    if (subject.info.isNotEmpty)
-                      Text(
-                        subject.info,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    const Spacer(),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
                       children: [
-                        if (score > 0)
-                          _RecommendationMeta(
-                            icon: Icons.star_rounded,
-                            label: score.toStringAsFixed(1),
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
                           ),
-                        if (subject.rating.rank > 0)
-                          _RecommendationMeta(
-                            icon: Icons.leaderboard_rounded,
-                            label: '#${subject.rating.rank}',
-                          ),
-                        if (subject.rating.total > 0)
-                          _RecommendationMeta(
-                            icon: Icons.people_alt_rounded,
-                            label: '${subject.rating.total}',
+                        ),
+                        if (subject.info.isNotEmpty)
+                          Text(
+                            subject.info,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                           ),
                       ],
                     ),
+                    if (metadata.isNotEmpty)
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: metadata,
+                      ),
                   ],
                 ),
               ),
@@ -182,11 +195,13 @@ class _RecommendationMeta extends StatelessWidget {
           color: Theme.of(context).colorScheme.primary,
         ),
         const SizedBox(width: 3),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+        Flexible(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ],

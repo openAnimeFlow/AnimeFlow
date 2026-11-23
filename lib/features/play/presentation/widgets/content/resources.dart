@@ -93,12 +93,12 @@ class VideoResourcesView extends StatelessWidget {
         final style = TextButton.styleFrom(
           alignment: AlignmentDirectional.centerStart,
           foregroundColor: colors.onSurface,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: JellyMenu.itemPadding(context),
           minimumSize: const Size(0, 48),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         );
         return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
           child: IntrinsicWidth(
             child: Column(
               mainAxisSize: MainAxisSize.min,

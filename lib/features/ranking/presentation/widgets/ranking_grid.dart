@@ -422,14 +422,12 @@ class _RankingListTile extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,
-      color: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: scheme.outlineVariant.withValues(alpha: .5)),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
         onTap: () => appNavigatorOf(context).openAnimeInfoFromExtra<void>(
             InfoRouteExtra(
                 id: subject.id, name: title, image: subject.images.large)),

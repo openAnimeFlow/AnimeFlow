@@ -212,6 +212,9 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
                 error: (error, _) => Center(child: Text(error.toString())),
                 data: (dataSources) => LayoutBuilder(
                   builder: (context, constraints) {
+                    const cardShape = RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    );
                     final horizontal =
                         math.max(10.0, (constraints.maxWidth - 1500.0) / 2);
                     return ReorderableListView.builder(
@@ -227,6 +230,17 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
                       itemCount: dataSources.length,
                       buildDefaultDragHandles: false,
                       onReorderItem: _onReorder,
+                      proxyDecorator: (child, _, animation) => AnimatedBuilder(
+                        animation: animation,
+                        builder: (context, child) => Material(
+                          color: Colors.transparent,
+                          elevation:
+                              6 * Curves.easeInOut.transform(animation.value),
+                          shape: cardShape,
+                          child: child,
+                        ),
+                        child: child,
+                      ),
                       itemBuilder: (context, index) {
                         final data = dataSources[index];
                         final remotePlugin = remotePluginsByName[data.name];
@@ -236,98 +250,102 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
                                 0;
                         final isPluginBusy =
                             _busyPluginNames.contains(data.name);
-                        return InkWell(
+                        return Card(
                           key: ValueKey(data.name),
-                          onTap: () => appNavigatorOf(context)
-                              .openPluginEditor<void>(editPluginKey: data.name),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(vertical: 2),
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Theme.of(context)
-                                    .disabledColor
-                                    .withValues(alpha: 0.1)),
-                            child: Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 5, horizontal: 5),
-                                  child: AnimationNetworkImage(
-                                      borderRadius: BorderRadius.circular(10),
-                                      width: 50,
-                                      height: 50,
-                                      url: data.iconUrl),
-                                ),
-                                Expanded(
-                                  child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          data.name,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(data.version),
-                                            if (hasUpdate) ...[
-                                              const SizedBox(width: 8),
-                                              Text(
-                                                l10n.updateAvailable,
-                                                style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .primary,
-                                                  fontSize: 12,
+                          margin: const EdgeInsets.symmetric(vertical: 2),
+                          elevation: 0,
+                          shape: cardShape,
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () => appNavigatorOf(context)
+                                .openPluginEditor<void>(
+                                    editPluginKey: data.name),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 5),
+                                    child: AnimationNetworkImage(
+                                        borderRadius: BorderRadius.circular(10),
+                                        width: 50,
+                                        height: 50,
+                                        url: data.iconUrl),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            data.name,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(data.version),
+                                              if (hasUpdate) ...[
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  l10n.updateAvailable,
+                                                  style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                    fontSize: 12,
+                                                  ),
                                                 ),
-                                              ),
+                                              ],
                                             ],
-                                          ],
-                                        )
-                                      ]),
-                                ),
-                                if (hasUpdate)
-                                  TextButton(
-                                    onPressed: isPluginBusy
-                                        ? null
-                                        : () => _updatePlugin(remotePlugin),
-                                    child: isPluginBusy
-                                        ? const SizedBox(
-                                            width: 16,
-                                            height: 16,
-                                            child: CircularProgressIndicator(
-                                                strokeWidth: 2),
                                           )
-                                        : Text(l10n.update),
+                                        ]),
                                   ),
-                                IconButton(
-                                  tooltip: l10n.copyPlugin,
-                                  icon: const Icon(Icons.content_copy_outlined),
-                                  onPressed: () => _copyPlugin(data.name),
-                                ),
-                                IconButton(
-                                  tooltip: l10n.delete,
-                                  icon: Icon(
-                                    Icons.delete_outline,
-                                    color: Theme.of(context).colorScheme.error,
+                                  if (hasUpdate)
+                                    TextButton(
+                                      onPressed: isPluginBusy
+                                          ? null
+                                          : () => _updatePlugin(remotePlugin),
+                                      child: isPluginBusy
+                                          ? const SizedBox(
+                                              width: 16,
+                                              height: 16,
+                                              child: CircularProgressIndicator(
+                                                  strokeWidth: 2),
+                                            )
+                                          : Text(l10n.update),
+                                    ),
+                                  IconButton(
+                                    tooltip: l10n.copyPlugin,
+                                    icon:
+                                        const Icon(Icons.content_copy_outlined),
+                                    onPressed: () => _copyPlugin(data.name),
                                   ),
-                                  onPressed: () => deleteDataSource(data.name),
-                                ),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {},
-                                  child: ReorderableDragStartListener(
-                                    index: index,
-                                    child: const Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 8),
-                                      child: Icon(Icons.drag_handle),
+                                  IconButton(
+                                    tooltip: l10n.delete,
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                    ),
+                                    onPressed: () =>
+                                        deleteDataSource(data.name),
+                                  ),
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {},
+                                    child: ReorderableDragStartListener(
+                                      index: index,
+                                      child: const Padding(
+                                        padding:
+                                            EdgeInsets.symmetric(horizontal: 8),
+                                        child: Icon(Icons.drag_handle),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );

@@ -2303,8 +2303,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get selectPlayerKernel => '選擇播放器內核';
 
   @override
-  String get playerKernelTroubleshootingHint =>
-      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，mpv 內核可能閃退，可切換其他內核。';
+  String get playerKernelTroubleshootingHint => '播放頁無法播放或發生閃退時，可嘗試切換播放器內核';
 
   @override
   String get playerKernelSwitchFailed => '播放器內核切換失敗';
@@ -4983,8 +4982,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get selectPlayerKernel => '选择播放器内核';
 
   @override
-  String get playerKernelTroubleshootingHint =>
-      '播放页无法播放或发生闪退时，可尝试切换播放器内核。iOS 巨魔安装环境下，mpv 内核可能闪退，可切换其他内核。';
+  String get playerKernelTroubleshootingHint => '播放页无法播放或发生闪退时，可尝试切换播放器内核';
 
   @override
   String get playerKernelSwitchFailed => '播放器内核切换失败';
@@ -7664,8 +7662,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get selectPlayerKernel => '選擇播放器內核';
 
   @override
-  String get playerKernelTroubleshootingHint =>
-      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，mpv 內核可能閃退，可切換其他內核。';
+  String get playerKernelTroubleshootingHint => '播放頁無法播放或發生閃退時，可嘗試切換播放器內核';
 
   @override
   String get playerKernelSwitchFailed => '播放器內核切換失敗';
@@ -10346,8 +10343,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get selectPlayerKernel => '選擇播放器內核';
 
   @override
-  String get playerKernelTroubleshootingHint =>
-      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，mpv 內核可能閃退，可切換其他內核。';
+  String get playerKernelTroubleshootingHint => '播放頁無法播放或發生閃退時，可嘗試切換播放器內核';
 
   @override
   String get playerKernelSwitchFailed => '播放器內核切換失敗';

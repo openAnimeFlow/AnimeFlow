@@ -747,7 +747,7 @@
   ,"@downloadSizeProgress": {"placeholders": {"downloaded": {}, "total": {}}}
   ,"playerKernel": "Player kernel"
   ,"selectPlayerKernel": "Select player kernel"
-  ,"playerKernelTroubleshootingHint": "If playback fails or crashes, try another player kernel. On iOS TrollStore installations, mpv may crash; try another player kernel."
+  ,"playerKernelTroubleshootingHint": "If playback fails or crashes, try switching to another player kernel."
   ,"playerKernelSwitchFailed": "Failed to switch player kernel"
   ,"playerKernelMpv": "mpv"
   ,"playerKernelMdk": "MDK"

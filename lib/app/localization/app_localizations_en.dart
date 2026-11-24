@@ -2382,7 +2382,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playerKernelTroubleshootingHint =>
-      'If playback fails or crashes, try another player kernel. On iOS TrollStore installations, mpv may crash; try another player kernel.';
+      'If playback fails or crashes, try switching to another player kernel.';
 
   @override
   String get playerKernelSwitchFailed => 'Failed to switch player kernel';

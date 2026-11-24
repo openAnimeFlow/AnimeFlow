@@ -1,5 +1,4 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/widgets/glass_capsule.dart';
 import 'package:anime_flow/shared/widgets/glass_tab_bar.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/anime/anime_view.dart';
@@ -24,7 +23,6 @@ class RecommendPage extends StatefulWidget {
 class _RecommendPageState extends State<RecommendPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
 
   @override
   void initState() {
@@ -40,38 +38,35 @@ class _RecommendPageState extends State<RecommendPage>
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<bool>(
-      stream: _glassNavigationStyle,
-      initialData: AppSettings.glassNavigationStyle,
-      builder: (context, snapshot) => AnimatedBuilder(
-        animation: Listenable.merge([_tabController, _tabController.animation]),
-        builder: (context, _) => WallpaperBrowser(
-          // Keep the viewport width stable until the tab transition completes.
-          active: _tabController.index == 2 ||
-              (_tabController.previousIndex == 2 &&
-                  (_tabController.indexIsChanging ||
-                      _tabController.animation!.value != _tabController.index)),
-          listBuilder: (context, onOpen) =>
-              _buildPage(context, snapshot.data ?? false, onOpen),
-        ),
+    return AnimatedBuilder(
+      animation: Listenable.merge([_tabController, _tabController.animation]),
+      builder: (context, _) => WallpaperBrowser(
+        // Keep the viewport width stable until the tab transition completes.
+        active: _tabController.index == 2 ||
+            (_tabController.previousIndex == 2 &&
+                (_tabController.indexIsChanging ||
+                    _tabController.animation!.value != _tabController.index)),
+        listBuilder: _buildPage,
       ),
     );
   }
 
-  Widget _buildPage(BuildContext context, bool glassStyle,
-      ValueChanged<WallpaperDetailArgs> onOpenWallpaper) {
+  Widget _buildPage(
+    BuildContext context,
+    ValueChanged<WallpaperDetailArgs> onOpenWallpaper,
+  ) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final glassHeaderHeight =
         MediaQuery.paddingOf(context).top + kToolbarHeight;
     return Scaffold(
-      extendBodyBehindAppBar: glassStyle,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: glassStyle ? Colors.transparent : null,
-        forceMaterialTransparency: glassStyle,
-        surfaceTintColor: glassStyle ? Colors.transparent : null,
-        elevation: glassStyle ? 0 : null,
-        scrolledUnderElevation: glassStyle ? 0 : null,
+        backgroundColor: Colors.transparent,
+        forceMaterialTransparency: true,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Row(
           children: [
             Text(l10n.recommend),
@@ -123,19 +118,12 @@ class _RecommendPageState extends State<RecommendPage>
             icon: const Icon(Icons.access_time_outlined),
           ),
         ],
-        bottom: glassStyle
-            ? null
-            : TabBar(controller: _tabController, tabs: [
-                Tab(text: l10n.anime),
-                Tab(text: l10n.community),
-                Tab(text: l10n.wallpapers),
-              ]),
       ),
       body: Stack(
         children: [
           Positioned.fill(
             child: TopOcclusionScope(
-              height: glassStyle ? glassHeaderHeight + GlassTabBar.height : 0,
+              height: glassHeaderHeight + GlassTabBar.height,
               child: TabBarView(
                 controller: _tabController,
                 children: [
@@ -148,25 +136,23 @@ class _RecommendPageState extends State<RecommendPage>
               ),
             ),
           ),
-          if (glassStyle)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: glassHeaderHeight + 48,
-              child: const TopGradientMask(),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: glassHeaderHeight + 48,
+            child: const TopGradientMask(),
+          ),
+          Positioned(
+            top: glassHeaderHeight,
+            left: 0,
+            right: 0,
+            height: GlassTabBar.height,
+            child: GlassTabBar(
+              controller: _tabController,
+              labels: [l10n.anime, l10n.community, l10n.wallpapers],
             ),
-          if (glassStyle)
-            Positioned(
-              top: glassHeaderHeight,
-              left: 0,
-              right: 0,
-              height: GlassTabBar.height,
-              child: GlassTabBar(
-                controller: _tabController,
-                labels: [l10n.anime, l10n.community, l10n.wallpapers],
-              ),
-            ),
+          ),
         ],
       ),
     );

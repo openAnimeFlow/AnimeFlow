@@ -1,6 +1,6 @@
 {
   "glassNavigationStyle": "Glass navigation style",
-  "glassNavigationStyleDescription": "Use a frosted glass style for app bars, tabs, and bottom navigation.",
+  "glassNavigationStyleDescription": "Use a frosted glass style for app bars and tabs.",
   "defaultCollectionCategory": "Default collection category",
   "defaultCollectionCategoryDescription": "Choose the category shown on your collection page.",
   "pageSettings": "Page settings",

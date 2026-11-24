@@ -2,7 +2,6 @@ import 'package:anime_flow/features/shell/presentation/widgets/shell_navigation_
 import 'package:anime_flow/features/shell/presentation/widgets/shell_navigation_rail.dart';
 import 'package:anime_flow/features/shell/presentation/widgets/shell_bottom_navigation.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
@@ -32,96 +31,82 @@ class AppShellPage extends StatelessWidget {
       final isDesktop = constraints.maxWidth >= 640;
       final colorScheme = Theme.of(context).colorScheme;
       final l10n = AppLocalizations.of(context);
-      return StreamBuilder<bool>(
-        stream: AppSettings.watchGlassNavigationStyle(),
-        initialData: AppSettings.glassNavigationStyle,
-        builder: (context, snapshot) {
-          final glassBar = snapshot.data ?? false;
-          return Scaffold(
-            extendBody: glassBar,
-            body: Row(
-              children: [
-                if (isDesktop)
-                  Consumer(
-                      builder: (context, ref, _) => ShellNavigationRail(
-                        tabs: shellNavigationTabs(l10n),
-                        glassBar: glassBar,
-                        avatar: _avatar(ref),
-                        selectedIndex: navigationShell.currentIndex,
-                        onSelected: navigationShell.goBranch,
-                        onSearch: () =>
-                            appNavigatorOf(context).openSearch<void>(),
-                        onSettings: () =>
-                            appNavigatorOf(context).openSettings<void>(
-                              destination: SettingsDestination.menu,
-                            ),
-                      )),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: isDesktop && !glassBar
-                        ? const BorderRadius.horizontal(left: Radius.circular(16))
-                        : BorderRadius.zero,
-                    child: ColoredBox(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      child: Builder(builder: (context) {
-                        // extendBody 提供的底部 padding 包含悬浮导航栏的实际高度。
-                        final bottomInset = MediaQuery.paddingOf(context).bottom;
-                        return BottomOcclusionScope(
-                          height: glassBar && !isDesktop ? bottomInset : 0,
-                          child: Stack(
-                            children: [
-                              Positioned.fill(child: navigationShell),
-                              if (glassBar &&
-                                  !isDesktop &&
-                                  MediaQuery.viewInsetsOf(context).bottom == 0)
-                                Positioned(
-                                  left: 0,
-                                  right: 0,
-                                  bottom: 0,
-                                  height: bottomInset + 48,
-                                  child: IgnorePointer(
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            colorScheme.surface.withValues(alpha: 0),
-                                            colorScheme.surface
-                                                .withValues(alpha: 0.4),
-                                            colorScheme.surface
-                                                .withValues(alpha: 0.9),
-                                          ],
-                                          stops: const [0, 0.6, 1],
-                                        ),
-                                      ),
+      final tabs = shellNavigationTabs(l10n);
+      return Scaffold(
+        extendBody: true,
+        body: Row(
+          children: [
+            if (isDesktop)
+              Consumer(
+                builder: (context, ref, _) => ShellNavigationRail(
+                  tabs: tabs,
+                  avatar: _avatar(ref),
+                  selectedIndex: navigationShell.currentIndex,
+                  onSelected: navigationShell.goBranch,
+                  onSearch: () => appNavigatorOf(context).openSearch<void>(),
+                  onSettings: () => appNavigatorOf(context).openSettings<void>(
+                    destination: SettingsDestination.menu,
+                  ),
+                ),
+              ),
+            Expanded(
+              child: ClipRect(
+                child: ColoredBox(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  child: Builder(builder: (context) {
+                    // extendBody 提供的底部 padding 包含悬浮导航栏的实际高度。
+                    final bottomInset = MediaQuery.paddingOf(context).bottom;
+                    return BottomOcclusionScope(
+                      height: isDesktop ? 0 : bottomInset,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(child: navigationShell),
+                          if (!isDesktop &&
+                              MediaQuery.viewInsetsOf(context).bottom == 0)
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              height: bottomInset + 48,
+                              child: IgnorePointer(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        colorScheme.surface
+                                            .withValues(alpha: 0),
+                                        colorScheme.surface
+                                            .withValues(alpha: 0.4),
+                                        colorScheme.surface
+                                            .withValues(alpha: 0.9),
+                                      ],
+                                      stops: const [0, 0.6, 1],
                                     ),
                                   ),
                                 ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  }),
                 ),
-              ],
+              ),
             ),
-            bottomNavigationBar: isDesktop
-                ? null
-                : Consumer(builder: (context, ref, _) {
-              final tabs = shellNavigationTabs(l10n);
-              final avatar = _avatar(ref);
-              return ShellBottomNavigation(
-                glassBar: glassBar,
-                tabs: tabs,
-                avatar: avatar,
-                selectedIndex: navigationShell.currentIndex,
-                onSelected: navigationShell.goBranch,
-              );
-            }),
-          );
-        }
+          ],
+        ),
+        bottomNavigationBar: isDesktop
+            ? null
+            : Consumer(
+                builder: (context, ref, _) => ShellBottomNavigation(
+                  tabs: tabs,
+                  avatar: _avatar(ref),
+                  selectedIndex: navigationShell.currentIndex,
+                  onSelected: navigationShell.goBranch,
+                ),
+              ),
       );
     });
   }

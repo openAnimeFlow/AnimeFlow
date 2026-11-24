@@ -12,7 +12,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get glassNavigationStyle => '磨砂玻璃导航风格';
 
   @override
-  String get glassNavigationStyleDescription => '顶部栏、标签栏和底部导航栏使用磨砂玻璃风格。';
+  String get glassNavigationStyleDescription => '顶部栏和标签栏使用磨砂玻璃风格。';
 
   @override
   String get defaultCollectionCategory => '默认收藏分类';
@@ -2693,7 +2693,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get glassNavigationStyle => '磨砂玻璃导航风格';
 
   @override
-  String get glassNavigationStyleDescription => '顶部栏、标签栏和底部导航栏使用磨砂玻璃风格。';
+  String get glassNavigationStyleDescription => '顶部栏和标签栏使用磨砂玻璃风格。';
 
   @override
   String get defaultCollectionCategory => '默认收藏分类';
@@ -5373,7 +5373,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get glassNavigationStyle => '毛玻璃導覽風格';
 
   @override
-  String get glassNavigationStyleDescription => '頂部列、分頁列與底部導覽列使用毛玻璃風格。';
+  String get glassNavigationStyleDescription => '頂部列與分頁列使用毛玻璃風格。';
 
   @override
   String get defaultCollectionCategory => '預設收藏分類';
@@ -8054,7 +8054,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get glassNavigationStyle => '毛玻璃導覽風格';
 
   @override
-  String get glassNavigationStyleDescription => '頂部列、分頁列與底部導覽列使用毛玻璃風格。';
+  String get glassNavigationStyleDescription => '頂部列與分頁列使用毛玻璃風格。';
 
   @override
   String get defaultCollectionCategory => '預設收藏分類';

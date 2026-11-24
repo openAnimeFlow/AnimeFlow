@@ -13,15 +13,13 @@ class ShellNavigationRail extends StatelessWidget {
       required this.onSelected,
       required this.onSearch,
       required this.onSettings,
-      this.avatar,
-      this.glassBar = false});
+      this.avatar});
   final List<TabItem> tabs;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
   final VoidCallback onSearch;
   final VoidCallback onSettings;
   final String? avatar;
-  final bool glassBar;
 
   List<NavigationRailDestination> _buildRailDestinations(
     ColorScheme colorScheme,
@@ -73,10 +71,8 @@ class ShellNavigationRail extends StatelessWidget {
     final backgroundColor = NavigationRailTheme.of(context).backgroundColor ??
         colorScheme.surfaceContainerHighest;
     final l10n = AppLocalizations.of(context);
-    final safePadding = MediaQuery.paddingOf(context);
-    final railColor = glassBar ? Colors.transparent : backgroundColor;
     final rail = NavigationRail(
-      backgroundColor: railColor,
+      backgroundColor: Colors.transparent,
       selectedIndex: selectedIndex,
       groupAlignment: 1.0,
       scrollable: true,
@@ -91,9 +87,7 @@ class ShellNavigationRail extends StatelessWidget {
         ),
       ),
       trailing: Padding(
-        padding: EdgeInsets.only(
-          bottom: !glassBar && safePadding.bottom > 0 ? 0 : 16,
-        ),
+        padding: const EdgeInsets.only(bottom: 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -108,34 +102,27 @@ class ShellNavigationRail extends StatelessWidget {
       ),
       destinations: _buildRailDestinations(colorScheme, avatar),
     );
-    return ColoredBox(
-      color: railColor,
-      child: SafeArea(
-        right: false,
-        minimum: glassBar
-            ? const EdgeInsets.fromLTRB(12, 16, 0, 16)
-            : EdgeInsets.zero,
-        child: !glassBar
-            ? rail
-            : Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: backgroundColor.withValues(alpha: 0.78),
-                        borderRadius: BorderRadius.circular(28),
-                        border: Border.all(
-                            color: colorScheme.outlineVariant
-                                .withValues(alpha: 0.45)),
-                      ),
-                      child: rail,
-                    ),
-                  ),
+    return SafeArea(
+      right: false,
+      minimum: const EdgeInsets.fromLTRB(12, 16, 0, 16),
+      child: Padding(
+        padding: const EdgeInsets.only(right: 12),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: backgroundColor.withValues(alpha: 0.78),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.45),
                 ),
               ),
+              child: rail,
+            ),
+          ),
+        ),
       ),
     );
   }

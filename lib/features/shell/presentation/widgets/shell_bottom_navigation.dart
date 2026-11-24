@@ -10,80 +10,26 @@ class ShellBottomNavigation extends StatelessWidget {
       required this.tabs,
       required this.selectedIndex,
       required this.onSelected,
-      this.avatar,
-      this.glassBar = false});
+      this.avatar});
   final List<TabItem> tabs;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
   final String? avatar;
-  final bool glassBar;
-
-  List<NavigationDestination> _buildBarDestinations(
-    ColorScheme colorScheme,
-    String? avatar,
-  ) {
-    return tabs.asMap().entries.map((entry) {
-      final index = entry.key;
-      final tab = entry.value;
-      if (index == 2 && avatar != null) {
-        return NavigationDestination(
-          icon: AnimationNetworkImage(
-            borderRadius: BorderRadius.circular(50),
-            url: avatar,
-            width: 24,
-            height: 24,
-            fit: BoxFit.cover,
-          ),
-          selectedIcon: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: colorScheme.primary,
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: AnimationNetworkImage(
-              borderRadius: BorderRadius.circular(50),
-              url: avatar,
-              width: 24,
-              height: 24,
-              fit: BoxFit.fill,
-            ),
-          ),
-          label: tab.title,
-        );
-      }
-
-      return NavigationDestination(
-        icon: Icon(tab.icon),
-        selectedIcon: Icon(tab.activeIcon, color: colorScheme.primary),
-        label: tab.title,
-      );
-    }).toList();
-  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final backgroundColor = NavigationBarTheme.of(context).backgroundColor ??
         colorScheme.surfaceContainerHighest;
-    if (glassBar) {
-      return SafeArea(
-        top: false,
-        left: false,
-        right: false,
-        maintainBottomViewPadding: true,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: _buildGlassBar(context, backgroundColor),
-        ),
-      );
-    }
-    return NavigationBar(
-      backgroundColor: backgroundColor,
-      selectedIndex: selectedIndex,
-      onDestinationSelected: onSelected,
-      destinations: _buildBarDestinations(colorScheme, avatar),
+    return SafeArea(
+      top: false,
+      left: false,
+      right: false,
+      maintainBottomViewPadding: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: _buildGlassBar(context, backgroundColor),
+      ),
     );
   }
 

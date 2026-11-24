@@ -13,7 +13,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get glassNavigationStyleDescription =>
-      'Use a frosted glass style for app bars, tabs, and bottom navigation.';
+      'Use a frosted glass style for app bars and tabs.';
 
   @override
   String get defaultCollectionCategory => 'Default collection category';

@@ -27,7 +27,6 @@ class RankingListSkeleton extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,
-      color: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: colors.outlineVariant.withValues(alpha: .5)),

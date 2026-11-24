@@ -166,36 +166,33 @@ class _FeaturedRankings extends StatelessWidget {
 
         return SizedBox(
           width: double.infinity,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 14, bottom: 24),
-            child: isCompact
-                ? SizedBox(
-                    height: 300,
-                    child: MediaQuery.removePadding(
-                      context: context,
-                      removeLeft: true,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: cards.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 5),
-                        itemBuilder: (_, index) => cards[index],
-                      ),
+          child: isCompact
+              ? SizedBox(
+                  height: 300,
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeLeft: true,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: cards.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 5),
+                      itemBuilder: (_, index) => cards[index],
                     ),
-                  )
-                : Row(
-                    // The scroll view leaves height unbounded; let cards size themselves.
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (cards.length > 1) cards[1],
-                      const SizedBox(width: 12),
-                      cards[0],
-                      if (cards.length > 2) ...[
-                        const SizedBox(width: 12),
-                        cards[2],
-                      ],
-                    ],
                   ),
-          ),
+                )
+              : Row(
+                  // The scroll view leaves height unbounded; let cards size themselves.
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (cards.length > 1) cards[1],
+                    const SizedBox(width: 12),
+                    cards[0],
+                    if (cards.length > 2) ...[
+                      const SizedBox(width: 12),
+                      cards[2],
+                    ],
+                  ],
+                ),
         );
       },
     );
@@ -225,7 +222,6 @@ class _FeaturedCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: rank == 1 ? 8 : 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(22),
       ),

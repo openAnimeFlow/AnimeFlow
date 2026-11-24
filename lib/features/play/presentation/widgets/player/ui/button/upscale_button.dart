@@ -55,78 +55,21 @@ List<MenuItemButton> buildUpscaleMenuItems(
 }
 
 class UpscaleButton extends StatelessWidget {
-  final UpscalePreset value;
-  final PlayerCapabilities capabilities;
-  final Future<void> Function(UpscalePreset) onChanged;
-  final VoidCallback? onMenuOpen;
-  final VoidCallback? onMenuClose;
+  const UpscaleButton({super.key, required this.onPressed});
 
-  const UpscaleButton({
-    super.key,
-    required this.value,
-    required this.capabilities,
-    required this.onChanged,
-    this.onMenuOpen,
-    this.onMenuClose,
-  });
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return MenuAnchor(
-      onOpen: onMenuOpen,
-      onClose: onMenuClose,
-      menuChildren: buildUpscaleMenuItems(
-        context,
-        value: value,
-        capabilities: capabilities,
-        onChanged: onChanged,
-        buildLabel: (label, isSelected) => Container(
-          height: 48,
-          constraints: const BoxConstraints(minWidth: 112),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              label,
-              style: TextStyle(
-                color:
-                    isSelected ? Theme.of(context).colorScheme.primary : null,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ),
-        ),
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        minimumSize: const Size(0, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       ),
-      builder:
-          (BuildContext context, MenuController controller, Widget? child) {
-        final themePrimary = Theme.of(context).colorScheme.primary;
-        return InkWell(
-          onTap: () {
-            if (controller.isOpen) {
-              controller.close();
-            } else {
-              controller.open();
-            }
-          },
-          child: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color:
-                  value.isEnabled && capabilities.supportsUpscalePreset(value)
-                      ? themePrimary.withValues(alpha: 0.5)
-                      : null,
-            ),
-            child: Text(
-              '4k',
-              style: TextStyle(
-                  color: themePrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18),
-            ),
-          ),
-        );
-      },
+      child: const Text('4k'),
     );
   }
 }

@@ -7,7 +7,8 @@ import 'package:material_ui/material_ui.dart';
 class JellyMenu<T> extends StatefulWidget {
   const JellyMenu({
     super.key,
-    required this.trigger,
+    this.trigger,
+    this.triggerBuilder,
     required this.menuBuilder,
     required this.onSelected,
     this.onOpenChanged,
@@ -30,10 +31,14 @@ class JellyMenu<T> extends StatefulWidget {
       damping: 19,
     ),
     this.tooltip = '更多',
-  });
+  }) : assert((trigger == null) != (triggerBuilder == null));
 
   /// 点击后展开菜单的组件。
-  final Widget trigger;
+  final Widget? trigger;
+
+  /// 构建通过自身按钮回调打开菜单的触发组件。
+  final Widget Function(BuildContext context, VoidCallback? open)?
+      triggerBuilder;
 
   /// 触发组件的背景色，省略时使用主题的 surfaceContainerHigh。
   final Color? triggerColor;
@@ -127,6 +132,10 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
     if (_portal.isShowing) setState(() {});
   }
 
+  Widget _buildTrigger(BuildContext context) =>
+      widget.triggerBuilder?.call(context, widget.enabled ? _open : null) ??
+      widget.trigger!;
+
   void _open() {
     if (!widget.enabled || open) return;
     if (_portal.isShowing) {
@@ -138,7 +147,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
         Overlay.of(context).context.findRenderObject()! as RenderBox;
     _triggerSize = target.size;
     if (widget.triggerResizeDuration != Duration.zero) {
-      _overlayTrigger = widget.trigger;
+      _overlayTrigger = _buildTrigger(context);
     }
     final origin = target.localToGlobal(Offset.zero, ancestor: overlay);
     final right = overlay.size.width - origin.dx;
@@ -221,8 +230,9 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
     final colors = Theme.of(context).colorScheme;
     final triggerColor = widget.triggerColor ?? colors.surfaceContainerHigh;
     final radius = _triggerSize.shortestSide / 2;
+    final triggerChild = _buildTrigger(context);
     final trigger = widget.triggerResizeDuration == Duration.zero
-        ? widget.trigger
+        ? triggerChild
         : AnimatedSize(
             duration: MediaQuery.disableAnimationsOf(context)
                 ? Duration.zero
@@ -230,8 +240,16 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
             curve: Curves.easeInOutCubic,
             child: SizedBox.fromSize(
               size: _portal.isShowing ? _triggerSize : null,
-              child: _overlayTrigger ?? widget.trigger,
+              child: _overlayTrigger ?? triggerChild,
             ),
+          );
+    final triggerControl = widget.triggerBuilder != null
+        ? trigger
+        : GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            excludeFromSemantics: !widget.enabled,
+            onTap: _open,
+            child: trigger,
           );
     final target = CompositedTransformTarget(
       key: _targetKey,
@@ -245,12 +263,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
           clipBehavior: Clip.antiAlias,
           child: Tooltip(
             message: widget.tooltip,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              excludeFromSemantics: !widget.enabled,
-              onTap: _open,
-              child: trigger,
-            ),
+            child: triggerControl,
           ),
         ),
       ),
@@ -258,15 +271,16 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
     if (widget.avoidKeyboard) {
       return OverlayPortal.overlayChildLayoutBuilder(
         controller: _portal,
-        overlayChildBuilder: (context, layout) =>
-            _buildOverlay(context, triggerColor, radius, layout: layout),
+        overlayChildBuilder: (context, layout) => _buildOverlay(
+            context, triggerColor, radius, triggerChild,
+            layout: layout),
         child: target,
       );
     }
     return OverlayPortal(
       controller: _portal,
       overlayChildBuilder: (context) =>
-          _buildOverlay(context, triggerColor, radius),
+          _buildOverlay(context, triggerColor, radius, triggerChild),
       child: target,
     );
   }
@@ -274,7 +288,8 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
   Widget _buildOverlay(
     BuildContext context,
     Color triggerColor,
-    double radius, {
+    double radius,
+    Widget trigger, {
     OverlayChildLayoutInfo? layout,
   }) {
     var anchor = _anchor;
@@ -339,12 +354,17 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
                 ),
                 Positioned.fill(
                   child: IgnorePointer(
-                    child: Opacity(
-                      opacity: (1 - width.value * 3).clamp(0.0, 1.0).toDouble(),
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: _overlayTrigger ?? widget.trigger,
+                    child: ExcludeFocus(
+                      child: ExcludeSemantics(
+                        child: Opacity(
+                          opacity:
+                              (1 - width.value * 3).clamp(0.0, 1.0).toDouble(),
+                          child: Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: _overlayTrigger ?? trigger,
+                            ),
+                          ),
                         ),
                       ),
                     ),

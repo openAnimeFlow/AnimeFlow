@@ -1,5 +1,6 @@
 import 'package:anime_flow/core/logger/app_log.dart';
 import 'package:anime_flow/features/play/application/play_session.dart';
+import 'package:anime_flow/features/play/domain/player/video_fit.dart';
 import 'package:anime_flow/features/play/presentation/widgets/dialog/episodes_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
@@ -21,6 +22,7 @@ import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_t
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/widgets/danmaku_text_field.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/play/presentation/widgets/loading_animation.dart';
 import 'package:anime_flow/features/play/presentation/widgets/play_pause_icon.dart';
@@ -98,6 +100,48 @@ class _BottomControlsContent extends ConsumerWidget {
   const _BottomControlsContent();
 
   static const double _wideDanmakuControlsMaxWidth = 520;
+
+  String _videoFitLabel(AppLocalizations l10n, VideoFit fit) => switch (fit) {
+        VideoFit.contain => l10n.fitAuto,
+        VideoFit.cover => l10n.fitCrop,
+        VideoFit.fill => l10n.fitStretch,
+      };
+
+  Widget _menuContent(List<Widget> items) => SingleChildScrollView(
+        primary: false,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 144),
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: items,
+            ),
+          ),
+        ),
+      );
+
+  Widget _menuOption(
+    BuildContext context, {
+    required String label,
+    required bool isSelected,
+    required VoidCallback onPressed,
+  }) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return MenuItemButton(
+      closeOnActivate: false,
+      onPressed: onPressed,
+      trailingIcon:
+          isSelected ? Icon(Icons.check, size: 18, color: primary) : null,
+      child: Text(
+        label,
+        style: isSelected
+            ? TextStyle(color: primary, fontWeight: FontWeight.bold)
+            : null,
+      ),
+    );
+  }
 
   Widget _buildProgressBar() {
     return Consumer(
@@ -242,6 +286,16 @@ class _BottomControlsContent extends ConsumerWidget {
     final keyboardLift = fullscreen && ref.read(playbackDeviceProvider).isMobile
         ? MediaQuery.viewInsetsOf(context).bottom
         : 0.0;
+
+    void onMenuOpenChanged(bool isOpen) {
+      if (isOpen) {
+        videoUiStateController.cancelUiTimer();
+      } else {
+        videoUiStateController.hideControlsUi(
+          duration: const Duration(seconds: 2),
+        );
+      }
+    }
 
     return Container(
       decoration: const BoxDecoration(
@@ -421,16 +475,31 @@ class _BottomControlsContent extends ConsumerWidget {
                           (state) => state.upscalePreset,
                         ),
                       );
-                      return UpscaleButton(
-                        value: upscalePreset,
-                        capabilities:
-                            playController.playbackCoordinator.capabilities,
-                        onChanged: playController.setUpscalePreset,
-                        onMenuOpen: videoUiStateController.cancelUiTimer,
-                        onMenuClose: () =>
-                            videoUiStateController.hideControlsUi(
-                          duration: const Duration(seconds: 2),
-                        ),
+                      final capabilities =
+                          playController.playbackCoordinator.capabilities;
+                      final enabled = upscalePreset.isEnabled &&
+                          capabilities.supportsUpscalePreset(upscalePreset);
+                      return JellyMenu<VoidCallback>(
+                        tooltip: '4K',
+                        preferredVerticalDirection: VerticalDirection.up,
+                        triggerColor: enabled
+                            ? Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(alpha: 0.5)
+                            : Colors.transparent,
+                        triggerBuilder: (_, open) =>
+                            UpscaleButton(onPressed: open),
+                        menuBuilder: (_, select) =>
+                            _menuContent(buildUpscaleMenuItems(
+                          context,
+                          value: upscalePreset,
+                          capabilities: capabilities,
+                          onChanged: playController.setUpscalePreset,
+                          onActivate: select,
+                        )),
+                        onSelected: (apply) => apply(),
+                        onOpenChanged: onMenuOpenChanged,
                       );
                     },
                   ),
@@ -442,16 +511,25 @@ class _BottomControlsContent extends ConsumerWidget {
                       final rate = ref.watch(
                         playStateProvider.select((state) => state.rate),
                       );
-                      return RateButton(
-                        value: rate,
-                        onChanged: (rate) =>
-                            playController.setPlaybackRate(rate),
-                        onMenuOpen: () =>
-                            videoUiStateController.cancelUiTimer(),
-                        onMenuClose: () =>
-                            videoUiStateController.hideControlsUi(
-                          duration: const Duration(seconds: 2),
-                        ),
+                      return JellyMenu<double>(
+                        tooltip: l10n.playbackRate,
+                        triggerColor: Colors.transparent,
+                        preferredVerticalDirection: VerticalDirection.up,
+                        triggerResizeDuration:
+                            const Duration(milliseconds: 200),
+                        triggerBuilder: (_, open) =>
+                            RateButton(value: rate, onPressed: open),
+                        menuBuilder: (context, select) => _menuContent([
+                          for (final speed in RateButton.speeds)
+                            _menuOption(
+                              context,
+                              label: '${speed}x',
+                              isSelected: rate == speed,
+                              onPressed: () => select(speed),
+                            ),
+                        ]),
+                        onSelected: playController.setPlaybackRate,
+                        onOpenChanged: onMenuOpenChanged,
                       );
                     },
                   ),
@@ -460,16 +538,23 @@ class _BottomControlsContent extends ConsumerWidget {
                     builder: (context, ref, child) {
                       final videoFit = ref
                           .watch(playStateProvider.select((s) => s.videoFit));
-                      return FitButton(
-                        value: videoFit,
-                        onChanged:
+                      return JellyMenu<VideoFit>(
+                        tooltip: _videoFitLabel(l10n, videoFit),
+                        triggerColor: Colors.transparent,
+                        preferredVerticalDirection: VerticalDirection.up,
+                        triggerBuilder: (_, open) => FitButton(onPressed: open),
+                        menuBuilder: (context, select) => _menuContent([
+                          for (final fit in VideoFit.values)
+                            _menuOption(
+                              context,
+                              label: _videoFitLabel(l10n, fit),
+                              isSelected: videoFit == fit,
+                              onPressed: () => select(fit),
+                            ),
+                        ]),
+                        onSelected:
                             ref.read(playStateProvider.notifier).setVideoFit,
-                        onMenuOpen: () =>
-                            videoUiStateController.cancelUiTimer(),
-                        onMenuClose: () =>
-                            videoUiStateController.hideControlsUi(
-                          duration: const Duration(seconds: 2),
-                        ),
+                        onOpenChanged: onMenuOpenChanged,
                       );
                     },
                   ),

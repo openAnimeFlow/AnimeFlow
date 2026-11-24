@@ -149,25 +149,29 @@ class _RankingPageState extends State<RankingPage> {
                               ValueListenableBuilder<bool>(
                             valueListenable: _isPinned,
                             builder: (context, isPinned, child) =>
-                                _GradientSliverAppBar(
-                              title: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                child: Text(l10n.rankingTitle),
-                              ),
-                              isPinned: isPinned,
-                              glassStyle: snapshot.data ?? false,
-                              expandedHeight: kToolbarHeight +
-                                  _filterHeight +
-                                  _progressHeight,
-                              flexibleSpace: child!,
-                              bottom: PreferredSize(
-                                preferredSize:
-                                    const Size.fromHeight(_progressHeight),
-                                child: isReloading
-                                    ? const LinearProgressIndicator(
-                                        minHeight: _progressHeight)
-                                    : const SizedBox.shrink(),
+                                MediaQuery.removePadding(
+                              context: context,
+                              removeLeft: true,
+                              child: _GradientSliverAppBar(
+                                title: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  child: Text(l10n.rankingTitle),
+                                ),
+                                isPinned: isPinned,
+                                glassStyle: snapshot.data ?? false,
+                                expandedHeight: kToolbarHeight +
+                                    _filterHeight +
+                                    _progressHeight,
+                                flexibleSpace: child!,
+                                bottom: PreferredSize(
+                                  preferredSize:
+                                      const Size.fromHeight(_progressHeight),
+                                  child: isReloading
+                                      ? const LinearProgressIndicator(
+                                          minHeight: _progressHeight)
+                                      : const SizedBox.shrink(),
+                                ),
                               ),
                             ),
                             child: _buildFilterSpace(context),

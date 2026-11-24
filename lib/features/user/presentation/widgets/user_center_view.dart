@@ -251,7 +251,8 @@ class _UserViewState extends ConsumerState<UserCenterView>
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
                 context,
               ),
-              sliver: header,
+              sliver: MediaQuery.removePadding(
+                  context: context, removeLeft: true, child: header),
             ),
           ];
         },

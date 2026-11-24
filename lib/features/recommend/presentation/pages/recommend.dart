@@ -59,101 +59,105 @@ class _RecommendPageState extends State<RecommendPage>
     final colorScheme = Theme.of(context).colorScheme;
     final glassHeaderHeight =
         MediaQuery.paddingOf(context).top + kToolbarHeight;
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        forceMaterialTransparency: true,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Row(
-          children: [
-            Text(l10n.recommend),
-            const SizedBox(width: 10),
-            Flexible(
-              child: SizedBox(
-                width: 200,
-                height: 35,
-                child: GlassCapsule(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: l10n.searchAnimeHint,
-                      hintStyle: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 14,
+    return MediaQuery.removePadding(
+      context: context,
+      removeLeft: true,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          forceMaterialTransparency: true,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          title: Row(
+            children: [
+              Text(l10n.recommend),
+              const SizedBox(width: 10),
+              Flexible(
+                child: SizedBox(
+                  width: 200,
+                  height: 35,
+                  child: GlassCapsule(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: l10n.searchAnimeHint,
+                        hintStyle: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 14,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: colorScheme.onSurfaceVariant,
+                          size: 22,
+                        ),
+                        filled: false,
+                        border: const OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                        ),
                       ),
-                      prefixIcon: Icon(
-                        Icons.search_rounded,
-                        color: colorScheme.onSurfaceVariant,
-                        size: 22,
-                      ),
-                      filled: false,
-                      border: const OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                      ),
+                      onTap: () {
+                        appNavigatorOf(context).openSearch<void>();
+                      },
+                      readOnly: true,
                     ),
-                    onTap: () {
-                      appNavigatorOf(context).openSearch<void>();
-                    },
-                    readOnly: true,
                   ),
                 ),
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              tooltip: l10n.downloadsTitle,
+              onPressed: () => appNavigatorOf(context).openDownload<void>(),
+              icon: const Icon(Icons.cloud_download_outlined),
+            ),
+            IconButton(
+              tooltip: l10n.playbackHistory,
+              onPressed: () => appNavigatorOf(context).openPlayRecord<void>(),
+              icon: const Icon(Icons.access_time_outlined),
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: TopOcclusionScope(
+                height: glassHeaderHeight + GlassTabBar.height,
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    const AnimeView(),
+                    CommunityView(
+                      active: widget.active && _tabController.index == 1,
+                    ),
+                    WallpaperView(onOpen: onOpenWallpaper),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: glassHeaderHeight + 48,
+              child: const TopGradientMask(),
+            ),
+            Positioned(
+              top: glassHeaderHeight,
+              left: 0,
+              right: 0,
+              height: GlassTabBar.height,
+              child: GlassTabBar(
+                controller: _tabController,
+                labels: [l10n.anime, l10n.community, l10n.wallpapers],
               ),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            tooltip: l10n.downloadsTitle,
-            onPressed: () => appNavigatorOf(context).openDownload<void>(),
-            icon: const Icon(Icons.cloud_download_outlined),
-          ),
-          IconButton(
-            tooltip: l10n.playbackHistory,
-            onPressed: () => appNavigatorOf(context).openPlayRecord<void>(),
-            icon: const Icon(Icons.access_time_outlined),
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: TopOcclusionScope(
-              height: glassHeaderHeight + GlassTabBar.height,
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  const AnimeView(),
-                  CommunityView(
-                    active: widget.active && _tabController.index == 1,
-                  ),
-                  WallpaperView(onOpen: onOpenWallpaper),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: glassHeaderHeight + 48,
-            child: const TopGradientMask(),
-          ),
-          Positioned(
-            top: glassHeaderHeight,
-            left: 0,
-            right: 0,
-            height: GlassTabBar.height,
-            child: GlassTabBar(
-              controller: _tabController,
-              labels: [l10n.anime, l10n.community, l10n.wallpapers],
-            ),
-          ),
-        ],
       ),
     );
   }

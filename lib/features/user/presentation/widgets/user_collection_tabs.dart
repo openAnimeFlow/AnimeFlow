@@ -20,6 +20,7 @@ import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:shimmer/shimmer.dart';
 
 class UserCollectionTabs extends ConsumerWidget {
   final TabController tabController;
@@ -235,6 +236,15 @@ class _UserCollectionTab extends ConsumerWidget {
                 final cardWidth = (availableWidth - 12 * (crossAxisCount - 1)) /
                     crossAxisCount;
                 final coverWidth = cardWidth / 2.5 * (2 / 3);
+                final collections = collectionsItem?.data ?? [];
+                final skeletonCount = collectionsItem == null
+                    ? 4 * crossAxisCount
+                    : tabState.isLoadingMore ||
+                            (collections.isEmpty &&
+                                tabState.canLoadMore &&
+                                tabState.isBusy)
+                        ? crossAxisCount
+                        : 0;
                 return scrollView = OcclusionAwareCustomScrollView(
                   key: PageStorageKey<int>(type),
                   scrollBehavior: const ScrollBehavior().copyWith(
@@ -263,37 +273,30 @@ class _UserCollectionTab extends ConsumerWidget {
                           ),
                         ),
                       )
-                    else if (collectionsItem == null)
-                      const SliverFillRemaining(
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    else if (collectionsItem.data.isEmpty)
+                    else if (collections.isEmpty && skeletonCount == 0)
                       SliverFillRemaining(
                         hasScrollBody: false,
                         child: Center(
                           child: !tabState.canLoadMore
                               ? Text(l10n.noData)
-                              : tabState.isBusy
-                                  ? const CircularProgressIndicator()
-                                  : Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        if (tabState.loadMoreErrorMessage !=
-                                            null) ...[
-                                          Text(l10n.collectionLoadMoreFailed),
-                                          const SizedBox(height: 12),
-                                        ],
-                                        FilledButton.icon(
-                                          onPressed: () => _onLoadMore(ref),
-                                          label: Text(
-                                            tabState.loadMoreErrorMessage ==
-                                                    null
-                                                ? l10n.viewMore
-                                                : l10n.retry,
-                                          ),
-                                        ),
-                                      ],
+                              : Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (tabState.loadMoreErrorMessage !=
+                                        null) ...[
+                                      Text(l10n.collectionLoadMoreFailed),
+                                      const SizedBox(height: 12),
+                                    ],
+                                    FilledButton.icon(
+                                      onPressed: () => _onLoadMore(ref),
+                                      label: Text(
+                                        tabState.loadMoreErrorMessage == null
+                                            ? l10n.viewMore
+                                            : l10n.retry,
+                                      ),
                                     ),
+                                  ],
+                                ),
                         ),
                       )
                     else ...[
@@ -312,7 +315,10 @@ class _UserCollectionTab extends ConsumerWidget {
                           ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
-                              final collection = collectionsItem.data[index];
+                              if (index >= collections.length) {
+                                return const _CollectionCardSkeleton();
+                              }
+                              final collection = collections[index];
                               return _CollectionItemCard(
                                 key: ValueKey(collection.id),
                                 collection: collection,
@@ -326,22 +332,22 @@ class _UserCollectionTab extends ConsumerWidget {
                                 ),
                               );
                             },
-                            childCount: collectionsItem.data.length,
+                            childCount: collections.length + skeletonCount,
                           ),
                         ),
                       ),
-                      SliverPadding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: horizontalPadding),
-                        sliver: SliverToBoxAdapter(
-                          child: _CollectionFooter(
-                            isLoadingMore: tabState.isLoadingMore,
-                            hasMore: tabState.canLoadMore,
-                            errorMessage: tabState.loadMoreErrorMessage,
-                            onRetry: () => _onLoadMore(ref),
+                      if (skeletonCount == 0)
+                        SliverPadding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: horizontalPadding),
+                          sliver: SliverToBoxAdapter(
+                            child: _CollectionFooter(
+                              hasMore: tabState.canLoadMore,
+                              errorMessage: tabState.loadMoreErrorMessage,
+                              onRetry: () => _onLoadMore(ref),
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ],
                 );
@@ -355,13 +361,11 @@ class _UserCollectionTab extends ConsumerWidget {
 }
 
 class _CollectionFooter extends StatelessWidget {
-  final bool isLoadingMore;
   final bool hasMore;
   final String? errorMessage;
   final VoidCallback onRetry;
 
   const _CollectionFooter({
-    required this.isLoadingMore,
     required this.hasMore,
     required this.errorMessage,
     required this.onRetry,
@@ -370,15 +374,6 @@ class _CollectionFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (isLoadingMore) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
     if (errorMessage != null) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -405,6 +400,101 @@ class _CollectionFooter extends StatelessWidget {
     }
 
     return const SizedBox(height: 16);
+  }
+}
+
+class _CollectionCardSkeleton extends StatelessWidget {
+  const _CollectionCardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ColorScheme.of(context);
+    final isDark = colors.brightness == Brightness.dark;
+    final baseColor = colors.surfaceContainerHighest;
+    final highlightColor = Color.lerp(
+      baseColor,
+      isDark ? colors.onSurface : colors.surface,
+      isDark ? 0.08 : 0.65,
+    )!;
+
+    Widget placeholder({double? width, double? height, double radius = 4}) {
+      return Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: baseColor,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+      );
+    }
+
+    return Card(
+      elevation: 0,
+      child: Shimmer.fromColors(
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+        enabled: !MediaQuery.disableAnimationsOf(context),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 2 / 3,
+              child: placeholder(radius: 12),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Flexible(
+                      flex: 3,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 4,
+                              children: [
+                                Flexible(
+                                  child: FractionallySizedBox(
+                                    widthFactor: 0.9,
+                                    child: placeholder(height: 12),
+                                  ),
+                                ),
+                                Flexible(
+                                  child: FractionallySizedBox(
+                                    widthFactor: 0.6,
+                                    child: placeholder(height: 10),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          placeholder(width: 24, height: 24, radius: 12),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Flexible(
+                      child: FractionallySizedBox(
+                        widthFactor: 0.65,
+                        child: placeholder(height: 10),
+                      ),
+                    ),
+                    const Spacer(),
+                    Flexible(child: placeholder(width: 68, height: 12)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

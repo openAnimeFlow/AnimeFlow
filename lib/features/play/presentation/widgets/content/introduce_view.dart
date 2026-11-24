@@ -158,146 +158,142 @@ class _IntroduceViewState extends State<IntroduceView>
     super.build(context);
     final paddingOf = MediaQuery.paddingOf(context);
     return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.only(
-            left: 10, top: 10, right: 10, bottom: paddingOf.bottom + 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 5,
-          children: [
-            Consumer(builder: (context, ref, child) {
-              final extra = ref.watch(playExtraProvider).playExtra;
-              final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
-              final subject = ref.watch(animeInfoProvider).asData?.value;
-              final l10n = AppLocalizations.of(context);
+      padding: EdgeInsets.only(
+          left: 10, top: 10, right: 10, bottom: paddingOf.bottom + 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 5,
+        children: [
+          Consumer(builder: (context, ref, child) {
+            final extra = ref.watch(playExtraProvider).playExtra;
+            final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
+            final subject = ref.watch(animeInfoProvider).asData?.value;
+            final l10n = AppLocalizations.of(context);
 
-              return Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: _showDetails,
-                      borderRadius: BorderRadius.circular(10),
-                      child: Text(
-                        extra.subjectName,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.left,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+            return Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: _showDetails,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Text(
+                      extra.subjectName,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
+                      textAlign: TextAlign.left,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (isLoggedIn && subject != null)
-                    CollectionMenu.icon(
-                      key: ValueKey(extra.subjectId),
-                      collectType:
-                          collectTypeFromApiType(subject.interest?.type),
-                      iconSize: 25,
-                      onCollectTypeChanged: (newType) async {
-                        try {
-                          await ref
-                              .read(animeInfoProvider.notifier)
-                              .updateCollectionType(newType.value);
-                        } on AnimeFlowApiException catch (e) {
-                          NotificationToast.show(
-                            e.message,
-                            title: l10n.updateFailed,
-                          );
-                          rethrow;
-                        } catch (e) {
-                          NotificationToast.show(
-                            e.toString(),
-                            title: l10n.updateFailed,
-                          );
-                          rethrow;
-                        }
-                      },
-                    ),
-                ],
-              );
-            }),
-            const SizedBox(height: 5),
-            //章节
-            Consumer(builder: (context, ref, child) {
-              final l10n = AppLocalizations.of(context);
-              final episodesAsync = ref.watch(episodesProvider);
-              final episodes = episodesAsync.value?.episodes?.data;
-              final extra = ref.watch(playExtraProvider);
-              final isPlaying = ref.watch(
-                playStateProvider.select((state) => state.playing),
-              );
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(l10n.episodeSelection),
-                      if (episodes != null && episodes.isNotEmpty)
-                        Row(
-                          children: [
-                            IconButton(
-                                onPressed: () {
-                                  appNavigatorOf(context)
-                                      .openVideoResourceDownload<void>(
-                                    VideoResourceDownloadRouteArgs(
-                                      subjectName: extra.playExtra.subjectName,
-                                      subjectCover:
-                                          extra.playExtra.subjectCover,
-                                      episodes: episodes,
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons.download_rounded)),
-                            IconButton(
-                              onPressed: () =>
-                                  setState(() => _isGridView = !_isGridView),
-                              icon: LayoutToggleIcon(isGridView: _isGridView),
-                              tooltip: _isGridView
-                                  ? l10n.switchToList
-                                  : l10n.switchToGrid,
-                            ),
-                          ],
-                        ),
-                    ],
+                ),
+                if (isLoggedIn && subject != null)
+                  CollectionMenu.icon(
+                    key: ValueKey(extra.subjectId),
+                    collectType: collectTypeFromApiType(subject.interest?.type),
+                    iconSize: 25,
+                    onCollectTypeChanged: (newType) async {
+                      try {
+                        await ref
+                            .read(animeInfoProvider.notifier)
+                            .updateCollectionType(newType.value);
+                      } on AnimeFlowApiException catch (e) {
+                        NotificationToast.show(
+                          e.message,
+                          title: l10n.updateFailed,
+                        );
+                        rethrow;
+                      } catch (e) {
+                        NotificationToast.show(
+                          e.toString(),
+                          title: l10n.updateFailed,
+                        );
+                        rethrow;
+                      }
+                    },
                   ),
-                  EpisodesListView(
-                    episodesAsync: episodesAsync,
-                    isGridView: _isGridView,
-                    subjectCover: extra.playExtra.subjectCover,
-                    isPlaying: isPlaying,
-                    onEpisodeSelected: (episode) => ref
-                        .read(episodesProvider.notifier)
-                        .selectEpisode(episode.id),
-                    onToggleWatched: extra.isOfflineMode
-                        ? null
-                        : (episode) => _updateEpisodeWatched(ref, episode),
-                    onLoadMore: () => _loadMoreEpisodes(ref),
-                    onRetry: () => _retryEpisodes(ref),
-                    onRetryLoadMore: () => _loadMoreEpisodes(ref, retry: true),
-                  ),
-                ],
-              );
-            }),
-            //数据源
-            Consumer(builder: (context, ref, child) {
-              final state = ref.watch(videoSourceProvider);
-              return VideoResourcesView(
-                isSearchCompleted: state.isSearchCompleted,
-                source: state.selectedPlaybackSource,
-                onSwitchSource: () => _showSourceDrawer(
-                    ref.read(playExtraProvider).playExtra.subjectName),
-                onOpenSourcePage: _openSourcePage,
-                onCopySourcePage: _copySourcePage,
-              );
-            }),
-            //弹幕
-            const DanmakuCard(),
-            const RecommendationsView(),
-          ],
-        ),
+              ],
+            );
+          }),
+          const SizedBox(height: 5),
+          //章节
+          Consumer(builder: (context, ref, child) {
+            final l10n = AppLocalizations.of(context);
+            final episodesAsync = ref.watch(episodesProvider);
+            final episodes = episodesAsync.value?.episodes?.data;
+            final extra = ref.watch(playExtraProvider);
+            final isPlaying = ref.watch(
+              playStateProvider.select((state) => state.playing),
+            );
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(l10n.episodeSelection),
+                    if (episodes != null && episodes.isNotEmpty)
+                      Row(
+                        children: [
+                          IconButton(
+                              onPressed: () {
+                                appNavigatorOf(context)
+                                    .openVideoResourceDownload<void>(
+                                  VideoResourceDownloadRouteArgs(
+                                    subjectName: extra.playExtra.subjectName,
+                                    subjectCover: extra.playExtra.subjectCover,
+                                    episodes: episodes,
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.download_rounded)),
+                          IconButton(
+                            onPressed: () =>
+                                setState(() => _isGridView = !_isGridView),
+                            icon: LayoutToggleIcon(isGridView: _isGridView),
+                            tooltip: _isGridView
+                                ? l10n.switchToList
+                                : l10n.switchToGrid,
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+                EpisodesListView(
+                  episodesAsync: episodesAsync,
+                  isGridView: _isGridView,
+                  subjectCover: extra.playExtra.subjectCover,
+                  isPlaying: isPlaying,
+                  onEpisodeSelected: (episode) => ref
+                      .read(episodesProvider.notifier)
+                      .selectEpisode(episode.id),
+                  onToggleWatched: extra.isOfflineMode
+                      ? null
+                      : (episode) => _updateEpisodeWatched(ref, episode),
+                  onLoadMore: () => _loadMoreEpisodes(ref),
+                  onRetry: () => _retryEpisodes(ref),
+                  onRetryLoadMore: () => _loadMoreEpisodes(ref, retry: true),
+                ),
+              ],
+            );
+          }),
+          //数据源
+          Consumer(builder: (context, ref, child) {
+            final state = ref.watch(videoSourceProvider);
+            return VideoResourcesView(
+              isSearchCompleted: state.isSearchCompleted,
+              source: state.selectedPlaybackSource,
+              onSwitchSource: () => _showSourceDrawer(
+                  ref.read(playExtraProvider).playExtra.subjectName),
+              onOpenSourcePage: _openSourcePage,
+              onCopySourcePage: _copySourcePage,
+            );
+          }),
+          //弹幕
+          const DanmakuCard(),
+          const RecommendationsView(),
+        ],
       ),
     );
   }

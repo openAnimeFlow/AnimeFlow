@@ -11,12 +11,13 @@ import 'package:anime_flow/features/play/presentation/providers/video_source_pro
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_query_providers.dart';
-import 'package:anime_flow/features/play/presentation/widgets/dialog/video_setting_dialog.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/control/video_settings_menu.dart';
 import 'package:anime_flow/core/utils/playback_format.dart';
 import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/ios_battery_icon.dart';
 import 'package:anime_flow/shared/widgets/network_icon.dart';
 import 'package:anime_flow/shared/widgets/collection_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/play/presentation/widgets/dialog/play_video_source_dialog.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
@@ -282,24 +283,46 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                               },
                               onCollectTypeChanged: _updateCollectionType,
                             ),
-                          if (!isWideScreen) const PlayerMoreButton(),
+                          if (!isWideScreen)
+                            MediaQuery.removePadding(
+                                context: context,
+                                removeLeft: true,
+                                child: const PlayerMoreButton()),
                           if (showContentActions && isWideScreen)
-                            IconButton(
+                            JellyMenu<VoidCallback>(
                               tooltip: l10n.settings,
-                              onPressed: () {
-                                showPlayerSettingsSheet(
-                                  context: context,
-                                  label: l10n.videoSettingsTitle,
-                                  child: const VideoSettingDialog(),
-                                  onOpen: videoUiStateController.cancelUiTimer,
-                                  onClose: videoUiStateController
-                                      .restartControlsAutoHideTimer,
-                                );
+                              triggerColor: Colors.transparent,
+                              preferredVerticalDirection:
+                                  VerticalDirection.down,
+                              triggerBuilder: (context, open) => IconButton(
+                                onPressed: open,
+                                icon: const Icon(
+                                  size: 29,
+                                  color: Colors.white,
+                                  Icons.settings_outlined,
+                                ),
+                              ),
+                              onOpenChanged: (isOpen) {
+                                if (isOpen) {
+                                  videoUiStateController.cancelUiTimer();
+                                } else {
+                                  videoUiStateController.hideControlsUi(
+                                    duration: const Duration(seconds: 3),
+                                  );
+                                }
                               },
-                              icon: const Icon(
-                                size: 29,
-                                color: Colors.white,
-                                Icons.settings_outlined,
+                              onSelected: (action) => action(),
+                              menuBuilder: (context, select) => AnimatedSize(
+                                alignment: Alignment.topRight,
+                                duration:
+                                    MediaQuery.disableAnimationsOf(context)
+                                        ? Duration.zero
+                                        : const Duration(milliseconds: 200),
+                                curve: Curves.easeOutCubic,
+                                child: MediaQuery.removePadding(
+                                    context: context,
+                                    removeLeft: true,
+                                    child: VideoSettingsMenu(onSelect: select)),
                               ),
                             ),
                           if (fullscreen)

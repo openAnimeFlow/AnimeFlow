@@ -6,13 +6,13 @@ import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/r
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/upscale_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/dialog/danmaku_setting_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
-import 'package:anime_flow/features/play/presentation/widgets/dialog/video_setting_dialog.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/control/video_settings_menu.dart';
 import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
-enum _PlayerMenuPage { main, rate, upscale }
+enum _PlayerMenuPage { main, rate, upscale, videoSettings }
 
 @Dependencies([playSession, PlayStateNotifier, VideoUiNotifier])
 class PlayerMoreButton extends ConsumerStatefulWidget {
@@ -78,11 +78,10 @@ class _PlayerMoreButtonState extends ConsumerState<PlayerMoreButton> {
                 child: Text(l10n.danmakuSettings),
               ),
               MenuItemButton(
+                closeOnActivate: false,
                 leadingIcon: const Icon(Icons.settings_outlined),
-                onPressed: () => select(() => openSettings(
-                      l10n.videoSettingsTitle,
-                      const VideoSettingDialog(),
-                    )),
+                trailingIcon: const Icon(Icons.chevron_right),
+                onPressed: () => _showPage(_PlayerMenuPage.videoSettings),
                 child: Text(l10n.videoSettingsTitle),
               ),
               MenuItemButton(
@@ -115,6 +114,7 @@ class _PlayerMoreButtonState extends ConsumerState<PlayerMoreButton> {
               onChanged: player.setUpscalePreset,
               onActivate: select,
             ),
+          _PlayerMenuPage.videoSettings => const <Widget>[],
         };
 
         return AnimatedSize(
@@ -123,30 +123,35 @@ class _PlayerMoreButtonState extends ConsumerState<PlayerMoreButton> {
               ? Duration.zero
               : const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
-          child: SingleChildScrollView(
-            key: ValueKey(_page),
-            primary: false,
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 168),
-              child: IntrinsicWidth(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (_page != _PlayerMenuPage.main)
-                      MenuItemButton(
-                        closeOnActivate: false,
-                        leadingIcon: const BackButtonIcon(),
-                        onPressed: () => _showPage(_PlayerMenuPage.main),
-                        child: Text(l10n.back),
+          child: _page == _PlayerMenuPage.videoSettings
+              ? VideoSettingsMenu(
+                  onBack: () => _showPage(_PlayerMenuPage.main),
+                  onSelect: select,
+                )
+              : SingleChildScrollView(
+                  key: ValueKey(_page),
+                  primary: false,
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minWidth: 168),
+                    child: IntrinsicWidth(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (_page != _PlayerMenuPage.main)
+                            MenuItemButton(
+                              closeOnActivate: false,
+                              leadingIcon: const BackButtonIcon(),
+                              onPressed: () => _showPage(_PlayerMenuPage.main),
+                              child: Text(l10n.back),
+                            ),
+                          ...items,
+                        ],
                       ),
-                    ...items,
-                  ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
         );
       },
     );

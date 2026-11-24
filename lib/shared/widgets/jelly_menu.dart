@@ -362,7 +362,9 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
                           child: Center(
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
-                              child: _overlayTrigger ?? trigger,
+                              child: open
+                                  ? _overlayTrigger ?? trigger
+                                  : trigger,
                             ),
                           ),
                         ),

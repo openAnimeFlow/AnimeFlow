@@ -11,10 +11,11 @@ import 'package:anime_flow/features/recommend/domain/wallpaper_repository.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_layout.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/justified_grid.dart';
-import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_filter_dialog.dart';
+import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_filter_form.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_skeleton.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/widgets/top_occlusion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -33,6 +34,8 @@ class _WallpaperViewState extends ConsumerState<WallpaperView>
   final _scrollController = ScrollController();
   final _backToTopVisible = ValueNotifier(false);
   bool _scrollCheckScheduled = false;
+  int _filterSession = 0;
+  double _filterKeyboardAnchorHeight = 0;
 
   @override
   bool get wantKeepAlive => true;
@@ -90,22 +93,61 @@ class _WallpaperViewState extends ConsumerState<WallpaperView>
     return _wall.refresh(sort: sort, keyword: keyword);
   }
 
-  /// 打开筛选弹窗；仅在排序或关键词实际变化时重新拉取，避免无谓的请求。
-  Future<void> _openFilter() async {
+  void _applyFilters(WallpaperFilterResult? result) {
+    if (result == null) return;
     final wall = ref.read(wallpaperWallProvider);
-    final result = await showDialog<WallpaperFilterResult>(
-      context: context,
-      useRootNavigator: false,
-      builder: (dialogContext) => WallpaperFilterDialog(
-        initialKeyword: wall.keyword,
-        initialSort: wall.sort,
-      ),
-    );
-    if (result == null || !mounted) return;
-    if (result.sort == wall.sort && result.keyword == wall.keyword) {
-      return;
-    }
+    if (result.sort == wall.sort && result.keyword == wall.keyword) return;
     unawaited(_refresh(sort: result.sort, keyword: result.keyword));
+  }
+
+  Widget _buildFilterMenu(WallpaperWallState wall, AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    return JellyMenu<WallpaperFilterResult?>(
+      tooltip: l10n.filterWallpapers,
+      keyboardAvoidance: JellyMenuKeyboardAvoidance.keepVisible(
+        _filterKeyboardAnchorHeight,
+      ),
+      preferredVerticalDirection: VerticalDirection.down,
+      triggerBuilder: (context, open) => InkWell(
+        onTap: open,
+        customBorder: const StadiumBorder(),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 40),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8,
+              children: [
+                Icon(Icons.tune, size: 18, color: theme.colorScheme.onSurface),
+                Text(
+                  l10n.filter,
+                  style: theme.textTheme.labelLarge
+                      ?.copyWith(color: theme.colorScheme.onSurface),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      onOpenChanged: (open) {
+        if (open) _filterSession++;
+      },
+      menuBuilder: (context, select) => FocusScope(
+        key: ValueKey(_filterSession),
+        child: WallpaperFilterForm(
+          initialKeyword: wall.keyword,
+          initialSort: wall.sort,
+          onKeyboardAnchorHeightChanged: (height) {
+            if (_filterKeyboardAnchorHeight == height) return;
+            setState(() => _filterKeyboardAnchorHeight = height);
+          },
+          onSubmit: select,
+          onCancel: () => select(null),
+        ),
+      ),
+      onSelected: _applyFilters,
+    );
   }
 
   /// 失败语义已在 Data/Application 收敛，这里只决定展示哪段文案。
@@ -187,11 +229,7 @@ class _WallpaperViewState extends ConsumerState<WallpaperView>
                           runSpacing: 8,
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
-                            OutlinedButton.icon(
-                              onPressed: _openFilter,
-                              icon: const Icon(Icons.tune, size: 18),
-                              label: Text(l10n.filter),
-                            ),
+                            _buildFilterMenu(wall, l10n),
                             // 已生效的筛选条件随按钮一起展示，可单独清除。
                             if (wall.sort != SortType.trends)
                               InputChip(

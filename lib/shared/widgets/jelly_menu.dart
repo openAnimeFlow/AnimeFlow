@@ -3,6 +3,24 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widget_previews.dart';
 import 'package:material_ui/material_ui.dart';
 
+class JellyMenuKeyboardAvoidance {
+  /// 根据键盘弹出后剩余的空间调整展开方向。
+  const JellyMenuKeyboardAvoidance.adaptive() : _minVisibleHeight = null;
+
+  /// 保持展开方向，向下展开时只上移到能露出指定高度的位置。
+  const JellyMenuKeyboardAvoidance.keepVisible(double height)
+      : assert(height >= 0),
+        _minVisibleHeight = height;
+
+  final double? _minVisibleHeight;
+}
+
+typedef _MenuPlacement = ({
+  Alignment anchor,
+  Size available,
+  Widget Function(Widget surface) positionMenu,
+});
+
 /// A trigger that morphs into a menu in the nearest overlay.
 class JellyMenu<T> extends StatefulWidget {
   const JellyMenu({
@@ -18,7 +36,7 @@ class JellyMenu<T> extends StatefulWidget {
     this.triggerResizeDuration = Duration.zero,
     this.enabled = true,
     this.barrierDismissible = true,
-    this.avoidKeyboard = false,
+    this.keyboardAvoidance,
     this.preferredVerticalDirection,
     this.widthSpring = const SpringDescription(
       mass: 1,
@@ -58,8 +76,8 @@ class JellyMenu<T> extends StatefulWidget {
   /// 是否允许点按菜单外部来收起菜单。
   final bool barrierDismissible;
 
-  /// 表单菜单在键盘弹出时使用可见区域重新定位。
-  final bool avoidKeyboard;
+  /// 表单菜单在键盘弹出时的定位方式。
+  final JellyMenuKeyboardAvoidance? keyboardAvoidance;
 
   /// 控制菜单宽度变化的弹簧参数，也适用于动画中途反转。
   final SpringDescription widthSpring;
@@ -104,7 +122,8 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
   final _link = LayerLink();
   final _targetKey = GlobalKey();
   Alignment _anchor = Alignment.topRight;
-  Size _available = Size.zero;
+  Rect _initialTarget = Rect.zero;
+  Size _initialOverlaySize = Size.zero;
   Size _triggerSize = Size.zero;
   Widget? _overlayTrigger;
   bool open = false;
@@ -113,14 +132,17 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
   @override
   void initState() {
     super.initState();
-    if (widget.avoidKeyboard) WidgetsBinding.instance.addObserver(this);
+    if (widget.keyboardAvoidance != null) {
+      WidgetsBinding.instance.addObserver(this);
+    }
   }
 
   @override
   void didUpdateWidget(covariant JellyMenu<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.avoidKeyboard == oldWidget.avoidKeyboard) return;
-    if (widget.avoidKeyboard) {
+    final avoidsKeyboard = widget.keyboardAvoidance != null;
+    if (avoidsKeyboard == (oldWidget.keyboardAvoidance != null)) return;
+    if (avoidsKeyboard) {
       WidgetsBinding.instance.addObserver(this);
     } else {
       WidgetsBinding.instance.removeObserver(this);
@@ -162,10 +184,8 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
       null => below >= above,
     };
     _anchor = Alignment(towardRight ? -1 : 1, towardBottom ? -1 : 1);
-    _available = Size(
-      (towardRight ? right : left).clamp(0.0, overlay.size.width).toDouble(),
-      (towardBottom ? below : above).clamp(0.0, overlay.size.height).toDouble(),
-    );
+    _initialTarget = origin & _triggerSize;
+    _initialOverlaySize = overlay.size;
     _portal.show();
     toggle(true);
   }
@@ -219,7 +239,9 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
   @override
   void dispose() {
     if (open) widget.onOpenChanged?.call(false);
-    if (widget.avoidKeyboard) WidgetsBinding.instance.removeObserver(this);
+    if (widget.keyboardAvoidance != null) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
     width.dispose();
     height.dispose();
     super.dispose();
@@ -229,7 +251,6 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final triggerColor = widget.triggerColor ?? colors.surfaceContainerHigh;
-    final radius = _triggerSize.shortestSide / 2;
     final triggerChild = _buildTrigger(context);
     final trigger = widget.triggerResizeDuration == Duration.zero
         ? triggerChild
@@ -268,57 +289,124 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
         ),
       ),
     );
-    if (widget.avoidKeyboard) {
+    final keyboardAvoidance = widget.keyboardAvoidance;
+    if (keyboardAvoidance != null) {
       return OverlayPortal.overlayChildLayoutBuilder(
         controller: _portal,
         overlayChildBuilder: (context, layout) => _buildOverlay(
-            context, triggerColor, radius, triggerChild,
-            layout: layout),
+          triggerColor,
+          triggerChild,
+          _keyboardPlacement(context, layout, keyboardAvoidance),
+        ),
         child: target,
       );
     }
     return OverlayPortal(
       controller: _portal,
       overlayChildBuilder: (context) =>
-          _buildOverlay(context, triggerColor, radius, triggerChild),
+          _buildOverlay(triggerColor, triggerChild, _followerPlacement()),
       child: target,
     );
   }
 
-  Widget _buildOverlay(
-    BuildContext context,
-    Color triggerColor,
-    double radius,
-    Widget trigger, {
-    OverlayChildLayoutInfo? layout,
-  }) {
-    var anchor = _anchor;
-    var available = _available;
-    Rect? target;
-    double? verticalEdge;
-    if (layout != null) {
-      target = MatrixUtils.transformRect(
-        layout.childPaintTransform,
-        Offset.zero & layout.childSize,
-      );
-      final view = View.of(context);
-      final keyboardInset = view.viewInsets.bottom / view.devicePixelRatio;
-      final overlaySize = layout.overlaySize;
-      final visibleBottom =
-          (overlaySize.height - keyboardInset).clamp(0.0, overlaySize.height);
-      final top = target.top.clamp(0.0, visibleBottom);
-      final bottom = target.bottom.clamp(0.0, visibleBottom);
-      final opensDown =
-          keyboardInset > 0 ? visibleBottom - top >= bottom : anchor.y < 0;
-      anchor = Alignment(anchor.x, opensDown ? -1 : 1);
-      verticalEdge = opensDown ? top : bottom;
-      available = Size(
-        (anchor.x < 0 ? overlaySize.width - target.left : target.right)
-            .clamp(0.0, overlaySize.width),
-        opensDown ? visibleBottom - top : bottom,
-      );
-    }
+  _MenuPlacement _followerPlacement() {
+    final anchor = _anchor;
+    return (
+      anchor: anchor,
+      available: _availableSpace(
+        _initialTarget,
+        _initialOverlaySize,
+        anchor,
+        anchor.y < 0
+            ? _initialOverlaySize.height - _initialTarget.top
+            : _initialTarget.bottom,
+      ),
+      positionMenu: (surface) => Align(
+            alignment: Alignment.topLeft,
+            child: CompositedTransformFollower(
+              link: _link,
+              showWhenUnlinked: false,
+              targetAnchor: anchor,
+              followerAnchor: anchor,
+              child: surface,
+            ),
+          ),
+    );
+  }
 
+  _MenuPlacement _keyboardPlacement(
+    BuildContext context,
+    OverlayChildLayoutInfo layout,
+    JellyMenuKeyboardAvoidance keyboardAvoidance,
+  ) {
+    final target = MatrixUtils.transformRect(
+      layout.childPaintTransform,
+      Offset.zero & layout.childSize,
+    );
+    final overlaySize = layout.overlaySize;
+    final view = View.of(context);
+    final keyboardInset = view.viewInsets.bottom / view.devicePixelRatio;
+    var overlayTop = 0.0;
+    var visibleBottom = overlaySize.height;
+    if (keyboardInset > 0) {
+      final overlay =
+          Overlay.of(context).context.findRenderObject()! as RenderBox;
+      overlayTop = overlay.localToGlobal(Offset.zero).dy;
+      final keyboardTop = view.physicalSize.height / view.devicePixelRatio -
+          keyboardInset -
+          overlayTop;
+      visibleBottom = keyboardTop.clamp(0.0, overlaySize.height);
+    }
+    final anchorHeight = keyboardAvoidance._minVisibleHeight;
+    final initiallyOpensDown = _anchor.y < 0;
+    var latestTop = visibleBottom;
+    if (keyboardInset > 0 && anchorHeight != null && initiallyOpensDown) {
+      final safeTop =
+          (view.viewPadding.top / view.devicePixelRatio - overlayTop)
+              .clamp(0.0, visibleBottom);
+      latestTop = (visibleBottom - anchorHeight).clamp(safeTop, visibleBottom);
+    }
+    final top = target.top.clamp(0.0, latestTop);
+    final bottom = target.bottom.clamp(0.0, visibleBottom);
+    final opensDown = keyboardInset > 0 && anchorHeight == null
+        ? visibleBottom - top >= bottom
+        : initiallyOpensDown;
+    final opensRight = _anchor.x < 0;
+    final anchor = Alignment(_anchor.x, opensDown ? -1 : 1);
+    return (
+      anchor: anchor,
+      available: _availableSpace(
+        target,
+        overlaySize,
+        anchor,
+        opensDown ? visibleBottom - top : bottom,
+      ),
+      positionMenu: (surface) => Positioned(
+            left: opensRight ? target.left : null,
+            right: opensRight ? null : overlaySize.width - target.right,
+            top: opensDown ? top : null,
+            bottom: opensDown ? null : overlaySize.height - bottom,
+            child: surface,
+          ),
+    );
+  }
+
+  Size _availableSpace(
+      Rect target, Size overlaySize, Alignment anchor, double availableHeight) {
+    final availableWidth =
+        anchor.x < 0 ? overlaySize.width - target.left : target.right;
+    return Size(
+      availableWidth.clamp(0.0, overlaySize.width),
+      availableHeight.clamp(0.0, overlaySize.height),
+    );
+  }
+
+  Widget _buildOverlay(
+    Color triggerColor,
+    Widget trigger,
+    _MenuPlacement placement,
+  ) {
+    final radius = _triggerSize.shortestSide / 2;
     return AnimatedBuilder(
       animation: Listenable.merge([width, height]),
       child: Builder(builder: (context) => widget.menuBuilder(context, select)),
@@ -326,7 +414,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
         final colors = Theme.of(context).colorScheme;
         final reveal = ((height.value - .45) * 2.4).clamp(0.0, 1.0).toDouble();
         final surface = ConstrainedBox(
-          constraints: BoxConstraints.loose(available),
+          constraints: BoxConstraints.loose(placement.available),
           child: Material(
             elevation: widget.elevation,
             color: Color.lerp(
@@ -343,7 +431,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
                   triggerSize: _triggerSize,
                   widthProgress: width.value,
                   heightProgress: height.value,
-                  alignment: anchor,
+                  alignment: placement.anchor,
                   child: IgnorePointer(
                     ignoring: !open || reveal == 0,
                     child: ExcludeSemantics(
@@ -362,9 +450,8 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
                           child: Center(
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
-                              child: open
-                                  ? _overlayTrigger ?? trigger
-                                  : trigger,
+                              child:
+                                  open ? _overlayTrigger ?? trigger : trigger,
                             ),
                           ),
                         ),
@@ -376,28 +463,6 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
             ),
           ),
         );
-        final menuPosition = layout == null
-            ? Align(
-                alignment: Alignment.topLeft,
-                child: CompositedTransformFollower(
-                  link: _link,
-                  showWhenUnlinked: false,
-                  targetAnchor: anchor,
-                  followerAnchor: anchor,
-                  child: surface,
-                ),
-              )
-            : Positioned(
-                left: anchor.x < 0 ? target!.left : null,
-                right: anchor.x > 0
-                    ? layout.overlaySize.width - target!.right
-                    : null,
-                top: anchor.y < 0 ? verticalEdge : null,
-                bottom: anchor.y > 0
-                    ? layout.overlaySize.height - verticalEdge!
-                    : null,
-                child: surface,
-              );
         return IgnorePointer(
           ignoring: !open,
           child: Stack(
@@ -411,7 +476,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
                 semanticsLabel:
                     MaterialLocalizations.of(context).modalBarrierDismissLabel,
               ),
-              menuPosition,
+              placement.positionMenu(surface),
             ],
           ),
         );

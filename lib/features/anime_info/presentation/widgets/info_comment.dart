@@ -112,7 +112,7 @@ class InfoCommentView extends ConsumerWidget {
       tooltip: '发表吐槽',
       triggerColor: Colors.transparent,
       barrierDismissible: false,
-      avoidKeyboard: true,
+      keyboardAvoidance: const JellyMenuKeyboardAvoidance.adaptive(),
       trigger: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Text(

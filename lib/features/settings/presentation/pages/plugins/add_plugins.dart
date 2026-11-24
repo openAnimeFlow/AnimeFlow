@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/crawler/api_crawler.dart';
@@ -197,10 +196,9 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return SettingsPageBuilder(
-        builder: (context, glassStyle) => Scaffold(
-              extendBodyBehindAppBar: glassStyle,
-              appBar: AdaptiveAppBar(
-                glassStyle: glassStyle,
+        builder: (context) => Scaffold(
+              extendBodyBehindAppBar: true,
+              appBar: SettingsAppBar(
                 title: Text(
                     _originalKey != null ? l10n.editSource : l10n.addSource),
                 actions: [

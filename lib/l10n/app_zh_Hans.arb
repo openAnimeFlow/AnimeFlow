@@ -1,6 +1,6 @@
 {
   "glassNavigationStyle": "磨砂玻璃导航风格",
-  "glassNavigationStyleDescription": "顶部栏和标签栏使用磨砂玻璃风格。",
+  "glassNavigationStyleDescription": "调整排行榜和壁纸详情页的顶部栏样式。",
   "defaultCollectionCategory": "默认收藏分类",
   "defaultCollectionCategoryDescription": "选择打开我的收藏时展示的分类。",
   "pageSettings": "页面设置",
@@ -375,7 +375,7 @@
   "playerShortcutScreenshot": "截图",
   "playerShortcutToggleDanmaku": "开关弹幕",
   "playerShortcutLongPressFastForward": "长按加速",
-  "playbackSettings": "播放",
+  "playbackSettings": "播放设置",
     "otherSettings": "其他",
   "about": "关于",
   "projectUpdates": "更新信息",

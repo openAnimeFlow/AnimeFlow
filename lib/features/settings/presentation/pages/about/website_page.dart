@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -56,9 +55,8 @@ class _WebsitePageState extends State<WebsitePage> {
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) => SettingsPageBuilder(
-          builder: (context, glassStyle) => Scaffold(
-                appBar: AdaptiveAppBar(
-                  glassStyle: glassStyle,
+          builder: (context) => Scaffold(
+                appBar: SettingsAppBar(
                   leading: BackButton(onPressed: _back),
                   title: Text(l10n.projectWebsite),
                   actions: [

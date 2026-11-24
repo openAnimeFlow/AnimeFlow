@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'dart:io';
 import 'dart:math' as math;
@@ -108,12 +107,11 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
         : <FontItem>[];
 
     return SettingsPageBuilder(
-        builder: (context, glassStyle) => Scaffold(
-              extendBodyBehindAppBar: glassStyle,
+        builder: (context) => Scaffold(
+              extendBodyBehindAppBar: true,
               appBar: PreferredSize(
                 preferredSize: const Size.fromHeight(kToolbarHeight),
-                child: AdaptiveAppBar(
-                  glassStyle: glassStyle,
+                child: SettingsAppBar(
                   title: Text(l10n.fontStyle),
                   actions: [
                     if (SystemUtil.isDesktop)

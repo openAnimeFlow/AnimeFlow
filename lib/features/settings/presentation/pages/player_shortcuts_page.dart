@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
@@ -177,10 +176,9 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
           l10n.playerShortcutLongPressFastForward,
     };
     return SettingsPageBuilder(
-        builder: (context, glassStyle) => Scaffold(
-              extendBodyBehindAppBar: glassStyle,
-              appBar: AdaptiveAppBar(
-                glassStyle: glassStyle,
+        builder: (context) => Scaffold(
+              extendBodyBehindAppBar: true,
+              appBar: SettingsAppBar(
                 title: Text(l10n.playerShortcuts),
                 automaticallyImplyLeading: !isWideScreen,
               ),

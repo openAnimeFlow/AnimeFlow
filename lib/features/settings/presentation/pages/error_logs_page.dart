@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -172,16 +171,19 @@ class _ErrorLogsPageState extends State<ErrorLogsPage> {
         final l10n = AppLocalizations.of(context);
         final isWideScreen = ref.watch(settingsLayoutProvider);
         return SettingsPageBuilder(
-            builder: (context, glassStyle) => Scaffold(
-                  extendBodyBehindAppBar: glassStyle,
-                  appBar: AdaptiveAppBar(
-                    glassStyle: glassStyle,
-                    title: Text(l10n.errorLogs),
-                    automaticallyImplyLeading: !isWideScreen,
+            builder: (context) => MediaQuery.removePadding(
+                  context: context,
+                  removeLeft: true,
+                  child: Scaffold(
+                    extendBodyBehindAppBar: true,
+                    appBar: SettingsAppBar(
+                      title: Text(l10n.errorLogs),
+                      automaticallyImplyLeading: !isWideScreen,
+                    ),
+                    body: buildBody(context, l10n),
+                    floatingActionButton:
+                        _logLines.isEmpty ? null : buildFloatingButtons(l10n),
                   ),
-                  body: buildBody(context, l10n),
-                  floatingActionButton:
-                      _logLines.isEmpty ? null : buildFloatingButtons(l10n),
                 ));
       },
     );

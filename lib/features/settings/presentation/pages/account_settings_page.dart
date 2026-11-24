@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:math' as math;
@@ -131,15 +130,14 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
       context: context,
       removeLeft: true,
       child: SettingsPageBuilder(
-          builder: (context, glassStyle) => Scaffold(
-                extendBodyBehindAppBar: glassStyle,
+          builder: (context) => Scaffold(
+                extendBodyBehindAppBar: true,
                 appBar: PreferredSize(
                   preferredSize: const Size.fromHeight(kToolbarHeight),
                   child: Consumer(
                     builder: (context, ref, _) {
                       final isWideScreen = ref.watch(settingsLayoutProvider);
-                      return AdaptiveAppBar(
-                        glassStyle: glassStyle,
+                      return SettingsAppBar(
                         title: Text(l10n.accountSettings),
                         automaticallyImplyLeading: !isWideScreen,
                       );

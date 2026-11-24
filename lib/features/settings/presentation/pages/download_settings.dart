@@ -1,5 +1,4 @@
 import 'package:anime_flow/features/download/domain/download_directory_failure.dart';
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/features/download/application/download_directory/download_directory_factory.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -46,15 +45,14 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
       context: context,
       removeLeft: true,
       child: SettingsPageBuilder(
-          builder: (context, glassStyle) => Scaffold(
-                extendBodyBehindAppBar: glassStyle,
+          builder: (context) => Scaffold(
+                extendBodyBehindAppBar: true,
                 appBar: PreferredSize(
                   preferredSize: const Size.fromHeight(kToolbarHeight),
                   child: Consumer(
                     builder: (context, ref, _) {
                       final isWideScreen = ref.watch(settingsLayoutProvider);
-                      return AdaptiveAppBar(
-                        glassStyle: glassStyle,
+                      return SettingsAppBar(
                         title: Text(l10n.downloadSettings),
                         automaticallyImplyLeading: !isWideScreen,
                       );

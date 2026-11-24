@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -123,12 +122,10 @@ class SponsorPage extends StatelessWidget {
     final paddingOf = MediaQuery.paddingOf(context);
     final topPadding = paddingOf.top + kToolbarHeight;
     return SettingsPageBuilder(
-        builder: (context, glassStyle) => Scaffold(
+        builder: (context) => Scaffold(
               extendBodyBehindAppBar: true,
-              appBar: AdaptiveAppBar(
-                glassStyle: glassStyle,
+              appBar: SettingsAppBar(
                 title: Text(l10n.sponsor),
-                backgroundColor: Colors.transparent,
               ),
               body: LayoutBuilder(
                 builder: (context, constraints) {

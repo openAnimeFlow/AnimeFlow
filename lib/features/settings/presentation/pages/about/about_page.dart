@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/shared/models/version_check_result.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
@@ -64,18 +63,16 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
       context: context,
       removeLeft: true,
       child: SettingsPageBuilder(
-          builder: (context, glassStyle) => Scaffold(
+          builder: (context) => Scaffold(
                 extendBodyBehindAppBar: true,
                 appBar: PreferredSize(
                   preferredSize: const Size.fromHeight(kToolbarHeight),
                   child: Consumer(
                     builder: (context, ref, _) {
                       final isWideScreen = ref.watch(settingsLayoutProvider);
-                      return AdaptiveAppBar(
-                        glassStyle: glassStyle,
+                      return SettingsAppBar(
                         title: Text(l10n.about),
                         automaticallyImplyLeading: !isWideScreen,
-                        backgroundColor: Colors.transparent,
                       );
                     },
                   ),

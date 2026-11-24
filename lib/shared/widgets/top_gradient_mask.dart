@@ -2,11 +2,13 @@ import 'package:material_ui/material_ui.dart';
 
 /// 顶部渐隐遮罩，同时阻止点击穿透到遮罩下方的内容。
 class TopGradientMask extends StatelessWidget {
-  const TopGradientMask({super.key});
+  const TopGradientMask({super.key, this.color});
+
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final backgroundColor = color ?? Theme.of(context).scaffoldBackgroundColor;
     return AbsorbPointer(
       child: DecoratedBox(
         decoration: BoxDecoration(

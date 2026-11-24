@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'dart:math' as math;
@@ -175,183 +174,191 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
       for (final plugin in remotePlugins) plugin.name: plugin,
     };
     return SettingsPageBuilder(
-        builder: (context, glassStyle) => Scaffold(
-              extendBodyBehindAppBar: glassStyle,
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(kToolbarHeight),
-                child: Consumer(
-                  builder: (context, ref, _) {
-                    final isWideScreen = ref.watch(settingsLayoutProvider);
-                    return AdaptiveAppBar(
-                      glassStyle: glassStyle,
-                      title: Text(l10n.sourceManagement),
-                      automaticallyImplyLeading: !isWideScreen,
-                      actions: [
-                        IconButton(
-                          onPressed: () {
-                            appNavigatorOf(context).openSettings<void>(
-                                destination:
-                                    SettingsDestination.downloadPlugins);
-                          },
-                          icon: const Icon(Icons.cloud_download_outlined,
-                              size: 30),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.save_as_outlined, size: 30),
-                          onPressed: () {
-                            appNavigatorOf(context).openPluginEditor<void>();
-                          },
-                        ),
-                      ],
-                    );
-                  },
+        builder: (context) => MediaQuery.removePadding(
+              context: context,
+              removeLeft: true,
+              child: Scaffold(
+                extendBodyBehindAppBar: true,
+                appBar: PreferredSize(
+                  preferredSize: const Size.fromHeight(kToolbarHeight),
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final isWideScreen = ref.watch(settingsLayoutProvider);
+                      return SettingsAppBar(
+                        title: Text(l10n.sourceManagement),
+                        automaticallyImplyLeading: !isWideScreen,
+                        actions: [
+                          IconButton(
+                            onPressed: () {
+                              appNavigatorOf(context).openSettings<void>(
+                                  destination:
+                                      SettingsDestination.downloadPlugins);
+                            },
+                            icon: const Icon(Icons.cloud_download_outlined,
+                                size: 30),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.save_as_outlined, size: 30),
+                            onPressed: () {
+                              appNavigatorOf(context).openPluginEditor<void>();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
-              ),
-              body: sourceConfigs.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Center(child: Text(error.toString())),
-                data: (dataSources) => LayoutBuilder(
-                  builder: (context, constraints) {
-                    const cardShape = RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    );
-                    final horizontal =
-                        math.max(10.0, (constraints.maxWidth - 1500.0) / 2);
-                    return ReorderableListView.builder(
-                      padding: (EdgeInsets.fromLTRB(
-                        horizontal,
-                        0,
-                        horizontal,
-                        paddingOf.bottom,
-                      ))
-                          .add(EdgeInsets.only(
-                              top: SettingsPageBuilder.topInsetOf(context)))
-                          .resolve(Directionality.of(context)),
-                      itemCount: dataSources.length,
-                      buildDefaultDragHandles: false,
-                      onReorderItem: _onReorder,
-                      proxyDecorator: (child, _, animation) => AnimatedBuilder(
-                        animation: animation,
-                        builder: (context, child) => Material(
-                          color: Colors.transparent,
-                          elevation:
-                              6 * Curves.easeInOut.transform(animation.value),
-                          shape: cardShape,
+                body: sourceConfigs.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, _) => Center(child: Text(error.toString())),
+                  data: (dataSources) => LayoutBuilder(
+                    builder: (context, constraints) {
+                      const cardShape = RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      );
+                      final horizontal =
+                          math.max(10.0, (constraints.maxWidth - 1500.0) / 2);
+                      return ReorderableListView.builder(
+                        padding: (EdgeInsets.fromLTRB(
+                          horizontal,
+                          0,
+                          horizontal,
+                          paddingOf.bottom,
+                        ))
+                            .add(EdgeInsets.only(
+                                top: SettingsPageBuilder.topInsetOf(context)))
+                            .resolve(Directionality.of(context)),
+                        itemCount: dataSources.length,
+                        buildDefaultDragHandles: false,
+                        onReorderItem: _onReorder,
+                        proxyDecorator: (child, _, animation) =>
+                            AnimatedBuilder(
+                          animation: animation,
+                          builder: (context, child) => Material(
+                            color: Colors.transparent,
+                            elevation:
+                                6 * Curves.easeInOut.transform(animation.value),
+                            shape: cardShape,
+                            child: child,
+                          ),
                           child: child,
                         ),
-                        child: child,
-                      ),
-                      itemBuilder: (context, index) {
-                        final data = dataSources[index];
-                        final remotePlugin = remotePluginsByName[data.name];
-                        final hasUpdate = remotePlugin != null &&
-                            Utils.compareVersionNumbers(
-                                    remotePlugin.version, data.version) >
-                                0;
-                        final isPluginBusy =
-                            _busyPluginNames.contains(data.name);
-                        return Card(
-                          key: ValueKey(data.name),
-                          margin: const EdgeInsets.symmetric(vertical: 2),
-                          elevation: 0,
-                          shape: cardShape,
-                          clipBehavior: Clip.antiAlias,
-                          child: InkWell(
-                            onTap: () => appNavigatorOf(context)
-                                .openPluginEditor<void>(
-                                    editPluginKey: data.name),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 5),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 5, horizontal: 5),
-                                    child: AnimationNetworkImage(
-                                        borderRadius: BorderRadius.circular(10),
-                                        width: 50,
-                                        height: 50,
-                                        url: data.iconUrl),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            data.name,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text(data.version),
-                                              if (hasUpdate) ...[
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  l10n.updateAvailable,
-                                                  style: TextStyle(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary,
-                                                    fontSize: 12,
+                        itemBuilder: (context, index) {
+                          final data = dataSources[index];
+                          final remotePlugin = remotePluginsByName[data.name];
+                          final hasUpdate = remotePlugin != null &&
+                              Utils.compareVersionNumbers(
+                                      remotePlugin.version, data.version) >
+                                  0;
+                          final isPluginBusy =
+                              _busyPluginNames.contains(data.name);
+                          return Card(
+                            key: ValueKey(data.name),
+                            margin: const EdgeInsets.symmetric(vertical: 2),
+                            elevation: 0,
+                            shape: cardShape,
+                            clipBehavior: Clip.antiAlias,
+                            child: InkWell(
+                              onTap: () => appNavigatorOf(context)
+                                  .openPluginEditor<void>(
+                                      editPluginKey: data.name),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 5),
+                                child: Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 5, horizontal: 5),
+                                      child: AnimationNetworkImage(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          width: 50,
+                                          height: 50,
+                                          url: data.iconUrl),
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              data.name,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text(data.version),
+                                                if (hasUpdate) ...[
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    l10n.updateAvailable,
+                                                    style: TextStyle(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .primary,
+                                                      fontSize: 12,
+                                                    ),
                                                   ),
-                                                ),
+                                                ],
                                               ],
-                                            ],
-                                          )
-                                        ]),
-                                  ),
-                                  if (hasUpdate)
-                                    TextButton(
-                                      onPressed: isPluginBusy
-                                          ? null
-                                          : () => _updatePlugin(remotePlugin),
-                                      child: isPluginBusy
-                                          ? const SizedBox(
-                                              width: 16,
-                                              height: 16,
-                                              child: CircularProgressIndicator(
-                                                  strokeWidth: 2),
                                             )
-                                          : Text(l10n.update),
+                                          ]),
                                     ),
-                                  IconButton(
-                                    tooltip: l10n.copyPlugin,
-                                    icon:
-                                        const Icon(Icons.content_copy_outlined),
-                                    onPressed: () => _copyPlugin(data.name),
-                                  ),
-                                  IconButton(
-                                    tooltip: l10n.delete,
-                                    icon: Icon(
-                                      Icons.delete_outline,
-                                      color:
-                                          Theme.of(context).colorScheme.error,
+                                    if (hasUpdate)
+                                      TextButton(
+                                        onPressed: isPluginBusy
+                                            ? null
+                                            : () => _updatePlugin(remotePlugin),
+                                        child: isPluginBusy
+                                            ? const SizedBox(
+                                                width: 16,
+                                                height: 16,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                        strokeWidth: 2),
+                                              )
+                                            : Text(l10n.update),
+                                      ),
+                                    IconButton(
+                                      tooltip: l10n.copyPlugin,
+                                      icon: const Icon(
+                                          Icons.content_copy_outlined),
+                                      onPressed: () => _copyPlugin(data.name),
                                     ),
-                                    onPressed: () =>
-                                        deleteDataSource(data.name),
-                                  ),
-                                  GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: () {},
-                                    child: ReorderableDragStartListener(
-                                      index: index,
-                                      child: const Padding(
-                                        padding:
-                                            EdgeInsets.symmetric(horizontal: 8),
-                                        child: Icon(Icons.drag_handle),
+                                    IconButton(
+                                      tooltip: l10n.delete,
+                                      icon: Icon(
+                                        Icons.delete_outline,
+                                        color:
+                                            Theme.of(context).colorScheme.error,
+                                      ),
+                                      onPressed: () =>
+                                          deleteDataSource(data.name),
+                                    ),
+                                    GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () {},
+                                      child: ReorderableDragStartListener(
+                                        index: index,
+                                        child: const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 8),
+                                          child: Icon(Icons.drag_handle),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  },
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
             ));

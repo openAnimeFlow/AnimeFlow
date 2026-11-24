@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:material_ui/material_ui.dart';
@@ -65,12 +64,10 @@ class ThanksPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return SettingsPageBuilder(
-        builder: (context, glassStyle) => Scaffold(
+        builder: (context) => Scaffold(
               extendBodyBehindAppBar: true,
-              appBar: AdaptiveAppBar(
-                glassStyle: glassStyle,
+              appBar: SettingsAppBar(
                 title: Text(l10n.thanks),
-                backgroundColor: Colors.transparent,
               ),
               body: LayoutBuilder(
                 builder: (context, constraints) {

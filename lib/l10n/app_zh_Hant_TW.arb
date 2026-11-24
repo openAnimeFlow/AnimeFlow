@@ -1,6 +1,6 @@
 {
   "glassNavigationStyle": "毛玻璃導覽風格",
-  "glassNavigationStyleDescription": "頂部列與分頁列使用毛玻璃風格。",
+  "glassNavigationStyleDescription": "調整排行榜與桌布詳情頁的頂部列樣式。",
   "defaultCollectionCategory": "預設收藏分類",
   "defaultCollectionCategoryDescription": "選擇開啟我的收藏時顯示的分類。",
   "pageSettings": "頁面設定",
@@ -373,7 +373,7 @@
   "playerShortcutScreenshot": "截圖",
   "playerShortcutToggleDanmaku": "開關彈幕",
   "playerShortcutLongPressFastForward": "長按加速",
-  "playbackSettings": "播放",
+  "playbackSettings": "播放設定",
     "otherSettings": "其他",
   "about": "關於",
   "projectUpdates": "更新資訊",

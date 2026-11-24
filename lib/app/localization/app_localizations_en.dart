@@ -13,7 +13,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get glassNavigationStyleDescription =>
-      'Use a frosted glass style for app bars and tabs.';
+      'Change the app bar style on the rankings and wallpaper details pages.';
 
   @override
   String get defaultCollectionCategory => 'Default collection category';
@@ -1120,7 +1120,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerShortcutLongPressFastForward => 'Long-press fast-forward';
 
   @override
-  String get playbackSettings => 'Playback';
+  String get playbackSettings => 'Playback settings';
 
   @override
   String get otherSettings => 'Other';

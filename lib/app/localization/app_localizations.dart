@@ -112,7 +112,7 @@ abstract class AppLocalizations {
   /// No description provided for @glassNavigationStyleDescription.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'顶部栏和标签栏使用磨砂玻璃风格。'**
+  /// **'调整排行榜和壁纸详情页的顶部栏样式。'**
   String get glassNavigationStyleDescription;
 
   /// No description provided for @defaultCollectionCategory.
@@ -2123,7 +2123,7 @@ abstract class AppLocalizations {
   /// No description provided for @playbackSettings.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'播放'**
+  /// **'播放设置'**
   String get playbackSettings;
 
   /// No description provided for @otherSettings.

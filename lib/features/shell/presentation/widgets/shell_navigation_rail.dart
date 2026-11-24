@@ -1,8 +1,7 @@
-import 'dart:ui';
-
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/shell/presentation/models/tab_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/glass_capsule.dart';
 import 'package:material_ui/material_ui.dart';
 
 class ShellNavigationRail extends StatelessWidget {
@@ -107,21 +106,9 @@ class ShellNavigationRail extends StatelessWidget {
       minimum: const EdgeInsets.fromLTRB(12, 16, 0, 16),
       child: Padding(
         padding: const EdgeInsets.only(right: 12),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: backgroundColor.withValues(alpha: 0.78),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.45),
-                ),
-              ),
-              child: rail,
-            ),
-          ),
+        child: GlassCapsule(
+          color: backgroundColor.withValues(alpha: 0.78),
+          child: rail,
         ),
       ),
     );

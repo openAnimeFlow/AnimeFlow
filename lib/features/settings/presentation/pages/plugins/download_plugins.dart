@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/download_mirror_menu.dart';
 import 'package:anime_flow/core/settings/rules_mirror.dart';
@@ -162,10 +161,9 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
         context: context,
         removeLeft: true,
         child: SettingsPageBuilder(
-            builder: (context, glassStyle) => Scaffold(
-                  extendBodyBehindAppBar: glassStyle,
-                  appBar: AdaptiveAppBar(
-                    glassStyle: glassStyle,
+            builder: (context) => Scaffold(
+                  extendBodyBehindAppBar: true,
+                  appBar: SettingsAppBar(
                     title: Text(l10n.downloadConfig),
                   ),
                   body: RefreshIndicator(

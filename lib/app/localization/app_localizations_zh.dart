@@ -12,7 +12,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get glassNavigationStyle => '磨砂玻璃导航风格';
 
   @override
-  String get glassNavigationStyleDescription => '顶部栏和标签栏使用磨砂玻璃风格。';
+  String get glassNavigationStyleDescription => '调整排行榜和壁纸详情页的顶部栏样式。';
 
   @override
   String get defaultCollectionCategory => '默认收藏分类';
@@ -1093,7 +1093,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerShortcutLongPressFastForward => '长按加速';
 
   @override
-  String get playbackSettings => '播放';
+  String get playbackSettings => '播放设置';
 
   @override
   String get otherSettings => '其他';
@@ -2692,7 +2692,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get glassNavigationStyle => '磨砂玻璃导航风格';
 
   @override
-  String get glassNavigationStyleDescription => '顶部栏和标签栏使用磨砂玻璃风格。';
+  String get glassNavigationStyleDescription => '调整排行榜和壁纸详情页的顶部栏样式。';
 
   @override
   String get defaultCollectionCategory => '默认收藏分类';
@@ -3773,7 +3773,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get playerShortcutLongPressFastForward => '长按加速';
 
   @override
-  String get playbackSettings => '播放';
+  String get playbackSettings => '播放设置';
 
   @override
   String get otherSettings => '其他';
@@ -5371,7 +5371,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get glassNavigationStyle => '毛玻璃導覽風格';
 
   @override
-  String get glassNavigationStyleDescription => '頂部列與分頁列使用毛玻璃風格。';
+  String get glassNavigationStyleDescription => '調整排行榜與桌布詳情頁的頂部列樣式。';
 
   @override
   String get defaultCollectionCategory => '預設收藏分類';
@@ -6452,7 +6452,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get playerShortcutLongPressFastForward => '長按加速';
 
   @override
-  String get playbackSettings => '播放';
+  String get playbackSettings => '播放設定';
 
   @override
   String get otherSettings => '其他';
@@ -8051,7 +8051,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get glassNavigationStyle => '毛玻璃導覽風格';
 
   @override
-  String get glassNavigationStyleDescription => '頂部列與分頁列使用毛玻璃風格。';
+  String get glassNavigationStyleDescription => '調整排行榜與桌布詳情頁的頂部列樣式。';
 
   @override
   String get defaultCollectionCategory => '預設收藏分類';
@@ -9132,7 +9132,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get playerShortcutLongPressFastForward => '長按加速';
 
   @override
-  String get playbackSettings => '播放';
+  String get playbackSettings => '播放設定';
 
   @override
   String get otherSettings => '其他';

@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/settings/presentation/providers/releases_provider.dart';
@@ -82,14 +81,13 @@ class _UpdatesPageState extends ConsumerState<UpdatesPage> {
       }
     });
     return SettingsPageBuilder(
-      builder: (context, glassStyle) {
+      builder: (context) {
         final colors = Theme.of(context).colorScheme;
         return Scaffold(
           backgroundColor: colors.surface,
-          extendBodyBehindAppBar: glassStyle,
-          appBar: AdaptiveAppBar(
-            glassStyle: glassStyle,
-            backgroundColor: colors.surface,
+          extendBodyBehindAppBar: true,
+          appBar: SettingsAppBar(
+            maskColor: colors.surface,
             title: Text(l10n.projectUpdates),
           ),
           body: Stack(children: [

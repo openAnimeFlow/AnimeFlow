@@ -1,5 +1,4 @@
 import 'package:anime_flow/features/play/presentation/providers/play_dependencies.dart';
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/features/play/presentation/extensions/player_kernel_localization.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
@@ -65,14 +64,13 @@ class _PlaybackSettingsPageState extends ConsumerState<PlaybackSettingsPage> {
       context: context,
       removeLeft: true,
       child: SettingsPageBuilder(
-        builder: (context, glassStyle) => Scaffold(
+        builder: (context) => Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
-          extendBodyBehindAppBar: glassStyle,
+          extendBodyBehindAppBar: true,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(kToolbarHeight),
             child: Consumer(
-              builder: (context, ref, _) => AdaptiveAppBar(
-                glassStyle: glassStyle,
+              builder: (context, ref, _) => SettingsAppBar(
                 title: Text(l10n.playbackSettings),
                 automaticallyImplyLeading: !ref.watch(settingsLayoutProvider),
               ),

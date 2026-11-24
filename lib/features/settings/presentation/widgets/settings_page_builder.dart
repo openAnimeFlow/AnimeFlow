@@ -1,37 +1,58 @@
-import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/shared/widgets/top_gradient_mask.dart';
 import 'package:material_ui/material_ui.dart';
 
-class SettingsPageBuilder extends StatefulWidget {
+class SettingsPageBuilder extends StatelessWidget {
   const SettingsPageBuilder({super.key, required this.builder});
 
-  final Widget Function(BuildContext context, bool glassStyle) builder;
+  final WidgetBuilder builder;
 
   static double topInsetOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<_SettingsTopInset>()?.height ??
       0;
 
   @override
-  State<SettingsPageBuilder> createState() => _SettingsPageBuilderState();
+  Widget build(BuildContext context) => _SettingsTopInset(
+        height: MediaQuery.paddingOf(context).top + kToolbarHeight,
+        child: Builder(builder: builder),
+      );
 }
 
-class _SettingsPageBuilderState extends State<SettingsPageBuilder> {
-  late final _style = AppSettings.watchGlassNavigationStyle();
+class SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const SettingsAppBar({
+    super.key,
+    required this.title,
+    this.leading,
+    this.actions,
+    this.automaticallyImplyLeading = true,
+    this.maskColor,
+  });
+
+  final Widget title;
+  final Widget? leading;
+  final List<Widget>? actions;
+  final bool automaticallyImplyLeading;
+  final Color? maskColor;
 
   @override
-  Widget build(BuildContext context) => StreamBuilder<bool>(
-        stream: _style,
-        initialData: AppSettings.glassNavigationStyle,
-        builder: (context, snapshot) {
-          final glassStyle = snapshot.data ?? false;
-          return _SettingsTopInset(
-            height: glassStyle
-                ? MediaQuery.paddingOf(context).top + kToolbarHeight
-                : 0,
-            child: Builder(
-              builder: (context) => widget.builder(context, glassStyle),
-            ),
-          );
-        },
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) => AppBar(
+        title: title,
+        leading: leading,
+        actions: actions,
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        toolbarHeight: preferredSize.height,
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        forceMaterialTransparency: true,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        flexibleSpace: IgnorePointer(
+          child: SizedBox.expand(
+            child: TopGradientMask(color: maskColor),
+          ),
+        ),
       );
 }
 

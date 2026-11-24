@@ -1,4 +1,3 @@
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
@@ -9,6 +8,7 @@ import 'package:anime_flow/features/settings/presentation/pages/account_settings
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/features/user/user_api.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/glass_capsule.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -75,10 +75,9 @@ class SettingsMenuPage extends ConsumerWidget {
       ref.watch(settingsLayoutProvider)
           ? const AccountSettingsPage()
           : SettingsPageBuilder(
-              builder: (context, glassStyle) => Scaffold(
-                    extendBodyBehindAppBar: glassStyle,
-                    appBar: AdaptiveAppBar(
-                        glassStyle: glassStyle,
+              builder: (context) => Scaffold(
+                    extendBodyBehindAppBar: true,
+                    appBar: SettingsAppBar(
                         leading:
                             BackButton(onPressed: () => _exitSettings(context)),
                         title: Text(AppLocalizations.of(context).settings)),
@@ -223,27 +222,36 @@ class _SettingsMenu extends ConsumerWidget {
       ],
     );
     if (!wide) return menu;
-    final theme = Theme.of(context);
-    return Material(
-      color: theme.cardTheme.color ?? theme.colorScheme.surfaceContainerHighest,
-      child: SafeArea(
-        right: false,
-        child: Column(children: [
-          ListTile(
-            leading: const Icon(Icons.arrow_back),
-            title: Text(AppLocalizations.of(context).settings),
-            onTap: () {
-              _exitSettings(context);
-            },
-          ),
-          const Divider(height: 1),
-          Expanded(
-              child: Material(
+    final backgroundColor = NavigationRailTheme.of(context).backgroundColor ??
+        Theme.of(context).colorScheme.surfaceContainerHighest;
+    return SafeArea(
+      right: false,
+      minimum: const EdgeInsets.fromLTRB(12, 16, 0, 16),
+      child: Padding(
+        padding: const EdgeInsets.only(right: 12),
+        child: GlassCapsule(
+          color: backgroundColor.withValues(alpha: 0.78),
+          child: Material(
             type: MaterialType.transparency,
-            clipBehavior: Clip.hardEdge,
-            child: menu,
-          )),
-        ]),
+            child: Column(children: [
+              ListTile(
+                leading: const Icon(Icons.arrow_back),
+                title: Text(AppLocalizations.of(context).settings),
+                onTap: () {
+                  _exitSettings(context);
+                },
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: Material(
+                  type: MaterialType.transparency,
+                  clipBehavior: Clip.hardEdge,
+                  child: menu,
+                ),
+              ),
+            ]),
+          ),
+        ),
       ),
     );
   }
@@ -254,12 +262,14 @@ class _SettingsMenu extends ConsumerWidget {
     SettingsDestination? currentDestination,
   ) {
     final colors = Theme.of(context).colorScheme;
+    final indicatorColor = NavigationRailTheme.of(context).indicatorColor ??
+        colors.secondaryContainer;
     final tiles = [
       for (final item in category.items)
         ListTile(
           shape: wide ? const StadiumBorder() : null,
           selected: wide && _category(currentDestination) == item.destination,
-          selectedTileColor: colors.primaryContainer,
+          selectedTileColor: indicatorColor,
           leading: item.avatar != null
               ? DecoratedBox(
                   decoration: BoxDecoration(

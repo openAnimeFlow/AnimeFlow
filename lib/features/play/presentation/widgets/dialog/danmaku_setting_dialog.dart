@@ -345,13 +345,15 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                       Switch(
                         value: danmakuController.option.massiveMode,
                         onChanged: (value) {
-                          danmakuController.updateOption(
-                            danmakuController.option
-                                .copyWith(massiveMode: value),
-                          );
-                          ref
-                              .read(playPreferencesProvider)
-                              .setDanmakuMassiveMode(value);
+                          setState(() {
+                            danmakuController.updateOption(
+                              danmakuController.option
+                                  .copyWith(massiveMode: value),
+                            );
+                            ref
+                                .read(playPreferencesProvider)
+                                .setDanmakuMassiveMode(value);
+                          });
                         },
                       )
                     ],

@@ -339,8 +339,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                       forceSide: true,
                                       child: PlayerSheet(
                                         backgroundColor: Theme.of(context)
-                                            .colorScheme
-                                            .surfaceContainerLow,
+                                            .scaffoldBackgroundColor,
                                         forceSide: true,
                                         builder:
                                             (context, scrollController, _) =>

@@ -124,7 +124,7 @@ class _IntroduceViewState extends State<IntroduceView>
       context: context,
       label: AppLocalizations.of(context).videoSource,
       child: PlayerSheet(
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         avoidKeyboard: true,
         initialSize: 0.60,
         snapSizes: const [0.3, 0.52, 0.95],

@@ -90,6 +90,11 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
   ScrollController get _scrollController =>
       widget.scrollController ?? _fallbackScrollController;
 
+  Color get _controlBackgroundColor {
+    final theme = Theme.of(context);
+    return theme.cardTheme.color ?? theme.colorScheme.surfaceContainerHighest;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -236,7 +241,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
     final selectedIndex =
         resources.isEmpty ? null : _resolveSelectedWebsiteIndex(resources);
     return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           16,
@@ -294,7 +299,6 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
   }
 
   Widget _buildManualSearch(AppLocalizations l10n) {
-    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 40,
       child: Row(
@@ -309,7 +313,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
                 onChanged: widget.onSearchDraftChanged,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerLowest,
+                  fillColor: _controlBackgroundColor,
                   hintText: l10n.manualSearchResource,
                   suffixIcon: IconButton(
                     tooltip: l10n.restoreDefaultSearchKeyword,
@@ -358,7 +362,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
                     margin: const EdgeInsets.only(right: 12),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerLowest,
+                      color: _controlBackgroundColor,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: selectedIndex == index
@@ -599,7 +603,6 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
     required String? selectedLineName,
   }) {
     final l10n = AppLocalizations.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       height: 40,
       child: Row(
@@ -613,8 +616,8 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
           const SizedBox(width: 8),
           FilledButton.tonalIcon(
             style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.surfaceContainerLowest,
-              foregroundColor: colorScheme.primary,
+              backgroundColor: _controlBackgroundColor,
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
             ),
             onPressed: () {
               setState(() {
@@ -642,8 +645,8 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
     return LayoutBuilder(
       builder: (context, constraints) => JellyMenu<String?>(
         tooltip: l10n.lineFilter,
-        triggerColor: colorScheme.surfaceContainerLowest,
-        menuColor: colorScheme.surfaceContainerLowest,
+        triggerColor: _controlBackgroundColor,
+        menuColor: _controlBackgroundColor,
         preferredVerticalDirection: VerticalDirection.down,
         trigger: Container(
           width: constraints.maxWidth,
@@ -731,12 +734,12 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
           side: const WidgetStatePropertyAll(BorderSide.none),
           backgroundColor: WidgetStateProperty.resolveWith(
             (states) => states.contains(WidgetState.selected)
-                ? colorScheme.secondaryContainer
-                : colorScheme.surfaceContainerLowest,
+                ? colorScheme.primary
+                : _controlBackgroundColor,
           ),
           foregroundColor: WidgetStateProperty.resolveWith(
             (states) => states.contains(WidgetState.selected)
-                ? colorScheme.onSecondaryContainer
+                ? colorScheme.onPrimary
                 : colorScheme.onSurface,
           ),
         ),
@@ -935,6 +938,8 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
             onChanged: (_) => setState(() {}),
             onSubmitted: (_) => onSearch(),
             decoration: InputDecoration(
+              filled: true,
+              fillColor: _controlBackgroundColor,
               hintText: l10n.manualSearchResource,
               isDense: true,
               border: const OutlineInputBorder(),
@@ -1044,7 +1049,7 @@ class _VideoSourceDialogState extends State<VideoSourceDialog> {
             : null,
       ),
       child: Card.filled(
-        color: colorScheme.surfaceContainerLowest,
+        color: _controlBackgroundColor,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),

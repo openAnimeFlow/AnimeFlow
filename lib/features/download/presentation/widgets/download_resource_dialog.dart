@@ -185,7 +185,7 @@ class _DownloadResourceDialogState
     final l10n = AppLocalizations.of(context);
     final selection = _selection;
     return Dialog(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       insetPadding: const EdgeInsets.all(16),
       child: SizedBox(
         width: 1000,

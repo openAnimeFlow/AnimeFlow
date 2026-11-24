@@ -9,6 +9,7 @@ import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
+import 'package:anime_flow/shared/widgets/glass_tab_bar.dart';
 import 'package:anime_flow/shared/widgets/collection_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
@@ -57,7 +58,7 @@ class _UserCollectionTab extends ConsumerWidget {
   });
 
   static const double _refreshIndicatorOffset =
-      kToolbarHeight + kTextTabBarHeight;
+      kToolbarHeight + GlassTabBar.height;
   static const double _minHorizontalPadding = 10;
   static const double _loadMoreTriggerDistance = 200;
   static const int _pageSize = 20;

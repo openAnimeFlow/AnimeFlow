@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'dart:async';
 
-import 'package:anime_flow/shared/widgets/adaptive_sliver_app_bar.dart';
 import 'package:anime_flow/shared/navigation/settings_destination.dart';
 import 'package:anime_flow/features/user/application/collection_refresh_provider.dart';
 import 'collection_sync_pending_banner.dart';
@@ -18,7 +17,10 @@ import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
 import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
+import 'package:anime_flow/shared/widgets/glass_capsule.dart';
+import 'package:anime_flow/shared/widgets/glass_tab_bar.dart';
 import 'package:anime_flow/shared/widgets/jelly_menu.dart';
+import 'package:anime_flow/shared/widgets/top_gradient_mask.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,12 +61,11 @@ class _UserViewState extends ConsumerState<UserCenterView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late final StreamSubscription<CollectType> _collectionSettingSubscription;
-  late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
   late final _scrollController = ScrollController()
     ..addListener(_updatePinnedState);
   final _isPinned = ValueNotifier(false);
+  final _showUserInfo = ValueNotifier(true);
   double _collapseExtent = 0;
-  bool isHideUserInfo = true;
 
   final Map<int, GlobalKey<RefreshIndicatorState>> _refreshIndicatorKeys = {
     for (var type = 1; type <= 5; type++)
@@ -86,13 +87,6 @@ class _UserViewState extends ConsumerState<UserCenterView>
 
   Future<void> _showRefreshIndicatorForCurrentTab() async {
     await _refreshIndicatorKeys[_currentType]?.currentState?.show();
-  }
-
-  /// 切换用户信息显示状态
-  void _toggleUserInfoVisibility() {
-    setState(() {
-      isHideUserInfo = !isHideUserInfo;
-    });
   }
 
   @override
@@ -154,6 +148,7 @@ class _UserViewState extends ConsumerState<UserCenterView>
     _tabController.dispose();
     _scrollController.dispose();
     _isPinned.dispose();
+    _showUserInfo.dispose();
     super.dispose();
   }
 
@@ -167,7 +162,7 @@ class _UserViewState extends ConsumerState<UserCenterView>
       });
     });
     final tabs = _buildTabs(context);
-    // 同一尺寸档位内复用页面；用户信息、标签或显示状态更新时重新创建缓存。
+    // 同一尺寸档位内复用页面；用户资料或标签更新时重新创建缓存。
     Widget? page;
     double? previousHeight;
     double? previousTopPadding;
@@ -205,73 +200,46 @@ class _UserViewState extends ConsumerState<UserCenterView>
     _collapseExtent = contentHeight + statusBarHeight;
     // 尺寸变化或恢复滚动位置后，在布局完成时同步一次吸顶状态。
     WidgetsBinding.instance.addPostFrameCallback((_) => _updatePinnedState());
-    final flexibleSpace = FlexibleSpaceBar(
-      collapseMode: CollapseMode.pin,
-      background: Padding(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: RepaintBoundary(child: _buildHeaderContent()),
+    final header = SliverAppBar(
+      pinned: true,
+      automaticallyImplyLeading: false,
+      forceMaterialTransparency: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      titleSpacing: 0,
+      title: ValueListenableBuilder<bool>(
+        valueListenable: _isPinned,
+        builder: (context, isPinned, _) => _buildAppBarTitle(context, isPinned),
       ),
-    );
-    final header = StreamBuilder<bool>(
-      stream: _glassNavigationStyle,
-      initialData: AppSettings.glassNavigationStyle,
-      builder: (context, snapshot) {
-        final glassStyle = snapshot.data ?? false;
-        return ValueListenableBuilder<bool>(
-          valueListenable: _isPinned,
-          builder: (context, isPinned, child) {
-            return AdaptiveSliverAppBar(
-              title: _buildAppBarTitle(context, isPinned),
-              isPinned: isPinned,
-              glassStyle: glassStyle,
-              expandedHeight: contentHeight +
-                  statusBarHeight +
-                  kToolbarHeight +
-                  kTextTabBarHeight,
-              flexibleSpace: flexibleSpace,
-              bottom: TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                dividerHeight: 0,
-                tabs: tabs.map((String name) {
-                  final parts = name.split('\n');
-                  return Tab(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            parts[0],
-                            style: const TextStyle(fontSize: 12),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          parts.length > 1 ? parts[1] : '0',
-                          style: const TextStyle(fontSize: 11),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                labelColor: Theme.of(context).colorScheme.primary,
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: Theme.of(context).colorScheme.primary,
-              ),
-            );
-          },
-        );
-      },
+      expandedHeight: _collapseExtent + kToolbarHeight + GlassTabBar.height,
+      flexibleSpace: Stack(
+        fit: StackFit.expand,
+        children: [
+          FlexibleSpaceBar(
+            collapseMode: CollapseMode.pin,
+            background: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: RepaintBoundary(child: _buildHeaderContent()),
+            ),
+          ),
+          ValueListenableBuilder<bool>(
+            valueListenable: _isPinned,
+            builder: (context, isPinned, child) =>
+                isPinned ? child! : const SizedBox.shrink(),
+            child: const TopGradientMask(),
+          ),
+        ],
+      ),
+      bottom: GlassTabBar(
+        controller: _tabController,
+        labels: tabs,
+        isScrollable: true,
+        labelBuilder: _buildCollectionTabLabel,
+      ),
     );
     return Scaffold(
       bottomNavigationBar: const CollectionSyncPendingBanner(),
       body: NestedScrollView(
         controller: _scrollController,
-        // 外层越界拉伸会影响顶部 BackdropFilter 的背景采样。
         // 越界反馈由内层收藏列表处理，外层只负责折叠顶部栏。
         scrollBehavior: ScrollConfiguration.of(context).copyWith(
           scrollbars: false,
@@ -372,6 +340,32 @@ class _UserViewState extends ConsumerState<UserCenterView>
     );
   }
 
+  Widget _buildCollectionTabLabel(BuildContext context, String label) {
+    final colors = Theme.of(context).colorScheme;
+    final parts = label.split('\n');
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 5,
+      children: [
+        Text(parts.first, maxLines: 1, overflow: TextOverflow.ellipsis),
+        DecoratedBox(
+          decoration: ShapeDecoration(
+            color: colors.onSurfaceVariant.withValues(alpha: 0.12),
+            shape: const StadiumBorder(),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            child: Text(
+              parts.length > 1 ? parts[1] : '0',
+              maxLines: 1,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildAppBarTitle(BuildContext context, bool isPinned) {
     final user = widget.user;
     final currentType = _currentType;
@@ -380,169 +374,216 @@ class _UserViewState extends ConsumerState<UserCenterView>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
+        spacing: 5,
         children: [
-          ClipRect(
-            child: AnimatedSlide(
-              offset: isPinned ? Offset.zero : const Offset(0, 1),
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutCubic,
-              child: IgnorePointer(
-                ignoring: !isPinned,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: user.avatar != null && user.avatar!.isNotEmpty
-                          ? DebouncedImageWidth(
-                              width: 30,
-                              builder: (context, cacheWidth) =>
-                                  AnimationNetworkImage(
-                                width: 30,
-                                height: 30,
-                                memCacheWidth: cacheWidth,
-                                gaplessResize: true,
-                                url: user.avatar!,
-                              ),
-                            )
-                          : const Icon(Icons.person, size: 30),
-                    ),
-                    const SizedBox(width: 5),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user.nickname.isNotEmpty ? user.nickname : user.email,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          FormatTimeUtil.formatDate(user.createTime),
-                          style: const TextStyle(fontSize: 10),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+          AnimatedOpacity(
+            opacity: isPinned ? 1 : 0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            child: ExcludeSemantics(
+              excluding: !isPinned,
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                heightFactor: 1,
+                child: _buildUserPill(context, user),
               ),
             ),
           ),
           const Spacer(),
-          IconButton(
-            onPressed: _toggleUserInfoVisibility,
-            tooltip: isHideUserInfo ? l10n.showUserInfo : l10n.hideUserInfo,
-            icon: Icon(
-              isHideUserInfo ? Icons.visibility : Icons.visibility_off,
+          GlassCapsule(
+            child: SizedBox.square(
+              dimension: 40,
+              child: ValueListenableBuilder<bool>(
+                valueListenable: _showUserInfo,
+                builder: (context, showUserInfo, _) => IconButton(
+                  onPressed: () => _showUserInfo.value = !_showUserInfo.value,
+                  tooltip: showUserInfo ? l10n.showUserInfo : l10n.hideUserInfo,
+                  icon: Icon(
+                    showUserInfo ? Icons.visibility : Icons.visibility_off,
+                  ),
+                ),
+              ),
             ),
           ),
           if (SystemUtil.isDesktop)
-            Consumer(
-              builder: (context, ref, _) {
-                final tabState = ref.watch(
-                  userCollectionsProvider.select(
-                    (state) => state.tabState(currentType),
-                  ),
-                );
-                final canTriggerRefresh = tabState.data != null;
-                final isRefreshButtonEnabled =
-                    canTriggerRefresh && !tabState.isBusy;
+            GlassCapsule(
+              child: SizedBox.square(
+                dimension: 40,
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final tabState = ref.watch(
+                      userCollectionsProvider.select(
+                        (state) => state.tabState(currentType),
+                      ),
+                    );
+                    final canTriggerRefresh = tabState.data != null;
+                    final isRefreshButtonEnabled =
+                        canTriggerRefresh && !tabState.isBusy;
 
-                return IconButton(
-                  tooltip: l10n.refreshCurrentTab,
-                  onPressed: isRefreshButtonEnabled
-                      ? _showRefreshIndicatorForCurrentTab
-                      : null,
-                  icon: const Icon(Icons.refresh),
-                );
-              },
-            ),
-          JellyMenu<_LoginOverflowAction>(
-            tooltip: l10n.moreMenu,
-            triggerColor: Colors.transparent,
-            preferredVerticalDirection: VerticalDirection.down,
-            trigger: const Icon(Icons.notes_outlined, size: 30),
-            menuBuilder: (context, select) {
-              final theme = Theme.of(context);
-              final style = TextButton.styleFrom(
-                alignment: AlignmentDirectional.centerStart,
-                foregroundColor: theme.colorScheme.onSurface,
-                textStyle: theme.textTheme.bodyLarge,
-                padding: JellyMenu.itemPadding(context),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              );
-              return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-                child: IntrinsicWidth(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (final action in _LoginOverflowAction.values)
-                        TextButton(
-                          style: style,
-                          onPressed: () => select(action),
-                          child: Row(
-                            children: [
-                              Icon(action.icon, size: 20),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  action.label(l10n),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
+                    return IconButton(
+                      tooltip: l10n.refreshCurrentTab,
+                      onPressed: isRefreshButtonEnabled
+                          ? _showRefreshIndicatorForCurrentTab
+                          : null,
+                      icon: const Icon(Icons.refresh),
+                    );
+                  },
                 ),
-              );
-            },
-            onSelected: (action) {
-              switch (action) {
-                case _LoginOverflowAction.favoriteWallpapers:
-                  appNavigatorOf(context).openFavoriteWallpapers<void>();
-                case _LoginOverflowAction.settings:
-                  appNavigatorOf(context).openSettings<void>(
-                      destination: SettingsDestination.menu);
-                case _LoginOverflowAction.playRecord:
-                  appNavigatorOf(context).openPlayRecord<void>();
-                case _LoginOverflowAction.downloads:
-                  appNavigatorOf(context).openDownload<void>();
-                case _LoginOverflowAction.logout:
-                  showDialog<void>(
-                    context: context,
-                    builder: (dialogContext) => AlertDialog(
-                      title: Text(l10n.confirmLogout),
-                      content: Text(l10n.logoutConfirmation),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(),
-                          child: Text(l10n.cancel),
-                        ),
-                        Consumer(builder: (context, ref, _) {
-                          return TextButton(
-                            onPressed: () async {
-                              Navigator.of(dialogContext).pop();
-                              await ref
-                                  .read(accountControllerProvider)
-                                  .clearUserInfo();
-                            },
-                            child: Text(l10n.confirm),
-                          );
-                        }),
+              ),
+            ),
+          GlassCapsule(
+            color: Colors.transparent,
+            child: JellyMenu<_LoginOverflowAction>(
+              tooltip: l10n.moreMenu,
+              triggerColor:
+                  GlassCapsule.surfaceColor(Theme.of(context).colorScheme),
+              preferredVerticalDirection: VerticalDirection.down,
+              trigger: SizedBox.square(
+                dimension: 40,
+                child: Icon(
+                  Icons.notes_outlined,
+                  size: 24,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              menuBuilder: (context, select) {
+                final theme = Theme.of(context);
+                final style = TextButton.styleFrom(
+                  alignment: AlignmentDirectional.centerStart,
+                  foregroundColor: theme.colorScheme.onSurface,
+                  textStyle: theme.textTheme.bodyLarge,
+                  padding: JellyMenu.itemPadding(context),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                );
+                return SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+                  child: IntrinsicWidth(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final action in _LoginOverflowAction.values)
+                          TextButton(
+                            style: style,
+                            onPressed: () => select(action),
+                            child: Row(
+                              children: [
+                                Icon(action.icon, size: 20),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    action.label(l10n),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
-                  );
-              }
-            },
+                  ),
+                );
+              },
+              onSelected: (action) {
+                switch (action) {
+                  case _LoginOverflowAction.favoriteWallpapers:
+                    appNavigatorOf(context).openFavoriteWallpapers<void>();
+                  case _LoginOverflowAction.settings:
+                    appNavigatorOf(context).openSettings<void>(
+                        destination: SettingsDestination.menu);
+                  case _LoginOverflowAction.playRecord:
+                    appNavigatorOf(context).openPlayRecord<void>();
+                  case _LoginOverflowAction.downloads:
+                    appNavigatorOf(context).openDownload<void>();
+                  case _LoginOverflowAction.logout:
+                    showDialog<void>(
+                      context: context,
+                      builder: (dialogContext) => AlertDialog(
+                        title: Text(l10n.confirmLogout),
+                        content: Text(l10n.logoutConfirmation),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            child: Text(l10n.cancel),
+                          ),
+                          Consumer(builder: (context, ref, _) {
+                            return TextButton(
+                              onPressed: () async {
+                                Navigator.of(dialogContext).pop();
+                                await ref
+                                    .read(accountControllerProvider)
+                                    .clearUserInfo();
+                              },
+                              child: Text(l10n.confirm),
+                            );
+                          }),
+                        ],
+                      ),
+                    );
+                }
+              },
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildUserPill(BuildContext context, FlowUsers user) {
+    final colors = Theme.of(context).colorScheme;
+    return GlassCapsule(
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(5, 5, 12, 5),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 8,
+          children: [
+            ClipOval(
+              child: user.avatar != null && user.avatar!.isNotEmpty
+                  ? DebouncedImageWidth(
+                      width: 30,
+                      builder: (context, cacheWidth) => AnimationNetworkImage(
+                        width: 30,
+                        height: 30,
+                        fit: BoxFit.cover,
+                        memCacheWidth: cacheWidth,
+                        gaplessResize: true,
+                        url: user.avatar!,
+                      ),
+                    )
+                  : Icon(Icons.person,
+                      size: 30, color: colors.onSurfaceVariant),
+            ),
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user.nickname.isNotEmpty ? user.nickname : user.email,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colors.onSurface,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    FormatTimeUtil.formatDate(user.createTime),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style:
+                        TextStyle(color: colors.onSurfaceVariant, fontSize: 10),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -594,8 +635,11 @@ class _UserViewState extends ConsumerState<UserCenterView>
               ),
             ),
           ),
-        if (isHideUserInfo)
-          Positioned.fill(
+        Positioned.fill(
+          child: ValueListenableBuilder<bool>(
+            valueListenable: _showUserInfo,
+            builder: (context, showUserInfo, child) =>
+                showUserInfo ? child! : const SizedBox.shrink(),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -632,7 +676,8 @@ class _UserViewState extends ConsumerState<UserCenterView>
                 ),
               ],
             ),
-          )
+          ),
+        ),
       ],
     );
   }

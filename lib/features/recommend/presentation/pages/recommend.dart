@@ -1,5 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/shared/widgets/glass_capsule.dart';
 import 'package:anime_flow/shared/widgets/glass_tab_bar.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/anime/anime_view.dart';
 import 'package:anime_flow/features/recommend/presentation/widgets/community/community_view.dart';
@@ -61,8 +62,6 @@ class _RecommendPageState extends State<RecommendPage>
       ValueChanged<WallpaperDetailArgs> onOpenWallpaper) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final searchBackgroundColor =
-        CardTheme.of(context).color ?? colorScheme.surfaceContainerHighest;
     final glassHeaderHeight =
         MediaQuery.paddingOf(context).top + kToolbarHeight;
     return Scaffold(
@@ -78,37 +77,35 @@ class _RecommendPageState extends State<RecommendPage>
             Text(l10n.recommend),
             const SizedBox(width: 10),
             Flexible(
-              child: Container(
+              child: SizedBox(
                 width: 200,
                 height: 35,
-                decoration: BoxDecoration(
-                  color: searchBackgroundColor,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: l10n.searchAnimeHint,
-                    hintStyle: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 14,
+                child: GlassCapsule(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: l10n.searchAnimeHint,
+                      hintStyle: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 14,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: colorScheme.onSurfaceVariant,
+                        size: 22,
+                      ),
+                      filled: false,
+                      border: const OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
                     ),
-                    prefixIcon: Icon(
-                      Icons.search_rounded,
-                      color: colorScheme.onSurfaceVariant,
-                      size: 22,
-                    ),
-                    filled: false,
-                    border: const OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                    ),
+                    onTap: () {
+                      appNavigatorOf(context).openSearch<void>();
+                    },
+                    readOnly: true,
                   ),
-                  onTap: () {
-                    appNavigatorOf(context).openSearch<void>();
-                  },
-                  readOnly: true,
                 ),
               ),
             ),

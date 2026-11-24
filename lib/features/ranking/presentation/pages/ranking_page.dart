@@ -9,6 +9,7 @@ import 'package:anime_flow/features/ranking/presentation/providers/ranking_provi
 import 'package:anime_flow/features/ranking/presentation/widgets/ranking_grid.dart';
 import 'package:anime_flow/features/ranking/presentation/widgets/ranking_list_skeleton.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/widgets/top_gradient_mask.dart';
 import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
 import 'package:material_ui/material_ui.dart';
@@ -283,96 +284,46 @@ class _RankingPageState extends State<RankingPage> {
                         );
                       }));
                       final notifier = ref.read(rankingProvider.notifier);
+                      final currentYear = DateTime.now().year;
                       return Wrap(
                         alignment: WrapAlignment.start,
                         spacing: 5,
                         children: [
-                          PopupMenuButton<SortType>(
-                            offset: const Offset(0, 40),
-                            initialValue: selectedSort,
-                            itemBuilder: (context) {
-                              return SortType.values.map((type) {
-                                return PopupMenuItem<SortType>(
-                                  value: type,
-                                  child: Text(_sortLabel(type, l10n)),
-                                );
-                              }).toList();
-                            },
+                          _buildFilterMenu<SortType>(
+                            triggerLabel: _sortLabel(selectedSort, l10n),
+                            icon: Icons.sort,
+                            selected: selectedSort,
+                            options: SortType.values,
+                            optionLabel: (sort) => _sortLabel(sort, l10n),
                             onSelected: notifier.setSort,
-                            child: _filterChip(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.sort, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    _sortLabel(selectedSort, l10n),
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ),
-                          PopupMenuButton<int>(
-                            offset: const Offset(0, 40),
-                            initialValue: selectedYear ?? -1,
-                            child: _filterChip(
-                              child: Text(
-                                selectedYear == null
-                                    ? l10n.allYears
-                                    : l10n.yearSuffix(selectedYear),
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ),
-                            itemBuilder: (context) {
-                              final currentYear = DateTime.now().year;
-                              return [
-                                PopupMenuItem<int>(
-                                  value: -1,
-                                  child: Text(l10n.all),
-                                ),
-                                ...List.generate(20, (index) {
-                                  final year = currentYear - index;
-                                  return PopupMenuItem<int>(
-                                    value: year,
-                                    child: Text(l10n.yearSuffix(year)),
-                                  );
-                                }),
-                              ];
-                            },
-                            onSelected: (value) {
-                              notifier.setYear(value == -1 ? null : value);
-                            },
+                          _buildFilterMenu<int?>(
+                            triggerLabel: selectedYear == null
+                                ? l10n.allYears
+                                : l10n.yearSuffix(selectedYear),
+                            selected: selectedYear,
+                            options: [
+                              null,
+                              for (var index = 0; index < 20; index++)
+                                currentYear - index,
+                            ],
+                            optionLabel: (year) =>
+                                year == null ? l10n.all : l10n.yearSuffix(year),
+                            onSelected: notifier.setYear,
                           ),
-                          PopupMenuButton<int>(
-                            offset: const Offset(0, 40),
-                            initialValue: selectedMonth ?? -1,
-                            child: _filterChip(
-                              child: Text(
-                                selectedMonth == null
-                                    ? l10n.allMonths
-                                    : l10n.monthSuffix(selectedMonth),
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ),
-                            itemBuilder: (context) {
-                              return [
-                                PopupMenuItem<int>(
-                                  value: -1,
-                                  child: Text(l10n.all),
-                                ),
-                                ...List.generate(12, (index) {
-                                  final month = index + 1;
-                                  return PopupMenuItem<int>(
-                                    value: month,
-                                    child: Text(l10n.monthSuffix(month)),
-                                  );
-                                }),
-                              ];
-                            },
-                            onSelected: (value) {
-                              notifier.setMonth(value == -1 ? null : value);
-                            },
+                          _buildFilterMenu<int?>(
+                            triggerLabel: selectedMonth == null
+                                ? l10n.allMonths
+                                : l10n.monthSuffix(selectedMonth),
+                            selected: selectedMonth,
+                            options: [
+                              null,
+                              for (var month = 1; month <= 12; month++) month,
+                            ],
+                            optionLabel: (month) => month == null
+                                ? l10n.all
+                                : l10n.monthSuffix(month),
+                            onSelected: notifier.setMonth,
                           ),
                         ],
                       );
@@ -387,16 +338,94 @@ class _RankingPageState extends State<RankingPage> {
     );
   }
 
-  Widget _filterChip({required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline,
-        ),
-        borderRadius: BorderRadius.circular(13),
+  Widget _buildFilterMenu<T>({
+    required String triggerLabel,
+    IconData? icon,
+    required T selected,
+    required List<T> options,
+    required String Function(T) optionLabel,
+    required ValueChanged<T> onSelected,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+    return JellyMenu<T>(
+      tooltip: MaterialLocalizations.of(context).showMenuTooltip,
+      preferredVerticalDirection: VerticalDirection.down,
+      widthSpring: const SpringDescription(
+        mass: 1,
+        stiffness: 220,
+        damping: 27,
       ),
-      child: child,
+      heightSpring: const SpringDescription(
+        mass: 1,
+        stiffness: 185,
+        damping: 25,
+      ),
+      triggerBuilder: (context, open) => InkWell(
+        onTap: open,
+        customBorder: const StadiumBorder(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 16),
+                const SizedBox(width: 4),
+              ],
+              Text(triggerLabel, style: const TextStyle(fontSize: 14)),
+            ],
+          ),
+        ),
+      ),
+      menuBuilder: (context, select) {
+        final style = TextButton.styleFrom(
+          alignment: AlignmentDirectional.centerStart,
+          foregroundColor: colors.onSurface,
+          padding: JellyMenu.itemPadding(context),
+          minimumSize: const Size(0, 48),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        );
+        final bottomOcclusion = BottomOcclusionScope.of(context);
+        final menu = SingleChildScrollView(
+          padding: const EdgeInsets.all(6),
+          child: IntrinsicWidth(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final option in options)
+                  Semantics(
+                    selected: option == selected,
+                    child: TextButton(
+                      style: style,
+                      onPressed: () => select(option),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            child: option == selected
+                                ? Icon(Icons.check,
+                                    size: 18, color: colors.primary)
+                                : null,
+                          ),
+                          Flexible(child: Text(optionLabel(option))),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+        return LayoutBuilder(
+          builder: (context, constraints) => ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: math.max(0, constraints.maxHeight - bottomOcclusion),
+            ),
+            child: menu,
+          ),
+        );
+      },
+      onSelected: onSelected,
     );
   }
 }

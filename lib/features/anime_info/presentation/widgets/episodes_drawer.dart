@@ -5,6 +5,7 @@ import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/features/subject_episodes/application/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -233,10 +234,19 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: hasCover
-                            ? AnimationNetworkImage(
-                                url: episode.cover!,
-                                fit: BoxFit.cover,
-                                borderRadius: BorderRadius.circular(6),
+                            ? LayoutBuilder(
+                                builder: (context, constraints) =>
+                                    DebouncedImageWidth(
+                                  width: constraints.maxWidth,
+                                  builder: (context, cacheWidth) =>
+                                      AnimationNetworkImage(
+                                    url: episode.cover!,
+                                    memCacheWidth: cacheWidth,
+                                    gaplessResize: true,
+                                    fit: BoxFit.cover,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
                               )
                             : Icon(
                                 Icons.image_not_supported_outlined,

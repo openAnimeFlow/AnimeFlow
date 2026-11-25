@@ -1,5 +1,6 @@
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'dart:async';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/api/api.dart';
 
 import 'package:anime_flow/features/anime_info/data/repositories/anime_info_repository.dart';
@@ -30,6 +31,21 @@ CancelToken _requestCancelToken(Ref ref) {
   final token = CancelToken();
   ref.onDispose(() => token.cancel());
   return token;
+}
+
+Future<T> _loadSection<T>(
+  Future<T> Function() request,
+  CancelToken cancelToken,
+  String errorMessage,
+) async {
+  try {
+    return await request();
+  } catch (error, stackTrace) {
+    if (!cancelToken.isCancelled) {
+      LiggLogger().e(errorMessage, error: error, stackTrace: stackTrace);
+    }
+    rethrow;
+  }
 }
 
 @Riverpod(dependencies: [animeInfoArgs])
@@ -169,18 +185,22 @@ class SubjectComments extends _$SubjectComments {
   @override
   Future<SubjectCommentsViewState> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    _cancelToken = _requestCancelToken(ref);
+    final repository = ref.watch(animeInfoRepositoryProvider.notifier);
+    final cancelToken = _cancelToken = _requestCancelToken(ref);
     _armedForBottomLoad = true;
     _loadMoreScheduled = false;
     _forceRefresh = !ref.isFirstBuild;
-    final comments =
-        await ref.watch(animeInfoRepositoryProvider.notifier).getComments(
-              subjectId,
-              limit: _pageSize,
-              offset: 0,
-              cancelToken: _cancelToken,
-              forceRefresh: _forceRefresh,
-            );
+    final comments = await _loadSection(
+      () => repository.getComments(
+        subjectId,
+        limit: _pageSize,
+        offset: 0,
+        cancelToken: cancelToken,
+        forceRefresh: _forceRefresh,
+      ),
+      cancelToken,
+      '获取评论失败',
+    );
     return SubjectCommentsViewState(
         comments: comments,
         nextOffset: comments.data.length,
@@ -266,8 +286,9 @@ class SubjectComments extends _$SubjectComments {
         nextOffset: current.nextOffset + result.data.length,
         hasNextPage: result.data.isNotEmpty,
       ));
-    } catch (_) {
+    } catch (error, stackTrace) {
       if (!ref.mounted || cancelToken.isCancelled) return;
+      LiggLogger().e('加载更多评论失败', error: error, stackTrace: stackTrace);
       _armedForBottomLoad = true;
       state = AsyncData(
         SubjectCommentsViewState(
@@ -287,11 +308,19 @@ class SubjectRelated extends _$SubjectRelated {
   @override
   Future<SubjectRelationItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return ref.watch(animeInfoRepositoryProvider.notifier).getRelated(subjectId,
+    final repository = ref.watch(animeInfoRepositoryProvider.notifier);
+    final cancelToken = _requestCancelToken(ref);
+    return _loadSection(
+      () => repository.getRelated(
+        subjectId,
         limit: 20,
         offset: 0,
-        cancelToken: _requestCancelToken(ref),
-        forceRefresh: !ref.isFirstBuild);
+        cancelToken: cancelToken,
+        forceRefresh: !ref.isFirstBuild,
+      ),
+      cancelToken,
+      '获取关联条目失败',
+    );
   }
 }
 
@@ -301,12 +330,19 @@ class SubjectCharacters extends _$SubjectCharacters {
   @override
   Future<CharactersItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return ref.watch(characterRepositoryProvider.notifier).getCharacters(
+    final repository = ref.watch(characterRepositoryProvider.notifier);
+    final cancelToken = _requestCancelToken(ref);
+    return _loadSection(
+      () => repository.getCharacters(
         subjectId,
         limit: 10,
         offset: 0,
-        cancelToken: _requestCancelToken(ref),
-        forceRefresh: !ref.isFirstBuild);
+        cancelToken: cancelToken,
+        forceRefresh: !ref.isFirstBuild,
+      ),
+      cancelToken,
+      '获取角色信息失败',
+    );
   }
 }
 
@@ -316,11 +352,18 @@ class SubjectProducers extends _$SubjectProducers {
   @override
   Future<ProducersItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return ref.watch(animeInfoRepositoryProvider.notifier).getProducers(
+    final repository = ref.watch(animeInfoRepositoryProvider.notifier);
+    final cancelToken = _requestCancelToken(ref);
+    return _loadSection(
+      () => repository.getProducers(
         subjectId,
         limit: 10,
         offset: 0,
-        cancelToken: _requestCancelToken(ref),
-        forceRefresh: !ref.isFirstBuild);
+        cancelToken: cancelToken,
+        forceRefresh: !ref.isFirstBuild,
+      ),
+      cancelToken,
+      '获取制作人信息失败',
+    );
   }
 }

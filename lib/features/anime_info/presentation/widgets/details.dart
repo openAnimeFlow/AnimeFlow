@@ -5,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 ///详情信息
 class DetailsView extends StatelessWidget {
-  final String title;
   final double? textSize;
   final FontWeight? textFontWeight;
   final List<Infobox> infobox;
@@ -13,7 +12,6 @@ class DetailsView extends StatelessWidget {
   const DetailsView(
       {super.key,
       required this.infobox,
-      required this.title,
       this.textSize,
       this.textFontWeight});
 
@@ -21,23 +19,7 @@ class DetailsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color themeTextColor =
         Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 5),
-        _buildText(textData: infobox, themeTextColor: themeTextColor)
-      ],
-    );
-  }
-
-  Widget _buildText(
-      {required List<Infobox> textData, required Color themeTextColor}) {
-    // 过滤掉空值的条目（包括values为空或所有v字段都为空字符串的情况）
-    final filteredData = textData.where((item) {
+    final filteredData = infobox.where((item) {
       return item.values.isNotEmpty &&
           item.values.any((value) => value.v.isNotEmpty);
     }).toList();
@@ -46,8 +28,6 @@ class DetailsView extends StatelessWidget {
     if (filteredData.length <= 10) {
       return _buildTextList(filteredData, themeTextColor);
     }
-
-    // 如果超过10条，使用可展开的视图
     return _ExpandableTextList(
       textData: filteredData,
       themeTextColor: themeTextColor,

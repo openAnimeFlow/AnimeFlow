@@ -1,171 +1,101 @@
-import 'dart:math';
-
-import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
+import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/character_info_extra.dart';
-import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/experimental/scope.dart';
 
-@Dependencies([SubjectCharacters, animeInfoArgs])
 class CharactersView extends StatelessWidget {
-  const CharactersView({super.key});
+  const CharactersView({super.key, required this.characters});
+
+  final List<CharacterActorData> characters;
 
   @override
   Widget build(BuildContext context) {
-    final double windowsWidth = MediaQuery.of(context).size.width;
-    final l10n = AppLocalizations.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Consumer(builder: (context, ref, child) {
-          final asyncCharacters = ref.watch(subjectCharactersProvider);
-          final subjectsId =
-              ref.watch(animeInfoArgsProvider.select((e) => e.id));
-          return asyncCharacters.when(
-            data: (characters) {
-              if (characters.total > 0) {
-                return Column(
-                  spacing: 8,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          l10n.charactersTitle,
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w600),
-                        ),
-                        InkWell(
-                          onTap: () => appNavigatorOf(context)
-                              .openCharacters<void>(subjectsId: subjectsId),
-                          child: Row(
-                            children: [
-                              Text(
-                                l10n.viewDetails,
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Theme.of(context).disabledColor),
-                              ),
-                              Transform.rotate(
-                                angle: 3 * pi / 2,
-                                child: Icon(
-                                  Icons.keyboard_double_arrow_down_rounded,
-                                  color: Theme.of(context).disabledColor,
-                                  size: 25,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: windowsWidth > 600 ? 130 : 120,
-                      child: ScrollConfiguration(
-                        behavior: ScrollConfiguration.of(context).copyWith(
-                          scrollbars: false,
-                        ),
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: characters.data.length,
-                          itemBuilder: (context, index) {
-                            final actor = characters.data[index];
-                            return Container(
-                              width: windowsWidth > 600 ? 80 : 60,
-                              margin: EdgeInsets.only(
-                                  right: index == characters.data.length - 1
-                                      ? 0
-                                      : 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                spacing: 3,
-                                children: [
-                                  // 角色头像
-                                  InkWell(
-                                    onTap: () => appNavigatorOf(context)
-                                        .openCharacterInfo<void>(
-                                            id: actor.character.id,
-                                            name: actor.character.nameCN.isEmpty
-                                                ? actor.character.name
-                                                : actor.character.nameCN,
-                                            image: actor.character.images.large,
-                                            extra: CharacterInfoExtra(
-                                              characterId: actor.character.id,
-                                              characterName:
-                                                  actor.character.name,
-                                              characterImage:
-                                                  actor.character.images.large,
-                                              casts: actor.casts,
-                                            )),
-                                    child: AspectRatio(
-                                      aspectRatio: 1,
-                                      child: AnimationNetworkImage(
-                                        borderRadius: BorderRadius.circular(10),
-                                        url: actor.character.images.large,
-                                        fit: BoxFit.cover,
-                                        alignment: Alignment.topCenter,
-                                      ),
-                                    ),
-                                  ),
-                                  // 角色名称
-                                  Text(
-                                    actor.character.nameCN.isEmpty
-                                        ? actor.character.name
-                                        : actor.character.nameCN,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  // 声优名称
-                                  if (actor.actors.isNotEmpty)
-                                    Text(
-                                      actor.actors[0].nameCN ??
-                                          actor.actors[0].name,
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: Theme.of(context).disabledColor,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                ],
-                              ),
-                            );
-                          },
+    final windowsWidth = MediaQuery.sizeOf(context).width;
+    final avatarWidth = windowsWidth > 600 ? 80.0 : 60.0;
+    return SizedBox(
+      height: windowsWidth > 600 ? 130 : 120,
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(
+          scrollbars: false,
+        ),
+        child: ListView.builder(
+          padding: EdgeInsets.zero,
+          scrollDirection: Axis.horizontal,
+          itemCount: characters.length,
+          itemBuilder: (context, index) {
+            final actor = characters[index];
+            return Container(
+              width: avatarWidth,
+              margin: EdgeInsets.only(
+                  right: index == characters.length - 1 ? 0 : 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                spacing: 3,
+                children: [
+                  // 角色头像
+                  InkWell(
+                    onTap: () => appNavigatorOf(context)
+                        .openCharacterInfo<void>(
+                            id: actor.character.id,
+                            name: actor.character.nameCN.isEmpty
+                                ? actor.character.name
+                                : actor.character.nameCN,
+                            image: actor.character.images.large,
+                            extra: CharacterInfoExtra(
+                              characterId: actor.character.id,
+                              characterName: actor.character.name,
+                              characterImage: actor.character.images.large,
+                              casts: actor.casts,
+                            )),
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: DebouncedImageWidth(
+                        width: avatarWidth,
+                        builder: (context, cacheWidth) => AnimationNetworkImage(
+                          memCacheWidth: cacheWidth,
+                          gaplessResize: true,
+                          borderRadius: BorderRadius.circular(10),
+                          url: actor.character.images.large,
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
                         ),
                       ),
                     ),
-                  ],
-                );
-              } else {
-                return const SizedBox.shrink();
-              }
-            },
-            loading: () {
-              return const SizedBox.shrink();
-            },
-            error: (error, stackTrace) {
-              LiggLogger().e('获取角色信息失败', error: error, stackTrace: stackTrace);
-              return const SizedBox.shrink();
-            },
-          );
-        }),
-      ],
+                  ),
+                  // 角色名称
+                  Text(
+                    actor.character.nameCN.isEmpty
+                        ? actor.character.name
+                        : actor.character.nameCN,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                  // 声优名称
+                  if (actor.actors.isNotEmpty)
+                    Text(
+                      actor.actors[0].nameCN ?? actor.actors[0].name,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Theme.of(context).disabledColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

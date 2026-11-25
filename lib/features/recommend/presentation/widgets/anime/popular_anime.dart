@@ -1,79 +1,20 @@
-import 'dart:async';
-
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/features/recommend/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:anime_flow/shared/widgets/card_skeleton.dart';
+import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PopularAnimeView extends ConsumerStatefulWidget {
+class PopularAnimeView extends ConsumerWidget {
   const PopularAnimeView({super.key, required this.contentWidth});
 
   final double contentWidth;
 
-  @override
-  ConsumerState<PopularAnimeView> createState() => _PopularAnimeViewState();
-}
-
-class _PopularAnimeViewState extends ConsumerState<PopularAnimeView> {
-  Timer? _resizeDebounce;
-  double? _pixelRatio;
-  late int _coverCacheWidth;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
-    final firstBuild = _pixelRatio == null;
-    if (_pixelRatio == pixelRatio) return;
-    _pixelRatio = pixelRatio;
-    if (firstBuild) {
-      _coverCacheWidth = _calculateCoverCacheWidth();
-    } else {
-      _scheduleCoverResize();
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant PopularAnimeView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.contentWidth != widget.contentWidth) {
-      _scheduleCoverResize();
-    }
-  }
-
-  void _scheduleCoverResize() {
-    _resizeDebounce?.cancel();
-    // 布局立即响应窗口变化，仅在尺寸稳定后计算并更新图片解码宽度。
-    _resizeDebounce = Timer(const Duration(milliseconds: 200), () {
-      if (!mounted) return;
-      final width = _calculateCoverCacheWidth();
-      if (width != _coverCacheWidth) {
-        setState(() => _coverCacheWidth = width);
-      }
-    });
-  }
-
-  int _calculateCoverCacheWidth() {
-    final grid = _gridDelegate;
-    final cardWidth = (widget.contentWidth -
-            grid.crossAxisSpacing * (grid.crossAxisCount - 1)) /
-        grid.crossAxisCount;
-    return (cardWidth * _pixelRatio!).ceil().clamp(1, 4096);
-  }
-
-  @override
-  void dispose() {
-    _resizeDebounce?.cancel();
-    super.dispose();
-  }
-
   SliverGridDelegateWithFixedCrossAxisCount get _gridDelegate {
-    final contentWidth = widget.contentWidth;
     final compact = contentWidth < 600;
     final spacing = compact ? 10.0 : 15.0;
     final minCardWidth = compact ? 120.0 : 200.0;
@@ -92,16 +33,20 @@ class _PopularAnimeViewState extends ConsumerState<PopularAnimeView> {
   static const int _initialSkeletonCount = 6;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final hotAsync = ref.watch(animeHotProvider);
+    final grid = _gridDelegate;
+    final coverWidth =
+        (contentWidth - grid.crossAxisSpacing * (grid.crossAxisCount - 1)) /
+            grid.crossAxisCount;
 
     return hotAsync.when(
       loading: () => SliverMainAxisGroup(
         slivers: [
           _buildTitleSliver(l10n),
           SliverGrid(
-            gridDelegate: _gridDelegate,
+            gridDelegate: grid,
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) => const Center(
                 child: CardSkeleton(),
@@ -122,47 +67,50 @@ class _PopularAnimeViewState extends ConsumerState<PopularAnimeView> {
           if (hotState.isRefreshing)
             const SliverToBoxAdapter(child: LinearProgressIndicator()),
           if (hotState.hasUpdate) _buildUpdateSliver(context, ref, l10n),
-          SliverGrid(
-            gridDelegate: _gridDelegate,
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                if (index < hotState.items.length) {
-                  final subject = hotState.items[index].subject;
-                  return InkWell(
-                    onTap: () => appNavigatorOf(context)
-                        .openAnimeInfoFromExtra<void>(InfoRouteExtra(
-                      id: subject.id,
-                      name: subject.nameCN.isEmpty
-                          ? subject.name
-                          : subject.nameCN,
-                      image: subject.images.large,
-                    )),
-                    child: SubjectCard(
-                      memCacheWidth: _coverCacheWidth,
-                      gaplessResize: true,
-                      image: subject.images.large,
-                      title: subject.nameCN.isEmpty
-                          ? subject.name
-                          : subject.nameCN,
-                    ),
-                  );
-                }
+          DebouncedImageWidth(
+            width: coverWidth,
+            builder: (context, cacheWidth) => SliverGrid(
+              gridDelegate: grid,
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  if (index < hotState.items.length) {
+                    final subject = hotState.items[index].subject;
+                    return InkWell(
+                      onTap: () => appNavigatorOf(context)
+                          .openAnimeInfoFromExtra<void>(InfoRouteExtra(
+                        id: subject.id,
+                        name: subject.nameCN.isEmpty
+                            ? subject.name
+                            : subject.nameCN,
+                        image: subject.images.large,
+                      )),
+                      child: SubjectCard(
+                        memCacheWidth: cacheWidth,
+                        gaplessResize: true,
+                        image: subject.images.large,
+                        title: subject.nameCN.isEmpty
+                            ? subject.name
+                            : subject.nameCN,
+                      ),
+                    );
+                  }
 
-                final skeletonCount =
-                    hotState.hasMore && hotState.isLoading ? 3 : 0;
-                if (index < hotState.items.length + skeletonCount) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(2),
-                      child: CardSkeleton(),
-                    ),
-                  );
-                }
+                  final skeletonCount =
+                      hotState.hasMore && hotState.isLoading ? 3 : 0;
+                  if (index < hotState.items.length + skeletonCount) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(2),
+                        child: CardSkeleton(),
+                      ),
+                    );
+                  }
 
-                return const SizedBox.shrink();
-              },
-              childCount: hotState.items.length +
-                  (hotState.hasMore && hotState.isLoading ? 3 : 0),
+                  return const SizedBox.shrink();
+                },
+                childCount: hotState.items.length +
+                    (hotState.hasMore && hotState.isLoading ? 3 : 0),
+              ),
             ),
           ),
           if (hotState.errorMessage != null && hotState.items.isNotEmpty)

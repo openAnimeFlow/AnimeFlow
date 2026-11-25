@@ -15,6 +15,7 @@ import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wa
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_skeleton.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/widgets/top_occlusion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -338,7 +339,6 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
   ScrollPosition? _scrollPosition;
   Widget? _cachedSliver;
   SliverChildBuilderDelegate? _posterDelegate;
-  double _pixelRatio = 1;
 
   @override
   void reassemble() {
@@ -355,11 +355,6 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
       _scrollPosition?.isScrollingNotifier.removeListener(_onScrollChanged);
       _scrollPosition = position;
       position?.isScrollingNotifier.addListener(_onScrollChanged);
-    }
-    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
-    if (_pixelRatio != pixelRatio) {
-      _pixelRatio = pixelRatio;
-      _posterDelegate = null;
     }
     _cachedSliver = null;
   }
@@ -474,7 +469,6 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
     final indices = {
       for (var i = 0; i < items.length; i++) items[i].subject.subjectId: i,
     };
-    final pixelRatio = _pixelRatio;
     return SliverChildBuilderDelegate(
       (context, index) {
         if (index >= items.length) {
@@ -483,10 +477,6 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
           );
         }
         final poster = items[index];
-        // 覆盖窄屏两列的常用尺寸；拖动窗口及跨越 600 断点不切换缓存键。
-        final logicalWidth = poster.isBackdrop ? 450.0 : 300.0;
-        final decodeWidth =
-            ((logicalWidth * pixelRatio / 128).ceil() * 128).clamp(128, 1536);
         return Padding(
           key: ValueKey(poster.subject.subjectId),
           padding: const EdgeInsets.only(bottom: 12),
@@ -500,7 +490,6 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
                 unawaited(appNavigatorOf(context).openWallpaper<void>(args));
               }
             },
-            memCacheWidth: decodeWidth,
             onImageSize: (size) => _onImageSize(poster, size),
           ),
         );
@@ -514,14 +503,10 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
 
 class _PosterCard extends StatelessWidget {
   const _PosterCard(
-      {required this.poster,
-      required this.onOpen,
-      required this.memCacheWidth,
-      required this.onImageSize});
+      {required this.poster, required this.onOpen, required this.onImageSize});
 
   final WallpaperPoster poster;
   final ValueChanged<WallpaperDetailArgs> onOpen;
-  final int memCacheWidth;
   final ValueChanged<Size> onImageSize;
 
   @override
@@ -537,14 +522,20 @@ class _PosterCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            AnimationNetworkImage(
-              url: poster.url,
-              memCacheWidth: memCacheWidth,
-              fadeInDuration: const Duration(milliseconds: 150),
-              fadeOutDuration: const Duration(milliseconds: 100),
-              onImageSize: onImageSize,
-              // 解码后行高、列宽按原图比例重算；重排前也不裁剪。
-              fit: BoxFit.contain,
+            DebouncedImageWidth(
+              // 保持窗口缩放和跨断点时的缩略图缓存键稳定。
+              width: poster.isBackdrop ? 450 : 300,
+              builder: (context, cacheWidth) => AnimationNetworkImage(
+                url: poster.url,
+                memCacheWidth:
+                    (((cacheWidth + 127) ~/ 128) * 128).clamp(128, 1536),
+                gaplessResize: true,
+                fadeInDuration: const Duration(milliseconds: 150),
+                fadeOutDuration: const Duration(milliseconds: 100),
+                onImageSize: onImageSize,
+                // 解码后行高、列宽按原图比例重算；重排前也不裁剪。
+                fit: BoxFit.contain,
+              ),
             ),
             Positioned(
               left: 0,

@@ -9,6 +9,7 @@ import 'package:anime_flow/core/network/sse/sse_connection_status.dart';
 import 'package:anime_flow/features/recommend/presentation/providers/community_provider.dart';
 import 'package:anime_flow/shared/models/flow/online_count.dart';
 import 'package:anime_flow/shared/models/flow/watching_subject.dart';
+import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:anime_flow/shared/widgets/top_occlusion.dart';
 import 'package:material_ui/material_ui.dart';
@@ -281,19 +282,21 @@ class _CommunityContent extends StatelessWidget {
                   horizontalPadding,
                   32,
                 ),
-                sliver: SliverGrid(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => _WatchingSubjectCard(
+                sliver: DebouncedImageWidth(
+                  width: cardWidth,
+                  builder: (context, cacheWidth) => SliverGrid.builder(
+                    itemBuilder: (context, index) => _WatchingSubjectCard(
                       subject: subjects[index],
                       watchingPeopleLabel: watchingPeopleLabel,
+                      cacheWidth: cacheWidth,
                     ),
-                    childCount: subjects.length,
-                  ),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    mainAxisSpacing: spacing,
-                    crossAxisSpacing: spacing,
-                    mainAxisExtent: cardWidth * 1.5 + footerHeight,
+                    itemCount: subjects.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      mainAxisSpacing: spacing,
+                      crossAxisSpacing: spacing,
+                      mainAxisExtent: cardWidth * 1.5 + footerHeight,
+                    ),
                   ),
                 ),
               ),
@@ -712,10 +715,13 @@ class _SectionHeader extends StatelessWidget {
 
 class _WatchingSubjectCard extends StatelessWidget {
   const _WatchingSubjectCard(
-      {required this.subject, required this.watchingPeopleLabel});
+      {required this.subject,
+      required this.watchingPeopleLabel,
+      required this.cacheWidth});
 
   final WatchingSubject subject;
   final String Function(Object count) watchingPeopleLabel;
+  final int cacheWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -729,7 +735,12 @@ class _WatchingSubjectCard extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: 2 / 3,
-            child: SubjectCard(image: imageUrl, title: subject.displayName),
+            child: SubjectCard(
+              image: imageUrl,
+              title: subject.displayName,
+              memCacheWidth: cacheWidth,
+              gaplessResize: true,
+            ),
           ),
           Expanded(
             child: Padding(

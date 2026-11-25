@@ -8,7 +8,6 @@ import 'package:anime_flow/features/user/application/user_collection_state.dart'
 import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/glass_tab_bar.dart';
 import 'package:anime_flow/shared/widgets/collection_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -233,9 +232,6 @@ class _UserCollectionTab extends ConsumerWidget {
                     constraints.maxWidth - horizontalPadding * 2;
                 final crossAxisCount =
                     (availableWidth / 320.0).floor().clamp(1, 4);
-                final cardWidth = (availableWidth - 12 * (crossAxisCount - 1)) /
-                    crossAxisCount;
-                final coverWidth = cardWidth / 2.5 * (2 / 3);
                 final collections = collectionsItem?.data ?? [];
                 final skeletonCount = collectionsItem == null
                     ? 4 * crossAxisCount
@@ -322,7 +318,6 @@ class _UserCollectionTab extends ConsumerWidget {
                               return _CollectionItemCard(
                                 key: ValueKey(collection.id),
                                 collection: collection,
-                                coverWidth: coverWidth,
                                 onCollectTypeChanged: (newType) =>
                                     _onCollectTypeChanged(
                                   context,
@@ -501,13 +496,11 @@ class _CollectionCardSkeleton extends StatelessWidget {
 /// 条目卡片。
 class _CollectionItemCard extends StatelessWidget {
   final UserCollectionData collection;
-  final double coverWidth;
   final Future<void> Function(CollectType type) onCollectTypeChanged;
 
   const _CollectionItemCard({
     super.key,
     required this.collection,
-    required this.coverWidth,
     required this.onCollectTypeChanged,
   });
 
@@ -567,15 +560,11 @@ class _CollectionItemCard extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 2 / 3,
-              child: DebouncedImageWidth(
-                width: coverWidth,
-                builder: (context, cacheWidth) => AnimationNetworkImage(
-                  borderRadius: const BorderRadius.all(Radius.circular(12)),
-                  url: collection.images.large,
-                  memCacheWidth: cacheWidth,
-                  gaplessResize: true,
-                  fit: BoxFit.cover,
-                ),
+              child: AnimationNetworkImage(
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                url: collection.images.large,
+                gaplessResize: true,
+                fit: BoxFit.cover,
               ),
             ),
             Expanded(

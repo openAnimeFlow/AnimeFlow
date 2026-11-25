@@ -148,10 +148,6 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
                                       child: AspectRatio(
                                         aspectRatio: 16 / 9,
                                         child: AnimationNetworkImage(
-                                          memCacheWidth: (300 *
-                                                  MediaQuery.devicePixelRatioOf(
-                                                      context))
-                                              .ceil(),
                                           alignment: Alignment.topCenter,
                                           fit: BoxFit.cover,
                                           url: history.cover,

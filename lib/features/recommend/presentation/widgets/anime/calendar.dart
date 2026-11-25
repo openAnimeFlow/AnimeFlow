@@ -291,9 +291,6 @@ class _CalendarViewState extends State<CalendarView> {
                     Positioned.fill(
                       child: AnimationNetworkImage(
                         url: itemData.images.large,
-                        memCacheWidth: (_cardWidth(windowWidth(context)) *
-                                MediaQuery.devicePixelRatioOf(context))
-                            .ceil(),
                         fit: BoxFit.cover,
                       ),
                     ),

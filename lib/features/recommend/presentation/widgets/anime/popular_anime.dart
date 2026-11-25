@@ -4,7 +4,6 @@ import 'package:anime_flow/features/recommend/presentation/providers/anime_provi
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:anime_flow/shared/widgets/card_skeleton.dart';
-import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,9 +36,6 @@ class PopularAnimeView extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final hotAsync = ref.watch(animeHotProvider);
     final grid = _gridDelegate;
-    final coverWidth =
-        (contentWidth - grid.crossAxisSpacing * (grid.crossAxisCount - 1)) /
-            grid.crossAxisCount;
 
     return hotAsync.when(
       loading: () => SliverMainAxisGroup(
@@ -67,50 +63,46 @@ class PopularAnimeView extends ConsumerWidget {
           if (hotState.isRefreshing)
             const SliverToBoxAdapter(child: LinearProgressIndicator()),
           if (hotState.hasUpdate) _buildUpdateSliver(context, ref, l10n),
-          DebouncedImageWidth(
-            width: coverWidth,
-            builder: (context, cacheWidth) => SliverGrid(
-              gridDelegate: grid,
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  if (index < hotState.items.length) {
-                    final subject = hotState.items[index].subject;
-                    return InkWell(
-                      onTap: () => appNavigatorOf(context)
-                          .openAnimeInfoFromExtra<void>(InfoRouteExtra(
-                        id: subject.id,
-                        name: subject.nameCN.isEmpty
-                            ? subject.name
-                            : subject.nameCN,
-                        image: subject.images.large,
-                      )),
-                      child: SubjectCard(
-                        memCacheWidth: cacheWidth,
-                        gaplessResize: true,
-                        image: subject.images.large,
-                        title: subject.nameCN.isEmpty
-                            ? subject.name
-                            : subject.nameCN,
-                      ),
-                    );
-                  }
+          SliverGrid(
+            gridDelegate: grid,
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                if (index < hotState.items.length) {
+                  final subject = hotState.items[index].subject;
+                  return InkWell(
+                    onTap: () => appNavigatorOf(context)
+                        .openAnimeInfoFromExtra<void>(InfoRouteExtra(
+                      id: subject.id,
+                      name: subject.nameCN.isEmpty
+                          ? subject.name
+                          : subject.nameCN,
+                      image: subject.images.large,
+                    )),
+                    child: SubjectCard(
+                      gaplessResize: true,
+                      image: subject.images.large,
+                      title: subject.nameCN.isEmpty
+                          ? subject.name
+                          : subject.nameCN,
+                    ),
+                  );
+                }
 
-                  final skeletonCount =
-                      hotState.hasMore && hotState.isLoading ? 3 : 0;
-                  if (index < hotState.items.length + skeletonCount) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(2),
-                        child: CardSkeleton(),
-                      ),
-                    );
-                  }
+                final skeletonCount =
+                    hotState.hasMore && hotState.isLoading ? 3 : 0;
+                if (index < hotState.items.length + skeletonCount) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(2),
+                      child: CardSkeleton(),
+                    ),
+                  );
+                }
 
-                  return const SizedBox.shrink();
-                },
-                childCount: hotState.items.length +
-                    (hotState.hasMore && hotState.isLoading ? 3 : 0),
-              ),
+                return const SizedBox.shrink();
+              },
+              childCount: hotState.items.length +
+                  (hotState.hasMore && hotState.isLoading ? 3 : 0),
             ),
           ),
           if (hotState.errorMessage != null && hotState.items.isNotEmpty)

@@ -142,11 +142,6 @@ class _FavoriteWallpapersPageState
           ((contentWidth + spacing) / (minCardWidth + spacing))
               .floor()
               .clamp(3, 7);
-          final cacheWidth =
-          (((contentWidth - spacing * (columns - 1)) / columns) *
-              MediaQuery.devicePixelRatioOf(context))
-              .ceil()
-              .clamp(1, 4096);
           return CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
@@ -272,7 +267,6 @@ class _FavoriteWallpapersPageState
                                         final item = list.items[index];
                                         return _FavoriteCard(
                                             subject: item,
-                                            cacheWidth: cacheWidth,
                                             pending: changes.pending
                                                 .contains(item.subjectId),
                                             onOpen: () => _open(item),
@@ -309,13 +303,11 @@ class _FavoriteWallpapersPageState
 
 class _FavoriteCard extends StatelessWidget {
   const _FavoriteCard({required this.subject,
-    required this.cacheWidth,
     required this.pending,
     required this.onOpen,
     required this.onRemove});
 
   final SubjectWallpaper subject;
-  final int cacheWidth;
   final bool pending;
   final VoidCallback onOpen;
   final VoidCallback onRemove;
@@ -353,7 +345,6 @@ class _FavoriteCard extends StatelessWidget {
               : SubjectCard(
             image: cover,
             title: subject.displayName,
-            memCacheWidth: cacheWidth,
             gaplessResize: true,
           ),
         ),

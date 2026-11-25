@@ -7,7 +7,6 @@ import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -227,15 +226,11 @@ class InfoHeadView extends StatelessWidget {
                 ),
                 child: Hero(
                   tag: image,
-                  child: DebouncedImageWidth(
-                    width: coverWidth,
-                    builder: (context, cacheWidth) => AnimationNetworkImage(
-                      memCacheWidth: cacheWidth,
-                      gaplessResize: true,
-                      borderRadius: BorderRadius.circular(8),
-                      url: image,
-                      fit: BoxFit.cover,
-                    ),
+                  child: AnimationNetworkImage(
+                    gaplessResize: true,
+                    borderRadius: BorderRadius.circular(8),
+                    url: image,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),

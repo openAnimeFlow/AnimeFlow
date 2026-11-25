@@ -1,6 +1,5 @@
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:anime_flow/shared/models/bangumi/producers_item.dart';
 
@@ -38,17 +37,13 @@ class ProducersView extends StatelessWidget {
                     margin: EdgeInsets.only(right: imageInset),
                     child: AspectRatio(
                       aspectRatio: 1,
-                      child: DebouncedImageWidth(
-                        width: cardWidth - imageInset,
-                        builder: (context, cacheWidth) => AnimationNetworkImage(
-                          memCacheWidth: cacheWidth,
-                          gaplessResize: true,
-                          borderRadius: BorderRadius.circular(10),
-                          fit: BoxFit.cover,
-                          alignment: Alignment.topCenter,
-                          url: staffItem.staff.images?.medium ??
-                              Constants.notImage,
-                        ),
+                      child: AnimationNetworkImage(
+                        gaplessResize: true,
+                        borderRadius: BorderRadius.circular(10),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                        url: staffItem.staff.images?.medium ??
+                            Constants.notImage,
                       ),
                     ),
                   ),

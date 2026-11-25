@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shimmer/shimmer.dart';
 
-class AnimationNetworkImage extends StatelessWidget {
+class AnimationNetworkImage extends StatefulWidget {
   final String url;
   final BoxFit? fit;
   final Color? color;
@@ -15,9 +17,6 @@ class AnimationNetworkImage extends StatelessWidget {
   /// 加载占位的高度。
   final double? placeholderHeight;
 
-  /// 可选的内存解码宽度（物理像素），用于列表缩略图，保留图片比例。
-  final int? memCacheWidth;
-
   /// 仅在同一 URL 的解码尺寸改变时保留旧图，切换 URL 时重新加载。
   final bool gaplessResize;
   final Duration fadeInDuration;
@@ -26,7 +25,7 @@ class AnimationNetworkImage extends StatelessWidget {
   final BorderRadiusGeometry borderRadius;
   final Alignment alignment;
 
-  /// 图片解码后回传像素尺寸；设置 memCacheWidth 时为缩略图尺寸。
+  /// 图片解码后回传像素尺寸。
   final ValueChanged<Size>? onImageSize;
 
   const AnimationNetworkImage({
@@ -37,7 +36,6 @@ class AnimationNetworkImage extends StatelessWidget {
     this.height,
     this.placeholderWidth,
     this.placeholderHeight,
-    this.memCacheWidth,
     this.gaplessResize = false,
     this.borderRadius = BorderRadius.zero,
     this.fadeInDuration = const Duration(milliseconds: 500),
@@ -49,53 +47,124 @@ class AnimationNetworkImage extends StatelessWidget {
   });
 
   @override
+  State<AnimationNetworkImage> createState() => _AnimationNetworkImageState();
+}
+
+class _AnimationNetworkImageState extends State<AnimationNetworkImage> {
+  Timer? _resizeDebounce;
+  ({int? width, int? height})? _decodeSize;
+  ({int? width, int? height})? _targetDecodeSize;
+
+  @override
+  void didUpdateWidget(covariant AnimationNetworkImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.url != widget.url) {
+      _resizeDebounce?.cancel();
+      _decodeSize = _targetDecodeSize = null;
+    }
+  }
+
+  void _updateDecodeSize(({int? width, int? height})? size) {
+    if (size == _targetDecodeSize) return;
+    _targetDecodeSize = size;
+    _resizeDebounce?.cancel();
+    if (_decodeSize == null || size == null) {
+      _decodeSize = size;
+    } else if (size != _decodeSize) {
+      // 仅延迟重新解码，布局仍立即响应窗口变化。
+      _resizeDebounce = Timer(const Duration(milliseconds: 200), () {
+        setState(() => _decodeSize = size);
+      });
+    }
+  }
+
+  int? _physicalPixels(double logicalSize, double pixelRatio) {
+    final pixels = logicalSize * pixelRatio;
+    return pixels.isFinite && pixels > 0 ? pixels.clamp(1, 4096).ceil() : null;
+  }
+
+  @override
+  void dispose() {
+    _resizeDebounce?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: CachedNetworkImage(
-        key: gaplessResize ? ValueKey(url) : null,
-        imageUrl: url,
-        useOldImageOnUrlChange: gaplessResize,
-        fit: fit,
-        width: width,
-        height: height,
-        memCacheWidth: memCacheWidth,
-        color: color,
-        alignment: alignment,
-        filterQuality: filterQuality,
-        fadeInDuration: fadeInDuration,
-        fadeOutDuration: fadeOutDuration,
-        imageBuilder: onImageSize == null
-            ? null
-            : (context, provider) {
-                // CachedNetworkImage 的 imageBuilder 提供原始 provider；必须
-                // 与其内部使用同一个 ResizeImage，避免重新解码一份原图。
-                final displayProvider =
-                    ResizeImage.resizeIfNeeded(memCacheWidth, null, provider);
-                return _ImageSizeReporter(
-                  provider: displayProvider,
-                  onImageSize: onImageSize!,
-                  child: Image(
-                    image: displayProvider,
-                    width: width,
-                    height: height,
-                    fit: fit,
-                    color: color,
-                    alignment: alignment,
-                    filterQuality: filterQuality,
-                  ),
-                );
-              },
-        placeholder: (context, url) {
-          return _ShimmerLoading(
-            width: placeholderWidth ?? 0,
-            height: placeholderHeight ?? 0,
-          );
-        },
-        errorWidget: (context, error, stackTrace) {
-          return const Center(child: SizedBox.shrink());
-        },
-      ),
+    final pixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ??
+        View.of(context).devicePixelRatio;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = _physicalPixels(
+          constraints.constrainWidth(widget.width ?? constraints.maxWidth),
+          pixelRatio,
+        );
+        // 水平滚动列表没有宽度上限，按固定高度等比解码。
+        final height = width == null &&
+                (widget.height != null || constraints.hasTightHeight)
+            ? _physicalPixels(
+                constraints
+                    .constrainHeight(widget.height ?? constraints.maxHeight),
+                pixelRatio,
+              )
+            : null;
+        _updateDecodeSize(
+          width == null && height == null
+              ? null
+              : (width: width, height: height),
+        );
+        final decodeWidth = _decodeSize?.width;
+        final decodeHeight = _decodeSize?.height;
+        final onImageSize = widget.onImageSize;
+        return ClipRRect(
+          borderRadius: widget.borderRadius,
+          child: CachedNetworkImage(
+            key: widget.gaplessResize ? ValueKey(widget.url) : null,
+            imageUrl: widget.url,
+            useOldImageOnUrlChange: widget.gaplessResize,
+            fit: widget.fit,
+            width: widget.width,
+            height: widget.height,
+            memCacheWidth: decodeWidth,
+            memCacheHeight: decodeHeight,
+            color: widget.color,
+            alignment: widget.alignment,
+            filterQuality: widget.filterQuality,
+            fadeInDuration: widget.fadeInDuration,
+            fadeOutDuration: widget.fadeOutDuration,
+            imageBuilder: onImageSize == null
+                ? null
+                : (context, provider) {
+              // CachedNetworkImage 的 imageBuilder 提供原始 provider；必须
+              // 与其内部使用同一个 ResizeImage，避免重新解码一份原图。
+              final displayProvider = ResizeImage.resizeIfNeeded(
+                  decodeWidth, decodeHeight, provider);
+              return _ImageSizeReporter(
+                provider: displayProvider,
+                onImageSize: onImageSize,
+                child: Image(
+                  image: displayProvider,
+                  width: widget.width,
+                  height: widget.height,
+                  fit: widget.fit,
+                  color: widget.color,
+                  alignment: widget.alignment,
+                  filterQuality: widget.filterQuality,
+                ),
+              );
+            },
+            placeholder: (context, url) {
+              return _ShimmerLoading(
+                width: widget.placeholderWidth ?? 0,
+                height: widget.placeholderHeight ?? 0,
+              );
+            },
+            errorWidget: (context, error, stackTrace) {
+              return const Center(child: SizedBox.shrink());
+            },
+          ),
+        );
+      },
     );
   }
 }

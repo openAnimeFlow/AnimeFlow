@@ -21,7 +21,6 @@ import 'package:anime_flow/features/anime_info/presentation/widgets/tags.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/image_viewer_extra.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/expandable_text.dart';
 import 'package:anime_flow/shared/widgets/image_preview.dart';
 import 'package:anime_flow/shared/widgets/top_gradient_mask.dart';
@@ -617,17 +616,11 @@ class _AnimeInfoViewState extends ConsumerState<AnimeInfoView> {
                                             heroTag: heroTag)),
                                 child: Hero(
                                   tag: heroTag,
-                                  child: DebouncedImageWidth(
-                                    // 剧照保留原比例，以常见的 16:9 估算解码宽度。
-                                    width: stillHeight * 16 / 9,
-                                    builder: (context, cacheWidth) =>
-                                        AnimationNetworkImage(
-                                      memCacheWidth: cacheWidth,
-                                      gaplessResize: true,
-                                      url: image,
-                                      fit: BoxFit.cover,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
+                                  child: AnimationNetworkImage(
+                                    gaplessResize: true,
+                                    url: image,
+                                    fit: BoxFit.cover,
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
                               ),
@@ -793,16 +786,11 @@ class _AnimeInfoViewState extends ConsumerState<AnimeInfoView> {
                                     },
                                     child: Column(
                                       children: [
-                                        DebouncedImageWidth(
-                                          width: cardWidth,
-                                          builder: (context, cacheWidth) =>
-                                              AnimationNetworkImage(
-                                            memCacheWidth: cacheWidth,
-                                            gaplessResize: true,
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            url: item.subject.images.large,
-                                          ),
+                                        AnimationNetworkImage(
+                                          gaplessResize: true,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          url: item.subject.images.large,
                                         ),
                                         const SizedBox(height: 10),
                                         Expanded(

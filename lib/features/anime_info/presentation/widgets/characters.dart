@@ -2,7 +2,6 @@ import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/navigation/args/character_info_extra.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:material_ui/material_ui.dart';
 
 class CharactersView extends StatelessWidget {
@@ -52,16 +51,12 @@ class CharactersView extends StatelessWidget {
                             )),
                     child: AspectRatio(
                       aspectRatio: 1,
-                      child: DebouncedImageWidth(
-                        width: avatarWidth,
-                        builder: (context, cacheWidth) => AnimationNetworkImage(
-                          memCacheWidth: cacheWidth,
-                          gaplessResize: true,
-                          borderRadius: BorderRadius.circular(10),
-                          url: actor.character.images.large,
-                          fit: BoxFit.cover,
-                          alignment: Alignment.topCenter,
-                        ),
+                      child: AnimationNetworkImage(
+                        gaplessResize: true,
+                        borderRadius: BorderRadius.circular(10),
+                        url: actor.character.images.large,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
                       ),
                     ),
                   ),

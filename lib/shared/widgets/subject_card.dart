@@ -7,9 +7,6 @@ class SubjectCard extends StatelessWidget {
   final String title;
   final int? rating;
 
-  /// 列表封面的解码宽度。
-  final int? memCacheWidth;
-
   /// 解码尺寸变化时保留同一封面，直到新尺寸图片加载完成。
   final bool gaplessResize;
 
@@ -27,7 +24,6 @@ class SubjectCard extends StatelessWidget {
     required this.title,
     this.heroTag,
     this.rating,
-    this.memCacheWidth,
     this.gaplessResize = false,
     this.isCoverAnimation = true,
     this.borderRadius = const BorderRadius.all(Radius.circular(15.0)),
@@ -53,7 +49,6 @@ class SubjectCard extends StatelessWidget {
     final Widget cover = AnimationNetworkImage(
       borderRadius: borderRadius,
       url: image,
-      memCacheWidth: memCacheWidth,
       gaplessResize: gaplessResize,
       fit: BoxFit.cover,
     );

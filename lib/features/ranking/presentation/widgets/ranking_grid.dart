@@ -6,7 +6,6 @@ import 'package:anime_flow/features/ranking/presentation/widgets/ranking_list_sk
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/card_skeleton.dart';
-import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,8 +65,6 @@ class RankingGrid extends ConsumerWidget {
     final listItemCount = items.length > 3 ? items.length - 3 : 0;
     final skeletonCount = isLoadingMore ? 3 : 0;
     final posterColumnCount = (contentWidth / 200).floor().clamp(3, 7);
-    final posterWidth =
-        (contentWidth - 10 * (posterColumnCount - 1)) / posterColumnCount;
 
     return SliverMainAxisGroup(
       slivers: [
@@ -110,7 +107,6 @@ class RankingGrid extends ConsumerWidget {
                   : _RankingPosterTile(
                       subject: items[index + 3],
                       rank: index + 4,
-                      coverWidth: posterWidth,
                     );
             },
           ),
@@ -234,16 +230,10 @@ class _FeaturedCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              LayoutBuilder(
-                builder: (context, constraints) => DebouncedImageWidth(
-                  width: constraints.maxWidth,
-                  builder: (context, cacheWidth) => AnimationNetworkImage(
-                    url: subject.images.large,
-                    fit: BoxFit.cover,
-                    memCacheWidth: cacheWidth,
-                    gaplessResize: true,
-                  ),
-                ),
+              AnimationNetworkImage(
+                url: subject.images.large,
+                fit: BoxFit.cover,
+                gaplessResize: true,
               ),
               DecoratedBox(
                 decoration: BoxDecoration(
@@ -372,12 +362,10 @@ class _RankingPosterTile extends StatelessWidget {
   const _RankingPosterTile({
     required this.subject,
     required this.rank,
-    required this.coverWidth,
   });
 
   final Subject subject;
   final int rank;
-  final double coverWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -388,15 +376,11 @@ class _RankingPosterTile extends StatelessWidget {
       onTap: () => appNavigatorOf(context).openAnimeInfoFromExtra<void>(
           InfoRouteExtra(
               id: subject.id, name: title, image: subject.images.large)),
-      child: DebouncedImageWidth(
-        width: coverWidth,
-        builder: (context, cacheWidth) => SubjectCard(
-          image: subject.images.large,
-          memCacheWidth: cacheWidth,
-          gaplessResize: true,
-          title: title,
-          rating: rank,
-        ),
+      child: SubjectCard(
+        image: subject.images.large,
+        gaplessResize: true,
+        title: title,
+        rating: rank,
       ),
     );
   }
@@ -434,15 +418,11 @@ class _RankingListTile extends StatelessWidget {
             children: [
               SizedBox(
                 width: 100,
-                child: DebouncedImageWidth(
-                  width: 100,
-                  builder: (context, cacheWidth) => AnimationNetworkImage(
-                    borderRadius: BorderRadius.circular(15),
-                    url: subject.images.small,
-                    memCacheWidth: cacheWidth,
-                    gaplessResize: true,
-                    fit: BoxFit.cover,
-                  ),
+                child: AnimationNetworkImage(
+                  borderRadius: BorderRadius.circular(15),
+                  url: subject.images.small,
+                  gaplessResize: true,
+                  fit: BoxFit.cover,
                 ),
               ),
               Expanded(

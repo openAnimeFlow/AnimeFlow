@@ -5,7 +5,6 @@ import 'package:anime_flow/features/anime_info/presentation/providers/anime_info
 import 'package:anime_flow/core/exception/storage_exception.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
@@ -201,16 +200,12 @@ class InfoAppbar extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             spacing: 8,
             children: [
-              DebouncedImageWidth(
+              AnimationNetworkImage(
+                gaplessResize: true,
                 width: _controlSize,
-                builder: (context, cacheWidth) => AnimationNetworkImage(
-                  memCacheWidth: cacheWidth,
-                  gaplessResize: true,
-                  width: _controlSize,
-                  height: _controlSize,
-                  fit: BoxFit.cover,
-                  url: args.image,
-                ),
+                height: _controlSize,
+                fit: BoxFit.cover,
+                url: args.image,
               ),
               Expanded(
                 child: Column(

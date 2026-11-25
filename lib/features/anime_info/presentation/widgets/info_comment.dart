@@ -2,7 +2,6 @@ import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shimmer/shimmer.dart';
@@ -55,17 +54,13 @@ class InfoCommentView extends StatelessWidget {
           InkWell(
             onTap: () => appNavigatorOf(context)
                 .openUserSpace<void>(name: comment.user.username),
-            child: DebouncedImageWidth(
+            child: AnimationNetworkImage(
+              gaplessResize: true,
+              borderRadius: BorderRadius.circular(10),
+              url: comment.user.avatar.medium,
               width: 40,
-              builder: (context, cacheWidth) => AnimationNetworkImage(
-                memCacheWidth: cacheWidth,
-                gaplessResize: true,
-                borderRadius: BorderRadius.circular(10),
-                url: comment.user.avatar.medium,
-                width: 40,
-                height: 40,
-                fit: BoxFit.cover,
-              ),
+              height: 40,
+              fit: BoxFit.cover,
             ),
           ),
           const SizedBox(width: 12),

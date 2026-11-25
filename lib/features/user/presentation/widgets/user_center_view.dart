@@ -16,7 +16,6 @@ import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/bottom_occlusion.dart';
-import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/glass_capsule.dart';
 import 'package:anime_flow/shared/widgets/glass_tab_bar.dart';
 import 'package:anime_flow/shared/widgets/jelly_menu.dart';
@@ -550,16 +549,12 @@ class _UserViewState extends ConsumerState<UserCenterView>
           children: [
             ClipOval(
               child: user.avatar != null && user.avatar!.isNotEmpty
-                  ? DebouncedImageWidth(
+                  ? AnimationNetworkImage(
                       width: 30,
-                      builder: (context, cacheWidth) => AnimationNetworkImage(
-                        width: 30,
-                        height: 30,
-                        fit: BoxFit.cover,
-                        memCacheWidth: cacheWidth,
-                        gaplessResize: true,
-                        url: user.avatar!,
-                      ),
+                      height: 30,
+                      fit: BoxFit.cover,
+                      gaplessResize: true,
+                      url: user.avatar!,
                     )
                   : Icon(Icons.person,
                       size: 30, color: colors.onSurfaceVariant),
@@ -610,34 +605,25 @@ class _UserViewState extends ConsumerState<UserCenterView>
             child: IgnorePointer(
               child: Opacity(
                 opacity: 0.4,
-                child: LayoutBuilder(
-                  builder: (context, boxConstraints) {
-                    return ImageFiltered(
-                      enabled: blurSigma > 0,
-                      imageFilter: ImageFilter.blur(
-                          sigmaX: blurSigma, sigmaY: blurSigma),
-                      child: ShaderMask(
-                        shaderCallback: (Rect bounds) {
-                          return const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Colors.white, Colors.transparent],
-                            stops: [0.9, 1],
-                          ).createShader(bounds);
-                        },
-                        child: DebouncedImageWidth(
-                          width: boxConstraints.maxWidth,
-                          builder: (context, cacheWidth) =>
-                              AnimationNetworkImage(
-                            url: backgroundUrl,
-                            memCacheWidth: cacheWidth,
-                            gaplessResize: true,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+                child: ImageFiltered(
+                  enabled: blurSigma > 0,
+                  imageFilter:
+                      ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.white, Colors.transparent],
+                        stops: [0.9, 1],
+                      ).createShader(bounds);
+                    },
+                    child: AnimationNetworkImage(
+                      url: backgroundUrl,
+                      gaplessResize: true,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -651,17 +637,13 @@ class _UserViewState extends ConsumerState<UserCenterView>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (hasAvatar)
-                  DebouncedImageWidth(
+                  AnimationNetworkImage(
+                    borderRadius: BorderRadius.circular(100),
+                    url: user.avatar!,
+                    fit: BoxFit.cover,
                     width: 100,
-                    builder: (context, cacheWidth) => AnimationNetworkImage(
-                      borderRadius: BorderRadius.circular(100),
-                      url: user.avatar!,
-                      fit: BoxFit.cover,
-                      width: 100,
-                      height: 100,
-                      memCacheWidth: cacheWidth,
-                      gaplessResize: true,
-                    ),
+                    height: 100,
+                    gaplessResize: true,
                   )
                 else
                   const Icon(Icons.person, size: 96),

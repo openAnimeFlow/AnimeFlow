@@ -15,7 +15,6 @@ import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wa
 import 'package:anime_flow/features/recommend/presentation/widgets/wallpapers/wallpaper_skeleton.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/debounced_image_width.dart';
 import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/widgets/top_occlusion.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -522,20 +521,14 @@ class _PosterCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            DebouncedImageWidth(
-              // 保持窗口缩放和跨断点时的缩略图缓存键稳定。
-              width: poster.isBackdrop ? 450 : 300,
-              builder: (context, cacheWidth) => AnimationNetworkImage(
-                url: poster.url,
-                memCacheWidth:
-                    (((cacheWidth + 127) ~/ 128) * 128).clamp(128, 1536),
-                gaplessResize: true,
-                fadeInDuration: const Duration(milliseconds: 150),
-                fadeOutDuration: const Duration(milliseconds: 100),
-                onImageSize: onImageSize,
-                // 解码后行高、列宽按原图比例重算；重排前也不裁剪。
-                fit: BoxFit.contain,
-              ),
+            AnimationNetworkImage(
+              url: poster.url,
+              gaplessResize: true,
+              fadeInDuration: const Duration(milliseconds: 150),
+              fadeOutDuration: const Duration(milliseconds: 100),
+              onImageSize: onImageSize,
+              // 解码后行高、列宽按原图比例重算；重排前也不裁剪。
+              fit: BoxFit.contain,
             ),
             Positioned(
               left: 0,

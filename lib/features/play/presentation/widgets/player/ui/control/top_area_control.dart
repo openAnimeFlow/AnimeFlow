@@ -1,5 +1,6 @@
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_more_menu.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player_settings_sheet.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/player_more_button.dart';
+import 'package:anime_flow/features/play/presentation/widgets/dialog/danmaku_setting_dialog.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
@@ -11,7 +12,7 @@ import 'package:anime_flow/features/play/presentation/providers/video_source_pro
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_query_providers.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/control/video_settings_menu.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/video_settings_menu.dart';
 import 'package:anime_flow/core/utils/playback_format.dart';
 import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/ios_battery_icon.dart';
@@ -48,6 +49,7 @@ class TopAreaControl extends ConsumerStatefulWidget {
 
 class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   late int _skipDuration;
+  int _moreMenuOpenCount = 0;
 
   @override
   void initState() {
@@ -285,9 +287,49 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                             ),
                           if (!isWideScreen)
                             MediaQuery.removePadding(
-                                context: context,
-                                removeLeft: true,
-                                child: const PlayerMoreButton()),
+                              context: context,
+                              removeLeft: true,
+                              child: JellyMenu<VoidCallback>(
+                                tooltip: l10n.moreMenu,
+                                triggerColor: Colors.transparent,
+                                preferredVerticalDirection:
+                                    VerticalDirection.down,
+                                triggerBuilder: (context, open) =>
+                                    SizedBox.square(
+                                  dimension: 48,
+                                  child: IconButton(
+                                    onPressed: open,
+                                    icon: const Icon(Icons.more_vert,
+                                        color: Colors.white),
+                                  ),
+                                ),
+                                onOpenChanged: (isOpen) {
+                                  if (isOpen) {
+                                    videoUiStateController.cancelUiTimer();
+                                    setState(() => _moreMenuOpenCount++);
+                                  } else {
+                                    videoUiStateController.hideControlsUi(
+                                      duration: const Duration(seconds: 3),
+                                    );
+                                  }
+                                },
+                                onSelected: (action) => action(),
+                                menuBuilder: (_, select) => PlayerMoreMenu(
+                                  key: ValueKey(_moreMenuOpenCount),
+                                  onSelect: select,
+                                  onOpenDanmakuSettings: () =>
+                                      showPlayerSettingsSheet(
+                                    context: context,
+                                    label: l10n.danmakuSettings,
+                                    child: const DanmakuSettingDialog(),
+                                    onOpen:
+                                        videoUiStateController.cancelUiTimer,
+                                    onClose: videoUiStateController
+                                        .restartControlsAutoHideTimer,
+                                  ),
+                                ),
+                              ),
+                            ),
                           if (showContentActions && isWideScreen)
                             JellyMenu<VoidCallback>(
                               tooltip: l10n.settings,

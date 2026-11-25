@@ -121,15 +121,14 @@ class _VideoSettingsMenuState extends ConsumerState<VideoSettingsMenu> {
             onPressed: busy ? null : () => _showPage(_SettingsPage.kernel),
             child: Text('${l10n.playerKernel} · ${l10n.kernelLabel(kernel)}'),
           ),
-           SwitchListTile(
-              title: Text(l10n.hardwareDecoding),
-              value: ref.read(playPreferencesProvider).hardwareDecoder,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-              onChanged: busy || kernel == PlayerKernel.videoPlayer
-                  ? null
-                  : _setHardwareDecoder,
-            ),
-
+          SwitchListTile(
+            title: Text(l10n.hardwareDecoding),
+            value: ref.read(playPreferencesProvider).hardwareDecoder,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+            onChanged: busy || kernel == PlayerKernel.videoPlayer
+                ? null
+                : _setHardwareDecoder,
+          ),
         ],
       _SettingsPage.timer => [_ScheduledStopPicker(onConfirm: _applyTimer)],
       _SettingsPage.kernel => [
@@ -147,24 +146,94 @@ class _VideoSettingsMenuState extends ConsumerState<VideoSettingsMenu> {
     };
     return SizedBox(
       width: 256,
-      child: SingleChildScrollView(
-        key: ValueKey(_page),
-        primary: false,
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: PlayerMenuPageSwitcher(
+        mainPageKey: const ValueKey(_SettingsPage.main),
+        child: SingleChildScrollView(
+          key: ValueKey(_page),
+          primary: false,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (onBack != null)
+                MenuItemButton(
+                  closeOnActivate: false,
+                  overflowAxis: Axis.vertical,
+                  leadingIcon: const BackButtonIcon(),
+                  onPressed: onBack,
+                  child: Text(l10n.back),
+                ),
+              ...items,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class PlayerMenuPageSwitcher extends StatelessWidget {
+  const PlayerMenuPageSwitcher({
+    super.key,
+    required this.mainPageKey,
+    required this.child,
+  });
+
+  final LocalKey mainPageKey;
+  final Widget child;
+
+  static const duration = Duration(milliseconds: 200);
+
+  @override
+  Widget build(BuildContext context) {
+    final textDirection = Directionality.of(context);
+    return ClipRect(
+      child: AnimatedSwitcher(
+        duration:
+            MediaQuery.disableAnimationsOf(context) ? Duration.zero : duration,
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeOutCubic.flipped,
+        transitionBuilder: (child, animation) => SlideTransition(
+          textDirection: textDirection,
+          position: Tween<Offset>(
+            begin: Offset(child.key == mainPageKey ? -1 : 1, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: Align(
+            alignment: Alignment.topCenter,
+            widthFactor: 1,
+            heightFactor: 1,
+            child: child,
+          ),
+        ),
+        layoutBuilder: (currentChild, previousChildren) => Stack(
+          alignment: Alignment.topCenter,
           children: [
-            if (onBack != null)
-              MenuItemButton(
-                closeOnActivate: false,
-                overflowAxis: Axis.vertical,
-                leadingIcon: const BackButtonIcon(),
-                onPressed: onBack,
-                child: Text(l10n.back),
-              ),
-            ...items,
+            for (final child in previousChildren)
+              _stackPage(child, outgoing: true),
+            if (currentChild != null) _stackPage(currentChild, outgoing: false),
           ],
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  static Widget _stackPage(Widget child, {required bool outgoing}) {
+    // Keep outgoing pages mounted without contributing to the menu size.
+    final inset = outgoing ? 0.0 : null;
+    return Positioned.fill(
+      key: child.key,
+      left: inset,
+      top: inset,
+      right: inset,
+      bottom: inset,
+      child: IgnorePointer(
+        ignoring: outgoing,
+        child: ExcludeFocus(
+          excluding: outgoing,
+          child: ExcludeSemantics(excluding: outgoing, child: child),
         ),
       ),
     );

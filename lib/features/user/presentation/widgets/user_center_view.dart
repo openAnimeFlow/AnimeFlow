@@ -383,24 +383,30 @@ class _UserViewState extends ConsumerState<UserCenterView>
             curve: Curves.easeOutCubic,
             child: ExcludeSemantics(
               excluding: !isPinned,
-              child: Align(
-                alignment: AlignmentDirectional.centerStart,
-                heightFactor: 1,
-                child: _buildUserPill(context, user),
-              ),
+              child: _buildUserPill(context, user),
             ),
           ),
           const Spacer(),
-          GlassCapsule(
-            child: SizedBox.square(
-              dimension: 40,
-              child: ValueListenableBuilder<bool>(
-                valueListenable: _showUserInfo,
-                builder: (context, showUserInfo, _) => IconButton(
-                  onPressed: () => _showUserInfo.value = !_showUserInfo.value,
-                  tooltip: showUserInfo ? l10n.showUserInfo : l10n.hideUserInfo,
-                  icon: Icon(
-                    showUserInfo ? Icons.visibility : Icons.visibility_off,
+          AnimatedOpacity(
+            opacity: !isPinned ? 1 : 0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            child: ExcludeSemantics(
+              excluding: isPinned,
+              child: GlassCapsule(
+                child: SizedBox.square(
+                  dimension: 40,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: _showUserInfo,
+                    builder: (context, showUserInfo, _) => IconButton(
+                      onPressed: () =>
+                          _showUserInfo.value = !_showUserInfo.value,
+                      tooltip:
+                          showUserInfo ? l10n.showUserInfo : l10n.hideUserInfo,
+                      icon: Icon(
+                        showUserInfo ? Icons.visibility : Icons.visibility_off,
+                      ),
+                    ),
                   ),
                 ),
               ),

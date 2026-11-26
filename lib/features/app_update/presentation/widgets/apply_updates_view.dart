@@ -6,7 +6,7 @@ import 'package:anime_flow/features/app_update/application/app_info_provider.dar
 import 'package:anime_flow/shared/models/download_info.dart';
 import 'package:anime_flow/shared/models/version_download_state.dart';
 import 'package:anime_flow/core/utils/utils.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,7 +34,6 @@ class ApplyUpdatesView extends StatefulWidget {
 class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
   int _selectedIndex = 0;
   UpdateDownloadRoute _route = UpdateDownloadRoute.github;
-  bool _downloadRouteMenuOpen = false;
   bool _startingDownload = false;
   bool _showDownloadRouteHint = false;
   bool _animateDownloadRouteHint = false;
@@ -178,51 +177,7 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
                             crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Text(l10n.updateDownloadRoute),
-                              DropDownMenu<UpdateDownloadRoute>(
-                                items: UpdateDownloadRoute.values,
-                                selectedItem: _route,
-                                tooltip: l10n.updateDownloadRoute,
-                                onOpenedChanged: (isOpen) {
-                                  if (mounted) {
-                                    setState(
-                                        () => _downloadRouteMenuOpen = isOpen);
-                                  }
-                                },
-                                onSelected: (route) =>
-                                    setState(() => _route = route),
-                                buttonBuilder: (context, route) => Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 12),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(_routeLabel(route!),
-                                          style: TextStyle(
-                                              color: colorScheme.primary)),
-                                      AnimatedRotation(
-                                        turns: _downloadRouteMenuOpen ? 0.5 : 0,
-                                        duration:
-                                            const Duration(milliseconds: 300),
-                                        curve: Curves.easeInOut,
-                                        child: Icon(Icons.arrow_drop_down,
-                                            color: colorScheme.primary),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                itemBuilder: (context, route, selected) => Row(
-                                  children: [
-                                    SizedBox(
-                                        width: 28,
-                                        child: selected
-                                            ? Icon(Icons.check,
-                                                size: 18,
-                                                color: colorScheme.primary)
-                                            : null),
-                                    Text(_routeLabel(route)),
-                                  ],
-                                ),
-                              ),
+                              _buildDownloadRouteMenu(l10n),
                             ],
                           ),
                         if (!isDownloading)
@@ -301,6 +256,58 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildDownloadRouteMenu(AppLocalizations l10n) {
+    final colors = Theme.of(context).colorScheme;
+    return JellyMenu<UpdateDownloadRoute>(
+      tooltip: l10n.updateDownloadRoute,
+      triggerResizeDuration: const Duration(milliseconds: 220),
+      triggerResizeAlignment: AlignmentDirectional.centerStart,
+      triggerBuilder: (context, open) => TextButton(
+        onPressed: open,
+        style: TextButton.styleFrom(
+          foregroundColor: colors.primary,
+          padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                _routeLabel(_route),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
+      ),
+      menuBuilder: (context, select) => SingleChildScrollView(
+        primary: false,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: IntrinsicWidth(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final route in UpdateDownloadRoute.values)
+                MenuItemButton(
+                  trailingIcon: route == _route
+                      ? Icon(Icons.check, size: 18, color: colors.primary)
+                      : null,
+                  onPressed: route == _route
+                      ? null
+                      : () => select(route),
+                  child: Text(_routeLabel(route)),
+                ),
+            ],
+          ),
+        ),
+      ),
+      onSelected: (route) => setState(() => _route = route),
     );
   }
 

@@ -1,6 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'plugin_form_controller.dart';
@@ -104,6 +104,7 @@ class PluginFormFields {
     required ValueChanged<T> onSelected,
     String? errorText,
   }) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -117,25 +118,61 @@ class PluginFormFields {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        child: DropDownMenu<T>(
-          items: items,
-          selectedItem: selected,
-          buttonBuilder: (context, item) => Row(
-            children: [
-              Text(item == null ? '' : labelOf(item)),
-              const Spacer(),
-              const Icon(Icons.arrow_drop_down),
-            ],
-          ),
-          itemBuilder: (context, item, isSelected) => Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(labelOf(item)),
-              if (isSelected) ...[
-                const SizedBox(width: 12),
-                const Icon(Icons.check, size: 18),
+        child: JellyMenu<T>(
+          tooltip: label,
+          triggerColor: Colors.transparent,
+          triggerBuilder: (context, open) => TextButton(
+            onPressed: open,
+            style: TextButton.styleFrom(
+              foregroundColor: colors.primary,
+              padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
+            ),
+            child: Stack(
+              alignment: AlignmentDirectional.centerStart,
+              children: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 24),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 24),
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      heightFactor: 1,
+                      child: Text(
+                        selected == null ? '' : labelOf(selected),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ),
+                const PositionedDirectional(
+                  end: 0,
+                  child: Icon(Icons.arrow_drop_down),
+                ),
               ],
-            ],
+            ),
+          ),
+          menuBuilder: (context, select) => SingleChildScrollView(
+            primary: false,
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: IntrinsicWidth(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final item in items)
+                    MenuItemButton(
+                      trailingIcon: item == selected
+                          ? Icon(Icons.check, size: 18, color: colors.primary)
+                          : null,
+                      onPressed: item == selected
+                          ? null
+                          : () => select(item),
+                      child: Text(labelOf(item)),
+                    ),
+                ],
+              ),
+            ),
           ),
           onSelected: onSelected,
         ),

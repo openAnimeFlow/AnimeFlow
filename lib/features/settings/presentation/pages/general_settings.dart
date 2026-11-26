@@ -7,7 +7,7 @@ import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/ech_image_route.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/cache_management_card.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,7 +20,6 @@ class GeneralSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
-  bool _isLanguageMenuOpen = false;
   late bool _echImageLoading;
   final _echRouteFormKey = GlobalKey<FormState>();
   final List<_EchRouteControllers> _echRoutes = [];
@@ -147,59 +146,9 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
                             child: ListTile(
                               leading: const Icon(Icons.language),
                               title: Text(l10n.languageLabel),
-                              trailing: DropDownMenu<_LanguageOption>(
-                                items: _LanguageOption.values,
-                                selectedItem: selectedLanguage,
-                                tooltip: l10n.selectLanguageTooltip,
-                                onOpenedChanged: (isOpen) {
-                                  if (_isLanguageMenuOpen == isOpen) return;
-                                  setState(() => _isLanguageMenuOpen = isOpen);
-                                },
-                                buttonBuilder: (context, _) {
-                                  final colorScheme =
-                                      Theme.of(context).colorScheme;
-                                  return Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        selectedLanguage.label,
-                                        style: TextStyle(
-                                            color: colorScheme.primary),
-                                      ),
-                                      AnimatedRotation(
-                                        turns: _isLanguageMenuOpen ? 0.5 : 0,
-                                        duration:
-                                            const Duration(milliseconds: 180),
-                                        curve: Curves.easeOutCubic,
-                                        child: Icon(
-                                          Icons.arrow_drop_down,
-                                          color: colorScheme.primary,
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                                itemBuilder: (context, language, isSelected) {
-                                  return Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(
-                                        width: 24,
-                                        child: isSelected
-                                            ? Icon(
-                                                Icons.check,
-                                                size: 18,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary,
-                                              )
-                                            : null,
-                                      ),
-                                      Text(language.label),
-                                    ],
-                                  );
-                                },
-                                onSelected: _setLanguage,
+                              trailing: _buildLanguageMenu(
+                                l10n,
+                                selectedLanguage,
                               ),
                             ),
                           ),
@@ -300,6 +249,61 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
                   ),
                 ),
               )),
+    );
+  }
+
+  Widget _buildLanguageMenu(
+    AppLocalizations l10n,
+    _LanguageOption selectedLanguage,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    return JellyMenu<_LanguageOption>(
+      tooltip: l10n.selectLanguageTooltip,
+      triggerResizeDuration: const Duration(milliseconds: 220),
+      triggerResizeAlignment: AlignmentDirectional.centerEnd,
+      triggerBuilder: (context, open) => TextButton(
+        onPressed: open,
+        style: TextButton.styleFrom(
+          foregroundColor: colors.primary,
+          padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                selectedLanguage.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
+      ),
+      menuBuilder: (context, select) => SingleChildScrollView(
+        primary: false,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: IntrinsicWidth(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final language in _LanguageOption.values)
+                MenuItemButton(
+                  trailingIcon: language == selectedLanguage
+                      ? Icon(Icons.check, size: 18, color: colors.primary)
+                      : null,
+                  onPressed: language == selectedLanguage
+                      ? null
+                      : () => select(language),
+                  child: Text(language.label),
+                ),
+            ],
+          ),
+        ),
+      ),
+      onSelected: _setLanguage,
     );
   }
 

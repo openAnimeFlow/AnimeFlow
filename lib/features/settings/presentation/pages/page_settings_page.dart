@@ -3,7 +3,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/startup_page.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,8 +21,6 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
   late CollectType _collectionType;
   late bool _glassNavigationStyle;
   bool _saving = false;
-  bool _isMenuOpen = false;
-  bool _isCollectionMenuOpen = false;
 
   @override
   void initState() {
@@ -80,11 +78,69 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
     }
   }
 
+  Widget _buildSelectionMenu<T>({
+    required String tooltip,
+    required Iterable<T> options,
+    required T selected,
+    required String Function(T) labelOf,
+    required ValueChanged<T> onSelected,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+    return JellyMenu<T>(
+      tooltip: tooltip,
+      enabled: !_saving,
+      triggerResizeDuration: const Duration(milliseconds: 220),
+      triggerResizeAlignment: AlignmentDirectional.centerEnd,
+      triggerBuilder: (context, open) => TextButton(
+        onPressed: open,
+        style: TextButton.styleFrom(
+          foregroundColor: colors.primary,
+          padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                labelOf(selected),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
+      ),
+      menuBuilder: (context, select) => SingleChildScrollView(
+        primary: false,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: IntrinsicWidth(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final option in options)
+                MenuItemButton(
+                  trailingIcon: option == selected
+                      ? Icon(Icons.check, size: 18, color: colors.primary)
+                      : null,
+                  onPressed: _saving || option == selected
+                      ? null
+                      : () => select(option),
+                  child: Text(labelOf(option)),
+                ),
+            ],
+          ),
+        ),
+      ),
+      onSelected: onSelected,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final wide = ref.watch(settingsLayoutProvider);
-    final primary = Theme.of(context).colorScheme.primary;
     String label(StartupPage page) => switch (page) {
           StartupPage.recommend => l10n.recommend,
           StartupPage.ranking => l10n.rankingTitle,
@@ -123,90 +179,24 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
                     ListTile(
                       title: Text(l10n.startupPage),
                       subtitle: Text(l10n.startupPageDescription),
-                      trailing: AbsorbPointer(
-                        absorbing: _saving,
-                        child: DropDownMenu<StartupPage>(
-                          items: StartupPage.values,
-                          selectedItem: _startupPage,
-                          tooltip: l10n.startupPage,
-                          buttonBorderRadius: BorderRadius.circular(8),
-                          onOpenedChanged: (isOpen) =>
-                              setState(() => _isMenuOpen = isOpen),
-                          buttonBuilder: (context, selectedItem) => Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(label(selectedItem!),
-                                  style:
-                                      TextStyle(color: primary, fontSize: 15)),
-                              AnimatedRotation(
-                                turns: _isMenuOpen ? 0.5 : 0,
-                                duration: const Duration(milliseconds: 180),
-                                curve: Curves.easeOutCubic,
-                                child:
-                                    Icon(Icons.arrow_drop_down, color: primary),
-                              ),
-                            ],
-                          ),
-                          itemBuilder: (context, page, isSelected) => Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                width: 24,
-                                child: isSelected
-                                    ? Icon(Icons.check,
-                                        size: 18, color: primary)
-                                    : null,
-                              ),
-                              Text(label(page)),
-                            ],
-                          ),
-                          onSelected: _selectPage,
-                        ),
+                      trailing: _buildSelectionMenu<StartupPage>(
+                        options: StartupPage.values,
+                        selected: _startupPage,
+                        labelOf: label,
+                        tooltip: l10n.startupPage,
+                        onSelected: _selectPage,
                       ),
                     ),
                     ListTile(
                       title: Text(l10n.defaultCollectionCategory),
                       subtitle: Text(l10n.defaultCollectionCategoryDescription),
-                      trailing: AbsorbPointer(
-                        absorbing: _saving,
-                        child: DropDownMenu<CollectType>(
-                          items: CollectType.values
-                              .where((type) => type.isCollected)
-                              .toList(),
-                          buttonBorderRadius: BorderRadius.circular(8),
-                          selectedItem: _collectionType,
-                          tooltip: l10n.defaultCollectionCategory,
-                          onOpenedChanged: (isOpen) =>
-                              setState(() => _isCollectionMenuOpen = isOpen),
-                          buttonBuilder: (context, selectedItem) => Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(collectionLabel(selectedItem!),
-                                  style:
-                                      TextStyle(color: primary, fontSize: 15)),
-                              AnimatedRotation(
-                                turns: _isCollectionMenuOpen ? 0.5 : 0,
-                                duration: const Duration(milliseconds: 180),
-                                curve: Curves.easeOutCubic,
-                                child:
-                                    Icon(Icons.arrow_drop_down, color: primary),
-                              ),
-                            ],
-                          ),
-                          itemBuilder: (context, type, isSelected) => Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                  width: 24,
-                                  child: isSelected
-                                      ? Icon(Icons.check,
-                                          size: 18, color: primary)
-                                      : null),
-                              Text(collectionLabel(type)),
-                            ],
-                          ),
-                          onSelected: _selectCollection,
-                        ),
+                      trailing: _buildSelectionMenu<CollectType>(
+                        options:
+                            CollectType.values.where((type) => type.isCollected),
+                        selected: _collectionType,
+                        labelOf: collectionLabel,
+                        tooltip: l10n.defaultCollectionCategory,
+                        onSelected: _selectCollection,
                       ),
                     ),
                   ],

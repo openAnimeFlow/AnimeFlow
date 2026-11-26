@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/settings/rules_mirror.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:material_ui/material_ui.dart';
 
 class DownloadMirrorMenu extends StatelessWidget {
@@ -24,35 +24,55 @@ class DownloadMirrorMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return IgnorePointer(
-      ignoring: !enabled,
-      child: DropDownMenu<RulesMirror>(
-        items: RulesMirror.values,
-        selectedItem: selectedMirror,
-        tooltip: tooltip,
-        onSelected: onSelected,
-        buttonBuilder: (context, _) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(_label(selectedMirror), style: TextStyle(color: primary)),
-              Icon(Icons.arrow_drop_down, color: primary),
-            ],
-          ),
+    final colors = Theme.of(context).colorScheme;
+    return JellyMenu<RulesMirror>(
+      tooltip: tooltip,
+      enabled: enabled,
+      triggerResizeDuration: const Duration(milliseconds: 220),
+      triggerResizeAlignment: AlignmentDirectional.centerEnd,
+      triggerBuilder: (context, open) => TextButton(
+        onPressed: open,
+        style: TextButton.styleFrom(
+          foregroundColor: colors.primary,
+          padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
         ),
-        itemBuilder: (context, mirror, selected) => Row(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: 28,
-              child:
-                  selected ? Icon(Icons.check, size: 18, color: primary) : null,
+            Flexible(
+              child: Text(
+                _label(selectedMirror),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            Text(_label(mirror)),
+            const Icon(Icons.arrow_drop_down),
           ],
         ),
       ),
+      menuBuilder: (context, select) => SingleChildScrollView(
+        primary: false,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: IntrinsicWidth(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final mirror in RulesMirror.values)
+                MenuItemButton(
+                  trailingIcon: mirror == selectedMirror
+                      ? Icon(Icons.check, size: 18, color: colors.primary)
+                      : null,
+                  onPressed: !enabled || mirror == selectedMirror
+                      ? null
+                      : () => select(mirror),
+                  child: Text(_label(mirror)),
+                ),
+            ],
+          ),
+        ),
+      ),
+      onSelected: onSelected,
     );
   }
 }

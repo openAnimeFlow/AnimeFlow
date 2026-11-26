@@ -7,7 +7,7 @@ import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
 import 'package:anime_flow/shared/navigation/args/info_route_extra.dart';
 import 'package:anime_flow/shared/navigation/app_navigator_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:material_ui/material_ui.dart';
@@ -571,6 +571,63 @@ class _CalendarPageState extends State<CalendarPage>
     );
   }
 
+  Widget _buildTagFilterTypeMenu(
+    BuildContext context,
+    _CalendarTagFilterType selected,
+    ValueChanged<_CalendarTagFilterType> onSelected,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    return JellyMenu<_CalendarTagFilterType>(
+      tooltip: '筛选类型',
+      triggerColor: colors.surfaceContainerHighest,
+      triggerResizeDuration: const Duration(milliseconds: 220),
+      triggerResizeAlignment: AlignmentDirectional.centerStart,
+      triggerBuilder: (context, open) => TextButton(
+        onPressed: open,
+        style: TextButton.styleFrom(
+          foregroundColor: colors.primary,
+          padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                selected.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
+      ),
+      menuBuilder: (context, select) => SingleChildScrollView(
+        primary: false,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: IntrinsicWidth(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final type in _CalendarTagFilterType.values)
+                MenuItemButton(
+                  trailingIcon: type == selected
+                      ? Icon(Icons.check, size: 18, color: colors.primary)
+                      : null,
+                  onPressed: type == selected
+                      ? null
+                      : () => select(type),
+                  child: Text(type.label),
+                ),
+            ],
+          ),
+        ),
+      ),
+      onSelected: onSelected,
+    );
+  }
+
   Future<void> _showTagFilter(
     BuildContext context,
     List<String> availableTags,
@@ -619,41 +676,10 @@ class _CalendarPageState extends State<CalendarPage>
                     ),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: DropDownMenu<_CalendarTagFilterType>(
-                        tooltip: '筛选类型',
-                        buttonBorderRadius: BorderRadius.circular(12),
-                        items: _CalendarTagFilterType.values,
-                        selectedItem: filterType,
-                        onSelected: (type) =>
-                            setSheetState(() => filterType = type),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        buttonBuilder: (context, selectedItem) => Ink(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            spacing: 8,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(selectedItem!.label),
-                              const Icon(Icons.arrow_drop_down),
-                            ],
-                          ),
-                        ),
-                        itemBuilder: (context, type, isSelected) => Row(
-                          children: [
-                            Text(type.label),
-                            const Spacer(),
-                            if (isSelected) const Icon(Icons.check, size: 18),
-                          ],
-                        ),
+                      child: _buildTagFilterTypeMenu(
+                        context,
+                        filterType,
+                        (type) => setSheetState(() => filterType = type),
                       ),
                     ),
                     Flexible(

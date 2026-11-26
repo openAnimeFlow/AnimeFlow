@@ -9,7 +9,7 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/domain/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/jelly_menu.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -208,64 +208,12 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                       Text(l10n.danmakuChineseConversion,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 20)),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12, bottom: 16),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: DropDownMenu<DanmakuChineseMode>(
-                            items: DanmakuChineseMode.values,
-                            selectedItem: danmakuChineseMode,
-                            tooltip: l10n.danmakuChineseConversion,
-                            buttonBuilder: (context, selected) => Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .outlineVariant,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(_danmakuChineseModeLabel(
-                                      selected!, l10n)),
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.arrow_drop_down,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            itemBuilder: (context, mode, isSelected) => Row(
-                              children: [
-                                SizedBox(
-                                  width: 24,
-                                  child: isSelected
-                                      ? Icon(
-                                          Icons.check,
-                                          size: 18,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                        )
-                                      : null,
-                                ),
-                                Text(_danmakuChineseModeLabel(mode, l10n)),
-                              ],
-                            ),
-                            onSelected: (mode) => ref
-                                .read(danmakuChineseModeProvider.notifier)
-                                .setMode(mode),
-                          ),
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 12, bottom: 16),
+                          child: _buildChineseModeMenu(l10n, danmakuChineseMode),
                         ),
-                      )
+                      ),
                     ],
                   ),
                   // 弹幕显示类型
@@ -469,6 +417,80 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildChineseModeMenu(
+    AppLocalizations l10n,
+    DanmakuChineseMode danmakuChineseMode,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    return JellyMenu<DanmakuChineseMode>(
+      tooltip: l10n.danmakuChineseConversion,
+      triggerResizeDuration: const Duration(milliseconds: 220),
+      triggerResizeAlignment: AlignmentDirectional.centerEnd,
+      trigger: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                _danmakuChineseModeLabel(danmakuChineseMode, l10n),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(Icons.arrow_drop_down, color: colors.primary),
+          ],
+        ),
+      ),
+      menuBuilder: (context, select) {
+        final style = TextButton.styleFrom(
+          alignment: AlignmentDirectional.centerStart,
+          foregroundColor: colors.onSurface,
+          padding: JellyMenu.itemPadding(context),
+          minimumSize: const Size(0, 48),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        );
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(6),
+          child: IntrinsicWidth(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final mode in DanmakuChineseMode.values)
+                  TextButton(
+                    style: style,
+                    onPressed:
+                        mode == danmakuChineseMode ? null : () => select(mode),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 24,
+                          child: mode == danmakuChineseMode
+                              ? Icon(
+                                  Icons.check,
+                                  size: 18,
+                                  color: colors.primary,
+                                )
+                              : null,
+                        ),
+                        Flexible(
+                          child: Text(_danmakuChineseModeLabel(mode, l10n)),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+      onSelected: (mode) =>
+          ref.read(danmakuChineseModeProvider.notifier).setMode(mode),
     );
   }
 

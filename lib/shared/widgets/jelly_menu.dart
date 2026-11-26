@@ -34,6 +34,7 @@ class JellyMenu<T> extends StatefulWidget {
     this.menuColor,
     this.elevation = 0,
     this.triggerResizeDuration = Duration.zero,
+    this.triggerResizeAlignment = Alignment.center,
     this.enabled = true,
     this.barrierDismissible = true,
     this.keyboardAvoidance,
@@ -69,6 +70,9 @@ class JellyMenu<T> extends StatefulWidget {
 
   /// 菜单收起后，触发组件在内容尺寸变化时的动画时长。
   final Duration triggerResizeDuration;
+
+  /// 触发组件对齐内容的位置。
+  final AlignmentGeometry triggerResizeAlignment;
 
   /// 是否允许打开菜单。
   final bool enabled;
@@ -255,6 +259,7 @@ class _JellyMenuState<T> extends State<JellyMenu<T>>
     final trigger = widget.triggerResizeDuration == Duration.zero
         ? triggerChild
         : AnimatedSize(
+            alignment: widget.triggerResizeAlignment,
             duration: MediaQuery.disableAnimationsOf(context)
                 ? Duration.zero
                 : widget.triggerResizeDuration,

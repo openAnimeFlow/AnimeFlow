@@ -1,4 +1,4 @@
-import 'package:anime_flow/core/async/serial_operation_queue.dart';
+import 'package:anime_flow/features/play/serial_operation_queue.dart';
 import 'package:anime_flow/features/play/domain/play_history_repository.dart';
 
 class PlayHistoryService {

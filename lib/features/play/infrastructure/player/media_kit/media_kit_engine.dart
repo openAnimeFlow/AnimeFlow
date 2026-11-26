@@ -8,7 +8,7 @@ import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
-import 'package:anime_flow/core/async/serial_operation_queue.dart';
+import 'package:anime_flow/features/play/serial_operation_queue.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';

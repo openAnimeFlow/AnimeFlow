@@ -8,7 +8,7 @@ import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
-import 'package:anime_flow/core/async/serial_operation_queue.dart';
+import 'package:anime_flow/features/play/serial_operation_queue.dart';
 
 /// 播放器基础协调层。
 class PlaybackCoordinator {

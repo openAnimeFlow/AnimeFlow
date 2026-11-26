@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:anime_flow/core/async/serial_operation_queue.dart';
 import 'package:anime_flow/core/webview/video/video_webview_controller.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:webview_windows/webview_windows.dart';
@@ -11,14 +10,23 @@ class VideoWebviewWindowsImpl
   // WebViewHost, leaving the native creation callback with a dangling pointer.
   // Share the lifecycle queue across playback and download parser instances;
   // page loading remains independent so cancellation can still return promptly.
-  static final _lifecycle = SerialOperationQueue(ensureReady: () {});
+  static Future<void> _lifecycleTail = Future<void>.value();
+
+  static Future<void> _runLifecycle(Future<void> Function() operation) {
+    final result = _lifecycleTail.then((_) => operation());
+    _lifecycleTail = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace __) {},
+    );
+    return result;
+  }
 
   final List<StreamSubscription> subscriptions = [];
 
   HeadlessWebview? headlessWebview;
 
   @override
-  Future<void> init() => _lifecycle.run(() async {
+  Future<void> init() => _runLifecycle(() async {
         headlessWebview ??= HeadlessWebview();
         await headlessWebview!.run();
         await headlessWebview!
@@ -76,7 +84,7 @@ class VideoWebviewWindowsImpl
   }
 
   @override
-  Future<void> dispose() => _lifecycle.run(() async {
+  Future<void> dispose() => _runLifecycle(() async {
         for (var s in subscriptions) {
           try {
             s.cancel();

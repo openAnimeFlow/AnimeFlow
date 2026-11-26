@@ -10,7 +10,7 @@ import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_video_surface.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
-import 'package:anime_flow/core/async/serial_operation_queue.dart';
+import 'package:anime_flow/features/play/serial_operation_queue.dart';
 import 'package:fvp/mdk.dart' as fvp;
 import 'package:material_ui/material_ui.dart';
 

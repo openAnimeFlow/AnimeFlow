@@ -7,18 +7,13 @@ extension PlaybackNoticePresentation on PlaybackNotice {
         PlaybackNotice.resolvingSource => l10n.videoSourceResolving,
         PlaybackNotice.sourceReady => l10n.videoSourceReady,
         PlaybackNotice.openingLocalVideo => l10n.openingLocalVideo,
-        PlaybackNotice.sourceResolutionTimedOut =>
-          l10n.videoSourceResolutionTimedOut,
+        PlaybackNotice.sourceResolutionTimedOut => l10n.videoSourceResolutionTimedOut,
         PlaybackNotice.sourceNotFound => l10n.noPlayableSourceForEpisode,
-        PlaybackNotice.sourceResolutionFailed =>
-          l10n.videoSourceResolutionFailed,
+        PlaybackNotice.sourceResolutionFailed => l10n.videoSourceResolutionFailed,
         PlaybackNotice.localVideoNoTrack => l10n.localVideoNoTrack,
-        PlaybackNotice.localVideoValidationTimedOut =>
-          l10n.localVideoValidationTimedOut,
+        PlaybackNotice.localVideoValidationTimedOut => l10n.localVideoValidationTimedOut,
         PlaybackNotice.localVideoOpenFailed => l10n.localVideoOpenFailed,
-        PlaybackNotice.localVideoPlaybackFailed =>
-          l10n.localVideoPlaybackFailed,
-        PlaybackNotice.onlineVideoPlaybackFailed =>
-          l10n.onlineVideoPlaybackFailed,
+        PlaybackNotice.localVideoPlaybackFailed => l10n.localVideoPlaybackFailed,
+        PlaybackNotice.onlineVideoPlaybackFailed => l10n.onlineVideoPlaybackFailed,
       };
 }

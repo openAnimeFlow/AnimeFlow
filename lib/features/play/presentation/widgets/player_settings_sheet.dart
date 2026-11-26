@@ -13,7 +13,7 @@ Future<void> showPlayerSettingsSheet({
   VoidCallback? onClose,
   bool forceSide = false,
 }) async {
-  final container = ProviderScope.containerOf(context);
+  final container = ProviderScope.containerOf(context, listen: false);
   onOpen?.call();
   try {
     await showGeneralDialog<void>(
@@ -23,8 +23,8 @@ Future<void> showPlayerSettingsSheet({
       barrierColor: Colors.black54,
       transitionDuration: const Duration(milliseconds: 250),
       pageBuilder: (context, animation, secondaryAnimation) =>
-          UncontrolledProviderScope(
-        container: container,
+          PlayerDialogScope(
+        parent: container,
         child: Consumer(
           builder: (context, ref, _) {
             final isWideScreen = forceSide ||
@@ -47,6 +47,34 @@ Future<void> showPlayerSettingsSheet({
     );
   } finally {
     if (context.mounted) onClose?.call();
+  }
+}
+
+/// 继承播放页状态，同时为对话框保留独立的刷新调度。
+class PlayerDialogScope extends StatefulWidget {
+  const PlayerDialogScope(
+      {super.key, required this.parent, required this.child});
+
+  final ProviderContainer parent;
+  final Widget child;
+
+  @override
+  State<PlayerDialogScope> createState() => _PlayerDialogScopeState();
+}
+
+class _PlayerDialogScopeState extends State<PlayerDialogScope> {
+  late final _container = ProviderContainer(parent: widget.parent);
+
+  @override
+  Widget build(BuildContext context) => UncontrolledProviderScope(
+        container: _container,
+        child: widget.child,
+      );
+
+  @override
+  void dispose() {
+    _container.dispose();
+    super.dispose();
   }
 }
 

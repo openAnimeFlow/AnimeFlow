@@ -410,7 +410,8 @@ class _BottomControlsContent extends ConsumerWidget {
                   if (!showEpisodeSelection) return const SizedBox.shrink();
                   return TextButton(
                     onPressed: () {
-                      final container = ProviderScope.containerOf(context);
+                      final container =
+                          ProviderScope.containerOf(context, listen: false);
                       showGeneralDialog(
                         context: context,
                         barrierDismissible: true,
@@ -432,8 +433,8 @@ class _BottomControlsContent extends ConsumerWidget {
                         },
                         pageBuilder:
                             (dialogContext, animation, secondaryAnimation) {
-                          return UncontrolledProviderScope(
-                            container: container,
+                          return PlayerDialogScope(
+                            parent: container,
                             child: EpisodesDialog(
                               isSelectedIcon: Consumer(
                                 builder: (context, ref, _) {

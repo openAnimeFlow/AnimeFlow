@@ -5,7 +5,6 @@ import 'package:anime_flow/features/play/application/play_session.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/play/presentation/extensions/video_fit_presentation.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/player_cache_speed_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
@@ -33,7 +32,6 @@ import 'package:anime_flow/features/play/presentation/providers/danmaku_state_pr
   playExtra,
   AnimeInfo,
   subjectOnlineCount,
-  playerCacheSpeed,
   DanmakuStateNotifier
 ])
 class PlayerView extends ConsumerStatefulWidget {
@@ -100,6 +98,9 @@ class _PlayerViewState extends ConsumerState<PlayerView> {
         requestAutoSelectResource();
       },
     );
+    final middleArea = MiddleAreaControl(
+      readCacheSpeed: playController.playbackCoordinator.readCacheSpeed,
+    );
     return Stack(
       children: [
         /// 视频层
@@ -129,8 +130,8 @@ class _PlayerViewState extends ConsumerState<PlayerView> {
             children: [
               Positioned.fill(
                 child: ref.read(playbackDeviceProvider).isMobile
-                    ? const MobileGestureDetector(child: MiddleAreaControl())
-                    : const DesktopGestureDetector(child: MiddleAreaControl()),
+                    ? MobileGestureDetector(child: middleArea)
+                    : DesktopGestureDetector(child: middleArea),
               ),
               const Positioned(
                   top: 0, left: 0, right: 0, child: TopAreaControl()),

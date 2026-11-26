@@ -3,8 +3,8 @@ import 'dart:ui' show ImageFilter;
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
+import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/presentation/extensions/playback_notice_presentation.dart';
-import 'package:anime_flow/features/play/presentation/providers/player_cache_speed_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -17,9 +17,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:riverpod_annotation/experimental/scope.dart';
 
 /// 播放器指示器
-@Dependencies([VideoUiNotifier, PlayStateNotifier, playerCacheSpeed])
+@Dependencies([VideoUiNotifier, PlayStateNotifier])
 class MiddleAreaControl extends ConsumerWidget {
-  const MiddleAreaControl({super.key});
+  const MiddleAreaControl({super.key, required this.readCacheSpeed});
+
+  final Future<double?> Function() readCacheSpeed;
 
   /// 顶部提示与顶部控件栏之间保留的间距。
   static const double _topIndicatorSpacing = 50.0;
@@ -36,6 +38,7 @@ class MiddleAreaControl extends ConsumerWidget {
             type: ref.watch(
               videoUiProvider.select((state) => state.centerIndicator),
             ),
+            readCacheSpeed: readCacheSpeed,
           ),
         ),
         // 顶部：音量、亮度、播放状态、倍速
@@ -56,11 +59,12 @@ class MiddleAreaControl extends ConsumerWidget {
 }
 
 /// 居中指示器：播放错误、解析、缓冲与拖动进度
-@Dependencies([VideoUiNotifier, PlayStateNotifier, playerCacheSpeed])
+@Dependencies([VideoUiNotifier, PlayStateNotifier])
 class _CenterIndicator extends ConsumerWidget {
-  const _CenterIndicator({required this.type});
+  const _CenterIndicator({required this.type, required this.readCacheSpeed});
 
   final VideoControlsIndicatorType type;
+  final Future<double?> Function() readCacheSpeed;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -100,13 +104,15 @@ class _CenterIndicator extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Row(mainAxisSize: MainAxisSize.min, spacing: 5, children: [
-              Consumer(builder: (context, ref, child) {
-                final speed = ref.watch(playerCacheSpeedProvider);
-                // 重建或切换内核时不展示上一次采样的值。
-                final value = speed.isLoading ? null : speed.asData?.value;
-                if (value == null) return const SizedBox.shrink();
-                return Text(formatBytesPerSec(value), style: textStyle);
-              }),
+              if (TickerMode.valuesOf(context).enabled &&
+                  ref.watch(playStateProvider.select((state) =>
+                      state.kernel == PlayerKernel.mediaKit &&
+                      !state.switchingKernel)))
+                _CacheSpeedLabel(
+                  key: ValueKey(readCacheSpeed),
+                  readCacheSpeed: readCacheSpeed,
+                  style: textStyle,
+                ),
               Text(AppLocalizations.of(context).buffering, style: textStyle),
             ]),
           ],
@@ -251,6 +257,49 @@ class _TopIndicator extends ConsumerWidget {
       _ => const SizedBox.shrink(),
     };
   }
+}
+
+class _CacheSpeedLabel extends StatefulWidget {
+  const _CacheSpeedLabel({
+    super.key,
+    required this.readCacheSpeed,
+    required this.style,
+  });
+
+  final Future<double?> Function() readCacheSpeed;
+  final TextStyle style;
+
+  @override
+  State<_CacheSpeedLabel> createState() => _CacheSpeedLabelState();
+}
+
+class _CacheSpeedLabelState extends State<_CacheSpeedLabel> {
+  late final _samples = _sampleCacheSpeed();
+
+  Stream<double?> _sampleCacheSpeed() async* {
+    final readCacheSpeed = widget.readCacheSpeed;
+    Future<double?> sample() async {
+      try {
+        return await readCacheSpeed();
+      } catch (_) {
+        return null;
+      }
+    }
+
+    yield await sample();
+    yield* Stream<void>.periodic(const Duration(seconds: 1))
+        .asyncMap((_) => sample());
+  }
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<double?>(
+    stream: _samples,
+    builder: (context, snapshot) {
+      final speed = snapshot.data;
+      if (speed == null) return const SizedBox.shrink();
+      return Text(formatBytesPerSec(speed), style: widget.style);
+    },
+  );
 }
 
 class _ProgressCard extends StatelessWidget {

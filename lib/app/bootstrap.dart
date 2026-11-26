@@ -58,7 +58,7 @@ Future<void> bootstrap() async {
     final windowOptions = WindowOptions(
       titleBarStyle:
           Platform.isWindows ? TitleBarStyle.hidden : TitleBarStyle.normal,
-      // minimumSize: Platform.isWindows ? const Size(800, 600) : null,
+      minimumSize: Platform.isWindows ? const Size(800, 600) : null,
       center: true,
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {

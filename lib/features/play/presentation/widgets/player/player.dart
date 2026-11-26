@@ -2,10 +2,6 @@ import 'package:anime_flow/features/play/presentation/providers/play_dependencie
 import 'dart:async';
 
 import 'package:anime_flow/features/play/application/play_session.dart';
-import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
-import 'package:anime_flow/features/play/presentation/extensions/playback_notice_presentation.dart';
-import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/play/presentation/extensions/video_fit_presentation.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -84,15 +80,6 @@ class _PlayerViewState extends ConsumerState<PlayerView> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(
-      playStateProvider.select((state) => (state.phase, state.notice)),
-      (_, next) {
-        final (phase, notice) = next;
-        if (phase == PlaybackPhase.error && notice != PlaybackNotice.none) {
-          NotificationToast.show(notice.localize(AppLocalizations.of(context)));
-        }
-      },
-    );
     // 监听集数变化：首次设置或切换集数时重新选择资源
     ref.listen<int>(
       episodesProvider.select((state) => state.asData?.value.episodeIndex ?? 0),

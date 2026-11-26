@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:anime_flow/features/play/application/play_session.dart';
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/domain/player/video_validation_exception.dart';
-import 'package:anime_flow/features/play/presentation/extensions/playback_notice_presentation.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_session_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_args_provider.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
@@ -177,7 +176,10 @@ class _PlayPageState extends ConsumerState<PlayPage>
       final notice = error is VideoValidationException
           ? error.notice
           : PlaybackNotice.localVideoOpenFailed;
-      NotificationToast.show(notice.localize(AppLocalizations.of(context)));
+      ref.read(playStateProvider.notifier).setPlaybackPhase(
+            PlaybackPhase.error,
+            notice: notice,
+          );
     }
   }
 

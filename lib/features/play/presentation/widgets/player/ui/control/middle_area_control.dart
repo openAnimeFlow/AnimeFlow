@@ -2,6 +2,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
+import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/presentation/extensions/playback_notice_presentation.dart';
 import 'package:anime_flow/features/play/presentation/providers/player_cache_speed_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
@@ -28,7 +29,7 @@ class MiddleAreaControl extends ConsumerWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 居中：解析、缓冲、拖动进度
+        // 居中：播放错误、解析、缓冲、拖动进度
         Align(
           alignment: Alignment.center,
           child: _CenterIndicator(
@@ -54,7 +55,7 @@ class MiddleAreaControl extends ConsumerWidget {
   }
 }
 
-/// 居中指示器：解析、缓冲与拖动进度
+/// 居中指示器：播放错误、解析、缓冲与拖动进度
 @Dependencies([VideoUiNotifier, PlayStateNotifier, playerCacheSpeed])
 class _CenterIndicator extends ConsumerWidget {
   const _CenterIndicator({required this.type});
@@ -71,6 +72,23 @@ class _CenterIndicator extends ConsumerWidget {
       fontSize: 14,
       fontWeight: FontWeight.w500,
     );
+
+    final (phase, notice) = ref.watch(
+      playStateProvider.select((state) => (state.phase, state.notice)),
+    );
+    if (phase == PlaybackPhase.error && notice != PlaybackNotice.none) {
+      return ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Semantics(
+          liveRegion: true,
+          child: Text(
+            notice.localize(AppLocalizations.of(context)),
+            textAlign: TextAlign.center,
+            style: textStyle,
+          ),
+        ),
+      );
+    }
 
     return switch (type) {
       VideoControlsIndicatorType.bufferingIndicator => Column(
@@ -124,18 +142,14 @@ class _CenterIndicator extends ConsumerWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(height: 5),
-            Consumer(builder: (context, ref, child) {
-              final notice =
-                  ref.watch(playStateProvider.select((state) => state.notice));
-              return Text(
-                notice.localize(AppLocalizations.of(context)),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              );
-            }),
+            Text(
+              notice.localize(AppLocalizations.of(context)),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
           ],
         ),
       _ => const SizedBox.shrink(),

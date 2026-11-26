@@ -338,7 +338,7 @@ class PlaySession {
     unawaited(playbackCoordinator.pause());
   }
 
-  /// 先保存并停止旧播放，再解析新请求。解析期间不占用播放操作队列。
+  /// 先保存旧播放进度并释放底层播放器，再解析新请求。解析期间不占用播放操作队列。
   Future<bool> replacePlayback(
     FutureOr<PlayRequest?> Function() resolveRequest, {
     bool Function()? shouldUseResult,
@@ -390,10 +390,19 @@ class PlaySession {
         alias: alias,
         isLocalPlayback: isLocalPlayback,
       );
+      await playbackCoordinator.createPlayer(state.source);
+      if (!isCurrent()) {
+        if (!_isDisposed) {
+          await playbackCoordinator.stop();
+          _currentSource = null;
+          if (!_isDisposed) {
+            _playStateActions.setPlaybackPhase(PlaybackPhase.idle);
+          }
+        }
+        return null;
+      }
       await playbackCoordinator.open(
-        state.source,
         startPosition: Duration(seconds: state.offset),
-        autoPlay: false,
       );
       if (!isCurrent()) return null;
       await playbackCoordinator.play();

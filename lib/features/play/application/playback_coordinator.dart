@@ -54,13 +54,11 @@ class PlaybackCoordinator {
     })();
   }
 
-  Future<void> open(
-    PlaybackSource source, {
-    Duration? startPosition,
-    bool autoPlay = false,
-  }) =>
+  Future<void> createPlayer(PlaybackSource source) =>
+      _run(() => engine.createPlayer(source));
+
+  Future<void> open({Duration? startPosition, bool autoPlay = false}) =>
       _run(() => engine.open(
-            source,
             startPosition: startPosition,
             autoPlay: autoPlay,
           ));
@@ -117,25 +115,23 @@ class PlaybackCoordinator {
               hardwareDecoder: hardwareDecoder ?? _hardwareDecoder);
           await next.initialize();
           _ensureReady();
-          // 在 open 前配置，允许原生内核在 prepare 前建立 GPU 处理管线。
+          // 创建底层实例前保存设置，供原生内核初始化时应用。
           await next.setUpscalePreset(
             next.capabilities.supportsUpscalePreset(upscalePreset)
                 ? upscalePreset
                 : UpscalePreset.off,
           );
           _ensureReady();
-          if (source != null) {
-            await next.open(
-              source,
-              startPosition: snapshot.position,
-              autoPlay: false,
-            );
-            _ensureReady();
-          }
           await next.setVolume(snapshot.volume);
           _ensureReady();
           await next.setRate(snapshot.rate);
           _ensureReady();
+          if (source != null) {
+            await next.createPlayer(source);
+            _ensureReady();
+            await next.open(startPosition: snapshot.position);
+            _ensureReady();
+          }
         } catch (error, stackTrace) {
           await _cleanup(next?.dispose);
           if (_disposed) return false;

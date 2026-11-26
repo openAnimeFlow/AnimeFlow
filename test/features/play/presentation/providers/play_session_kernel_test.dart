@@ -104,6 +104,32 @@ void main() {
     ]);
   });
 
+  test('a request invalidated during creation releases the unopened player',
+      () async {
+    final creating = Completer<void>();
+    final finishCreation = Completer<void>();
+    final factory = _Factory()
+      ..beforeCreate = () async {
+        creating.complete();
+        await finishCreation.future;
+      };
+    final session = _Session(factory);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    var isCurrent = true;
+
+    final opening = session.replacePlayback(() => _request(1),
+        shouldUseResult: () => isCurrent);
+    await creating.future;
+    isCurrent = false;
+    finishCreation.complete();
+
+    expect(await opening, isFalse);
+    final engine = factory.engines.single;
+    expect(engine.openedUris, isEmpty);
+    expect(engine.stopCalls, 1);
+  });
+
   test('local source remains local after opening and kernel switches',
       () async {
     final factory = _Factory();
@@ -642,6 +668,7 @@ class _DanmakuStore implements DanmakuStore {
 class _Factory {
   final engines = <_Engine>[];
   final decoderOptions = <bool>[];
+  Future<void> Function()? beforeCreate;
   Future<void> Function(_Engine)? beforeOpen;
   void Function()? onStop;
   PlayerEngine create(PlayerKernel kernel,
@@ -659,6 +686,7 @@ class _Engine implements PlayerEngine {
   final PlayerKernel kernel;
   final _Factory factory;
   PlaybackSource? source;
+  PlaybackSource? _pendingSource;
   final openedUris = <String>[];
   final startPositions = <Duration?>[];
   final seekPositions = <Duration>[];
@@ -686,10 +714,18 @@ class _Engine implements PlayerEngine {
   @override
   Future<void> initialize() async {}
   @override
-  Future<void> open(PlaybackSource source,
-      {Duration? startPosition, bool autoPlay = false}) async {
+  Future<void> createPlayer(PlaybackSource source) async {
+    expect(disposeCount, 0, reason: 'must not create on a disposed engine');
+    await factory.beforeCreate?.call();
+    _pendingSource = source;
+  }
+
+  @override
+  Future<void> open({Duration? startPosition, bool autoPlay = false}) async {
     await factory.beforeOpen?.call(this);
     expect(disposeCount, 0, reason: 'must not open on a disposed engine');
+    final source = _pendingSource!;
+    _pendingSource = null;
     this.source = source;
     openedUris.add(source.uri.toString());
     startPositions.add(startPosition);

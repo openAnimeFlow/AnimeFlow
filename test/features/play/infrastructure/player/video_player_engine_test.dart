@@ -16,6 +16,11 @@ void main() {
   final source =
       PlaybackSource.network(uri: Uri.parse('https://example.com/video.mp4'));
 
+  Future<void> openSource() async {
+    await engine.createPlayer(source);
+    await engine.open();
+  }
+
   setUp(() async {
     previousPlatform = VideoPlayerPlatform.instance;
     platform = _FakeVideoPlatform();
@@ -32,7 +37,7 @@ void main() {
 
   test('Android opts in before prepare and switches efficiency on and off',
       () async {
-    await engine.open(source);
+    await openSource();
     expect(platform.created.single.videoPlayerOptions?.videoEffects?.effect,
         VideoEffectType.none);
     await engine.setUpscalePreset(UpscalePreset.efficiency);
@@ -44,22 +49,41 @@ void main() {
   test('preset selected before opening survives controller replacement',
       () async {
     await engine.setUpscalePreset(UpscalePreset.efficiency);
-    await engine.open(source);
-    await engine.open(source);
+    await openSource();
+    await openSource();
     expect(
         platform.created.map((c) => c.videoPlayerOptions?.videoEffects?.effect),
         everyElement(VideoEffectType.shaderBundle));
     expect(platform.disposed, [1]);
   });
 
+  test('stop releases the controller before a replacement is opened', () async {
+    await openSource();
+    await engine.stop();
+    await engine.stop();
+    await engine.setVolume(42);
+    await engine.setRate(1.25);
+    expect(platform.disposed, [1]);
+    expect(platform.created, hasLength(1));
+
+    await expectLater(engine.open(), throwsStateError);
+    expect(platform.created, hasLength(1));
+    await engine.createPlayer(source);
+    expect(platform.created, hasLength(2));
+    await engine.open(autoPlay: true);
+    expect(platform.created, hasLength(2));
+    expect(platform.volumes.last, (2, 0.42));
+    expect(platform.rates.last, (2, 1.25));
+  });
+
   test(
       'rejected update does not persist the failed preset into the next episode',
       () async {
-    await engine.open(source);
+    await openSource();
     platform.rejectEffect = true;
     await expectLater(
         engine.setUpscalePreset(UpscalePreset.efficiency), throwsStateError);
-    await engine.open(source);
+    await openSource();
     expect(platform.created.last.videoPlayerOptions?.videoEffects?.effect,
         VideoEffectType.none);
   });
@@ -71,7 +95,7 @@ void main() {
         isFalse);
     await expectLater(
         engine.setUpscalePreset(UpscalePreset.quality), throwsUnsupportedError);
-    await engine.open(source);
+    await openSource();
     expect(platform.created.single.videoPlayerOptions?.videoEffects?.effect,
         VideoEffectType.shaderBundle);
   });
@@ -85,8 +109,8 @@ void main() {
     expect(engine.capabilities.supportsUpscalePreset(UpscalePreset.efficiency),
         isTrue);
     await engine.setUpscalePreset(UpscalePreset.efficiency);
-    await engine.open(source);
-    await engine.open(source);
+    await openSource();
+    await openSource();
     for (final creation in platform.created) {
       final effect = creation.videoPlayerOptions!.videoEffects!;
       expect(effect.effect, VideoEffectType.shaderBundle);
@@ -105,7 +129,7 @@ void main() {
     await engine.initialize();
     expect(engine.capabilities.supportsUpscalePreset(UpscalePreset.efficiency),
         isFalse);
-    await engine.open(source);
+    await openSource();
     expect(platform.created.single.videoPlayerOptions?.videoEffects, isNull);
     await expectLater(engine.setUpscalePreset(UpscalePreset.efficiency),
         throwsUnsupportedError);
@@ -114,7 +138,7 @@ void main() {
   testWidgets(
       'physical fitted output survives toggles and follows layout changes',
       (tester) async {
-    await engine.open(source);
+    await openSource();
     Widget view(double width) => MediaQuery(
           data: const MediaQueryData(devicePixelRatio: 3),
           child: Directionality(
@@ -154,6 +178,8 @@ class _FakeVideoPlatform extends VideoPlayerPlatform {
   final effects = <VideoEffectType>[];
   final configurations = <VideoEffectConfiguration>[];
   final disposed = <int>[];
+  final volumes = <(int, double)>[];
+  final rates = <(int, double)>[];
   bool rejectEffect = false;
 
   @override
@@ -191,9 +217,17 @@ class _FakeVideoPlatform extends VideoPlayerPlatform {
   @override
   Future<void> setMixWithOthers(bool mixWithOthers) async {}
   @override
-  Future<void> setVolume(int playerId, double volume) async {}
+  Future<void> setVolume(int playerId, double volume) async {
+    volumes.add((playerId, volume));
+  }
+
   @override
-  Future<void> setPlaybackSpeed(int playerId, double speed) async {}
+  Future<void> setPlaybackSpeed(int playerId, double speed) async {
+    rates.add((playerId, speed));
+  }
+
+  @override
+  Future<void> play(int playerId) async {}
   @override
   Future<void> pause(int playerId) async {}
 }

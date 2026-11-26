@@ -39,6 +39,7 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
   late final _operations = SerialOperationQueue(ensureReady: _ensureReady);
   bool _initialized = false;
   bool _disposed = false;
+  bool _canOpen = false;
   bool _completed = false;
   String? _lastError;
   VideoPlayerValue? _lastValue;
@@ -147,12 +148,9 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
   }
 
   @override
-  Future<void> open(PlaybackSource source,
-          {Duration? startPosition, bool autoPlay = false}) =>
-      _operations.run(() async {
-        await _release();
+  Future<void> createPlayer(PlaybackSource source) => _operations.run(() async {
+        await _stop();
         _ensureReady();
-        _resetState();
         final headers = <String, String>{
           ...source.headers,
           if (source.referer != null) 'Referer': source.referer!,
@@ -173,6 +171,7 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
         _controller.value = controller;
         controller.addListener(_onChanged);
         try {
+          // video_player 在 initialize 中一起创建平台播放器并准备媒体。
           final initialization = controller.initialize();
           if (source is LocalFilePlaybackSource) {
             await initialization.timeout(VideoValidationException.timeout,
@@ -187,12 +186,28 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
           _ensureReady();
           await controller.setVolume(_volume);
           await controller.setPlaybackSpeed(_rate);
+          _canOpen = true;
+        } catch (_) {
+          await _stop();
+          rethrow;
+        }
+      });
+
+  @override
+  Future<void> open({Duration? startPosition, bool autoPlay = false}) =>
+      _operations.run(() async {
+        final controller = _controller.value;
+        if (controller == null || !_canOpen) {
+          throw StateError('VideoPlayerEngine has no prepared media');
+        }
+        _canOpen = false;
+        try {
           if (startPosition != null && startPosition > Duration.zero) {
             await controller.seekTo(startPosition);
           }
           if (autoPlay) await controller.play();
         } catch (_) {
-          await _release();
+          await _stop();
           rethrow;
         }
       });
@@ -203,10 +218,14 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
   Future<void> pause() =>
       _operations.run(() async => _controller.value?.pause());
   @override
-  Future<void> stop() => _operations.run(() async {
-        await _release();
-        _resetState();
-      });
+  Future<void> stop() => _operations.run(_stop);
+
+  Future<void> _stop() async {
+    if (_controller.value == null) return;
+    await _release();
+    _resetState();
+  }
+
   @override
   Future<void> seek(Duration position) => _operations.run(() async {
         _completed = false;
@@ -310,6 +329,9 @@ class VideoPlayerEngine implements PlayerEngine, PlayerVideoSurface {
     final controller = _controller.value;
     if (controller == null) return;
     controller.removeListener(_onChanged);
+    _canOpen = false;
+    _pendingSurfaceController = null;
+    _pendingOutputSize = null;
     _controller.value = null;
     await controller.dispose();
   }

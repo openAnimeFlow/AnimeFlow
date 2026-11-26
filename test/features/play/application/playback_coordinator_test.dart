@@ -13,6 +13,26 @@ import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('opening media does not create another player', () async {
+    final operations = <String>[];
+    final factory = _FakeEngineFactory(configure: (engine) {
+      engine.beforeOperation = (operation) async => operations.add(operation);
+    });
+    final coordinator = PlaybackCoordinator(
+      engineFactory: factory.create,
+      adBlocker: false,
+      hardwareDecoder: true,
+    );
+    await coordinator.initialize();
+    addTearDown(coordinator.dispose);
+    operations.clear();
+
+    await coordinator.createPlayer(_snapshot().source!);
+    expect(operations, ['createPlayer']);
+    await coordinator.open();
+    expect(operations, ['createPlayer', 'open']);
+  });
+
   test('configures upscaling before opening the replacement engine', () async {
     final operations = <String>[];
     final factory = _FakeEngineFactory(configure: (engine) {
@@ -32,7 +52,7 @@ void main() {
         await coordinator.switchKernel(PlayerKernel.fvp, _snapshot(),
             upscalePreset: UpscalePreset.efficiency),
         isTrue);
-    expect(operations.indexOf('upscale'), lessThan(operations.indexOf('open')));
+    expect(operations, containsAllInOrder(['upscale', 'createPlayer', 'open']));
     expect(factory.created.last.upscalePreset, UpscalePreset.efficiency);
     await expectLater(coordinator.setUpscalePreset(UpscalePreset.quality),
         throwsUnsupportedError);
@@ -341,7 +361,7 @@ void main() {
     });
   }
 
-  for (final stage in ['initialize', 'open', 'dispose']) {
+  for (final stage in ['initialize', 'createPlayer', 'open', 'dispose']) {
     test('disposal during switch $stage releases both engines without resuming',
         () async {
       final started = Completer<void>();
@@ -405,11 +425,13 @@ void main() {
     await started.future;
     final source =
         PlaybackSource.network(uri: Uri.parse('https://example.com/next'));
-    final opening = coordinator.open(source);
+    final creating = coordinator.createPlayer(source);
+    final opening = coordinator.open();
     final playing = coordinator.play();
     expect(factory.created.first.openedSource, isNull);
     gate.complete();
     expect(await switching, isTrue);
+    await creating;
     await opening;
     await playing;
     expect(factory.created.last.openedSource, same(source));
@@ -571,6 +593,7 @@ class _FakePlayerEngine implements PlayerEngine {
   bool emitPlayingChanges = false;
   Duration? openedPosition;
   PlaybackSource? openedSource;
+  PlaybackSource? _pendingSource;
   Future<void> Function(String operation)? beforeOperation;
   double? volume;
   double? rate;
@@ -590,14 +613,17 @@ class _FakePlayerEngine implements PlayerEngine {
   }
 
   @override
-  Future<void> open(
-    PlaybackSource source, {
-    Duration? startPosition,
-    bool autoPlay = false,
-  }) async {
+  Future<void> createPlayer(PlaybackSource source) async {
+    await beforeOperation?.call('createPlayer');
+    _pendingSource = source;
+  }
+
+  @override
+  Future<void> open({Duration? startPosition, bool autoPlay = false}) async {
     await beforeOperation?.call('open');
     if (shouldFail) throw StateError('open failed');
-    openedSource = source;
+    openedSource = _pendingSource!;
+    _pendingSource = null;
     openedPosition = startPosition;
   }
 

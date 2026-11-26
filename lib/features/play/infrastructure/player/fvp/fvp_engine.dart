@@ -33,9 +33,9 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
   // 这是可缓存区间的数量，不是秒数；MDK 按 LRU 淘汰旧区间。
   static const int _demuxCacheRanges = 8;
 
-  late fvp.Player _player;
+  fvp.Player? _player;
+  PlaybackSource? _pendingSource;
   final ValueNotifier<int?> _textureId = ValueNotifier<int?>(null);
-  bool _opened = false;
   double _volume = 1;
   double _rate = 1;
   final StreamController<PlayerEvent> _events =
@@ -64,8 +64,8 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
 
   @override
   Future<void> initialize() async {
+    if (_disposed) throw StateError('FvpEngine is disposed');
     if (_initialized) return;
-    _createPlayer();
     _pollTimer = Timer.periodic(
       const Duration(milliseconds: 250),
       (_) => _emitCurrentMetrics(),
@@ -74,23 +74,24 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
   }
 
   void _createPlayer() {
-    _player = fvp.Player();
-    _player.setProperty('demux.buffer.ranges', '$_demuxCacheRanges');
+    final player = _FvpPlayer();
+    _player = player;
+    player.setProperty('demux.buffer.ranges', '$_demuxCacheRanges');
     // Follow FVP 0.38.1's platform priorities with software fallback.
-    _player.videoDecoders = [
+    player.videoDecoders = [
       if (hardwareDecoder) ..._preferredDecoders(),
       'FFmpeg',
       'dav1d',
     ];
-    _player.volume = _volume;
-    _player.playbackRate = _rate;
-    _player.textureId.addListener(_updateTextureId);
-    _player.setBufferRange(
+    player.volume = _volume;
+    player.playbackRate = _rate;
+    player.textureId.addListener(_updateTextureId);
+    player.setBufferRange(
       min: _bufferRangeMinMilliseconds,
       max: _bufferRangeMaxMilliseconds,
     );
     _subscriptions.addAll([
-      _player.onStateChanged.listen((change) {
+      player.onStateChanged.listen((change) {
         _emitPlayingState();
         // MediaStatus.end only means EOF was read; buffered frames may still
         // be playing. Complete only after native playback has actually stopped.
@@ -99,17 +100,17 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
             _hasMedia &&
             !_completionEmitted &&
             change.newValue == fvp.PlaybackState.stopped &&
-            _player.waitFor(fvp.PlaybackState.stopped, timeout: 0) &&
-            _player.mediaStatus.test(fvp.MediaStatus.end)) {
+            player.waitFor(fvp.PlaybackState.stopped, timeout: 0) &&
+            player.mediaStatus.test(fvp.MediaStatus.end)) {
           _completionEmitted = true;
           _emit(const PlayerCompleted());
         }
       }),
-      _player.onMediaStatus.listen((_) {
+      player.onMediaStatus.listen((_) {
         if (!_acceptMediaStatus) return;
         _emitBufferingState();
       }),
-      _player.onEvent.listen((event) {
+      player.onEvent.listen((event) {
         // 部分 MDK 事件复用 error 字段传递状态值，而不是错误码：
         // reader.buffering 是缓冲进度，thread.* 是线程状态，
         // render.video 是渲染时间戳。
@@ -139,7 +140,7 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
     ]);
   }
 
-  void _updateTextureId() => _textureId.value = _player.textureId.value;
+  void _updateTextureId() => _textureId.value = _player?.textureId.value;
 
   List<String> _preferredDecoders() {
     if (Platform.isLinux) {
@@ -162,14 +163,21 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
   }
 
   Future<void> _releasePlayer() async {
-    _player.textureId.removeListener(_updateTextureId);
+    final player = _player;
+    if (player == null) return;
+    _player = null;
+    _pendingSource = null;
+    _hasMedia = false;
+    _acceptMediaStatus = false;
+    _videoSize = null;
+    player.textureId.removeListener(_updateTextureId);
     _textureId.value = null;
     for (final subscription in _subscriptions) {
       await subscription.cancel();
     }
     _subscriptions.clear();
-    // FVP exposes disposal as async void; detach listeners before releasing it.
-    _player.dispose();
+    // FVP 声明为 async void，Future.sync 等待实际返回的异步销毁结果。
+    await Future<void>.sync(player.dispose);
   }
 
   @override
@@ -205,52 +213,55 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
   }
 
   @override
-  Future<void> open(
-    PlaybackSource source, {
-    Duration? startPosition,
-    bool autoPlay = false,
-  }) =>
-      _operations.run(() =>
-          _open(source, startPosition: startPosition, autoPlay: autoPlay));
+  Future<void> createPlayer(PlaybackSource source) => _operations.run(() async {
+        await _stop();
+        _ensureReady();
+        try {
+          _createPlayer();
+          _pendingSource = source;
+        } catch (_) {
+          await _releasePlayer();
+          rethrow;
+        }
+      });
 
-  Future<void> _open(
-    PlaybackSource source, {
-    Duration? startPosition,
-    required bool autoPlay,
-  }) async {
-    await _stop();
+  @override
+  Future<void> open({Duration? startPosition, bool autoPlay = false}) =>
+      _operations
+          .run(() => _open(startPosition: startPosition, autoPlay: autoPlay));
+
+  Future<void> _open({Duration? startPosition, required bool autoPlay}) async {
+    final player = _player;
+    final source = _pendingSource;
+    if (player == null || source == null) {
+      throw StateError('FvpEngine has no prepared media');
+    }
+    _pendingSource = null;
     _completionEmitted = false;
-    if (_opened) {
-      await _releasePlayer();
-      _createPlayer();
-    }
-    _opened = true;
-    _ensureReady();
-    _videoSize = null;
-    final headers = <String, String>{
-      ...source.headers,
-      if (source.referer != null) 'Referer': source.referer!,
-    };
-    if (headers.isNotEmpty) {
-      _player.setProperty(
-        'avio.headers',
-        headers.entries
-            .map((entry) => '${entry.key}: ${entry.value}\r\n')
-            .join(),
-      );
-    }
-    if (source.userAgent != null) {
-      _player.setProperty('avio.user_agent', source.userAgent!);
-    }
-    _acceptMediaStatus = true;
     try {
-      _player.media = switch (source) {
+      final headers = <String, String>{
+        ...source.headers,
+        if (source.referer != null) 'Referer': source.referer!,
+      };
+      if (headers.isNotEmpty) {
+        player.setProperty(
+          'avio.headers',
+          headers.entries
+              .map((entry) => '${entry.key}: ${entry.value}\r\n')
+              .join(),
+        );
+      }
+      if (source.userAgent != null) {
+        player.setProperty('avio.user_agent', source.userAgent!);
+      }
+      _acceptMediaStatus = true;
+      player.media = switch (source) {
         LocalFilePlaybackSource(:final path) => path,
         NetworkPlaybackSource(:final uri) => uri.toString(),
       };
       final requestedPosition = startPosition?.inMilliseconds ?? 0;
       final isLocalVideo = source is LocalFilePlaybackSource;
-      final preparation = _player.prepare(
+      final preparation = player.prepare(
         // MDK prepare(0) 只保证元数据就绪；正数位置会等待首帧解码结果。
         // 本地视频从 1ms 预加载，避免把仅能解封装误判为可解码。
         position:
@@ -266,7 +277,7 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
       if (result < 0) {
         throw StateError('FVP prepare failed: $result');
       }
-      final video = _player.mediaInfo.video?.firstOrNull;
+      final video = player.mediaInfo.video?.firstOrNull;
       if (isLocalVideo &&
           (video == null ||
               video.codec.width <= 0 ||
@@ -280,53 +291,57 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
         );
       }
       // Set geometry before updateTexture notifies the video surface.
-      final texture = await _player.updateTexture();
+      final texture = await player.updateTexture();
       _ensureReady();
       if (texture < 0) {
         throw StateError('FVP video texture creation failed: $texture');
       }
       _hasMedia = true;
       _emitCurrentMetrics();
-      if (autoPlay) _player.state = fvp.PlaybackState.playing;
+      if (autoPlay) player.state = fvp.PlaybackState.playing;
     } catch (_) {
-      _acceptMediaStatus = false;
-      _hasMedia = false;
-      _player.state = fvp.PlaybackState.stopped;
-      _emit(const PlayerBufferingChanged(false));
+      await _releasePlayer();
+      _resetPlaybackState();
       rethrow;
     }
   }
 
   @override
   Future<void> play() => _operations.run(() async {
-        _player.state = fvp.PlaybackState.playing;
+        _player?.state = fvp.PlaybackState.playing;
       });
 
   @override
   Future<void> pause() => _operations.run(() async {
-        _player.state = fvp.PlaybackState.paused;
+        _player?.state = fvp.PlaybackState.paused;
       });
 
   @override
   Future<void> stop() => _operations.run(_stop);
 
   Future<void> _stop() async {
-    _ensureReady();
+    final player = _player;
+    if (player == null) return;
     _hasMedia = false;
     _acceptMediaStatus = false;
-    _player.state = fvp.PlaybackState.stopped;
+    player.state = fvp.PlaybackState.stopped;
     // MDK state requests are asynchronous and are not queued. Do not prepare
     // another episode until the previous media has actually stopped. Poll
     // without blocking the isolate so native callbacks can still be handled.
     final deadline = DateTime.now().add(const Duration(seconds: 10));
-    while (!_player.waitFor(fvp.PlaybackState.stopped, timeout: 0)) {
+    while (!player.waitFor(fvp.PlaybackState.stopped, timeout: 0)) {
       if (DateTime.now().isAfter(deadline)) {
         throw StateError('FVP timed out waiting for playback to stop');
       }
       await Future<void>.delayed(const Duration(milliseconds: 10));
       _ensureReady();
     }
-    _emitPlayingState();
+    await _releasePlayer();
+    _resetPlaybackState();
+  }
+
+  void _resetPlaybackState() {
+    _emit(const PlayerPlayingChanged(false));
     // The shared state infers buffering from position and buffered position.
     // Clear both before clearing buffering, otherwise the previous episode's
     // metrics can keep the loading indicator alive during source resolution.
@@ -339,7 +354,9 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
   /// 精确跳转到指定位置，并优先复用已有缓冲。
   @override
   Future<void> seek(Duration position) => _operations.run(() async {
-        final result = await _player.seek(
+        final player = _player;
+        if (player == null) return;
+        final result = await player.seek(
           position: position.inMilliseconds,
           flags: const fvp.SeekFlag(
             fvp.SeekFlag.fromStart | fvp.SeekFlag.inCache,
@@ -352,26 +369,22 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
       });
 
   @override
-  Future<void> setVolume(double volume) async {
-    _ensureReady();
-    _volume = (volume / 100).clamp(0.0, 1.0);
-    _player.volume = _volume;
-    _emit(PlayerVolumeChanged(volume.clamp(0.0, 100.0)));
-  }
+  Future<void> setVolume(double volume) => _operations.run(() async {
+        _volume = (volume / 100).clamp(0.0, 1.0);
+        _player?.volume = _volume;
+        _emit(PlayerVolumeChanged(volume.clamp(0.0, 100.0)));
+      });
 
   @override
-  Future<void> setRate(double rate) async {
-    _ensureReady();
-    _rate = rate;
-    _player.playbackRate = _rate;
-    _emit(PlayerRateChanged(rate));
-  }
+  Future<void> setRate(double rate) => _operations.run(() async {
+        _rate = rate;
+        _player?.playbackRate = _rate;
+        _emit(PlayerRateChanged(rate));
+      });
 
   @override
-  Future<Uint8List?> screenshot() async {
-    _ensureReady();
-    return _player.snapshot();
-  }
+  Future<Uint8List?> screenshot() =>
+      _operations.run(() async => _player?.snapshot());
 
   @override
   Future<void> setUpscalePreset(UpscalePreset preset) async {
@@ -391,32 +404,34 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
     _pollTimer?.cancel();
     // A pending platform texture operation must finish before native disposal.
     await _operations.drained;
-    if (_initialized) await _releasePlayer();
+    await _releasePlayer();
     _textureId.dispose();
     await _events.close();
   }
 
   void _emitCurrentMetrics() {
-    if (!_hasMedia || _disposed) return;
+    final player = _player;
+    if (player == null || !_hasMedia || _disposed) return;
     _emitPlayingState();
-    final position = _player.position;
+    final position = player.position;
     _emit(PlayerPositionChanged(Duration(milliseconds: position)));
 
     // 同时考虑待解码队列和可回退缓存，报告当前位置之后连续可用的末端。
     _emitBufferedPosition(position: position);
     _emitBufferingState();
 
-    final duration = _player.mediaInfo.duration;
+    final duration = player.mediaInfo.duration;
     if (duration > 0) {
       _emit(PlayerDurationChanged(Duration(milliseconds: duration)));
     }
   }
 
   void _emitBufferingState() {
-    if (!_acceptMediaStatus || _disposed) return;
+    final player = _player;
+    if (player == null || !_acceptMediaStatus || _disposed) return;
     // Native mediaStatus is authoritative; queued callbacks may still describe
     // the previous source or a buffering phase that has already finished.
-    final status = _player.mediaStatus;
+    final status = player.mediaStatus;
     final buffering =
         status.test(fvp.MediaStatus.buffering | fvp.MediaStatus.stalled) &&
             !status.test(fvp.MediaStatus.buffered |
@@ -427,20 +442,22 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
   }
 
   void _emitPlayingState() {
-    if (_disposed) return;
+    final player = _player;
+    if (player == null || _disposed) return;
     // Player.state is a Dart cache updated by both commands and delayed native
     // callbacks. A zero-timeout waitFor reads the native state, so a late event
     // from the previous episode cannot overwrite the current playback state.
     _emit(PlayerPlayingChanged(
-      _player.waitFor(fvp.PlaybackState.playing, timeout: 0),
+      player.waitFor(fvp.PlaybackState.playing, timeout: 0),
     ));
   }
 
   void _emitBufferedPosition({int? position}) {
-    if (!_hasMedia || _disposed) return;
-    final currentPosition = position ?? _player.position;
-    final bufferLength = _player.buffered();
-    final ranges = _player.bufferedTimeRanges()
+    final player = _player;
+    if (player == null || !_hasMedia || _disposed) return;
+    final currentPosition = position ?? player.position;
+    final bufferLength = player.buffered();
+    final ranges = player.bufferedTimeRanges()
       ..sort((a, b) => a.start.compareTo(b.start));
     if (bufferLength < 0 && ranges.isEmpty) return;
 
@@ -464,5 +481,16 @@ class FvpEngine implements PlayerEngine, PlayerVideoSurface {
 
   void _emit(PlayerEvent event) {
     if (!_disposed && !_events.isClosed) _events.add(event);
+  }
+}
+
+class _FvpPlayer extends fvp.Player {
+  @override
+  Future<int> updateTexture(
+      {int? width, int? height, bool? tunnel, bool? fit}) {
+    // 销毁时若尚未创建纹理，无需等待首帧尺寸。打开失败时尺寸可能一直未就绪。
+    if (width == -1 && (textureId.value ?? -1) < 0) return Future.value(-1);
+    return super
+        .updateTexture(width: width, height: height, tunnel: tunnel, fit: fit);
   }
 }

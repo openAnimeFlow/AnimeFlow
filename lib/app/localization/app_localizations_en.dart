@@ -9,13 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get glassNavigationStyle => 'Glass navigation style';
-
-  @override
-  String get glassNavigationStyleDescription =>
-      'Change the app bar style on the rankings and wallpaper details pages.';
-
-  @override
   String get defaultCollectionCategory => 'Default collection category';
 
   @override

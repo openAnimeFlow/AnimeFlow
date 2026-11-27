@@ -19,7 +19,6 @@ class PageSettingsPage extends ConsumerStatefulWidget {
 class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
   late StartupPage _startupPage;
   late CollectType _collectionType;
-  late bool _glassNavigationStyle;
   bool _saving = false;
 
   @override
@@ -27,23 +26,6 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
     super.initState();
     _startupPage = AppSettings.startupPage;
     _collectionType = AppSettings.defaultCollectionType;
-    _glassNavigationStyle = AppSettings.glassNavigationStyle;
-  }
-
-  Future<void> _setGlassNavigationStyle(bool value) async {
-    if (_saving) return;
-    setState(() => _saving = true);
-    try {
-      await AppSettings.setGlassNavigationStyle(value);
-      if (mounted) setState(() => _glassNavigationStyle = value);
-    } catch (_) {
-      if (mounted) {
-        final l10n = AppLocalizations.of(context);
-        NotificationToast.show(l10n.saveFailed, title: l10n.error);
-      }
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
   }
 
   Future<void> _selectCollection(CollectType type) async {
@@ -170,12 +152,6 @@ class _PageSettingsPageState extends ConsumerState<PageSettingsPage> {
                       .add(EdgeInsets.only(
                           top: SettingsPageBuilder.topInsetOf(context))),
                   children: [
-                    SwitchListTile(
-                      title: Text(l10n.glassNavigationStyle),
-                      subtitle: Text(l10n.glassNavigationStyleDescription),
-                      value: _glassNavigationStyle,
-                      onChanged: _saving ? null : _setGlassNavigationStyle,
-                    ),
                     ListTile(
                       title: Text(l10n.startupPage),
                       subtitle: Text(l10n.startupPageDescription),

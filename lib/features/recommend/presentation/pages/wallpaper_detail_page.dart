@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/recommend/application/wallpaper_recommendations.dart';
 import 'package:anime_flow/features/recommend/application/wallpaper_favorites.dart';
 import 'package:anime_flow/features/auth/auth_api.dart';
@@ -13,8 +12,8 @@ import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/models/flow/subject_wallpaper.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/adaptive_app_bar.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
+import 'package:anime_flow/shared/widgets/top_gradient_mask.dart';
 import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +35,6 @@ class WallpaperDetailPage extends ConsumerStatefulWidget {
 
 class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
   final _sizes = <String, Size>{};
   final _thumbnails = ScrollController();
   double _thumbnailItemExtent = 104;
@@ -253,40 +251,40 @@ class _WallpaperDetailPageState extends ConsumerState<WallpaperDetailPage>
       ));
 
   @override
-  Widget build(BuildContext context) => StreamBuilder<bool>(
-        stream: _glassNavigationStyle,
-        initialData: AppSettings.glassNavigationStyle,
-        builder: (context, snapshot) =>
-            _buildPage(context, snapshot.data ?? false),
-      );
-
-  Widget _buildPage(BuildContext context, bool glassStyle) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
+    final appBar = AppBar(
+      leading: widget.onClose == null
+          ? null
+          : CloseButton(onPressed: widget.onClose),
+      title: Text(
+        _images.isEmpty
+            ? l10n.wallpapers
+            : (_subject.nameCn.isEmpty ? _subject.name : _subject.nameCn),
+      ),
+      toolbarHeight: kToolbarHeight,
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      forceMaterialTransparency: true,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      flexibleSpace: const IgnorePointer(
+        child: SizedBox.expand(child: TopGradientMask()),
+      ),
+    );
     if (_images.isEmpty) {
       return Scaffold(
-          appBar: AdaptiveAppBar(
-              glassStyle: glassStyle,
-              leading: widget.onClose == null
-                  ? null
-                  : CloseButton(onPressed: widget.onClose),
-              title: Text(l10n.wallpapers)),
-          body: Center(child: Text(l10n.noData)));
+        appBar: appBar,
+        body: Center(child: Text(l10n.noData)),
+      );
     }
     return Scaffold(
-      extendBodyBehindAppBar: glassStyle,
-      appBar: AdaptiveAppBar(
-        glassStyle: glassStyle,
-        leading: widget.onClose == null
-            ? null
-            : CloseButton(onPressed: widget.onClose),
-        title: Text(_subject.nameCn.isEmpty ? _subject.name : _subject.nameCn),
-      ),
+      extendBodyBehindAppBar: true,
+      appBar: appBar,
       body: SingleChildScrollView(
         padding: EdgeInsets.only(
-          top: glassStyle
-              ? MediaQuery.paddingOf(context).top + kToolbarHeight
-              : 0,
+          top: MediaQuery.paddingOf(context).top + kToolbarHeight,
         ),
         child: Center(
           child: ConstrainedBox(

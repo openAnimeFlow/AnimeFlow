@@ -103,18 +103,6 @@ abstract class AppLocalizations {
         languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant')
   ];
 
-  /// No description provided for @glassNavigationStyle.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'磨砂玻璃导航风格'**
-  String get glassNavigationStyle;
-
-  /// No description provided for @glassNavigationStyleDescription.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'调整排行榜和壁纸详情页的顶部栏样式。'**
-  String get glassNavigationStyleDescription;
-
   /// No description provided for @defaultCollectionCategory.
   ///
   /// In zh_Hans, this message translates to:

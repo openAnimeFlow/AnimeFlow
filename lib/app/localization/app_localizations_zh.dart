@@ -9,12 +9,6 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get glassNavigationStyle => '磨砂玻璃导航风格';
-
-  @override
-  String get glassNavigationStyleDescription => '调整排行榜和壁纸详情页的顶部栏样式。';
-
-  @override
   String get defaultCollectionCategory => '默认收藏分类';
 
   @override
@@ -2705,12 +2699,6 @@ class AppLocalizationsZh extends AppLocalizations {
 /// The translations for Chinese, using the Han script (`zh_Hans`).
 class AppLocalizationsZhHans extends AppLocalizationsZh {
   AppLocalizationsZhHans() : super('zh_Hans');
-
-  @override
-  String get glassNavigationStyle => '磨砂玻璃导航风格';
-
-  @override
-  String get glassNavigationStyleDescription => '调整排行榜和壁纸详情页的顶部栏样式。';
 
   @override
   String get defaultCollectionCategory => '默认收藏分类';
@@ -5404,12 +5392,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   AppLocalizationsZhHantHk() : super('zh_Hant_HK');
 
   @override
-  String get glassNavigationStyle => '毛玻璃導覽風格';
-
-  @override
-  String get glassNavigationStyleDescription => '調整排行榜與桌布詳情頁的頂部列樣式。';
-
-  @override
   String get defaultCollectionCategory => '預設收藏分類';
 
   @override
@@ -8100,12 +8082,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
 class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   AppLocalizationsZhHantTw() : super('zh_Hant_TW');
-
-  @override
-  String get glassNavigationStyle => '毛玻璃導覽風格';
-
-  @override
-  String get glassNavigationStyleDescription => '調整排行榜與桌布詳情頁的頂部列樣式。';
 
   @override
   String get defaultCollectionCategory => '預設收藏分類';

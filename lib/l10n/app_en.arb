@@ -1,6 +1,4 @@
 {
-  "glassNavigationStyle": "Glass navigation style",
-  "glassNavigationStyleDescription": "Change the app bar style on the rankings and wallpaper details pages.",
   "defaultCollectionCategory": "Default collection category",
   "defaultCollectionCategoryDescription": "Choose the category shown on your collection page.",
   "pageSettings": "Page settings",

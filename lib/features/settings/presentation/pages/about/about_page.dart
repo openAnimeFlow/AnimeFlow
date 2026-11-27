@@ -117,11 +117,14 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 1500),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Consumer(
                                 builder: (context, ref, _) {
                                   final appInfo = ref.watch(appInfoProvider);
-                                  return Center(
+                                  return Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        16, 12, 16, 16),
                                     child: Column(
                                       children: [
                                         CircleAvatar(
@@ -133,6 +136,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                         ),
                                         Text(
                                           appInfo.appName,
+                                          textAlign: TextAlign.center,
                                           style: const TextStyle(
                                             fontSize: 24,
                                             fontWeight: FontWeight.bold,
@@ -141,6 +145,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                         const SizedBox(height: 8),
                                         Text(
                                           l10n.version(appInfo.version),
+                                          textAlign: TextAlign.center,
                                           style: TextStyle(
                                             color: Theme.of(context)
                                                 .colorScheme
@@ -152,12 +157,13 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                   );
                                 },
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(16),
+                              Card(
+                                elevation: 0,
+                                margin:
+                                    const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                                clipBehavior: Clip.antiAlias,
                                 child: Column(
                                   children: [
-                                    const SizedBox(height: 16),
-                                    const Divider(),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 15),
@@ -178,7 +184,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                             ),
                                           ]),
                                     ),
-                                    const Divider(),
+                                    const Divider(height: 1),
                                     Consumer(
                                       builder: (context, ref, _) {
                                         return ListTile(
@@ -205,7 +211,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                         );
                                       },
                                     ),
-                                    const Divider(),
+                                    const Divider(height: 1),
                                     ListTile(
                                       title: Text(l10n.projectUpdates),
                                       trailing:
@@ -215,7 +221,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                               destination:
                                                   SettingsDestination.updates),
                                     ),
-                                    const Divider(),
+                                    const Divider(height: 1),
                                     ListTile(
                                       title: Text(l10n.projectWebsite),
                                       trailing:
@@ -225,7 +231,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                               destination:
                                                   SettingsDestination.website),
                                     ),
-                                    const Divider(),
+                                    const Divider(height: 1),
                                     ListTile(
                                       title: Text(l10n.openSource),
                                       trailing: const Icon(Icons.open_in_new),
@@ -241,7 +247,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                         }
                                       },
                                     ),
-                                    const Divider(),
+                                    const Divider(height: 1),
                                     ListTile(
                                       title: Text(l10n.thanks),
                                       trailing: const Icon(Icons.chevron_right),
@@ -252,7 +258,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                                     SettingsDestination.thanks);
                                       },
                                     ),
-                                    const Divider(),
+                                    const Divider(height: 1),
                                     ListTile(
                                       title: const Text('关于作者'),
                                       trailing: const Icon(Icons.chevron_right),
@@ -261,7 +267,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                               destination:
                                                   SettingsDestination.author),
                                     ),
-                                    const Divider(),
+                                    const Divider(height: 1),
                                     ListTile(
                                       title: Text(l10n.sponsor),
                                       trailing: const Icon(
@@ -274,7 +280,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                                     .sponsor);
                                       },
                                     ),
-                                    const Divider(),
+                                    const Divider(height: 1),
                                     ListTile(
                                       title: Text(l10n.privacyPolicy),
                                       trailing: const Icon(Icons.chevron_right),
@@ -285,7 +291,6 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                                                     .agreement);
                                       },
                                     ),
-                                    const Divider(),
                                   ],
                                 ),
                               )

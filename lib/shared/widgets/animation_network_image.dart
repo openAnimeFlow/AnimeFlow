@@ -78,7 +78,8 @@ class _AnimationNetworkImageState extends State<AnimationNetworkImage> {
     }
   }
 
-  int? _physicalPixels(double logicalSize, double pixelRatio) {
+  int? _physicalPixels(double? logicalSize, double pixelRatio) {
+    if (logicalSize == null) return null;
     final pixels = logicalSize * pixelRatio;
     return pixels.isFinite && pixels > 0 ? pixels.clamp(1, 4096).ceil() : null;
   }
@@ -95,19 +96,15 @@ class _AnimationNetworkImageState extends State<AnimationNetworkImage> {
         View.of(context).devicePixelRatio;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = _physicalPixels(
-          constraints.constrainWidth(widget.width ?? constraints.maxWidth),
-          pixelRatio,
-        );
-        // 水平滚动列表没有宽度上限，按固定高度等比解码。
-        final height = width == null &&
-                (widget.height != null || constraints.hasTightHeight)
-            ? _physicalPixels(
-                constraints
-                    .constrainHeight(widget.height ?? constraints.maxHeight),
-                pixelRatio,
-              )
-            : null;
+        var width = _physicalPixels(widget.width, pixelRatio);
+        var height =
+            width == null ? _physicalPixels(widget.height, pixelRatio) : null;
+        if (width == null && height == null) {
+          width = _physicalPixels(constraints.maxWidth, pixelRatio);
+          if (width == null && constraints.hasTightHeight) {
+            height = _physicalPixels(constraints.maxHeight, pixelRatio);
+          }
+        }
         _updateDecodeSize(
           width == null && height == null
               ? null

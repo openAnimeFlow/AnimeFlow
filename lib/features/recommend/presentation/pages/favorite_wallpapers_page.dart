@@ -37,7 +37,11 @@ class _FavoriteWallpapersPageState
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadIfLoggedIn());
+    ref.listenManual(isLoggedInProvider, (previous, next) {
+      if (previous?.asData?.value != true && next.asData?.value == true) {
+        unawaited(_loadIfLoggedIn());
+      }
+    }, fireImmediately: true);
   }
 
   Future<void> _loadIfLoggedIn() async {
@@ -114,11 +118,6 @@ class _FavoriteWallpapersPageState
     final login = ref.watch(isLoggedInProvider);
     final list = ref.watch(favoriteWallpaperListProvider);
     final changes = ref.watch(wallpaperFavoritesProvider);
-    ref.listen(isLoggedInProvider, (previous, next) {
-      if (previous?.asData?.value != true && next.asData?.value == true) {
-        unawaited(_loadIfLoggedIn());
-      }
-    });
     return Scaffold(
       appBar: AppBar(title: Text(l10n.favoriteWallpapers)),
       body: login.isLoading

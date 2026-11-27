@@ -371,7 +371,8 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
     if (oldWidget.availableWidth != widget.availableWidth) {
       _cachedSliver = null;
     }
-    if (oldWidget.skeletonCount != widget.skeletonCount) {
+    if ((oldWidget.availableWidth < 600) != (widget.availableWidth < 600) ||
+        oldWidget.skeletonCount != widget.skeletonCount) {
       _posterDelegate = null;
       _cachedSliver = null;
     }
@@ -459,11 +460,11 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
         reverseCrossAxis: Directionality.of(context) == TextDirection.rtl,
       )),
       // 宽度/图片比例变化仅更新布局，复用 builder，避免重建图片子树。
-      delegate: _posterDelegate ??= _buildPosterDelegate(),
+      delegate: _posterDelegate ??= _buildPosterDelegate(targetHeight),
     );
   }
 
-  SliverChildBuilderDelegate _buildPosterDelegate() {
+  SliverChildBuilderDelegate _buildPosterDelegate(double targetHeight) {
     final items = widget.items;
     final indices = {
       for (var i = 0; i < items.length; i++) items[i].subject.subjectId: i,
@@ -481,6 +482,7 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
           padding: const EdgeInsets.only(bottom: 12),
           child: _PosterCard(
             poster: poster,
+            targetHeight: targetHeight,
             onOpen: (args) {
               final open = widget.onOpen;
               if (open != null) {
@@ -501,10 +503,15 @@ class _WallpaperFlowState extends State<WallpaperFlow> {
 }
 
 class _PosterCard extends StatelessWidget {
-  const _PosterCard(
-      {required this.poster, required this.onOpen, required this.onImageSize});
+  const _PosterCard({
+    required this.poster,
+    required this.targetHeight,
+    required this.onOpen,
+    required this.onImageSize,
+  });
 
   final WallpaperPoster poster;
+  final double targetHeight;
   final ValueChanged<WallpaperDetailArgs> onOpen;
   final ValueChanged<Size> onImageSize;
 
@@ -523,6 +530,7 @@ class _PosterCard extends StatelessWidget {
           children: [
             AnimationNetworkImage(
               url: poster.url,
+              height: targetHeight,
               gaplessResize: true,
               fadeInDuration: const Duration(milliseconds: 150),
               fadeOutDuration: const Duration(milliseconds: 100),

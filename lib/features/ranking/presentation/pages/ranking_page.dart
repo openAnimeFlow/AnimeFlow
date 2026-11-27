@@ -28,8 +28,6 @@ class _RankingPageState extends State<RankingPage> {
   static const _progressHeight = 4.0;
   final scrollController = ScrollController();
   final _showBackToTop = ValueNotifier(false);
-  final _isPinned = ValueNotifier(false);
-  late final _glassNavigationStyle = AppSettings.watchGlassNavigationStyle();
   bool isDetailsContent = true;
 
   @override
@@ -50,7 +48,6 @@ class _RankingPageState extends State<RankingPage> {
 
   void scrollListener() {
     _showBackToTop.value = scrollController.offset >= 300;
-    _isPinned.value = scrollController.offset >= _filterHeight;
   }
 
   void scrollToTop() {
@@ -66,7 +63,6 @@ class _RankingPageState extends State<RankingPage> {
     scrollController.removeListener(scrollListener);
     scrollController.dispose();
     _showBackToTop.dispose();
-    _isPinned.dispose();
     super.dispose();
   }
 
@@ -143,39 +139,42 @@ class _RankingPageState extends State<RankingPage> {
                     child: OcclusionAwareCustomScrollView(
                       controller: scrollController,
                       slivers: [
-                        StreamBuilder<bool>(
-                          stream: _glassNavigationStyle,
-                          initialData: AppSettings.glassNavigationStyle,
-                          builder: (context, snapshot) =>
-                              ValueListenableBuilder<bool>(
-                            valueListenable: _isPinned,
-                            builder: (context, isPinned, child) =>
-                                MediaQuery.removePadding(
-                              context: context,
-                              removeLeft: true,
-                              child: _GradientSliverAppBar(
-                                title: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
-                                  child: Text(l10n.rankingTitle),
-                                ),
-                                isPinned: isPinned,
-                                glassStyle: snapshot.data ?? false,
-                                expandedHeight: kToolbarHeight +
-                                    _filterHeight +
-                                    _progressHeight,
-                                flexibleSpace: child!,
-                                bottom: PreferredSize(
-                                  preferredSize:
-                                      const Size.fromHeight(_progressHeight),
-                                  child: isReloading
-                                      ? const LinearProgressIndicator(
-                                          minHeight: _progressHeight)
-                                      : const SizedBox.shrink(),
-                                ),
-                              ),
+                        MediaQuery.removePadding(
+                          context: context,
+                          removeLeft: true,
+                          child: SliverAppBar(
+                            automaticallyImplyLeading: false,
+                            titleSpacing: 0,
+                            title: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(l10n.rankingTitle),
                             ),
-                            child: _buildFilterSpace(context),
+                            toolbarHeight: kToolbarHeight,
+                            pinned: true,
+                            backgroundColor: Colors.transparent,
+                            surfaceTintColor: Colors.transparent,
+                            forceMaterialTransparency: true,
+                            elevation: 0,
+                            scrolledUnderElevation: 0,
+                            expandedHeight: kToolbarHeight +
+                                _filterHeight +
+                                _progressHeight,
+                            bottom: PreferredSize(
+                              preferredSize:
+                                  const Size.fromHeight(_progressHeight),
+                              child: isReloading
+                                  ? const LinearProgressIndicator(
+                                      minHeight: _progressHeight)
+                                  : const SizedBox.shrink(),
+                            ),
+                            flexibleSpace: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                const Positioned.fill(child: TopGradientMask()),
+                                _buildFilterSpace(context),
+                              ],
+                            ),
                           ),
                         ),
                         if (rankingState?.errorMessage case final errorMessage?)
@@ -509,50 +508,6 @@ class _RankingLoadingSkeleton extends StatelessWidget {
             itemBuilder: (context, index) => const RankingListSkeleton(),
           ),
       ],
-    );
-  }
-}
-
-class _GradientSliverAppBar extends StatelessWidget {
-  const _GradientSliverAppBar({
-    required this.title,
-    required this.flexibleSpace,
-    required this.expandedHeight,
-    required this.isPinned,
-    required this.glassStyle,
-    this.bottom,
-  });
-
-  final Widget title;
-  final Widget flexibleSpace;
-  final double expandedHeight;
-  final bool isPinned;
-  final bool glassStyle;
-  final PreferredSizeWidget? bottom;
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverAppBar(
-      automaticallyImplyLeading: false,
-      titleSpacing: 0,
-      title: title,
-      toolbarHeight: kToolbarHeight,
-      pinned: true,
-      backgroundColor: glassStyle ? Colors.transparent : null,
-      surfaceTintColor: glassStyle ? Colors.transparent : null,
-      forceMaterialTransparency: glassStyle,
-      elevation: glassStyle ? 0 : (isPinned ? 4.0 : 0.0),
-      scrolledUnderElevation: glassStyle ? 0 : null,
-      forceElevated: !glassStyle && isPinned,
-      expandedHeight: expandedHeight,
-      bottom: bottom,
-      flexibleSpace: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (glassStyle) const Positioned.fill(child: TopGradientMask()),
-          flexibleSpace,
-        ],
-      ),
     );
   }
 }

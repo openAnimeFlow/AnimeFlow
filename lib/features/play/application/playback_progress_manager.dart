@@ -45,7 +45,6 @@ class PlaybackProgressManager {
   String? subjectName;
   String? subjectCover;
   List<String> alias = [];
-  bool isLocalPlayback = false;
   Duration position = Duration.zero;
   Duration duration = Duration.zero;
 
@@ -56,7 +55,6 @@ class PlaybackProgressManager {
     required String? subjectName,
     required String? subjectCover,
     required List<String> alias,
-    required bool isLocalPlayback,
   }) {
     this.subjectId = subjectId;
     this.episodeId = episodeId;
@@ -64,21 +62,20 @@ class PlaybackProgressManager {
     this.subjectName = subjectName;
     this.subjectCover = subjectCover;
     this.alias = List<String>.from(alias);
-    this.isLocalPlayback = isLocalPlayback;
   }
 
-  void updatePlaybackState({
+  Future<void> updatePlaybackState({
     required Duration position,
     required Duration duration,
     required bool playing,
     required bool isLoggedIn,
-  }) {
+  }) async {
     this.position = position;
     this.duration = duration;
     if (!isLoggedIn) return;
     if (!playing || duration <= Duration.zero) return;
     if (duration < minDurationForAutoWatched) return;
-    if (isLocalPlayback || subjectId <= 0 || episodeId <= 0) return;
+    if (subjectId <= 0 || episodeId <= 0) return;
     if (subjectName == null || subjectCover == null) return;
     if (!autoMarkEnabled()) {
       return;
@@ -91,8 +88,22 @@ class PlaybackProgressManager {
       return;
     }
 
-    _autoWatchedEpisodeUpdatesInFlight.add(episodeId);
-    unawaited(_autoUpdateEpisodeWatched(episodeId));
+    final targetSubjectId = subjectId;
+    final targetEpisodeId = episodeId;
+    _autoWatchedEpisodeUpdatesInFlight.add(targetEpisodeId);
+    try {
+      await _markEpisodeWatched(targetEpisodeId);
+      _autoWatchedEpisodeIds.add(targetEpisodeId);
+      onEpisodeWatched(
+        subjectId: targetSubjectId,
+        episodeId: targetEpisodeId,
+        watched: true,
+      );
+    } catch (e) {
+      logError('自动更新观看进度失败: $e');
+    } finally {
+      _autoWatchedEpisodeUpdatesInFlight.remove(targetEpisodeId);
+    }
   }
 
   /// 合并暂停和开始播放产生的连续保存事件。
@@ -167,21 +178,5 @@ class PlaybackProgressManager {
     final position = _pendingSeekPosition;
     _pendingSeekPosition = null;
     return position;
-  }
-
-  Future<void> _autoUpdateEpisodeWatched(int targetEpisodeId) async {
-    try {
-      await _markEpisodeWatched(targetEpisodeId);
-      _autoWatchedEpisodeIds.add(targetEpisodeId);
-      onEpisodeWatched(
-        subjectId: subjectId,
-        episodeId: targetEpisodeId,
-        watched: true,
-      );
-    } catch (e) {
-      logError('自动更新观看进度失败: $e');
-    } finally {
-      _autoWatchedEpisodeUpdatesInFlight.remove(targetEpisodeId);
-    }
   }
 }

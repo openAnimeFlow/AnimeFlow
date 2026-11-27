@@ -5,6 +5,8 @@ import 'package:anime_flow/features/play/infrastructure/danmaku/flow_danmaku_rep
 import 'package:anime_flow/features/play/domain/player/upscale_preset.dart';
 import 'package:anime_flow/features/play/domain/player/player_capabilities.dart';
 import 'package:anime_flow/features/play/domain/play_request.dart';
+import 'package:anime_flow/features/play/domain/episodes_data.dart';
+import 'package:anime_flow/features/play/application/offline_playback.dart';
 import 'package:anime_flow/features/play/application/play_session.dart';
 import 'package:anime_flow/features/play/domain/play_state.dart';
 import 'package:anime_flow/features/play/domain/player/video_fit.dart';
@@ -28,6 +30,7 @@ import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/domain/play_session_actions.dart';
 import 'package:anime_flow/features/play/domain/play_history_repository.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
+import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -48,18 +51,18 @@ void main() {
     await session.replacePlayback(() => _request(1));
     final engine = factory.engines.single;
     final progress = session.playbackProgressManager;
-    progress.updatePlaybackState(
+    await progress.updatePlaybackState(
       position: const Duration(seconds: 73),
       duration: const Duration(minutes: 24),
       playing: true,
       isLoggedIn: false,
     );
-    factory.onStop = () => progress.updatePlaybackState(
+    factory.onStop = () => unawaited(progress.updatePlaybackState(
           position: Duration.zero,
           duration: Duration.zero,
           playing: false,
           isLoggedIn: false,
-        );
+        ));
 
     var resolving = false;
     final opening = session.replacePlayback(() async {
@@ -151,6 +154,60 @@ void main() {
     expect(factory.engines.last.source, isA<LocalFilePlaybackSource>());
     expect(await session.switchKernel(PlayerKernel.fvp), isTrue);
     expect(factory.engines.last.source, isA<LocalFilePlaybackSource>());
+  });
+
+  test('downloaded episodes and manually selected files can auto-mark',
+      () async {
+    final factory = _Factory();
+    final history = _PendingHistory();
+    final marked = <int>[];
+    final progress = PlaybackProgressManager(
+      history: history,
+      autoMarkEnabled: () => true,
+      markEpisodeWatched: (episodeId) async => marked.add(episodeId),
+      onEpisodeWatched: (
+          {required subjectId, required episodeId, required watched}) {},
+    );
+    final session = _Session(factory, progress: progress);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    final offlinePlayback = OfflinePlayback(
+      PlayHistoryService(history),
+      session.replacePlayback,
+    );
+
+    await offlinePlayback.select(
+      episodes: EpisodesData(
+        episodes: EpisodesItem(data: [], total: 1),
+        episodeId: 1,
+        episodeIndex: 1,
+        episodeSort: 1,
+      ),
+      path: _localPath(1),
+      danmakuPath: null,
+      subjectId: 1,
+      name: 'Anime',
+      cover: '',
+      aliases: const [],
+    );
+    expect(factory.engines.last.source, isA<LocalFilePlaybackSource>());
+    await progress.updatePlaybackState(
+      position: const Duration(minutes: 9),
+      duration: const Duration(minutes: 10),
+      playing: true,
+      isLoggedIn: true,
+    );
+    expect(marked, [1]);
+
+    history.commit.complete();
+    expect(await session.replacePlayback(() => _request(2)), isTrue);
+    await progress.updatePlaybackState(
+      position: const Duration(minutes: 9),
+      duration: const Duration(minutes: 10),
+      playing: true,
+      isLoggedIn: true,
+    );
+    expect(marked, [1, 2]);
   });
 
   test('failed native validation never starts playback', () async {
@@ -610,11 +667,19 @@ String _localPath(int episode) =>
     '${Directory.systemTemp.path}${Platform.pathSeparator}本地 #100% 第 $episode 集.mp4';
 
 class _Session extends PlaySession {
-  _Session(_Factory factory, {_State? state, PlayHistoryRepository? history})
-      : this._(factory, state ?? _State(), history);
+  _Session(
+    _Factory factory, {
+    _State? state,
+    PlayHistoryRepository? history,
+    PlaybackProgressManager? progress,
+  }) : this._(factory, state ?? _State(), history, progress);
 
-  _Session._(_Factory factory, _State state, PlayHistoryRepository? history)
-      : super(
+  _Session._(
+    _Factory factory,
+    _State state,
+    PlayHistoryRepository? history,
+    PlaybackProgressManager? progress,
+  ) : super(
           preferences: StoredPlayPreferences(),
           platform: NativePlaybackPlatform(),
           history: history ?? HivePlayHistoryRepository(),
@@ -645,15 +710,18 @@ class _Session extends PlaySession {
       adBlocker: false,
       hardwareDecoder: true,
     );
-    playbackProgressManager = history == null
-        ? _Progress()
-        : PlaybackProgressManager(
-            history: history,
-            autoMarkEnabled: () => false,
-            markEpisodeWatched: (_) async {},
-            onEpisodeWatched: (
-                {required subjectId, required episodeId, required watched}) {},
-          );
+    playbackProgressManager = progress ??
+        (history == null
+            ? _Progress()
+            : PlaybackProgressManager(
+                history: history,
+                autoMarkEnabled: () => false,
+                markEpisodeWatched: (_) async {},
+                onEpisodeWatched: (
+                    {required subjectId,
+                    required episodeId,
+                    required watched}) {},
+              ));
   }
 }
 

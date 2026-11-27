@@ -36,10 +36,7 @@ PlaybackProgressManager _manager(List<int> marked) {
   );
 }
 
-void _useSubject(
-  PlaybackProgressManager manager, {
-  bool isLocalPlayback = false,
-}) {
+void _useSubject(PlaybackProgressManager manager) {
   manager.setPlaybackContext(
     subjectId: 1,
     episodeId: 10,
@@ -47,7 +44,6 @@ void _useSubject(
     subjectName: '葬送的芙莉莲',
     subjectCover: 'https://example.com/cover.jpg',
     alias: const [],
-    isLocalPlayback: isLocalPlayback,
   );
 }
 
@@ -66,13 +62,12 @@ void main() {
       final manager = _manager(marked);
       _useSubject(manager);
 
-      manager.updatePlaybackState(
+      await manager.updatePlaybackState(
         position: const Duration(minutes: 3),
         duration: const Duration(minutes: 3),
         playing: true,
         isLoggedIn: true,
       );
-      await pumpEventQueue();
 
       expect(marked, [10]);
     });
@@ -82,13 +77,12 @@ void main() {
       final manager = _manager(marked);
       _useSubject(manager);
 
-      manager.updatePlaybackState(
+      await manager.updatePlaybackState(
         position: const Duration(seconds: 110),
         duration: const Duration(seconds: 110),
         playing: true,
         isLoggedIn: true,
       );
-      await pumpEventQueue();
 
       expect(marked, isEmpty);
     });
@@ -98,13 +92,12 @@ void main() {
       final manager = _manager(marked);
       _useSubject(manager);
 
-      manager.updatePlaybackState(
+      await manager.updatePlaybackState(
         position: PlaybackProgressManager.minDurationForAutoWatched,
         duration: PlaybackProgressManager.minDurationForAutoWatched,
         playing: true,
         isLoggedIn: true,
       );
-      await pumpEventQueue();
 
       expect(marked, [10]);
     });
@@ -114,13 +107,12 @@ void main() {
       final manager = _manager(marked);
       _useSubject(manager);
 
-      manager.updatePlaybackState(
+      await manager.updatePlaybackState(
         position: const Duration(minutes: 2),
         duration: const Duration(minutes: 5),
         playing: true,
         isLoggedIn: true,
       );
-      await pumpEventQueue();
 
       expect(marked, isEmpty);
     });
@@ -131,13 +123,12 @@ void main() {
       _useSubject(manager);
 
       for (var i = 0; i < 3; i++) {
-        manager.updatePlaybackState(
+        await manager.updatePlaybackState(
           position: const Duration(minutes: 4),
           duration: const Duration(minutes: 4),
           playing: true,
           isLoggedIn: true,
         );
-        await pumpEventQueue();
       }
 
       expect(marked, [10]);
@@ -148,35 +139,18 @@ void main() {
       final manager = _manager(marked);
       _useSubject(manager);
 
-      manager.updatePlaybackState(
+      await manager.updatePlaybackState(
         position: const Duration(minutes: 4),
         duration: const Duration(minutes: 4),
         playing: false,
         isLoggedIn: true,
       );
-      manager.updatePlaybackState(
+      await manager.updatePlaybackState(
         position: const Duration(minutes: 4),
         duration: const Duration(minutes: 4),
         playing: true,
         isLoggedIn: false,
       );
-      await pumpEventQueue();
-
-      expect(marked, isEmpty);
-    });
-
-    test('本地播放不标记', () async {
-      final marked = <int>[];
-      final manager = _manager(marked);
-      _useSubject(manager, isLocalPlayback: true);
-
-      manager.updatePlaybackState(
-        position: const Duration(minutes: 4),
-        duration: const Duration(minutes: 4),
-        playing: true,
-        isLoggedIn: true,
-      );
-      await pumpEventQueue();
 
       expect(marked, isEmpty);
     });
@@ -187,13 +161,12 @@ void main() {
       final manager = _manager(marked);
       _useSubject(manager);
 
-      manager.updatePlaybackState(
+      await manager.updatePlaybackState(
         position: const Duration(minutes: 4),
         duration: const Duration(minutes: 4),
         playing: true,
         isLoggedIn: true,
       );
-      await pumpEventQueue();
 
       expect(marked, isEmpty);
     });

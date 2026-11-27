@@ -388,7 +388,6 @@ class PlaySession {
         subjectName: subjectName,
         subjectCover: subjectCover,
         alias: alias,
-        isLocalPlayback: isLocalPlayback,
       );
       await playbackCoordinator.createPlayer(state.source);
       if (!isCurrent()) {
@@ -421,12 +420,12 @@ class PlaySession {
   }
 
   void handlePlayStateChanged(PlayState state, {required bool isLoggedIn}) {
-    playbackProgressManager.updatePlaybackState(
+    unawaited(playbackProgressManager.updatePlaybackState(
       position: state.position,
       duration: state.duration,
       playing: state.playing,
       isLoggedIn: isLoggedIn,
-    );
+    ));
     if (subjectId > 0 && episodeId > 0) {
       platform.updatePresence(
         subjectId: subjectId,

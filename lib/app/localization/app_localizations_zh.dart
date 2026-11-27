@@ -1620,6 +1620,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fontLibrary => '字体库';
 
   @override
+  String get currentFont => '目前字型';
+
+  @override
+  String get currentFontPreview => '目前效果';
+
+  @override
+  String get onlineFonts => '線上字型';
+
+  @override
+  String get noDownloadedFonts => '尚未下載任何字型';
+
+  @override
+  String get fontInUse => '使用中';
+
+  @override
+  String get applyFontAction => '套用';
+
+  @override
   String get fontMirrorLabel => '字体下载线路';
 
   @override
@@ -1649,7 +1667,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String fontAuthorInfo(Object author, Object size) {
-    return '作者：$author - 字体包体积：$size';
+    return '$author · $size';
   }
 
   @override
@@ -4300,6 +4318,24 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get fontLibrary => '字体库';
 
   @override
+  String get currentFont => '当前字体';
+
+  @override
+  String get currentFontPreview => '当前效果';
+
+  @override
+  String get onlineFonts => '在线字体';
+
+  @override
+  String get noDownloadedFonts => '暂无已下载字体';
+
+  @override
+  String get fontInUse => '使用中';
+
+  @override
+  String get applyFontAction => '应用';
+
+  @override
   String get fontMirrorLabel => '字体下载线路';
 
   @override
@@ -4329,7 +4365,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String fontAuthorInfo(Object author, Object size) {
-    return '作者：$author - 字体包体积：$size';
+    return '$author · $size';
   }
 
   @override
@@ -6979,6 +7015,24 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get fontLibrary => '字型庫';
 
   @override
+  String get currentFont => '目前字型';
+
+  @override
+  String get currentFontPreview => '目前效果';
+
+  @override
+  String get onlineFonts => '線上字型';
+
+  @override
+  String get noDownloadedFonts => '尚未下載任何字型';
+
+  @override
+  String get fontInUse => '使用中';
+
+  @override
+  String get applyFontAction => '套用';
+
+  @override
   String get fontMirrorLabel => '字型下載線路';
 
   @override
@@ -7008,7 +7062,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String fontAuthorInfo(Object author, Object size) {
-    return '作者：$author - 字型包大小：$size';
+    return '$author · $size';
   }
 
   @override
@@ -9659,6 +9713,24 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get fontLibrary => '字型庫';
 
   @override
+  String get currentFont => '目前字型';
+
+  @override
+  String get currentFontPreview => '目前效果';
+
+  @override
+  String get onlineFonts => '線上字型';
+
+  @override
+  String get noDownloadedFonts => '尚未下載任何字型';
+
+  @override
+  String get fontInUse => '使用中';
+
+  @override
+  String get applyFontAction => '套用';
+
+  @override
   String get fontMirrorLabel => '字型下載線路';
 
   @override
@@ -9688,7 +9760,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String fontAuthorInfo(Object author, Object size) {
-    return '作者：$author - 字型包大小：$size';
+    return '$author · $size';
   }
 
   @override

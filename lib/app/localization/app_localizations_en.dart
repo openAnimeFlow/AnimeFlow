@@ -1669,6 +1669,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fontLibrary => 'Font library';
 
   @override
+  String get currentFont => 'Current font';
+
+  @override
+  String get currentFontPreview => 'Current preview';
+
+  @override
+  String get onlineFonts => 'Online fonts';
+
+  @override
+  String get noDownloadedFonts => 'No downloaded fonts';
+
+  @override
+  String get fontInUse => 'In use';
+
+  @override
+  String get applyFontAction => 'Apply';
+
+  @override
   String get fontMirrorLabel => 'Font download route';
 
   @override
@@ -1700,7 +1718,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String fontAuthorInfo(Object author, Object size) {
-    return 'Author: $author - Font size: $size';
+    return '$author · $size';
   }
 
   @override

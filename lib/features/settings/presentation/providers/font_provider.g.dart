@@ -9,52 +9,6 @@ part of 'font_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(FontRepoMirror)
-final fontRepoMirrorProvider = FontRepoMirrorProvider._();
-
-final class FontRepoMirrorProvider
-    extends $NotifierProvider<FontRepoMirror, RulesMirror> {
-  FontRepoMirrorProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'fontRepoMirrorProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$fontRepoMirrorHash();
-
-  @$internal
-  @override
-  FontRepoMirror create() => FontRepoMirror();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(RulesMirror value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<RulesMirror>(value),
-    );
-  }
-}
-
-String _$fontRepoMirrorHash() => r'4a8dbedc29977013147549d5b0bb1ca3e7875206';
-
-abstract class _$FontRepoMirror extends $Notifier<RulesMirror> {
-  RulesMirror build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<RulesMirror, RulesMirror>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<RulesMirror, RulesMirror>, RulesMirror, Object?, Object?>;
-    return element.handleCreate(ref, build);
-  }
-}
-
 @ProviderFor(Font)
 final fontProvider = FontProvider._();
 
@@ -78,7 +32,7 @@ final class FontProvider extends $AsyncNotifierProvider<Font, List<FontItem>> {
   Font create() => Font();
 }
 
-String _$fontHash() => r'30fe405da6c3a7058b57cb1356b9b780cf6688d2';
+String _$fontHash() => r'95ee29b2ad5a2c7c630e88cf4e85bf0e97c5702f';
 
 abstract class _$Font extends $AsyncNotifier<List<FontItem>> {
   FutureOr<List<FontItem>> build();
@@ -239,7 +193,7 @@ final class FontDownloadProvider
   }
 }
 
-String _$fontDownloadHash() => r'c848f2bd3345f06cdb3a066d051c68a343678e2c';
+String _$fontDownloadHash() => r'403d91723ef729ca0e0908b41f6c9d8d950c9631';
 
 final class FontDownloadFamily extends $Family
     with

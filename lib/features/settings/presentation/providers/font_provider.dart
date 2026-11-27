@@ -9,32 +9,15 @@ import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'font_provider.g.dart';
 
-bool isFontRequestCancelled(Object error) =>
-    error is DioException && CancelToken.isCancel(error);
-
-@riverpod
-class FontRepoMirror extends _$FontRepoMirror {
-  @override
-  RulesMirror build() => AppSettings.fontRepoMirror;
-
-  Future<void> setMirror(RulesMirror mirror) async {
-    if (state == mirror) return;
-    await AppSettings.setFontRepoMirror(mirror);
-    if (!ref.mounted) return;
-    ref.read(fontNetworkTasksProvider.notifier).cancelAll();
-    state = mirror;
-  }
-}
-
 // ──────────────────────────────────────────
 // 下载状态
 // ──────────────────────────────────────────
-
 enum FontDownloadStatus { idle, downloading, done, error }
 
 class FontDownloadState {
@@ -75,7 +58,7 @@ class FontDownloadState {
 class Font extends _$Font {
   @override
   Future<List<FontItem>> build() async {
-    final mirror = ref.watch(fontRepoMirrorProvider);
+    final mirror = AppSettings.fontRepoMirror;
     ref.watch(fontNetworkTasksProvider);
     final tasks = ref.read(fontNetworkTasksProvider.notifier);
     final cancelToken = CancelToken();
@@ -97,7 +80,7 @@ class Font extends _$Font {
         Future.microtask(() async {
           try {
             if (cancelToken.isCancelled ||
-                ref.read(fontRepoMirrorProvider) != mirror) {
+                AppSettings.fontRepoMirror != mirror) {
               return;
             }
             await ref
@@ -125,9 +108,9 @@ class Font extends _$Font {
   /// 加载字节用于字体预览
   Future<List<int>> loadingFont(
     String fontUrl, {
+    required RulesMirror mirror,
     CancelToken? cancelToken,
   }) async {
-    final mirror = ref.read(fontRepoMirrorProvider);
     return GithubApi.previewFont(
       fontUrl,
       mirror: mirror,
@@ -135,6 +118,49 @@ class Font extends _$Font {
     );
   }
 }
+
+typedef FontPreviewRequest = ({
+  String fontId,
+  String source,
+  RulesMirror? mirror,
+});
+
+final fontPreviewProvider =
+    FutureProvider.autoDispose.family<String, FontPreviewRequest>(
+  (ref, request) async {
+    final token = CancelToken();
+    ref.onDispose(token.cancel);
+    final mirror = request.mirror;
+    final tasks =
+        mirror == null ? null : ref.read(fontNetworkTasksProvider.notifier);
+    final taskKey = 'preview:${request.fontId}';
+    tasks?.register(taskKey, token);
+
+    try {
+      final bytes = mirror != null
+          ? await ref.read(fontProvider.notifier).loadingFont(
+                request.source,
+                mirror: mirror,
+                cancelToken: token,
+              )
+          : await File(request.source).readAsBytes();
+      if (token.isCancelled) throw token.cancelError!;
+      if (bytes.isEmpty) throw StateError('字体预览数据为空');
+
+      final family = 'AnimeFlowPreview_${request.fontId}_${++_previewSerial}';
+      final data = bytes is Uint8List ? bytes : Uint8List.fromList(bytes);
+      final loader = FontLoader(family)
+        ..addFont(Future.value(ByteData.sublistView(data)));
+      await loader.load();
+      return family;
+    } finally {
+      tasks?.unregister(taskKey, token);
+    }
+  },
+  retry: (attempt, error) => null,
+);
+
+int _previewSerial = 0;
 
 // ──────────────────────────────────────────
 // 字体页网络任务（下载 / 预览），退出页面时统一取消
@@ -299,7 +325,7 @@ class FontDownload extends _$FontDownload {
     }
     // 切换线路期间字体列表会暂时卸载，保留下载状态直到旧请求完成清理。
     final keepAlive = ref.keepAlive();
-    final mirror = ref.read(fontRepoMirrorProvider);
+    final mirror = AppSettings.fontRepoMirror;
     final tasks = ref.read(fontNetworkTasksProvider.notifier);
     final taskKey = 'download:$fontId';
     final cancelToken = CancelToken();
@@ -345,7 +371,8 @@ class FontDownload extends _$FontDownload {
       );
     } catch (e) {
       if (filePath != null) await _deletePartialFile(filePath);
-      if (cancelToken.isCancelled || isFontRequestCancelled(e)) {
+      if (cancelToken.isCancelled ||
+          e is DioException && CancelToken.isCancel(e)) {
         state = const FontDownloadState();
         return;
       }

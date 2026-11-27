@@ -1,17 +1,16 @@
 import 'package:anime_flow/features/settings/presentation/widgets/settings_page_builder.dart';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:anime_flow/shared/models/font_item.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/rules_mirror.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/download_mirror_menu.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
-import 'package:dio/dio.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
@@ -23,8 +22,7 @@ class FontSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
-  /// 递增后强制重建预览加载器（刷新列表 / 取消下载后重新拉预览）。
-  int _previewRefreshKey = 0;
+  late RulesMirror _mirror = AppSettings.fontRepoMirror;
   bool _savingMirror = false;
 
   late final FontNetworkTasks _fontNetworkTasks;
@@ -46,29 +44,25 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
     ref.invalidate(fontProvider);
     try {
       await ref.read(fontProvider.future);
-    } catch (_) {
-      // The provider exposes the current error below.
-    }
+    } catch (_) {}
     if (!mounted) return;
+    ref.invalidate(fontPreviewProvider);
     final result = ref.read(fontProvider);
     if (result.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).fontRefreshFailed(
-            result.error.toString(),
-          )),
-        ),
-      );
-      return;
+      NotificationToast.show(AppLocalizations.of(context)
+          .fontRefreshFailed(result.error.toString()));
     }
-    setState(() => _previewRefreshKey++);
   }
 
   Future<void> _selectMirror(RulesMirror mirror) async {
-    if (_savingMirror) return;
+    if (_savingMirror || mirror == _mirror) return;
     setState(() => _savingMirror = true);
     try {
-      await ref.read(fontRepoMirrorProvider.notifier).setMirror(mirror);
+      await AppSettings.setFontRepoMirror(mirror);
+      if (!mounted) return;
+      _mirror = mirror;
+      _fontNetworkTasks.cancelAll();
+      ref.invalidate(fontProvider);
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,250 +76,354 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final paddingOf = MediaQuery.paddingOf(context);
-    final mirror = ref.watch(fontRepoMirrorProvider);
+    final mirror = _mirror;
     final fontsAsync = ref.watch(fontProvider);
-    ref.watch(fontNetworkTasksProvider);
+    final selectedFamily = ref.watch(selectedFontProvider);
     final downloadedMetas = ref.watch(downloadedFontMetasProvider);
+    ref.watch(fontNetworkTasksProvider);
+    final metas = ref.read(downloadedFontMetasProvider.notifier);
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    final localFonts = ref
-        .read(downloadedFontMetasProvider.notifier)
-        .orphansFor(<String>{})
-        .where((font) =>
-            ref.watch(fontDownloadProvider(font.id)).status ==
-            FontDownloadStatus.done)
-        .toList();
+    final catalogReady =
+        fontsAsync.hasValue && !fontsAsync.isLoading && !fontsAsync.hasError;
+    final catalog = catalogReady ? fontsAsync.requireValue : <FontItem>[];
+    final orphans = metas.orphansFor(catalog.map((font) => font.id).toSet());
+    final installed = <FontItem>[];
+    final online = <FontItem>[];
 
-    final remoteIds =
-        fontsAsync.hasValue && !fontsAsync.isLoading && !fontsAsync.hasError
-            ? fontsAsync.requireValue.map((font) => font.id).toSet()
-            : <String>{};
-    final orphans = fontsAsync.hasValue &&
-            !fontsAsync.isLoading &&
-            !fontsAsync.hasError
-        ? ref.read(downloadedFontMetasProvider.notifier).orphansFor(remoteIds)
-        : <FontItem>[];
+    for (final font in catalog) {
+      if (ref.watch(fontDownloadProvider(font.id)).status ==
+          FontDownloadStatus.done) {
+        installed.add(downloadedMetas[font.id] ?? font);
+      } else {
+        online.add(font);
+      }
+    }
+    if (!catalogReady) {
+      installed.addAll(orphans.where((font) =>
+          ref.watch(fontDownloadProvider(font.id)).status ==
+          FontDownloadStatus.done));
+    }
+
+    final currentFont = [
+      ...installed,
+      ...orphans,
+      ...catalog,
+    ].where((font) => font.family == selectedFamily).firstOrNull;
+
+    // Keep previews subscribed while their rows are outside the viewport.
+    final previews = <String, AsyncValue<String>>{};
+    for (final font in [...installed, ...online]) {
+      final path = ref.watch(fontDownloadProvider(font.id)).filePath;
+      previews[font.id] = ref.watch(fontPreviewProvider((
+        fontId: font.id,
+        source: path ?? font.preview,
+        mirror: path == null ? mirror : null,
+      )));
+    }
+
+    Widget fontRow(FontItem font, {bool orphan = false}) => _FontListTile(
+          key: ValueKey(font.id),
+          font: font,
+          orphan: orphan,
+          preview: previews[font.id],
+        );
 
     return SettingsPageBuilder(
-        builder: (context) => Scaffold(
-              extendBodyBehindAppBar: true,
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(kToolbarHeight),
-                child: SettingsAppBar(
-                  title: Text(l10n.fontStyle),
-                  actions: [
-                    if (SystemUtil.isDesktop)
-                      IconButton(
-                        icon: const Icon(Icons.refresh_outlined),
-                        tooltip: l10n.refreshFontList,
-                        onPressed: _refreshFontList,
-                      ),
-                  ],
-                ),
+      builder: (context) => Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: SettingsAppBar(
+          title: Text(l10n.fontLibrary),
+          actions: [
+            if (SystemUtil.isDesktop)
+              IconButton(
+                icon: const Icon(Icons.refresh_outlined),
+                tooltip: l10n.refreshFontList,
+                onPressed: _refreshFontList,
               ),
-              body: LayoutBuilder(
-                builder: (context, constraints) {
-                  final horizontal =
-                      math.max(10.0, (constraints.maxWidth - 1500.0) / 2);
-                  return RefreshIndicator(
-                    edgeOffset: SettingsPageBuilder.topInsetOf(context),
-                    onRefresh: _refreshFontList,
-                    child: ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: (EdgeInsets.fromLTRB(
-                        horizontal,
-                        16,
-                        horizontal,
-                        24.0 + paddingOf.bottom,
-                      )).add(EdgeInsets.only(
-                          top: SettingsPageBuilder.topInsetOf(context))),
+          ],
+        ),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontal = math.max(16.0, (constraints.maxWidth - 920) / 2);
+            final topInset = SettingsPageBuilder.topInsetOf(context);
+            final textTheme = Theme.of(context).textTheme;
+            return RefreshIndicator(
+              edgeOffset: topInset,
+              onRefresh: _refreshFontList,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  horizontal,
+                  topInset + 16,
+                  horizontal,
+                  24 + bottomInset,
+                ),
+                children: [
+                  _CurrentFontPanel(
+                    name: currentFont?.name ??
+                        selectedFamily ??
+                        l10n.followSystem,
+                    family: selectedFamily,
+                    onRestore: () =>
+                        ref.read(selectedFontProvider.notifier).clearFont(),
+                  ),
+                  const SizedBox(height: 24),
+                  _FontGroup(
+                    title: l10n.downloaded,
+                    count: installed.length,
+                    children: installed.isEmpty
+                        ? [
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text(l10n.noDownloadedFonts,
+                                  style: textTheme.bodySmall),
+                            )
+                          ]
+                        : installed.map(fontRow).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  _FontGroup(
+                    title: l10n.onlineFonts,
+                    count: catalogReady ? online.length : null,
+                    action: Wrap(
+                      spacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          l10n.fontLibrary,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          l10n.fontMirrorLabel,
+                          style: textTheme.labelMedium,
                         ),
-                        Text(
-                          l10n.fontRestartHint,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        DownloadMirrorMenu(
+                          selectedMirror: mirror,
+                          tooltip: l10n.fontMirrorLabel,
+                          onSelected: _selectMirror,
+                          enabled: !_savingMirror,
                         ),
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(l10n.fontMirrorLabel),
-                          subtitle: Text(mirror == RulesMirror.jsDelivr
-                              ? l10n.fontDelayHint
-                              : l10n.fontMirrorSubtitle),
-                          trailing: DownloadMirrorMenu(
-                            selectedMirror: mirror,
-                            tooltip: l10n.fontMirrorLabel,
-                            onSelected: _selectMirror,
-                            enabled: !_savingMirror,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        fontsAsync.when(
-                          skipLoadingOnRefresh: false,
-                          skipLoadingOnReload: false,
-                          loading: () => _FontGlassPanel(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Column(
-                              children: [
-                                const _SystemFontListTile(),
-                                ...localFonts.map((font) => _FontListTile(
-                                      font: font,
-                                      previewRefreshKey: _previewRefreshKey,
-                                    )),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 24),
-                                  child: Center(
-                                      child: CircularProgressIndicator()),
-                                ),
-                              ],
-                            ),
-                          ),
-                          error: (error, _) => Column(
-                            children: [
-                              _FontGlassPanel(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 4),
-                                child: Column(children: [
-                                  const _SystemFontListTile(),
-                                  ...localFonts.map((font) => _FontListTile(
-                                        font: font,
-                                        previewRefreshKey: _previewRefreshKey,
-                                      )),
-                                ]),
-                              ),
-                              _FontListError(
-                                message: error.toString(),
-                                onRetry: () {
-                                  LiggLogger().e(error);
-                                  _refreshFontList();
-                                },
-                              ),
-                            ],
-                          ),
-                          data: (fonts) => _FontGlassPanel(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Column(
-                              children: [
-                                const _SystemFontListTile(),
-                                if (fonts.isEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        16, 8, 16, 16),
-                                    child: Text(
-                                      l10n.noOtherFonts,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                          ),
-                                    ),
-                                  )
-                                else
-                                  ...fonts.map(
-                                    (font) => _FontListTile(
-                                      font: ref
-                                                  .watch(fontDownloadProvider(
-                                                      font.id))
-                                                  .status ==
-                                              FontDownloadStatus.done
-                                          ? downloadedMetas[font.id] ?? font
-                                          : font,
-                                      previewRefreshKey: _previewRefreshKey,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        if (orphans.isNotEmpty) ...[
-                          const SizedBox(height: 20),
-                          Text(
-                            l10n.downloadedOrphanFonts,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l10n.orphanFontDescription,
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                          ),
-                          const SizedBox(height: 10),
-                          _FontGlassPanel(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Column(
-                              children: orphans
-                                  .map(
-                                      (font) => _OrphanFontListTile(font: font))
-                                  .toList(),
-                            ),
-                          ),
-                        ],
                       ],
                     ),
-                  );
-                },
+                    description: mirror == RulesMirror.jsDelivr
+                        ? l10n.fontDelayHint
+                        : null,
+                    children: [
+                      if (fontsAsync.isLoading)
+                        const Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      else if (fontsAsync.hasError)
+                        _FontListError(
+                          message: fontsAsync.error.toString(),
+                          onRetry: () {
+                            LiggLogger().e(fontsAsync.error);
+                            _refreshFontList();
+                          },
+                        )
+                      else if (online.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(l10n.noOtherFonts,
+                              style: textTheme.bodySmall),
+                        )
+                      else
+                        ...online.map(fontRow),
+                    ],
+                  ),
+                  if (catalogReady && orphans.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    _FontGroup(
+                      title: l10n.downloadedOrphanFonts,
+                      count: orphans.length,
+                      description: l10n.orphanFontDescription,
+                      children: [
+                        for (final font in orphans) fontRow(font, orphan: true),
+                      ],
+                    ),
+                  ],
+                ],
               ),
-            ));
-  }
-}
-
-class _FontGlassPanel extends StatelessWidget {
-  const _FontGlassPanel({
-    required this.child,
-    this.padding,
-  });
-
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-
-  @override
-  Widget build(BuildContext context) {
-    const borderRadius = BorderRadius.all(Radius.circular(24));
-    final isDark = SystemUtil.isDarkTheme(context);
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: Material(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.08)
-            : Colors.black.withValues(alpha: 0.08),
-        shape: RoundedRectangleBorder(
-          borderRadius: borderRadius,
-          side: BorderSide(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.15)
-                : Colors.black.withValues(alpha: 0.15),
-          ),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: padding ?? EdgeInsets.zero,
-          child: child,
+            );
+          },
         ),
       ),
     );
   }
 }
 
-class _FontListError extends StatelessWidget {
-  const _FontListError({
-    required this.message,
-    required this.onRetry,
+class _CurrentFontPanel extends StatelessWidget {
+  const _CurrentFontPanel({
+    required this.name,
+    required this.family,
+    required this.onRestore,
   });
+
+  final String name;
+  final String? family;
+  final VoidCallback onRestore;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final info = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.currentFont,
+          style: theme.textTheme.labelLarge?.copyWith(color: colors.primary),
+        ),
+        const SizedBox(height: 4),
+        Text(name, style: theme.textTheme.headlineSmall),
+        const SizedBox(height: 4),
+        Text(l10n.fontRestartHint,
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: colors.onSurfaceVariant)),
+        if (family != null) ...[
+          const SizedBox(height: 8),
+          OutlinedButton(onPressed: onRestore, child: Text(l10n.followSystem)),
+        ],
+      ],
+    );
+    final sample = _FontPreviewBox(
+      loaded: true,
+      failed: false,
+      fontFamily: family,
+      heading: l10n.currentFontPreview,
+    );
+
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 500) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [info, const SizedBox(height: 12), sample],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(child: info),
+                const SizedBox(width: 16),
+                Expanded(flex: 2, child: sample),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _FontSectionHeading extends StatelessWidget {
+  const _FontSectionHeading({required this.title, this.count, this.action});
+
+  final String title;
+  final int? count;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 16,
+        runSpacing: 4,
+        children: [
+          Wrap(
+            spacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(title, style: theme.textTheme.titleMedium),
+              if (count case final value?)
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    child: Text(
+                      MaterialLocalizations.of(context).formatDecimal(value),
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          if (action case final widget?) widget,
+        ],
+      ),
+    );
+  }
+}
+
+class _FontGroup extends StatelessWidget {
+  const _FontGroup({
+    required this.title,
+    this.count,
+    this.action,
+    this.description,
+    required this.children,
+  });
+
+  final String title;
+  final int? count;
+  final Widget? action;
+  final String? description;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child:
+                _FontSectionHeading(title: title, count: count, action: action),
+          ),
+          if (description case final message?)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                message,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ),
+          Divider(height: 1, color: colors.outlineVariant),
+          for (final (index, child) in children.indexed) ...[
+            if (index > 0) Divider(height: 1, color: colors.outlineVariant),
+            child,
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _FontListError extends StatelessWidget {
+  const _FontListError({required this.message, required this.onRetry});
 
   final String message;
   final VoidCallback onRetry;
@@ -333,83 +431,22 @@ class _FontListError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
+      padding: const EdgeInsets.all(16),
       child: Column(
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 40,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.fontListLoadFailed,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-          ),
-          const SizedBox(height: 12),
-          FilledButton.tonalIcon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh),
-            label: Text(l10n.retry),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SystemFontListTile extends ConsumerWidget {
-  const _SystemFontListTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final selectedFamily = ref.watch(selectedFontProvider);
-    final isSelected = selectedFamily == null;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return ListTile(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      selected: isSelected,
-      onTap: !isSelected
-          ? () => ref.read(selectedFontProvider.notifier).clearFont()
-          : null,
-      title: Row(
-        children: [
-          Expanded(
-            child: Text(
-              l10n.followSystem,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          if (isSelected)
-            Icon(Icons.check_circle_rounded, color: colorScheme.primary),
-        ],
-      ),
-      subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.systemFontSubtitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            l10n.fontListLoadFailed,
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
           ),
-          _FontPreviewBox(
-            colorScheme: colorScheme,
-            loaded: true,
-            failed: false,
-            fontFamily: 'System',
-          ),
+          const SizedBox(height: 4),
+          Text(message, style: theme.textTheme.bodySmall),
+          const SizedBox(height: 8),
+          FilledButton.tonal(onPressed: onRetry, child: Text(l10n.retry)),
         ],
       ),
     );
@@ -418,162 +455,164 @@ class _SystemFontListTile extends ConsumerWidget {
 
 class _FontListTile extends ConsumerWidget {
   const _FontListTile({
+    super.key,
     required this.font,
-    required this.previewRefreshKey,
+    required this.preview,
+    required this.orphan,
   });
 
   final FontItem font;
-  final int previewRefreshKey;
+  final AsyncValue<String>? preview;
+  final bool orphan;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final downloadState = ref.watch(fontDownloadProvider(font.id));
-    final selectedFamily = ref.watch(selectedFontProvider);
-    final isSelected = selectedFamily == font.family;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final state = ref.watch(fontDownloadProvider(font.id));
+    final isSelected = ref.watch(selectedFontProvider) == font.family;
+    final path = state.filePath;
+    final isLocal = state.status == FontDownloadStatus.done;
+    final apply = isLocal && path != null && !isSelected
+        ? () => ref.read(selectedFontProvider.notifier).selectFont(font, path)
+        : null;
+    final actions = <Widget>[];
 
-    return ListTile(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      selected: isSelected,
-      onTap: downloadState.status == FontDownloadStatus.done && !isSelected
-          ? () => ref
-              .read(selectedFontProvider.notifier)
-              .selectFont(font, downloadState.filePath!)
-          : null,
-      title: Row(
-        children: [
-          Expanded(
+    if (isSelected && (isLocal || orphan)) {
+      actions.add(
+        Card(
+          elevation: 0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             child: Text(
-              font.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              l10n.fontInUse,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: colors.onSecondaryContainer,
+              ),
             ),
           ),
-          _buildActionWidget(
-              context, ref, downloadState, isSelected, colorScheme),
-        ],
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+      );
+    } else if (apply != null) {
+      actions.add(FilledButton.tonal(
+        onPressed: apply,
+        child: Text(l10n.applyFontAction),
+      ));
+    }
+
+    if (isLocal || orphan) {
+      actions.add(TextButton(
+        onPressed: () => _FontDeleteConfirm.show(
+          context,
+          ref,
+          fontId: font.id,
+          fontName: font.name,
+          isSelected: isSelected,
+        ),
+        child: Text(l10n.delete),
+      ));
+    } else if (state.status == FontDownloadStatus.downloading) {
+      final percent = (state.progress * 100).toInt();
+      actions.add(Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            l10n.fontAuthorInfo(font.author, Utils.formatBytes(font.size)),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          _PreviewFontLoader(
-            key: ValueKey(
-              'preview-${font.id}-$previewRefreshKey-${downloadState.status}',
+          SizedBox(
+            width: 48,
+            child: LinearProgressIndicator(
+              value: state.progress,
+              semanticsLabel: l10n.downloadDownloadingStatus,
             ),
-            font: font,
-            builder: (context,
-                {required loaded, required failed, required family}) {
-              return AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
-                switchInCurve: Curves.easeOut,
-                switchOutCurve: Curves.easeIn,
-                child: KeyedSubtree(
-                  key: ValueKey('preview-${font.id}-$loaded-$failed'),
-                  child: _FontPreviewBox(
-                    colorScheme: Theme.of(context).colorScheme,
-                    loaded: loaded,
-                    failed: failed,
-                    fontFamily: loaded ? family : null,
-                  ),
-                ),
-              );
-            },
+          ),
+          const SizedBox(width: 8),
+          Text('$percent%', style: theme.textTheme.labelMedium),
+        ],
+      ));
+    } else {
+      final failed = state.status == FontDownloadStatus.error;
+      if (failed) {
+        actions.add(Text(
+          l10n.downloadFailed,
+          style: theme.textTheme.labelMedium?.copyWith(color: colors.error),
+        ));
+      }
+      actions.add(FilledButton.tonal(
+        onPressed: () =>
+            ref.read(fontDownloadProvider(font.id).notifier).download(font),
+        child: Text(failed ? l10n.retry : l10n.downloadFont),
+      ));
+    }
+
+    final info = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(font.name, style: theme.textTheme.titleSmall),
+        const SizedBox(height: 3),
+        Text(
+          l10n.fontAuthorInfo(font.author, Utils.formatBytes(font.size)),
+          style: theme.textTheme.bodySmall
+              ?.copyWith(color: colors.onSurfaceVariant),
+        ),
+        if (orphan && path == null) ...[
+          const SizedBox(height: 3),
+          Text(
+            l10n.orphanFontMissing,
+            style: theme.textTheme.bodySmall?.copyWith(color: colors.error),
           ),
         ],
+      ],
+    );
+    final previewState = preview;
+    final sample = previewState == null
+        ? null
+        : _FontPreviewBox(
+            loaded: previewState.hasValue,
+            failed: previewState.hasError,
+            fontFamily: previewState.value,
+          );
+
+    return InkWell(
+      onTap: apply,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final actionBar = Wrap(
+              spacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              alignment: WrapAlignment.end,
+              children: actions,
+            );
+            final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+            if (constraints.maxWidth < 560 * scale) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  info,
+                  if (sample case final widget?) ...[
+                    const SizedBox(height: 8),
+                    widget,
+                  ],
+                  const SizedBox(height: 4),
+                  actionBar,
+                ],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(child: info),
+                if (sample case final widget?) ...[
+                  const SizedBox(width: 12),
+                  Expanded(flex: 2, child: widget),
+                ],
+                const SizedBox(width: 12),
+                SizedBox(width: 144 * scale, child: actionBar),
+              ],
+            );
+          },
+        ),
       ),
     );
-  }
-
-  Widget _buildActionWidget(
-    BuildContext context,
-    WidgetRef ref,
-    FontDownloadState downloadState,
-    bool isSelected,
-    ColorScheme colorScheme,
-  ) {
-    final l10n = AppLocalizations.of(context);
-    switch (downloadState.status) {
-      case FontDownloadStatus.idle:
-        return IconButton(
-          icon: const Icon(Icons.cloud_download_outlined),
-          tooltip: l10n.downloadFont,
-          onPressed: () =>
-              ref.read(fontDownloadProvider(font.id).notifier).download(font),
-        );
-
-      case FontDownloadStatus.downloading:
-        final percent = (downloadState.progress * 100).toInt();
-        return SizedBox(
-          width: 48,
-          height: 48,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              CircularProgressIndicator(
-                value: downloadState.progress,
-                strokeWidth: 2.5,
-                color: colorScheme.primary,
-              ),
-              Text(
-                '$percent%',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-        );
-
-      case FontDownloadStatus.done:
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isSelected)
-              IconButton(
-                icon: Icon(Icons.check_circle_rounded,
-                    color: colorScheme.primary),
-                tooltip: l10n.appliedFont,
-                onPressed: () =>
-                    ref.read(selectedFontProvider.notifier).clearFont(),
-              )
-            else
-              IconButton(
-                icon: const Icon(Icons.font_download_outlined),
-                tooltip: l10n.applyFont,
-                onPressed: () => ref
-                    .read(selectedFontProvider.notifier)
-                    .selectFont(font, downloadState.filePath!),
-              ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: l10n.deleteDownloadedFont,
-              onPressed: () => _FontDeleteConfirm.show(
-                context,
-                ref,
-                fontId: font.id,
-                fontName: font.name,
-                isSelected: isSelected,
-              ),
-            ),
-          ],
-        );
-
-      case FontDownloadStatus.error:
-        return IconButton(
-          icon: Icon(Icons.error_outline, color: colorScheme.error),
-          tooltip: l10n.downloadFontFailedRetry,
-          onPressed: () =>
-              ref.read(fontDownloadProvider(font.id).notifier).download(font),
-        );
-    }
   }
 }
 
@@ -615,319 +654,69 @@ class _FontDeleteConfirm {
   }
 }
 
-/// 已下载但已从远程仓库下架的字体条目。
-///
-/// 只依赖本地缓存的元数据 + 已下载文件，因此即便远程列表完全无法访问，
-/// 用户也可以从这里删除或继续应用本地字体。
-class _OrphanFontListTile extends ConsumerWidget {
-  const _OrphanFontListTile({required this.font});
-
-  final FontItem font;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final downloadState = ref.watch(fontDownloadProvider(font.id));
-    final selectedFamily = ref.watch(selectedFontProvider);
-    final isSelected = selectedFamily == font.family;
-    final colorScheme = Theme.of(context).colorScheme;
-    final hasLocalFile = downloadState.status == FontDownloadStatus.done &&
-        downloadState.filePath != null;
-
-    return ListTile(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      selected: isSelected,
-      onTap: hasLocalFile && !isSelected
-          ? () => ref
-              .read(selectedFontProvider.notifier)
-              .selectFont(font, downloadState.filePath!)
-          : null,
-      title: Row(
-        children: [
-          Expanded(
-            child: Text(
-              font.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          if (isSelected)
-            IconButton(
-              icon:
-                  Icon(Icons.check_circle_rounded, color: colorScheme.primary),
-              tooltip: l10n.appliedFont,
-              onPressed: () =>
-                  ref.read(selectedFontProvider.notifier).clearFont(),
-            )
-          else if (hasLocalFile)
-            IconButton(
-              icon: const Icon(Icons.font_download_outlined),
-              tooltip: l10n.applyFont,
-              onPressed: () => ref
-                  .read(selectedFontProvider.notifier)
-                  .selectFont(font, downloadState.filePath!),
-            ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: l10n.deleteDownloadedFont,
-            onPressed: () => _FontDeleteConfirm.show(
-              context,
-              ref,
-              fontId: font.id,
-              fontName: font.name,
-              isSelected: isSelected,
-            ),
-          ),
-        ],
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.fontAuthorInfo(font.author, Utils.formatBytes(font.size)),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              hasLocalFile ? l10n.orphanFontAvailable : l10n.orphanFontMissing,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: hasLocalFile
-                        ? colorScheme.onSurfaceVariant
-                        : colorScheme.error,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 从 [FontItem.preview] 下载子集 TTF，经 [FontLoader] 注册后供子组件使用。
-class _PreviewFontLoader extends ConsumerStatefulWidget {
-  const _PreviewFontLoader({
-    super.key,
-    required this.font,
-    required this.builder,
-  });
-
-  final FontItem font;
-  final Widget Function(
-    BuildContext context, {
-    required bool loaded,
-    required bool failed,
-    required String family,
-  }) builder;
-
-  @override
-  ConsumerState<_PreviewFontLoader> createState() => _PreviewFontLoaderState();
-}
-
-class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
-  bool _loaded = false;
-  bool _failed = false;
-  String _loadedFamily = '';
-  int _loadSerial = 0;
-  CancelToken? _previewCancelToken;
-  ProviderSubscription<RulesMirror>? _mirrorSubscription;
-  late final FontNetworkTasks _fontNetworkTasks;
-
-  String get _taskKey => 'preview:${widget.font.id}';
-
-  @override
-  void initState() {
-    super.initState();
-    _fontNetworkTasks = ref.read(fontNetworkTasksProvider.notifier);
-    _mirrorSubscription = ref.listenManual(
-      fontRepoMirrorProvider,
-      (previous, next) {
-        if (previous != next && mounted) {
-          setState(() {
-            _loaded = false;
-            _failed = false;
-          });
-          _loadPreviewFont();
-        }
-      },
-    );
-    _loadPreviewFont();
-  }
-
-  @override
-  void dispose() {
-    _mirrorSubscription?.close();
-    _previewCancelToken?.cancel();
-    final token = _previewCancelToken;
-    if (token != null) _fontNetworkTasks.unregister(_taskKey, token);
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(covariant _PreviewFontLoader oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.font.id != widget.font.id ||
-        oldWidget.font.preview != widget.font.preview ||
-        oldWidget.font.family != widget.font.family) {
-      _loaded = false;
-      _failed = false;
-      _loadPreviewFont();
-    }
-  }
-
-  Future<void> _loadPreviewFont() async {
-    _previewCancelToken?.cancel();
-    final font = widget.font;
-    final cancelToken = CancelToken();
-    _previewCancelToken = cancelToken;
-    _fontNetworkTasks.register(_taskKey, cancelToken);
-    final previewFamily =
-        'AnimeFlowPreview_${font.id}_${identityHashCode(this)}_${++_loadSerial}';
-
-    try {
-      final downloadState = ref.read(fontDownloadProvider(font.id));
-      final bytes = downloadState.status == FontDownloadStatus.done &&
-              downloadState.filePath != null
-          ? await File(downloadState.filePath!).readAsBytes()
-          : await ref.read(fontProvider.notifier).loadingFont(
-                font.preview,
-                cancelToken: cancelToken,
-              );
-      if (cancelToken.isCancelled) return;
-      if (bytes.isEmpty) {
-        throw StateError('字体预览数据为空');
-      }
-
-      final byteData = bytes is Uint8List
-          ? ByteData.sublistView(bytes)
-          : ByteData.sublistView(Uint8List.fromList(bytes));
-
-      final loader = FontLoader(previewFamily)..addFont(Future.value(byteData));
-      await loader.load();
-
-      if (mounted && !cancelToken.isCancelled) {
-        setState(() {
-          _loaded = true;
-          _failed = false;
-          _loadedFamily = previewFamily;
-        });
-      }
-    } catch (e) {
-      if (cancelToken.isCancelled || isFontRequestCancelled(e)) return;
-      if (mounted) {
-        setState(() {
-          _failed = true;
-          _loaded = false;
-        });
-      }
-    } finally {
-      _fontNetworkTasks.unregister(_taskKey, cancelToken);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.builder(
-      context,
-      loaded: _loaded,
-      failed: _failed,
-      family: _loadedFamily,
-    );
-  }
-}
-
 class _FontPreviewBox extends StatelessWidget {
   const _FontPreviewBox({
-    required this.colorScheme,
     required this.loaded,
     required this.failed,
     this.fontFamily,
+    this.heading,
   });
 
-  final ColorScheme colorScheme;
   final bool loaded;
   final bool failed;
   final String? fontFamily;
+  final String? heading;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-          border: Border.all(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-          ),
-        ),
-        child: Container(
-          width: double.infinity,
-          height: 80,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-            ),
-          ),
-          child: _buildContent(l10n),
-        ),
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final title = heading;
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: title == null ? colors.surfaceContainerHigh : colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
-    );
-  }
-
-  Widget _buildContent(AppLocalizations l10n) {
-    if (failed) {
-      return Center(
-        child: Row(
+      child: Container(
+        constraints: BoxConstraints(minHeight: title == null ? 44 : 98),
+        alignment:
+            title == null ? Alignment.center : AlignmentDirectional.centerStart,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Column(
+          crossAxisAlignment: title == null
+              ? CrossAxisAlignment.center
+              : CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.font_download_off_outlined,
-              size: 18,
-              color: colorScheme.error,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              l10n.previewLoadFailed,
-              style: TextStyle(
-                fontSize: 13,
-                color: colorScheme.onSurfaceVariant,
+            if (title != null) ...[
+              Text(title,
+                  style: theme.textTheme.labelMedium
+                      ?.copyWith(color: colors.primary)),
+              const SizedBox(height: 4),
+            ],
+            if (failed)
+              Text(
+                l10n.previewLoadFailed,
+                style: theme.textTheme.bodySmall?.copyWith(color: colors.error),
+              )
+            else if (!loaded)
+              const SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              Text(
+                l10n.fontPreviewHeadline,
+                textAlign: title == null ? TextAlign.center : TextAlign.start,
+                style: (title == null
+                        ? theme.textTheme.titleMedium
+                        : theme.textTheme.headlineSmall)
+                    ?.copyWith(fontFamily: fontFamily, color: colors.onSurface),
               ),
-            ),
           ],
-        ),
-      );
-    }
-
-    if (!loaded) {
-      return Center(
-        child: SizedBox(
-          height: 22,
-          width: 22,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: colorScheme.primary,
-          ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Text(
-        l10n.fontPreviewHeadline,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontFamily: fontFamily,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          height: 1.25,
-          color: colorScheme.onSurface,
         ),
       ),
     );

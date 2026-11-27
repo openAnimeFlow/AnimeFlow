@@ -3152,6 +3152,42 @@ abstract class AppLocalizations {
   /// **'字体库'**
   String get fontLibrary;
 
+  /// No description provided for @currentFont.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前字体'**
+  String get currentFont;
+
+  /// No description provided for @currentFontPreview.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前效果'**
+  String get currentFontPreview;
+
+  /// No description provided for @onlineFonts.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'在线字体'**
+  String get onlineFonts;
+
+  /// No description provided for @noDownloadedFonts.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无已下载字体'**
+  String get noDownloadedFonts;
+
+  /// No description provided for @fontInUse.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'使用中'**
+  String get fontInUse;
+
+  /// No description provided for @applyFontAction.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'应用'**
+  String get applyFontAction;
+
   /// No description provided for @fontMirrorLabel.
   ///
   /// In zh_Hans, this message translates to:
@@ -3209,7 +3245,7 @@ abstract class AppLocalizations {
   /// No description provided for @fontAuthorInfo.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'作者：{author} - 字体包体积：{size}'**
+  /// **'{author} · {size}'**
   String fontAuthorInfo(Object author, Object size);
 
   /// No description provided for @downloadFont.
